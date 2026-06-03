@@ -24,6 +24,12 @@ export class DataTable {
   @Input() loading = false;
   @Input() rows = 10;
   @Input() rowsPerPageOptions: number[] = [5, 10, 25, 50];
+  rowsOptions = [
+    { label: '5', value: 5 },
+    { label: '10', value: 10 },
+    { label: '25', value: 25 },
+    { label: '50', value: 50 }
+  ];
 
   @Input() globalFilterFields: string[] = [];
 

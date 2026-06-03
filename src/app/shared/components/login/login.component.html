@@ -136,8 +136,7 @@
                                 (click)="submitLoginForm()">
                                 <span class="bigger-110"
                                     style="display: flex;align-items: center; justify-content: center;">Login
-                                    <ng-container *ngIf="isProccess"><mat-spinner
-                                            diameter="25"></mat-spinner></ng-container></span>
+                                    <ng-container *ngIf="isProccess"><i class="pi pi-spin pi-spinner" style="font-size: 1.5rem"></i></ng-container></span>
                             </button>
                         </div>
                         <div class="space-4"></div>
@@ -249,8 +248,7 @@
 
                                 <span class="bigger-110"
                                     style="display: flex;align-items: center; justify-content: center;">Send Me!
-                                    <ng-container *ngIf="isProccess"><mat-spinner
-                                            diameter="25"></mat-spinner></ng-container></span>
+                                    <ng-container *ngIf="isProccess"><i class="pi pi-spin pi-spinner" style="font-size: 1.5rem"></i></ng-container></span>
 
                             </button>
                         </div>
@@ -496,8 +494,7 @@
                                 class="width-100 btn-primary submit-button">
                                 <span class="bigger-110"
                                     style="display: flex;align-items: center; justify-content: center;">Register
-                                    <ng-container *ngIf="isProccess"><mat-spinner
-                                            diameter="25"></mat-spinner></ng-container></span>
+                                    <ng-container *ngIf="isProccess"><i class="pi pi-spin pi-spinner" style="font-size: 1.5rem"></i></ng-container></span>
                                 <!-- <i class="ace-icon fa fa-arrow-right icon-on-right"></i> -->
                             </button>
                         </div>
@@ -546,7 +543,7 @@
                         class="width-100 btn-primary submit-button" style="margin-top: 30px;">
                         <span class="bigger-110"
                             style="display: flex;align-items: center; justify-content: center;">Proceed <ng-container
-                                *ngIf="isProccess"><mat-spinner diameter="25"></mat-spinner></ng-container></span>
+                                *ngIf="isProccess"><i class="pi pi-spin pi-spinner" style="font-size: 1.5rem"></i></ng-container></span>
                         <!-- <i class="ace-icon fa fa-arrow-right icon-on-right"></i> -->
                     </button>
                 </div>
@@ -631,8 +628,8 @@
                             </span>
                         </label>
                         <label class="block clearfix">
-                            <app-password-strength [passwordToCheck]="createPassForm.value.password"
-                                [hidden]="createPassForm.get('password')?.value ==''"></app-password-strength>
+                            <!-- <app-password-strength [passwordToCheck]="createPassForm.value.password"
+                                [hidden]="createPassForm.get('password')?.value ==''"></app-password-strength> -->
                         </label>
                         <div class="capture-code">
                             <div class="col-12">
@@ -690,8 +687,7 @@
                                 (click)="submitCreatePassForm()">
                                 <span class="bigger-110"
                                     style="display: flex;align-items: center; justify-content: center;">Submit
-                                    <ng-container *ngIf="isProccess"><mat-spinner
-                                            diameter="25"></mat-spinner></ng-container></span>
+                                    <ng-container *ngIf="isProccess"><i class="pi pi-spin pi-spinner" style="font-size: 1.5rem"></i></ng-container></span>
                             </button>
                         </div>
                         <div class="space-4"></div>
@@ -701,8 +697,9 @@
         </div>
     </div>
 </div>
-<ngx-spinner class="fixedNGX" bdColor="rgba(51, 51, 51, 0.8)" size="medium" color="#fff"
-    type="line-scale-pulse-out"></ngx-spinner>
+<!-- <ngx-spinner class="fixedNGX" bdColor="rgba(51, 51, 51, 0.8)" size="default" type="ball-spin-clockwise">
+    <p style="color: white">Please Wait. </p>
+</ngx-spinner> -->
 
 
 <div class="modal" tabindex="-1" role="dialog" [ngStyle]="{'display':display}">

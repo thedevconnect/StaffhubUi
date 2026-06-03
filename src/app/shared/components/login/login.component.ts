@@ -3,9 +3,13 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService } from '../../services/user-service';
 import { MessageService } from 'primeng/api';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-login',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   providers: [MessageService]
@@ -13,9 +17,22 @@ import { MessageService } from 'primeng/api';
 export class LoginComponent implements OnInit {
 
   loginForm!: FormGroup;
+  signupForm!: FormGroup;
+  forgateForm!: FormGroup;
+  createPassForm!: FormGroup;
+
   showPassword = false;
+  showConfirmPassword = false;
   isProcess = false;
   captchaCode = '';
+  
+  formType: string = 'login';
+  show = false;
+  parameterType: string = '';
+  display: string = 'none';
+  showOTP = false;
+  emailVerified = false;
+  mobileVerified = false;
 
   constructor(
     private fb: FormBuilder,
@@ -32,6 +49,29 @@ export class LoginComponent implements OnInit {
       rememberMe: [false]
     });
 
+    this.signupForm = this.fb.group({
+      companyName: ['', Validators.required],
+      shortName: ['', Validators.required],
+      address: ['', Validators.required],
+      username: ['', Validators.required],
+      email: ['', Validators.required],
+      mobile: ['', Validators.required],
+      captcha: ['', Validators.required],
+      acceptTerms: [false, Validators.requiredTrue]
+    });
+
+    this.forgateForm = this.fb.group({
+      email: ['', Validators.required],
+      captcha: ['', Validators.required]
+    });
+
+    this.createPassForm = this.fb.group({
+      name: ['', Validators.required],
+      email: ['', Validators.required],
+      password: ['', Validators.required],
+      confirmPassword: ['', Validators.required]
+    });
+
     this.generateCaptcha();
 
     const username = localStorage.getItem('loginUser');
@@ -46,12 +86,52 @@ export class LoginComponent implements OnInit {
     }
   }
 
-  get f() {
-    return this.loginForm.controls;
+  get f() { return this.loginForm.controls; }
+  get f1() { return this.forgateForm.controls; }
+  get f2() { return this.signupForm.controls; }
+  get f3() { return this.createPassForm.controls; }
+
+  get isProccess() { return this.isProcess; }
+
+  showPass() {
+    this.show = !this.show;
   }
 
   togglePassword() {
     this.showPassword = !this.showPassword;
+  }
+
+  togglePasswordVisibility(field: string) {
+    if (field === 'password') this.showPassword = !this.showPassword;
+    if (field === 'confirmPassword') this.showConfirmPassword = !this.showConfirmPassword;
+  }
+
+  redirectForm(type: string, val: number) {
+    this.formType = type;
+  }
+
+  gotoTermsCondition() {}
+
+  GenerateCaptcha(type: number) {
+    this.generateCaptcha();
+  }
+
+  captchavoice(type: number) {}
+
+  submitLoginForm() {
+    this.submitLogin();
+  }
+
+  submitForgatePasswordForm() {}
+  submitSignUpForm() {}
+  submitCreatePassForm() {}
+
+  onCloseHandled() {
+    this.display = 'none';
+  }
+
+  OnSubmitModal() {
+    this.display = 'none';
   }
 
   generateCaptcha() {

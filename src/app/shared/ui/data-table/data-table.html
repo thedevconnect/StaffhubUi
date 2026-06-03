@@ -28,19 +28,19 @@
 
       <input pInputText type="text" placeholder="Type to search" class="w-48" [(ngModel)]="globalFilterValue"
           (input)="table.filterGlobal(globalFilterValue, 'contains')" />
-        <button pButton type="button" icon="pi pi-search" (click)="table.filterGlobal(globalFilterValue, 'contains')" />
+        <button pButton type="button" icon="pi pi-search" (click)="table.filterGlobal(globalFilterValue, 'contains')"></button>
 
     </div>
 
   </div>
 
   <!-- Table -->
-  <!-- <p-table #table [value]="value" [loading]="loading" [paginator]="true" [rows]="rows"
+  <p-table #table [value]="value" [loading]="loading" [paginator]="true" [rows]="rows"
     [rowsPerPageOptions]="rowsPerPageOptions" [tableStyle]="{ 'min-width': '40rem' }"
-    [globalFilterFields]="globalFilterFields" styleClass="p-datatable-sm"> -->
+    [globalFilterFields]="globalFilterFields" styleClass="p-datatable-sm">
 
     <!-- Header -->
-    <!-- <ng-template pTemplate="header">
+    <ng-template pTemplate="header">
 
       <tr>
 
@@ -52,10 +52,10 @@
 
       </tr>
 
-    </ng-template> -->
+    </ng-template>
 
     <!-- Body -->
-    <!-- <ng-template pTemplate="body" let-row>
+    <ng-template pTemplate="body" let-row>
 
       <tr>
 
@@ -67,10 +67,10 @@
 
       </tr>
 
-    </ng-template> -->
+    </ng-template>
 
     <!-- Empty -->
-    <!-- <ng-template pTemplate="emptymessage">
+    <ng-template pTemplate="emptymessage">
 
       <tr>
 
@@ -84,6 +84,6 @@
 
     </ng-template>
 
-  </p-table> -->
+  </p-table>
 
 </div>
