@@ -1,0 +1,60 @@
+<div class="flex min-h-screen bg-slate-100">
+  <aside
+    class="fixed left-0 top-0 z-30 h-screen border-r border-slate-200 bg-blue-700 text-white transition-all duration-300"
+    [class.w-64]="sidebarOpen()"
+    [class.w-16]="!sidebarOpen()"
+  >
+    <div class="flex h-[72px] items-center justify-center border-b border-slate-200 bg-white px-2">
+      <a [routerLink]="getDashboardRoute()" class="flex w-full items-center justify-center">
+        <img src="assets/img/OBLO.png" alt="OBLO Logo" class="max-h-10 w-auto object-contain" />
+      </a>
+    </div>
+
+    <nav class="space-y-1 p-3">
+      @for (menu of menuItemsWithSubmenu(); track menu.menu) {
+      <a
+        [routerLink]="menu.route"
+        routerLinkActive="bg-white/20 font-semibold"
+        class="flex items-center rounded-lg px-3 py-2 text-sm text-white transition hover:bg-white/15"
+        [class.justify-center]="!sidebarOpen()"
+        [class.justify-start]="sidebarOpen()"
+      >
+        <i [class]="'pi ' + menu.icon"></i>
+        @if (sidebarOpen()) {
+        <span class="ml-3">{{ menu.menu }}</span>
+        }
+      </a>
+      }
+    </nav>
+  </aside>
+
+  <div class="flex min-h-screen flex-1 flex-col transition-all duration-300" [class.ml-64]="sidebarOpen()" [class.ml-16]="!sidebarOpen()">
+    @if (userDetails(); as user) {
+    <header class="sticky top-0 z-20 border-b border-slate-200 bg-white shadow-sm">
+      <app-app-header
+        [user]="user"
+        [sidebarOpen]="sidebarOpen()"
+        [selectedRoleId]="selectedRoleId()"
+        [roleOptions]="roleOptions()"
+        (onLogout)="logout()"
+        (onRoleChange)="onRoleChange($event)"
+        (onToggleSidebar)="toggleSidebar()"
+      />
+    </header>
+    }
+
+    <main class="flex-1 overflow-y-auto p-4 md:p-6">
+      <router-outlet />
+    </main>
+
+    <footer class="border-t border-slate-200 bg-white px-6 py-3 text-sm text-slate-500">
+      <div class="flex items-center justify-between">
+        <span>© 2026 StaffHub.</span>
+        <span class="text-blue-600">Privacy · Terms</span>
+      </div>
+    </footer>
+  </div>
+
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+</div>

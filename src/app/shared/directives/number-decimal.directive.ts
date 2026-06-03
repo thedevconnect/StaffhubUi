@@ -1,0 +1,45 @@
+import { Directive, ElementRef, HostListener } from '@angular/core';
+
+@Directive({
+  selector: '[appNumberDecimal]',
+  standalone: true,
+})
+export class NumberDecimalDirective {
+  private regex: RegExp = new RegExp(/^\d*\.?\d{0,2}$/g);
+  private specialKeys: Array<string> = [
+    'Backspace',
+    'Tab',
+    'End',
+    'Home',
+    'ArrowLeft',
+    'ArrowRight',
+    'Delete',
+    'Enter',
+  ];
+
+  constructor(private el: ElementRef) {}
+
+  @HostListener('keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent): void {
+    if (this.specialKeys.indexOf(event.key) !== -1) {
+      return;
+    }
+
+    const current: string = this.el.nativeElement.value;
+    const next: string = current.concat(event.key);
+
+    if (next && !String(next).match(this.regex)) {
+      event.preventDefault();
+    }
+  }
+
+  @HostListener('paste', ['$event'])
+  onPaste(event: ClipboardEvent): void {
+    event.preventDefault();
+    const pastedInput = event.clipboardData?.getData('text/plain') || '';
+    if (this.regex.test(pastedInput)) {
+      document.execCommand('insertText', false, pastedInput);
+    }
+  }
+}
+

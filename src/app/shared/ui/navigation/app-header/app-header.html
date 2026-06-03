@@ -1,0 +1,36 @@
+<div class="flex h-[72px] w-full items-center justify-between px-4 md:px-6">
+  <button
+    type="button"
+    (click)="toggleSidebar()"
+    class="rounded-lg p-2 text-slate-600 transition hover:bg-slate-100"
+    [pTooltip]="sidebarOpen() ? 'Collapse Sidebar' : 'Expand Sidebar'"
+    tooltipPosition="bottom"
+  >
+    <i [class]="sidebarOpen() ? 'pi pi-angle-left' : 'pi pi-angle-right'"></i>
+  </button>
+
+  <div class="flex items-center gap-3 md:gap-4">
+    <p-select
+      [options]="roleOptions()"
+      optionLabel="rolDes"
+      optionValue="roleId"
+      [(ngModel)]="internalSelectedRoleId"
+      [placeholder]="currentRole() || 'Select Role'"
+      [filter]="false"
+      appendTo="body"
+      styleClass="w-40"
+      (onChange)="onRoleDropdownChange($event)"
+    />
+
+    <span class="hidden text-sm font-medium text-slate-700 sm:inline">{{ getUserName() }}</span>
+    <p-avatar
+      size="normal"
+      shape="circle"
+      class="cursor-pointer !bg-blue-600 !text-white"
+      (click)="userMenu.toggle($event)"
+    >
+      <span>{{ getUserInitial() }}</span>
+    </p-avatar>
+    <p-menu #userMenu [model]="userMenuItems" [popup]="true" [appendTo]="'body'"></p-menu>
+  </div>
+</div>

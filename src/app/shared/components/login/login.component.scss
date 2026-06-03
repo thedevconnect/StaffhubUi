@@ -1,0 +1,572 @@
+.page-wrapper {
+    display: flex;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+    width: 100%;
+    padding: 30px;
+    background: #F0F0F0;
+    //  background: #ecf6ef; 
+    
+  }
+  .col-md-6{
+    min-height:auto
+  }
+  .left-side {
+    align-items: center;
+    /* background: #2980b9;
+      background: linear-gradient(0deg, #fff, #6dd5fa, #2980b9); */
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    width: 50%;
+    border-radius: 20px;
+    background: #F0F0F0;
+    // background: #ecf6ef; 
+    position: relative;
+  }
+  
+.logo {
+    width: 80%; 
+    max-width: 600px; 
+    height: auto; 
+    margin: 0; 
+}
+  
+  .left-side .main-logo {
+    width: 350px;
+  }
+  
+  .right-side {
+    background-color: #fff;
+    /* box-shadow: 0 20px 30px -10px #26394d; */
+    box-shadow: 0 20px 30px -35px #26394d;
+    height: 100%;
+    overflow-y: auto;
+    width: 50%;
+    border-radius: 20px;
+    padding: 20px;
+    /* display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative; */
+    border-left: 5px solid #e1dfdd;
+    // border-left: 5px solid #ced9d1;
+  z-index: 100;
+  }
+  
+  
+  .top-label {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+   position: relative;
+      /*  top: 20px;
+      right: 20px; */
+  }
+  
+  .top-label .span-text {
+    padding-right: 10px;
+  }
+  
+  .top-label button {
+    /* background-color: #428BCA!important;
+      border-color: #428BCA;
+      color: #fff;
+      cursor: pointer;
+      float: right; */
+    border-radius: 30px;
+  }
+  
+  .box {
+    padding: 30px 50px 30px 50px;
+    width: 100%;
+    /* top: 50%;
+      transform: translate(0%, 30%);
+      left: 0; */
+  
+    height: 94%;
+    /* overflow: auto;  */
+    display: grid;
+    place-items: center left;
+  
+  }
+  
+  .box .box-inner {
+    width: 100%;
+    /* height: 100%; */
+  }
+  
+  .box .main-heading {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 40px;
+  }
+  
+  .box .title {
+    font-size: 16px;
+    margin-bottom: 40px;
+    color: #999999;
+  }
+  .logo-rigth{
+    display: none;
+}
+
+  
+  .block.clearfix {
+    padding-bottom: 10px;
+  
+  }
+  input[type=checkbox].ace{
+    position: relative;
+
+  }
+  
+  .block.clearfix input {
+    border-radius: 4px !important;
+    height: 40px;
+  }
+  
+  .block.clearfix i {
+    top: 5px !important;
+  }
+  
+  .capture-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    padding-inline: 12px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .capture-item {
+    margin-right: 25px;
+    // margin-bottom: 10px;
+    overflow: hidden;
+    position: relative;
+    min-height: 58px;
+  }
+
+  
+  .is-invalid {
+    border-color: #a94442 !important;
+  }
+  ::ng-deep  .is-invalid ~ button.dropdown-toggle  {
+    border-color: #a94442 !important;
+  }
+  
+  .submit-button {
+    height: 45px;
+    font-size: 15px;
+    margin-bottom: 15px;
+  }
+  
+  ::ng-deep .mat-spinner {
+    margin-left: 10px;
+  }
+  
+  ::ng-deep .mat-progress-spinner circle,
+  .mat-spinner circle {
+    stroke: #FFF;
+  }
+  
+  .box-wrraper {
+    border: 1px solid #D5D5D5;
+    padding: 22px 15px 0px 15px;
+    position: relative;
+    border-radius: 10px;
+    border-color: black;
+  }
+  
+  .box-wrraper .box-title {
+    position: absolute;
+    top: -11px;
+    background: #FFF;
+    padding-inline: 4px;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  
+  .box-wrraper .box-title p {
+    margin-bottom: 0px;
+  
+  }
+  
+  .date-input-container {
+    position: relative;
+  }
+  
+  .date-input {
+    position: relative;
+    z-index: 1;
+    background: none;
+    /* Remove background to allow pseudo-element to show */
+  }
+  
+  .date-input-container::before {
+    content: attr(data-placeholder);
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    /* Adjust as needed */
+    transform: translateY(-50%);
+    color: #aaa;
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  .date-input:focus+.date-input-container::before,
+  .date-input:not(:placeholder-shown)+.date-input-container::before {
+    display: none;
+  }
+  
+  .cus_datePicker {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+  }
+  
+  ::ng-deep .mat-form-field-outline-start {
+    border-radius: 0px !important;
+    border-width: 1px !important;
+  }
+  
+  ::ng-deep .mat-form-field-outline-end {
+    border-radius: 0px !important;
+    border-width: 1px !important;
+  }
+  
+  ::ng-deep .mat-form-field-appearance-outline .mat-form-field-wrapper {
+    margin: 0px !important;
+    padding-bottom: 0;
+  }
+  
+  ::ng-deep .mat-form-field .mat-form-field-wrapper .mat-form-field-infix {
+    padding: 0;
+    border-top: 0;
+  }
+  
+  ::ng-deep .mat-form-field .mat-form-field-wrapper .mat-form-field-infix input {
+    height: 26px !important;
+  }
+  
+  ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline-thick {
+    color: #F59942;
+  }
+  
+  ::ng-deep .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+    color: #F59942;
+  }
+  
+  ::ng-deep .mat-form-field .mat-select .mat-select-trigger {
+    height: 30px;
+  }
+  
+  ::ng-deep .bootstrap-select .dropdown-toggle {
+    border-radius: 4px;
+  }
+  
+  .col-margin {
+    margin-bottom: 10px;
+  }
+  
+  .dateLabel {
+    position: absolute;
+    right: 35px;
+    top: 10px;
+  }
+
+  ::ng-deep .mat-dialog-container{
+    padding: 0px!important;
+    overflow: hidden!important;
+}
+.mat-title{
+    padding-inline: 20px;
+    background: #307ECC;
+    color: #FFF;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0;
+    padding-bottom: 10px;
+    padding-top: 10px;
+}
+.mat-title h2{
+    margin: 0px !important;
+}
+.mat-title button{
+    font-size: 28px;
+    opacity: 1;
+}
+.mat-content{
+    overflow-y: auto;
+    max-height: 70vh;
+    padding: 12px;
+    margin: 0px;
+    display: block;
+}
+.mat-action{
+    background-color: #EFF3F8;
+    padding-inline: 20px;
+    padding-bottom: 10px;
+    padding-top: 10px;  
+}
+  
+input[type="password"]::-ms-reveal {
+  display: none;
+}
+::ng-deep .mat-button-wrapper>span{
+  width: 100%;
+}
+.otpWapper{
+  display: grid;
+  width: 100%;
+  .otp-row{
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom:20px;
+    .icon-wrap {
+      border: 1px solid #DDD;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      color: #428bca;
+      margin-right: 15px;
+      font-size: 25px;
+  
+    }
+    .rowLabel{
+      display: flex;
+      flex-direction: column;
+      margin-right: 10px;
+      flex: 1;
+      input{
+        border: 0;
+        border-bottom: 1px solid #DDD;
+        padding: 0;
+        padding-bottom: 2px;
+      }
+    }
+    .ferified-icon{
+      width: 40px;
+    }
+  }
+}
+
+.app-links {
+  margin-top: 20px;
+  text-align: center;
+  margin-bottom: 20px;
+  // display: none;
+}
+.app-links p {
+font-size: 12px;
+color: #6b7280;
+margin-bottom: 10px;
+}
+.app-links .store-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+.store-button {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+padding: 10px 12px;
+background: #000;
+color: white;
+text-decoration: none;
+border-radius: 5px;
+font-size: 12px;
+transition: background 0.3s;
+width: auto;
+}
+.store-button span {
+margin-left: 5px;
+}
+
+.store-button:hover {
+  background: #333;
+}
+
+  @media (min-width:1500px) {
+    .left-side {
+      width: 60%;
+    }
+  
+    .right-side {
+      width: 40%;
+    }
+  }
+  
+  @media (min-width:769px) and (max-width:1400px) {
+    .left-side .main-logo {
+      width: 300px;
+    }
+    .box {
+      padding: 30px 0px 30px 0px;
+    }
+  
+    .box .main-heading {
+      font-size: 35px;
+    }
+  
+  }
+  
+  @media (min-width:769px) and (max-width:990px) {
+    .left-side .main-logo {
+      width: 250px;
+    }
+    .box .main-heading {
+      font-size: 30px;
+      text-align: center;
+    }
+  
+    .box .title {
+      text-align: center;
+    }
+  }
+  
+  @media (max-width:768px) {
+    .box .main-heading {
+      font-size: 30px;
+      text-align: center;
+    }
+  
+    .box .title {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  
+    .left-side {
+      display: none;
+    }
+  
+    .right-side {
+      width: 100%;
+    }
+    .logo-rigth{
+        display: block;
+        width: 150px;
+    }
+    .box-inner .main-logo{
+        width: 170px;
+        margin: auto;
+        padding-bottom: 18px;
+    }
+    .app-links {
+      display: block;
+      width: 100%;
+
+    }
+  }
+  
+  @media (max-width:591px) {
+    .page-wrapper {
+      overflow: auto;
+      // height: auto;
+      background: #fff;
+      padding: 0px
+    }
+    .box {
+      padding: 20px 0px 0px 0px;
+    }  
+    .right-side {
+      border-left: none;
+      box-shadow: none;
+      // padding: 20px;
+    }
+    .right-side{
+      overflow-x: hidden;
+    }
+    .box-inner .main-logo{
+      width: 110px;
+    }
+    .box .main-heading {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    
+  }
+    
+  @media (max-width:491px) {
+    .top-row{
+        display: grid;
+        place-items: center right;
+    }
+    .top-label button {
+      font-size: 12px;
+      margin-top: 5px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+    }
+    .box-inner .main-logo{
+      width: 100px;
+    }
+    .box .main-heading {
+      font-size: 18px;
+      line-height: 30px;
+    }
+    .box .title {
+      font-size: 14px;
+    }
+    .capture-item.item1{
+      width: 48%;
+      margin-right: 5px;
+    }
+    .capture-item.item1 img{
+      width: 100%;
+      height: 40px;
+    }
+    .capture-item.item2{
+      margin-right: 0;
+      margin-left: 5px;
+      width: 48%;
+    }
+    .capture-item.item2 input{
+      width: 100%!important;
+    }
+    .capture-item.item3{
+      min-height: 10px;
+    }
+    .capture-row{
+      margin-bottom: 0px;
+    }
+  }
+  @media (max-width:400px) {
+    .span-text{
+        display: none;
+    }
+    .top-label button {
+      margin-top: 0px;
+    }
+    
+  }
+
+.main-heading {
+  margin-bottom: 10px;
+}
+
+.sub-heading {
+  margin-top: 0;
+  font-size: 18px; /* optional */
+}
+
+
+:host ::ng-deep .row {
+  margin-bottom: 20px !important;
+}
+
+
+:host ::ng-deep .input-icon.input-icon-right > .ace-icon {
+  left: auto;
+  right: 5px;
+}
