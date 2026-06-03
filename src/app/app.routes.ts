@@ -1,11 +1,11 @@
 import { Routes } from '@angular/router';
-import { LoginPage } from './features/auth/pages/login-page/login-page';
 import { WorkspacePage } from './features/workspace/pages/workspace-page/workspace-page';
 import { AppShell } from './core/layout/app-shell/app-shell';
 import { authGuard, guestGuard } from './core/auth/guards/auth.guard';
+import { LoginComponent } from './shared/components/login/login.component';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginPage, canActivate: [guestGuard] },
+  { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
   {
     path: '',
     component: AppShell,
