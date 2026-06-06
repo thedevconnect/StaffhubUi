@@ -146,33 +146,6 @@
                         </small>
                     </div>
 
-                    <!-- Captcha Widget -->
-                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mt-2">
-                        <div class="flex flex-col sm:flex-row items-center gap-4 justify-between">
-                            <div
-                                class="flex items-center gap-2 bg-white border border-slate-200 rounded-lg p-1.5 shadow-sm">
-                                <canvas id="loginTextCanvas" style="height:38px; width:130px; border-radius: 4px;"
-                                    height="38px" width="130px"></canvas>
-                                <p-button icon="pi pi-refresh" [text]="true" [rounded]="true" size="small"
-                                    styleClass="text-slate-500 hover:bg-slate-100" (onClick)="GenerateCaptcha(1)"
-                                    title="Refresh Captcha" />
-                            </div>
-                            <div class="w-full sm:w-auto flex-1">
-                                <p-floatlabel>
-                                    <input pInputText id="loginCaptcha" type="text" formControlName="captcha"
-                                        class="w-full" autocomplete="off"
-                                        [class.ng-invalid]="f['captcha'].invalid && f['captcha'].touched"
-                                        [class.ng-dirty]="f['captcha'].invalid && f['captcha'].touched" />
-                                    <label for="loginCaptcha">Enter Captcha</label>
-                                </p-floatlabel>
-                            </div>
-                        </div>
-                        <small *ngIf="f['captcha'].touched && f['captcha'].errors?.['required']"
-                            class="text-rose-500 text-xs mt-1.5 block font-medium">
-                            <i class="pi pi-exclamation-circle mr-1"></i>Captcha is required.
-                        </small>
-                    </div>
-
                     <!-- Remember Me & Forgot Password -->
                     <div class="flex items-center justify-between my-2">
                         <div class="flex items-center gap-2">
@@ -215,33 +188,6 @@
                                     class="pi pi-exclamation-circle mr-1"></i>Email is required.</span>
                             <span *ngIf="f1['email'].errors?.['pattern']"><i
                                     class="pi pi-exclamation-circle mr-1"></i>Please enter a valid email address.</span>
-                        </small>
-                    </div>
-
-                    <!-- Captcha Widget -->
-                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mt-2">
-                        <div class="flex flex-col sm:flex-row items-center gap-4 justify-between">
-                            <div
-                                class="flex items-center gap-2 bg-white border border-slate-200 rounded-lg p-1.5 shadow-sm">
-                                <canvas id="fpTextCanvas" style="height:38px; width:130px; border-radius: 4px;"
-                                    height="38px" width="130px"></canvas>
-                                <p-button icon="pi pi-refresh" [text]="true" [rounded]="true" size="small"
-                                    styleClass="text-slate-500 hover:bg-slate-100" (onClick)="GenerateCaptcha(2)"
-                                    title="Refresh Captcha" />
-                            </div>
-                            <div class="w-full sm:w-auto flex-1">
-                                <p-floatlabel>
-                                    <input pInputText id="fpCaptcha" type="text" formControlName="captcha"
-                                        class="w-full" autocomplete="off"
-                                        [class.ng-invalid]="f1['captcha'].invalid && f1['captcha'].touched"
-                                        [class.ng-dirty]="f1['captcha'].invalid && f1['captcha'].touched" />
-                                    <label for="fpCaptcha">Enter Captcha</label>
-                                </p-floatlabel>
-                            </div>
-                        </div>
-                        <small *ngIf="f1['captcha'].touched && f1['captcha'].errors?.['required']"
-                            class="text-rose-500 text-xs mt-1.5 block font-medium">
-                            <i class="pi pi-exclamation-circle mr-1"></i>Captcha is required.
                         </small>
                     </div>
 
@@ -313,33 +259,6 @@
                                     class="pi pi-exclamation-circle mr-1"></i>Confirm password is required.</span>
                             <span *ngIf="f3['confirmPassword'].errors?.['confirmPasswordValidator']"><i
                                     class="pi pi-exclamation-circle mr-1"></i>Passwords do not match.</span>
-                        </small>
-                    </div>
-
-                    <!-- Captcha Widget -->
-                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mt-2">
-                        <div class="flex flex-col sm:flex-row items-center gap-4 justify-between">
-                            <div
-                                class="flex items-center gap-2 bg-white border border-slate-200 rounded-lg p-1.5 shadow-sm">
-                                <canvas id="cpTextCanvas" style="height:38px; width:130px; border-radius: 4px;"
-                                    height="38px" width="130px"></canvas>
-                                <p-button icon="pi pi-refresh" [text]="true" [rounded]="true" size="small"
-                                    styleClass="text-slate-500 hover:bg-slate-100" (onClick)="GenerateCaptcha(4)"
-                                    title="Refresh Captcha" />
-                            </div>
-                            <div class="w-full sm:w-auto flex-1">
-                                <p-floatlabel>
-                                    <input pInputText id="cpCaptcha" type="text" formControlName="captcha"
-                                        class="w-full" autocomplete="off"
-                                        [class.ng-invalid]="f3['captcha'].invalid && f3['captcha'].touched"
-                                        [class.ng-dirty]="f3['captcha'].invalid && f3['captcha'].touched" />
-                                    <label for="cpCaptcha">Enter Captcha</label>
-                                </p-floatlabel>
-                            </div>
-                        </div>
-                        <small *ngIf="f3['captcha'].touched && f3['captcha'].errors?.['required']"
-                            class="text-rose-500 text-xs mt-1.5 block font-medium">
-                            <i class="pi pi-exclamation-circle mr-1"></i>Captcha is required.
                         </small>
                     </div>
 
