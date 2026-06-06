@@ -4,7 +4,7 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { AppHeader } from '../../../shared/ui/navigation/app-header/app-header';
+import { AppHeader } from '../../../shared/ui/navigation/header/header';
 import { AuthService } from '../../auth/services/auth.service';
 
 interface UserDetails {
@@ -55,7 +55,7 @@ export class AppShell {
     private readonly messageService: MessageService,
     private readonly confirmationService: ConfirmationService,
     private readonly router: Router,
-  ) {}
+  ) { }
 
   toggleSidebar(): void {
     this.sidebarOpen.update((isOpen) => !isOpen);

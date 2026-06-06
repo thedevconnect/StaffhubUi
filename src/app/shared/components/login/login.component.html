@@ -2,10 +2,15 @@
 
 <div class="min-h-screen w-full flex bg-slate-50 font-sans">
     <!-- Left Column: Branding (hidden on mobile) -->
-    <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white flex-col justify-between p-16 relative overflow-hidden">
+    <div
+        class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white flex-col justify-between p-16 relative overflow-hidden">
         <!-- Animated Background Blur Blobs -->
-        <div class="absolute -top-12 -left-12 w-96 h-96 bg-indigo-500 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-blob"></div>
-        <div class="absolute bottom-12 right-12 w-96 h-96 bg-emerald-500 rounded-full mix-blend-screen filter blur-3xl opacity-15 animate-blob animation-delay-2000"></div>
+        <div
+            class="absolute -top-12 -left-12 w-96 h-96 bg-indigo-500 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-blob">
+        </div>
+        <div
+            class="absolute bottom-12 right-12 w-96 h-96 bg-emerald-500 rounded-full mix-blend-screen filter blur-3xl opacity-15 animate-blob animation-delay-2000">
+        </div>
 
         <!-- Top Branding Section -->
         <div class="flex items-center gap-3 z-10 select-none">
@@ -15,23 +20,28 @@
                 <rect x="3" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.8" />
                 <rect x="13" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.4" />
             </svg>
-            <span class="text-2xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-100 to-emerald-300">STAFFHUB</span>
+            <span
+                class="text-2xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-100 to-emerald-300">STAFFHUB</span>
         </div>
 
         <!-- Center Highlight Message -->
         <div class="my-auto z-10 max-w-lg">
             <h1 class="text-4xl font-extrabold leading-tight mb-4 tracking-tight">
                 Manage Your Workforce <br>
-                <span class="text-emerald-400 bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-indigo-300">Effortlessly & Smartly.</span>
+                <span
+                    class="text-emerald-400 bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-indigo-300">Effortlessly
+                    & Smartly.</span>
             </h1>
             <p class="text-slate-300 text-base leading-relaxed mb-10">
-                The all-in-one HRMS solution to streamline employee tracking, attendance, real-time collaboration, and payroll management.
+                The all-in-one HRMS solution to streamline employee tracking, attendance, real-time collaboration, and
+                payroll management.
             </p>
 
             <!-- Feature Checklist -->
             <div class="flex flex-col gap-6">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 text-xl border border-white/10 shadow-lg">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 text-xl border border-white/10 shadow-lg">
                         <i class="pi pi-shield"></i>
                     </div>
                     <div>
@@ -40,7 +50,8 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 text-xl border border-white/10 shadow-lg">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 text-xl border border-white/10 shadow-lg">
                         <i class="pi pi-chart-line"></i>
                     </div>
                     <div>
@@ -49,7 +60,8 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 text-xl border border-white/10 shadow-lg">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 text-xl border border-white/10 shadow-lg">
                         <i class="pi pi-bolt"></i>
                     </div>
                     <div>
@@ -81,26 +93,21 @@
 
         <!-- Card Outer Wrapper -->
         <div class="w-full max-w-xl bg-white rounded-2xl shadow-xl border border-slate-100 p-8 md:p-10 relative">
-            
+
             <!-- Navigation header -->
             <div class="flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
                 <span class="text-slate-400 text-sm font-semibold uppercase tracking-wider select-none">
-                    {{ formType === 'login' ? 'Login' : formType === 'signup' ? 'Registration' : formType === 'forgotpassword' ? 'Reset Password' : 'New Password' }}
+                    {{ formType === 'login' ? 'Login' : formType === 'forgotpassword' ? 'Reset Password' : 'New
+                    Password' }}
                 </span>
-                
+
                 <div *ngIf="formType !== 'createPassword'">
-                    <ng-container *ngIf="formType === 'signup'; else showSignUpLink">
-                        <div class="flex items-center gap-2 text-xs">
-                            <span class="text-slate-500">Already a user?</span>
-                            <p-button label="Login" [text]="true" size="small" styleClass="text-indigo-600 font-bold p-0 hover:underline" (onClick)="redirectForm('login', 1)" />
-                        </div>
-                    </ng-container>
-                    <ng-template #showSignUpLink>
-                        <div class="flex items-center gap-2 text-xs">
-                            <span class="text-slate-500">Need an account?</span>
-                            <p-button label="Sign Up" [text]="true" size="small" styleClass="text-indigo-600 font-bold p-0 hover:underline" (onClick)="redirectForm('signup', 3)" />
-                        </div>
-                    </ng-template>
+                    <div class="flex items-center gap-2 text-xs">
+                        <span class="text-slate-500">Need an account?</span>
+                        <p-button label=" Register Now" [text]="true" size="small"
+                            styleClass="text-indigo-600 font-bold p-0 hover:underline"
+                            (onClick)="redirectForm('signup', 3)" />
+                    </div>
                 </div>
             </div>
 
@@ -113,10 +120,13 @@
                     <!-- Username Input -->
                     <div>
                         <p-floatlabel>
-                            <input pInputText id="username" type="text" formControlName="username" class="w-full" [class.ng-invalid]="f['username'].invalid && f['username'].touched" [class.ng-dirty]="f['username'].invalid && f['username'].touched" />
+                            <input pInputText id="username" type="text" formControlName="username" class="w-full"
+                                [class.ng-invalid]="f['username'].invalid && f['username'].touched"
+                                [class.ng-dirty]="f['username'].invalid && f['username'].touched" />
                             <label for="username"><i class="pi pi-user mr-2 text-slate-400"></i>Username</label>
                         </p-floatlabel>
-                        <small *ngIf="f['username'].touched && f['username'].errors?.['required']" class="text-rose-500 text-xs mt-1.5 block font-medium">
+                        <small *ngIf="f['username'].touched && f['username'].errors?.['required']"
+                            class="text-rose-500 text-xs mt-1.5 block font-medium">
                             <i class="pi pi-exclamation-circle mr-1"></i>Username is required.
                         </small>
                     </div>
@@ -124,10 +134,14 @@
                     <!-- Password Input -->
                     <div>
                         <p-floatlabel>
-                            <p-password id="password" formControlName="password" [toggleMask]="true" [feedback]="false" styleClass="w-full" inputStyleClass="w-full" [class.ng-invalid]="f['password'].invalid && f['password'].touched" [class.ng-dirty]="f['password'].invalid && f['password'].touched" />
+                            <p-password id="password" formControlName="password" [toggleMask]="true" [feedback]="false"
+                                styleClass="w-full" inputStyleClass="w-full"
+                                [class.ng-invalid]="f['password'].invalid && f['password'].touched"
+                                [class.ng-dirty]="f['password'].invalid && f['password'].touched" />
                             <label for="password"><i class="pi pi-lock mr-2 text-slate-400"></i>Password</label>
                         </p-floatlabel>
-                        <small *ngIf="f['password'].touched && f['password'].errors?.['required']" class="text-rose-500 text-xs mt-1.5 block font-medium">
+                        <small *ngIf="f['password'].touched && f['password'].errors?.['required']"
+                            class="text-rose-500 text-xs mt-1.5 block font-medium">
                             <i class="pi pi-exclamation-circle mr-1"></i>Password is required.
                         </small>
                     </div>
@@ -135,18 +149,26 @@
                     <!-- Captcha Widget -->
                     <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mt-2">
                         <div class="flex flex-col sm:flex-row items-center gap-4 justify-between">
-                            <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-lg p-1.5 shadow-sm">
-                                <canvas id="loginTextCanvas" style="height:38px; width:130px; border-radius: 4px;" height="38px" width="130px"></canvas>
-                                <p-button icon="pi pi-refresh" [text]="true" [rounded]="true" size="small" styleClass="text-slate-500 hover:bg-slate-100" (onClick)="GenerateCaptcha(1)" title="Refresh Captcha" />
+                            <div
+                                class="flex items-center gap-2 bg-white border border-slate-200 rounded-lg p-1.5 shadow-sm">
+                                <canvas id="loginTextCanvas" style="height:38px; width:130px; border-radius: 4px;"
+                                    height="38px" width="130px"></canvas>
+                                <p-button icon="pi pi-refresh" [text]="true" [rounded]="true" size="small"
+                                    styleClass="text-slate-500 hover:bg-slate-100" (onClick)="GenerateCaptcha(1)"
+                                    title="Refresh Captcha" />
                             </div>
                             <div class="w-full sm:w-auto flex-1">
                                 <p-floatlabel>
-                                    <input pInputText id="loginCaptcha" type="text" formControlName="captcha" class="w-full" autocomplete="off" [class.ng-invalid]="f['captcha'].invalid && f['captcha'].touched" [class.ng-dirty]="f['captcha'].invalid && f['captcha'].touched" />
+                                    <input pInputText id="loginCaptcha" type="text" formControlName="captcha"
+                                        class="w-full" autocomplete="off"
+                                        [class.ng-invalid]="f['captcha'].invalid && f['captcha'].touched"
+                                        [class.ng-dirty]="f['captcha'].invalid && f['captcha'].touched" />
                                     <label for="loginCaptcha">Enter Captcha</label>
                                 </p-floatlabel>
                             </div>
                         </div>
-                        <small *ngIf="f['captcha'].touched && f['captcha'].errors?.['required']" class="text-rose-500 text-xs mt-1.5 block font-medium">
+                        <small *ngIf="f['captcha'].touched && f['captcha'].errors?.['required']"
+                            class="text-rose-500 text-xs mt-1.5 block font-medium">
                             <i class="pi pi-exclamation-circle mr-1"></i>Captcha is required.
                         </small>
                     </div>
@@ -155,263 +177,106 @@
                     <div class="flex items-center justify-between my-2">
                         <div class="flex items-center gap-2">
                             <p-checkbox formControlName="rememberMe" [binary]="true" inputId="rememberMe" />
-                            <label for="rememberMe" class="text-sm font-semibold text-slate-600 cursor-pointer select-none">Remember Me</label>
+                            <label for="rememberMe"
+                                class="text-sm font-semibold text-slate-600 cursor-pointer select-none">Remember
+                                Me</label>
                         </div>
-                        <a (click)="redirectForm('forgotpassword', 2)" class="text-sm font-bold text-indigo-600 hover:text-indigo-700 hover:underline cursor-pointer">
+                        <a (click)="redirectForm('forgotpassword', 2)"
+                            class="text-sm font-bold text-indigo-600 hover:text-indigo-700 hover:underline cursor-pointer">
                             Forgot Password?
                         </a>
                     </div>
 
                     <!-- Submit -->
-                    <p-button label="Login" type="submit" [loading]="isProccess" styleClass="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border-none shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/30 transition-all duration-200" (onClick)="submitLoginForm()" />
+                    <p-button label="Login" type="submit" [loading]="isProccess"
+                        styleClass="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border-none shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/30 transition-all duration-200"
+                        (onClick)="submitLoginForm()" />
                 </form>
             </div>
 
             <!-- FORGOT PASSWORD STATE -->
             <div *ngIf="formType === 'forgotpassword'" class="animate-fade-in">
                 <h2 class="text-2xl font-black text-slate-950 mb-1">Forgot password?</h2>
-                <p class="text-sm text-slate-400 mb-8 font-medium">No worries! Enter your email and we'll send you reset details.</p>
+                <p class="text-sm text-slate-400 mb-8 font-medium">No worries! Enter your email and we'll send you reset
+                    details.</p>
 
                 <form [formGroup]="forgateForm" class="flex flex-col gap-6">
                     <!-- Email Input -->
                     <div>
                         <p-floatlabel>
-                            <input pInputText id="fpEmail" type="email" formControlName="email" class="w-full" [class.ng-invalid]="f1['email'].invalid && f1['email'].touched" [class.ng-dirty]="f1['email'].invalid && f1['email'].touched" />
+                            <input pInputText id="fpEmail" type="email" formControlName="email" class="w-full"
+                                [class.ng-invalid]="f1['email'].invalid && f1['email'].touched"
+                                [class.ng-dirty]="f1['email'].invalid && f1['email'].touched" />
                             <label for="fpEmail"><i class="pi pi-envelope mr-2 text-slate-400"></i>Email Address</label>
                         </p-floatlabel>
-                        <small *ngIf="f1['email'].touched && f1['email'].errors" class="text-rose-500 text-xs mt-1.5 block font-medium">
-                            <span *ngIf="f1['email'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Email is required.</span>
-                            <span *ngIf="f1['email'].errors?.['pattern']"><i class="pi pi-exclamation-circle mr-1"></i>Please enter a valid email address.</span>
+                        <small *ngIf="f1['email'].touched && f1['email'].errors"
+                            class="text-rose-500 text-xs mt-1.5 block font-medium">
+                            <span *ngIf="f1['email'].errors?.['required']"><i
+                                    class="pi pi-exclamation-circle mr-1"></i>Email is required.</span>
+                            <span *ngIf="f1['email'].errors?.['pattern']"><i
+                                    class="pi pi-exclamation-circle mr-1"></i>Please enter a valid email address.</span>
                         </small>
                     </div>
 
                     <!-- Captcha Widget -->
                     <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mt-2">
                         <div class="flex flex-col sm:flex-row items-center gap-4 justify-between">
-                            <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-lg p-1.5 shadow-sm">
-                                <canvas id="fpTextCanvas" style="height:38px; width:130px; border-radius: 4px;" height="38px" width="130px"></canvas>
-                                <p-button icon="pi pi-refresh" [text]="true" [rounded]="true" size="small" styleClass="text-slate-500 hover:bg-slate-100" (onClick)="GenerateCaptcha(2)" title="Refresh Captcha" />
+                            <div
+                                class="flex items-center gap-2 bg-white border border-slate-200 rounded-lg p-1.5 shadow-sm">
+                                <canvas id="fpTextCanvas" style="height:38px; width:130px; border-radius: 4px;"
+                                    height="38px" width="130px"></canvas>
+                                <p-button icon="pi pi-refresh" [text]="true" [rounded]="true" size="small"
+                                    styleClass="text-slate-500 hover:bg-slate-100" (onClick)="GenerateCaptcha(2)"
+                                    title="Refresh Captcha" />
                             </div>
                             <div class="w-full sm:w-auto flex-1">
                                 <p-floatlabel>
-                                    <input pInputText id="fpCaptcha" type="text" formControlName="captcha" class="w-full" autocomplete="off" [class.ng-invalid]="f1['captcha'].invalid && f1['captcha'].touched" [class.ng-dirty]="f1['captcha'].invalid && f1['captcha'].touched" />
+                                    <input pInputText id="fpCaptcha" type="text" formControlName="captcha"
+                                        class="w-full" autocomplete="off"
+                                        [class.ng-invalid]="f1['captcha'].invalid && f1['captcha'].touched"
+                                        [class.ng-dirty]="f1['captcha'].invalid && f1['captcha'].touched" />
                                     <label for="fpCaptcha">Enter Captcha</label>
                                 </p-floatlabel>
                             </div>
                         </div>
-                        <small *ngIf="f1['captcha'].touched && f1['captcha'].errors?.['required']" class="text-rose-500 text-xs mt-1.5 block font-medium">
+                        <small *ngIf="f1['captcha'].touched && f1['captcha'].errors?.['required']"
+                            class="text-rose-500 text-xs mt-1.5 block font-medium">
                             <i class="pi pi-exclamation-circle mr-1"></i>Captcha is required.
                         </small>
                     </div>
 
                     <!-- Submit Actions -->
                     <div class="flex flex-col gap-3 mt-4">
-                        <p-button label="Send Recovery Link" type="submit" [loading]="isProccess" styleClass="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border-none shadow-md shadow-indigo-600/20" (onClick)="submitForgatePasswordForm()" />
-                        <p-button label="Back to Login" [link]="true" styleClass="w-full py-2 text-slate-500 hover:text-indigo-600 font-bold hover:underline" (onClick)="redirectForm('login', 1)" />
+                        <p-button label="Send Recovery Link" type="submit" [loading]="isProccess"
+                            styleClass="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border-none shadow-md shadow-indigo-600/20"
+                            (onClick)="submitForgatePasswordForm()" />
+                        <p-button label="Back to Login" [link]="true"
+                            styleClass="w-full py-2 text-slate-500 hover:text-indigo-600 font-bold hover:underline"
+                            (onClick)="redirectForm('login', 1)" />
                     </div>
                 </form>
-            </div>
-
-            <!-- REGISTRATION / SIGN UP STATE -->
-            <div *ngIf="formType === 'signup'" class="animate-fade-in">
-                <h2 class="text-2xl font-black text-slate-950 mb-1">Create an account</h2>
-                <p class="text-sm text-slate-400 mb-8 font-medium">Register your company to set up StaffHub portal.</p>
-
-                <form [formGroup]="signupForm" *ngIf="!showOTP" class="flex flex-col gap-6">
-                    <!-- Section: Company Details -->
-                    <div class="border border-slate-100 rounded-2xl p-5 bg-slate-50/50 flex flex-col gap-5">
-                        <h3 class="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2 select-none">
-                            <i class="pi pi-building text-indigo-600"></i> Company Information
-                        </h3>
-                        
-                        <!-- Company Name -->
-                        <div>
-                            <p-floatlabel>
-                                <input pInputText id="companyName" formControlName="companyName" class="w-full bg-white" [class.ng-invalid]="f2['companyName'].invalid && f2['companyName'].touched" [class.ng-dirty]="f2['companyName'].invalid && f2['companyName'].touched" />
-                                <label for="companyName">Company Name</label>
-                            </p-floatlabel>
-                            <small *ngIf="f2['companyName'].touched && f2['companyName'].errors" class="text-rose-500 text-xs mt-1.5 block font-medium">
-                                <span *ngIf="f2['companyName'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Company name is required.</span>
-                                <span *ngIf="f2['companyName'].errors?.['whitespace']"><i class="pi pi-exclamation-circle mr-1"></i>Name cannot be only whitespace.</span>
-                            </small>
-                        </div>
-
-                        <!-- Short Name -->
-                        <div>
-                            <p-floatlabel>
-                                <input pInputText id="shortName" formControlName="shortName" class="w-full bg-white" [class.ng-invalid]="f2['shortName'].invalid && f2['shortName'].touched" [class.ng-dirty]="f2['shortName'].invalid && f2['shortName'].touched" />
-                                <label for="shortName">Short Name</label>
-                            </p-floatlabel>
-                            <small *ngIf="f2['shortName'].touched && f2['shortName'].errors" class="text-rose-500 text-xs mt-1.5 block font-medium">
-                                <span *ngIf="f2['shortName'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Short name is required.</span>
-                                <span *ngIf="f2['shortName'].errors?.['whitespace']"><i class="pi pi-exclamation-circle mr-1"></i>Short name cannot be only whitespace.</span>
-                            </small>
-                        </div>
-
-                        <!-- Company Address -->
-                        <div>
-                            <p-floatlabel>
-                                <textarea pTextarea id="address" formControlName="address" rows="3" class="w-full bg-white resize-none" [class.ng-invalid]="f2['address'].invalid && f2['address'].touched" [class.ng-dirty]="f2['address'].invalid && f2['address'].touched"></textarea>
-                                <label for="address">Company Address</label>
-                            </p-floatlabel>
-                            <small *ngIf="f2['address'].touched && f2['address'].errors" class="text-rose-500 text-xs mt-1.5 block font-medium">
-                                <span *ngIf="f2['address'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Company address is required.</span>
-                                <span *ngIf="f2['address'].errors?.['whitespace']"><i class="pi pi-exclamation-circle mr-1"></i>Address cannot be only whitespace.</span>
-                            </small>
-                        </div>
-                    </div>
-
-                    <!-- Section: Contact Details -->
-                    <div class="border border-slate-100 rounded-2xl p-5 bg-slate-50/50 flex flex-col gap-5">
-                        <h3 class="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2 select-none">
-                            <i class="pi pi-user text-indigo-600"></i> Contact Representative
-                        </h3>
-
-                        <!-- Full Name -->
-                        <div>
-                            <p-floatlabel>
-                                <input pInputText id="contactName" formControlName="username" class="w-full bg-white" [class.ng-invalid]="f2['username'].invalid && f2['username'].touched" [class.ng-dirty]="f2['username'].invalid && f2['username'].touched" />
-                                <label for="contactName">Full Name</label>
-                            </p-floatlabel>
-                            <small *ngIf="f2['username'].touched && f2['username'].errors" class="text-rose-500 text-xs mt-1.5 block font-medium">
-                                <span *ngIf="f2['username'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Name is required.</span>
-                                <span *ngIf="f2['username'].errors?.['whitespace']"><i class="pi pi-exclamation-circle mr-1"></i>Name cannot be only whitespace.</span>
-                                <span *ngIf="f2['username'].errors?.['minlength']"><i class="pi pi-exclamation-circle mr-1"></i>Name must be at least 3 characters.</span>
-                                <span *ngIf="f2['username'].errors?.['maxlength']"><i class="pi pi-exclamation-circle mr-1"></i>Name must not exceed 20 characters.</span>
-                                <span *ngIf="f2['username'].errors?.['pattern']"><i class="pi pi-exclamation-circle mr-1"></i>Please enter a valid name.</span>
-                            </small>
-                        </div>
-
-                        <!-- Grid: Email & Mobile -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Email -->
-                            <div>
-                                <p-floatlabel>
-                                    <input pInputText id="contactEmail" type="email" formControlName="email" class="w-full bg-white" [class.ng-invalid]="f2['email'].invalid && f2['email'].touched" [class.ng-dirty]="f2['email'].invalid && f2['email'].touched" />
-                                    <label for="contactEmail">Email Address</label>
-                                </p-floatlabel>
-                                <small *ngIf="f2['email'].touched && f2['email'].errors" class="text-rose-500 text-xs mt-1.5 block font-medium">
-                                    <span *ngIf="f2['email'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Required.</span>
-                                    <span *ngIf="f2['email'].errors?.['pattern']"><i class="pi pi-exclamation-circle mr-1"></i>Invalid email.</span>
-                                </small>
-                            </div>
-                            <!-- Mobile -->
-                            <div>
-                                <p-floatlabel>
-                                    <input pInputText id="contactMobile" type="text" formControlName="mobile" class="w-full bg-white" [class.ng-invalid]="f2['mobile'].invalid && f2['mobile'].touched" [class.ng-dirty]="f2['mobile'].invalid && f2['mobile'].touched" />
-                                    <label for="contactMobile">Mobile Number</label>
-                                </p-floatlabel>
-                                <small *ngIf="f2['mobile'].touched && f2['mobile'].errors" class="text-rose-500 text-xs mt-1.5 block font-medium">
-                                    <span *ngIf="f2['mobile'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Required.</span>
-                                    <span *ngIf="f2['mobile'].errors?.['pattern']"><i class="pi pi-exclamation-circle mr-1"></i>Invalid number.</span>
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Captcha Widget -->
-                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                        <div class="flex flex-col sm:flex-row items-center gap-4 justify-between">
-                            <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-lg p-1.5 shadow-sm">
-                                <canvas id="signupTextCanvas" style="height:38px; width:130px; border-radius: 4px;" height="38px" width="130px"></canvas>
-                                <p-button icon="pi pi-refresh" [text]="true" [rounded]="true" size="small" styleClass="text-slate-500 hover:bg-slate-100" (onClick)="GenerateCaptcha(3)" title="Refresh Captcha" />
-                            </div>
-                            <div class="w-full sm:w-auto flex-1">
-                                <p-floatlabel>
-                                    <input pInputText id="signupCaptcha" type="text" formControlName="captcha" class="w-full" autocomplete="off" [class.ng-invalid]="f2['captcha'].invalid && f2['captcha'].touched" [class.ng-dirty]="f2['captcha'].invalid && f2['captcha'].touched" />
-                                    <label for="signupCaptcha">Enter Captcha</label>
-                                </p-floatlabel>
-                            </div>
-                        </div>
-                        <small *ngIf="f2['captcha'].touched && f2['captcha'].errors?.['required']" class="text-rose-500 text-xs mt-1.5 block font-medium">
-                            <i class="pi pi-exclamation-circle mr-1"></i>Captcha is required.
-                        </small>
-                    </div>
-
-                    <!-- Accept Terms and Conditions -->
-                    <div>
-                        <div class="flex items-start gap-2">
-                            <p-checkbox formControlName="acceptTerms" [binary]="true" inputId="acceptTerms" [class.ng-invalid]="f2['acceptTerms'].invalid && f2['acceptTerms'].touched" />
-                            <label for="acceptTerms" class="text-sm font-semibold text-slate-600 cursor-pointer select-none leading-normal">
-                                I accept the <a (click)="gotoTermsCondition()" class="text-indigo-600 hover:text-indigo-700 font-bold hover:underline cursor-pointer">Terms and Conditions</a>
-                            </label>
-                        </div>
-                        <small *ngIf="f2['acceptTerms'].touched && f2['acceptTerms'].errors?.['required']" class="text-rose-500 text-xs mt-1.5 block font-medium">
-                            <i class="pi pi-exclamation-circle mr-1"></i>You must accept the terms and conditions.
-                        </small>
-                    </div>
-
-                    <!-- Register Button -->
-                    <p-button label="Register" type="submit" [loading]="isProccess" styleClass="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border-none shadow-md shadow-indigo-600/20" (onClick)="submitSignUpForm()" />
-                </form>
-
-                <!-- OTP Verification Frame (Inside Card when active) -->
-                <div *ngIf="showOTP" class="flex flex-col gap-6 animate-fade-in">
-                    <h3 class="text-xl font-bold text-slate-900 select-none">Verify Codes</h3>
-                    <p class="text-sm text-slate-400 font-medium">Please verify OTP codes to complete your account registration.</p>
-
-                    <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100 flex flex-col gap-6">
-                        <!-- Email OTP Field -->
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 text-lg flex-shrink-0 mt-0.5 border border-indigo-100 shadow-sm">
-                                <i class="pi pi-envelope"></i>
-                            </div>
-                            <div class="flex-1">
-                                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider select-none">Email Code</div>
-                                <div class="text-sm font-black text-slate-800 mb-2 truncate max-w-[200px] sm:max-w-none">{{ signupForm.get('email')?.value }}</div>
-                                <div class="flex gap-2 items-center" *ngIf="!emailVerified">
-                                    <input pInputText type="text" placeholder="OTP Code" class="w-32 py-1.5 px-3 text-xs bg-white" />
-                                    <p-button label="Verify" [text]="true" size="small" styleClass="text-indigo-600 font-bold p-0 hover:underline" />
-                                </div>
-                                <div class="flex items-center gap-1.5 text-emerald-600 text-xs font-bold" *ngIf="emailVerified">
-                                    <i class="pi pi-check-circle"></i> Verified
-                                </div>
-                            </div>
-                        </div>
-
-                        <hr class="border-slate-200">
-
-                        <!-- Mobile OTP Field -->
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 text-lg flex-shrink-0 mt-0.5 border border-indigo-100 shadow-sm">
-                                <i class="pi pi-phone"></i>
-                            </div>
-                            <div class="flex-1">
-                                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider select-none">Mobile Code</div>
-                                <div class="text-sm font-black text-slate-800 mb-2">{{ signupForm.get('mobile')?.value }}</div>
-                                <div class="flex gap-2 items-center" *ngIf="!mobileVerified">
-                                    <input pInputText type="text" placeholder="OTP Code" class="w-32 py-1.5 px-3 text-xs bg-white" />
-                                    <p-button label="Verify" [text]="true" size="small" styleClass="text-indigo-600 font-bold p-0 hover:underline" />
-                                </div>
-                                <div class="flex items-center gap-1.5 text-emerald-600 text-xs font-bold" *ngIf="mobileVerified">
-                                    <i class="pi pi-check-circle"></i> Verified
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Proceed to login -->
-                    <p-button label="Proceed" type="submit" [loading]="isProccess" styleClass="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border-none shadow-md shadow-indigo-600/20" (onClick)="submitSignUpForm()" />
-                </div>
             </div>
 
             <!-- CREATE PASSWORD STATE -->
             <div *ngIf="formType === 'createPassword'" class="animate-fade-in">
                 <h2 class="text-2xl font-black text-slate-950 mb-1">Set Account Password</h2>
-                <p class="text-sm text-slate-400 mb-8 font-medium">Please choose a password to finalize your StaffHub access.</p>
+                <p class="text-sm text-slate-400 mb-8 font-medium">Please choose a password to finalize your StaffHub
+                    access.</p>
 
                 <form [formGroup]="createPassForm" class="flex flex-col gap-6">
                     <!-- User details: Readonly -->
                     <div>
                         <p-floatlabel>
-                            <input pInputText id="cpName" formControlName="name" readonly class="w-full bg-slate-50 cursor-not-allowed text-slate-500 font-medium" />
+                            <input pInputText id="cpName" formControlName="name" readonly
+                                class="w-full bg-slate-50 cursor-not-allowed text-slate-500 font-medium" />
                             <label for="cpName">Name</label>
                         </p-floatlabel>
                     </div>
 
                     <div>
                         <p-floatlabel>
-                            <input pInputText id="cpEmail" formControlName="email" readonly class="w-full bg-slate-50 cursor-not-allowed text-slate-500 font-medium" />
+                            <input pInputText id="cpEmail" formControlName="email" readonly
+                                class="w-full bg-slate-50 cursor-not-allowed text-slate-500 font-medium" />
                             <label for="cpEmail">Email Address</label>
                         </p-floatlabel>
                     </div>
@@ -419,47 +284,69 @@
                     <!-- Passwords -->
                     <div>
                         <p-floatlabel>
-                            <p-password id="cpPassword" formControlName="password" [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full" [class.ng-invalid]="f3['password'].invalid && f3['password'].touched" [class.ng-dirty]="f3['password'].invalid && f3['password'].touched" />
+                            <p-password id="cpPassword" formControlName="password" [toggleMask]="true"
+                                styleClass="w-full" inputStyleClass="w-full"
+                                [class.ng-invalid]="f3['password'].invalid && f3['password'].touched"
+                                [class.ng-dirty]="f3['password'].invalid && f3['password'].touched" />
                             <label for="cpPassword">Password</label>
                         </p-floatlabel>
-                        <small *ngIf="f3['password'].touched && f3['password'].invalid" class="text-rose-500 text-xs mt-1.5 block font-medium">
-                            <span *ngIf="f3['password'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Password is required.</span>
-                            <span *ngIf="f3['password'].errors?.['minlength']"><i class="pi pi-exclamation-circle mr-1"></i>Must be at least 6 characters.</span>
+                        <small *ngIf="f3['password'].touched && f3['password'].invalid"
+                            class="text-rose-500 text-xs mt-1.5 block font-medium">
+                            <span *ngIf="f3['password'].errors?.['required']"><i
+                                    class="pi pi-exclamation-circle mr-1"></i>Password is required.</span>
+                            <span *ngIf="f3['password'].errors?.['minlength']"><i
+                                    class="pi pi-exclamation-circle mr-1"></i>Must be at least 6 characters.</span>
                         </small>
                     </div>
 
                     <div>
                         <p-floatlabel>
-                            <p-password id="cpConfirmPassword" formControlName="confirmPassword" [toggleMask]="true" [feedback]="false" styleClass="w-full" inputStyleClass="w-full" [class.ng-invalid]="f3['confirmPassword'].invalid && f3['confirmPassword'].touched" [class.ng-dirty]="f3['confirmPassword'].invalid && f3['confirmPassword'].touched" />
+                            <p-password id="cpConfirmPassword" formControlName="confirmPassword" [toggleMask]="true"
+                                [feedback]="false" styleClass="w-full" inputStyleClass="w-full"
+                                [class.ng-invalid]="f3['confirmPassword'].invalid && f3['confirmPassword'].touched"
+                                [class.ng-dirty]="f3['confirmPassword'].invalid && f3['confirmPassword'].touched" />
                             <label for="cpConfirmPassword">Confirm Password</label>
                         </p-floatlabel>
-                        <small *ngIf="f3['confirmPassword'].touched && f3['confirmPassword'].invalid" class="text-rose-500 text-xs mt-1.5 block font-medium">
-                            <span *ngIf="f3['confirmPassword'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Confirm password is required.</span>
-                            <span *ngIf="f3['confirmPassword'].errors?.['confirmPasswordValidator']"><i class="pi pi-exclamation-circle mr-1"></i>Passwords do not match.</span>
+                        <small *ngIf="f3['confirmPassword'].touched && f3['confirmPassword'].invalid"
+                            class="text-rose-500 text-xs mt-1.5 block font-medium">
+                            <span *ngIf="f3['confirmPassword'].errors?.['required']"><i
+                                    class="pi pi-exclamation-circle mr-1"></i>Confirm password is required.</span>
+                            <span *ngIf="f3['confirmPassword'].errors?.['confirmPasswordValidator']"><i
+                                    class="pi pi-exclamation-circle mr-1"></i>Passwords do not match.</span>
                         </small>
                     </div>
 
                     <!-- Captcha Widget -->
                     <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mt-2">
                         <div class="flex flex-col sm:flex-row items-center gap-4 justify-between">
-                            <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-lg p-1.5 shadow-sm">
-                                <canvas id="cpTextCanvas" style="height:38px; width:130px; border-radius: 4px;" height="38px" width="130px"></canvas>
-                                <p-button icon="pi pi-refresh" [text]="true" [rounded]="true" size="small" styleClass="text-slate-500 hover:bg-slate-100" (onClick)="GenerateCaptcha(4)" title="Refresh Captcha" />
+                            <div
+                                class="flex items-center gap-2 bg-white border border-slate-200 rounded-lg p-1.5 shadow-sm">
+                                <canvas id="cpTextCanvas" style="height:38px; width:130px; border-radius: 4px;"
+                                    height="38px" width="130px"></canvas>
+                                <p-button icon="pi pi-refresh" [text]="true" [rounded]="true" size="small"
+                                    styleClass="text-slate-500 hover:bg-slate-100" (onClick)="GenerateCaptcha(4)"
+                                    title="Refresh Captcha" />
                             </div>
                             <div class="w-full sm:w-auto flex-1">
                                 <p-floatlabel>
-                                    <input pInputText id="cpCaptcha" type="text" formControlName="captcha" class="w-full" autocomplete="off" [class.ng-invalid]="f3['captcha'].invalid && f3['captcha'].touched" [class.ng-dirty]="f3['captcha'].invalid && f3['captcha'].touched" />
+                                    <input pInputText id="cpCaptcha" type="text" formControlName="captcha"
+                                        class="w-full" autocomplete="off"
+                                        [class.ng-invalid]="f3['captcha'].invalid && f3['captcha'].touched"
+                                        [class.ng-dirty]="f3['captcha'].invalid && f3['captcha'].touched" />
                                     <label for="cpCaptcha">Enter Captcha</label>
                                 </p-floatlabel>
                             </div>
                         </div>
-                        <small *ngIf="f3['captcha'].touched && f3['captcha'].errors?.['required']" class="text-rose-500 text-xs mt-1.5 block font-medium">
+                        <small *ngIf="f3['captcha'].touched && f3['captcha'].errors?.['required']"
+                            class="text-rose-500 text-xs mt-1.5 block font-medium">
                             <i class="pi pi-exclamation-circle mr-1"></i>Captcha is required.
                         </small>
                     </div>
 
                     <!-- Submit -->
-                    <p-button label="Submit" type="submit" [loading]="isProccess" styleClass="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border-none shadow-md shadow-indigo-600/20" (onClick)="submitCreatePassForm()" />
+                    <p-button label="Submit" type="submit" [loading]="isProccess"
+                        styleClass="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border-none shadow-md shadow-indigo-600/20"
+                        (onClick)="submitCreatePassForm()" />
                 </form>
             </div>
 
@@ -468,33 +355,42 @@
 </div>
 
 <!-- COMPATIBILITY BACKDROP ALERT -->
-<div *ngIf="display === 'block'" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+<div *ngIf="display === 'block'"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
     <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-100 flex flex-col">
         <div class="bg-indigo-600 p-4 text-white flex justify-between items-center select-none">
             <h4 class="font-bold text-base flex items-center gap-2"><i class="pi pi-info-circle"></i> Notification</h4>
-            <button (click)="display = 'none'" class="text-white hover:text-slate-100 text-2xl font-bold leading-none">&times;</button>
+            <button (click)="display = 'none'"
+                class="text-white hover:text-slate-100 text-2xl font-bold leading-none">&times;</button>
         </div>
         <div class="p-6">
             <p class="text-slate-600 font-semibold text-sm">Hi there !</p>
         </div>
         <div class="bg-slate-50 px-6 py-4 flex justify-end">
-            <p-button label="OK" size="small" (onClick)="display='none'" styleClass="bg-indigo-600 hover:bg-indigo-700 text-white border-none font-bold px-4 py-2 rounded-lg" />
+            <p-button label="OK" size="small" (onClick)="display='none'"
+                styleClass="bg-indigo-600 hover:bg-indigo-700 text-white border-none font-bold px-4 py-2 rounded-lg" />
         </div>
     </div>
 </div>
 
 <!-- COMPATIBILITY BACKDROP CONFIRM -->
-<div id="LoginModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-100 flex flex-col animate-scale-up">
+<div id="LoginModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+    <div
+        class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-100 flex flex-col animate-scale-up">
         <div class="bg-indigo-600 p-4 text-white flex justify-between items-center select-none">
-            <h4 class="font-bold text-base flex items-center gap-2"><i class="pi pi-question-circle"></i> Confirm Action</h4>
+            <h4 class="font-bold text-base flex items-center gap-2"><i class="pi pi-question-circle"></i> Confirm Action
+            </h4>
         </div>
         <div class="p-6">
-            <p class="text-slate-600 text-sm font-semibold leading-relaxed">You are already logged in to the system. Do you want to proceed?</p>
+            <p class="text-slate-600 text-sm font-semibold leading-relaxed">You are already logged in to the system. Do
+                you want to proceed?</p>
         </div>
         <div class="bg-slate-50 px-6 py-4 flex justify-end gap-3 border-t border-slate-100">
-            <p-button label="No" size="small" (onClick)="onCloseHandled()" styleClass="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-4 py-2 rounded-lg" />
-            <p-button label="Yes" size="small" (onClick)="OnSubmitModal()" styleClass="bg-indigo-600 hover:bg-indigo-700 text-white border-none font-bold px-4 py-2 rounded-lg" />
+            <p-button label="No" size="small" (onClick)="onCloseHandled()"
+                styleClass="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-4 py-2 rounded-lg" />
+            <p-button label="Yes" size="small" (onClick)="OnSubmitModal()"
+                styleClass="bg-indigo-600 hover:bg-indigo-700 text-white border-none font-bold px-4 py-2 rounded-lg" />
         </div>
     </div>
 </div>

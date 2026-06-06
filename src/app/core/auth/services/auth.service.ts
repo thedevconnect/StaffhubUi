@@ -49,6 +49,11 @@ export class AuthService {
     this._user.set(null);
     this._selectedRoleId.set(null);
     localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem('userToken');
+    sessionStorage.removeItem('userToken');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('companyId');
+    localStorage.removeItem('role');
   }
 
   setSelectedRole(roleId: string): void {
@@ -116,5 +121,18 @@ export class AuthService {
     }
 
     return [];
+  }
+
+  setSessionFromLogin(res: any, username: string): void {
+    const roleId = String(res.role || 'hradmin').toLowerCase();
+    const user: AuthUser = {
+      id: res.userId || 0,
+      username: username,
+      employeeName: username,
+      roles: [{ rolDes: res.role || 'HR Admin', roleId: roleId }]
+    };
+    this._user.set(user);
+    this._selectedRoleId.set(roleId);
+    this.persistSession();
   }
 }

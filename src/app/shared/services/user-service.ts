@@ -1,10 +1,12 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
+  private readonly apiUrl = environment.apiBaseUrl;
   // Sidebar state management using Signals
 
   constructor(
@@ -21,12 +23,43 @@ export class UserService {
   toggleSidebar(): void {
     this.sidebarState.update((state) => !state);
   }
+
+  signup(data: any) {
+    return this.http.post(`${this.apiUrl}/api/auth/signup`, data);
+  }
+
   login(username: string, password: string) {
-    return this.http.post('http://localhost:5000/api/auth/login', {
+    return this.http.post(`${this.apiUrl}/api/auth/login`, {
       username,
       password
     });
   }
+
+  private getAuthHeaders() {
+    const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
+    return { headers: new HttpHeaders({ 'Authorization': `Bearer ${token}` }) };
+  }
+
+  createUser(data: any) {
+    return this.http.post(`${this.apiUrl}/users`, data, this.getAuthHeaders());
+  }
+
+  getAllUsers() {
+    return this.http.get(`${this.apiUrl}/users`, this.getAuthHeaders());
+  }
+
+  getUserById(id: string | number) {
+    return this.http.get(`${this.apiUrl}/users/${id}`, this.getAuthHeaders());
+  }
+
+  updateUser(id: string | number, data: any) {
+    return this.http.put(`${this.apiUrl}/users/${id}`, data, this.getAuthHeaders());
+  }
+
+  deleteUser(id: string | number) {
+    return this.http.delete(`${this.apiUrl}/users/${id}`, this.getAuthHeaders());
+  }
+
   // Set sidebar state
   setSidebarState(isOpen: boolean): void {
     this.sidebarState.set(isOpen);
@@ -37,4 +70,3 @@ export class UserService {
     return this.sidebarState() ? 'w-64' : 'w-16';
   });
 }
-

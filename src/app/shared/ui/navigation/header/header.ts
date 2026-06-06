@@ -14,6 +14,7 @@ import { MenuItem } from 'primeng/api';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../../core/auth/services/auth.service';
 
 interface UserDetails {
   name: string;
@@ -30,12 +31,12 @@ interface RoleOption {
   selector: 'app-app-header',
   imports: [CommonModule, FormsModule, AvatarModule, TooltipModule, MenuModule, SelectModule],
   standalone: true,
-  templateUrl: './app-header.html',
-  styleUrl: './app-header.scss',
+  templateUrl: './header.html',
+  styleUrl: './header.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppHeader {
-  constructor(private readonly router: Router) {
+  constructor(private readonly router: Router, private readonly authService: AuthService) {
     effect(() => {
       const parentRoleId = this.selectedRoleId();
       if (parentRoleId) {
@@ -93,8 +94,11 @@ export class AppHeader {
   }
 
   private logout(): void {
-    this.onLogout.emit();
+    // Clear auth session and redirect to login page
+    this.authService.logout();
     this.router.navigate(['/login']);
+    // Emit event for any parent listeners (optional)
+    this.onLogout.emit();
   }
 
   private handleProfile(): void {

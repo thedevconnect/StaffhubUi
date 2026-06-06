@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService } from '../../services/user-service';
+import { AuthService } from '../../../core/auth/services/auth.service';
 import { MessageService } from 'primeng/api';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -39,7 +40,6 @@ import { InputIconModule } from 'primeng/inputicon';
 export class LoginComponent implements OnInit {
 
   loginForm!: FormGroup;
-  signupForm!: FormGroup;
   forgateForm!: FormGroup;
   createPassForm!: FormGroup;
 
@@ -52,14 +52,12 @@ export class LoginComponent implements OnInit {
   show = false;
   parameterType: string = '';
   display: string = 'none';
-  showOTP = false;
-  emailVerified = false;
-  mobileVerified = false;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private userService: UserService,
+    private authService: AuthService,
     private messageService: MessageService
   ) { }
 
@@ -69,17 +67,6 @@ export class LoginComponent implements OnInit {
       password: ['', Validators.required],
       captcha: ['', Validators.required],
       rememberMe: [false]
-    });
-
-    this.signupForm = this.fb.group({
-      companyName: ['', Validators.required],
-      shortName: ['', Validators.required],
-      address: ['', Validators.required],
-      username: ['', Validators.required],
-      email: ['', Validators.required],
-      mobile: ['', Validators.required],
-      captcha: ['', Validators.required],
-      acceptTerms: [false, Validators.requiredTrue]
     });
 
     this.forgateForm = this.fb.group({
@@ -111,7 +98,6 @@ export class LoginComponent implements OnInit {
 
   get f() { return this.loginForm.controls; }
   get f1() { return this.forgateForm.controls; }
-  get f2() { return this.signupForm.controls; }
   get f3() { return this.createPassForm.controls; }
 
   get isProccess() { return this.isProcess; }
@@ -130,6 +116,10 @@ export class LoginComponent implements OnInit {
   }
 
   redirectForm(type: string, val: number) {
+    if (type === 'signup') {
+      this.router.navigate(['/register']);
+      return;
+    }
     this.formType = type;
     this.generateCaptcha();
   }
@@ -147,7 +137,6 @@ export class LoginComponent implements OnInit {
   }
 
   submitForgatePasswordForm() { }
-  submitSignUpForm() { }
   submitCreatePassForm() { }
 
   onCloseHandled() {
@@ -170,8 +159,6 @@ export class LoginComponent implements OnInit {
       this.drawCaptcha('loginTextCanvas', this.captchaCode);
     } else if (this.formType === 'forgotpassword') {
       this.drawCaptcha('fpTextCanvas', this.captchaCode);
-    } else if (this.formType === 'signup') {
-      this.drawCaptcha('signupTextCanvas', this.captchaCode);
     } else if (this.formType === 'createPassword') {
       this.drawCaptcha('cpTextCanvas', this.captchaCode);
     }
@@ -217,7 +204,7 @@ export class LoginComponent implements OnInit {
         const x = charWidth * (i + 1) + (Math.random() * 4 - 2);
         const y = canvas.height / 2 + (Math.random() * 6 - 3);
         const angle = (Math.random() * 20 - 10) * Math.PI / 180;
-        
+
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate(angle);
@@ -232,8 +219,6 @@ export class LoginComponent implements OnInit {
       this.loginForm.patchValue({ captcha: '' });
     } else if (this.formType === 'forgotpassword') {
       this.forgateForm.patchValue({ captcha: '' });
-    } else if (this.formType === 'signup') {
-      this.signupForm.patchValue({ captcha: '' });
     } else if (this.formType === 'createPassword') {
       this.createPassForm.patchValue({ captcha: '' });
     }
@@ -265,15 +250,21 @@ export class LoginComponent implements OnInit {
     this.isProcess = true;
 
     this.userService.login(username, password).subscribe({
-      next: (res: any) => {
+      next: (apiRes: any) => {
         this.isProcess = false;
 
-        sessionStorage.setItem('userToken', res.token);
-        sessionStorage.setItem('userId', res.userId);
-        sessionStorage.setItem('userName', res.userName);
+        const res = apiRes.data || apiRes;
+
+        localStorage.setItem('userToken', res.token);
+        localStorage.setItem('userId', res.userId);
+        localStorage.setItem('companyId', res.companyId);
+        localStorage.setItem('role', res.role);
+
+        // Update AuthService session
+        this.authService.setSessionFromLogin(res, username);
 
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Login successfully' });
-        this.router.navigate(['/dashboard']);
+        this.router.navigate([this.authService.getDashboardRoute()]);
       },
       error: (err) => {
         this.isProcess = false;

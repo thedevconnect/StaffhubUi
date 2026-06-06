@@ -5,7 +5,8 @@ import { AuthService } from '../services/auth.service';
 export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  return authService.isAuthenticated() ? true : router.createUrlTree(['/login']);
+  const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
+  return authService.isAuthenticated() && !!token ? true : router.createUrlTree(['/login']);
 };
 
 export const guestGuard: CanActivateFn = () => {
