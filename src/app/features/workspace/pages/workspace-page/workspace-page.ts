@@ -21,11 +21,13 @@ export class WorkspacePage {
   readonly loading = computed(() => this.usersApi.loading());
 
   readonly columns: DataTableColumn[] = [
-    { field: 'employeeName', header: 'Employee' },
+    { field: 'emp_id', header: 'Emp ID' },
+    { field: 'full_name', header: 'Full Name' },
     { field: 'username', header: 'Username' },
-    { field: 'currentRole', header: 'Role' },
-    { field: 'personalemail', header: 'Email' },
-    { field: 'phone', header: 'Phone' },
+    { field: 'email', header: 'Email' },
+    { field: 'mobile', header: 'Mobile' },
+    { field: 'role', header: 'Role' },
+    { field: 'status', header: 'Status' },
   ];
 
   constructor() {

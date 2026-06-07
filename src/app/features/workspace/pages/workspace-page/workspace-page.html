@@ -5,13 +5,15 @@
   </header>
 
   <p-card header="Users">
-    <app-data-table
-      [value]="users()"
-      [loading]="loading()"
-      [columns]="columns"
-      [rows]="10"
-      [rowsPerPageOptions]="[5, 10, 25, 50]"
-      [globalFilterFields]="['employeeName', 'username', 'currentRole', 'personalemail', 'phone']"
-    />
+    <app-data-table [value]="users()" [loading]="loading()" [columns]="columns" [rows]="10"
+      [rowsPerPageOptions]="[5, 10, 25, 50]" [globalFilterFields]="[
+        'emp_id',
+        'full_name',
+        'username',
+        'email',
+        'mobile',
+        'role',
+        'status',
+      ]" />
   </p-card>
 </section>

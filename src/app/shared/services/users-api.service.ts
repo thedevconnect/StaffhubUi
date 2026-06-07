@@ -4,17 +4,25 @@ import { environment } from '../../../environments/environment';
 
 export interface UserListItem {
   id: number;
+  company_id: number;
+  emp_id: string;
+  full_name: string;
   username: string;
-  employeeName: string;
-  personalemail: string;
-  phone: string;
-  currentRole: string;
-  orgMasterId: number;
-  isActive: number;
+  email: string;
+  mobile: string;
+  role: string;
+  status: string;
+  email_verified_at: string | null;
+  mobile_verified_at: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface UsersApiResponse {
   success: boolean;
+  message: string;
+  statusCode: number;
+  status: string;
   data: UserListItem[];
 }
 

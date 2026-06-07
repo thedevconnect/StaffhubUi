@@ -95,9 +95,9 @@ export class RegisterComponent implements OnInit {
 
     // Create payload according to API spec (remove acceptTerms/captcha if needed by backend, though backend usually ignores extra fields)
     const payload = { ...this.signupForm.value };
-    
+
     // UI uses 'username' control for the Full Name field
-    payload.fullName = payload.username; 
+    payload.fullName = payload.username;
     // Derive username from email prefix
     if (payload.email) {
       payload.username = payload.email.split('@')[0];
@@ -111,12 +111,12 @@ export class RegisterComponent implements OnInit {
     this.userService.signup(payload).subscribe({
       next: (res: any) => {
         const generatedPassword = res.password || 'NIPL@123';
-        
+
         // Automatically log in using the newly created credentials
         this.userService.login(payload.email, generatedPassword).subscribe({
           next: (loginApiRes: any) => {
             this.isProcess = false;
-            
+
             const loginRes = loginApiRes.data || loginApiRes;
 
             // Save authentication details
@@ -127,9 +127,9 @@ export class RegisterComponent implements OnInit {
 
             // Update AuthService session
             this.authService.setSessionFromLogin(loginRes, payload.email);
-            
+
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Registration successful. Welcome!' });
-            this.router.navigate(['/dashboard']);
+            this.router.navigate(['/home']);
           },
           error: (loginErr) => {
             this.isProcess = false;
@@ -198,7 +198,7 @@ export class RegisterComponent implements OnInit {
         const x = charWidth * (i + 1) + (Math.random() * 4 - 2);
         const y = canvas.height / 2 + (Math.random() * 6 - 3);
         const angle = (Math.random() * 20 - 10) * Math.PI / 180;
-        
+
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate(angle);

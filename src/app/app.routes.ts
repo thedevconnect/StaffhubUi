@@ -2,10 +2,11 @@ import { Routes } from '@angular/router';
 import { WorkspacePage } from './features/workspace/pages/workspace-page/workspace-page';
 import { AppShell } from './core/layout/app-shell/app-shell';
 import { authGuard, guestGuard } from './core/auth/guards/auth.guard';
+import { Pagenotfound } from './shared/components/pagenotfound/pagenotfound';
 
 export const routes: Routes = [
-  { 
-    path: 'auth', 
+  {
+    path: 'auth',
     loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES),
     canActivate: [guestGuard]
   },
@@ -17,9 +18,9 @@ export const routes: Routes = [
     component: AppShell,
     canActivate: [authGuard],
     children: [
-      { 
-        path: 'home', 
-        loadChildren: () => import('./features/dashboard/dashboard.routes').then(m => m.DASHBOARD_ROUTES) 
+      {
+        path: 'home',
+        loadChildren: () => import('./features/dashboard/dashboard.routes').then(m => m.DASHBOARD_ROUTES)
       },
       { path: 'dashboard/hr', component: WorkspacePage, data: { title: 'HR Dashboard' } },
       { path: 'dashboard/ess', component: WorkspacePage, data: { title: 'ESS Dashboard' } },
@@ -28,5 +29,6 @@ export const routes: Routes = [
       { path: 'profile', component: WorkspacePage, data: { title: 'Profile' } },
     ],
   },
-  { path: '**', redirectTo: 'auth/login' },
+  { path: '**', component: Pagenotfound },
+  // { path: '**', redirectTo: 'auth/login' },
 ];

@@ -1,5 +1,5 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -35,29 +35,24 @@ export class UserService {
     });
   }
 
-  private getAuthHeaders() {
-    const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
-    return { headers: new HttpHeaders({ 'Authorization': `Bearer ${token}` }) };
-  }
-
   createUser(data: any) {
-    return this.http.post(`${this.apiUrl}/users`, data, this.getAuthHeaders());
+    return this.http.post(`${this.apiUrl}/users`, data);
   }
 
   getAllUsers() {
-    return this.http.get(`${this.apiUrl}/users`, this.getAuthHeaders());
+    return this.http.get(`${this.apiUrl}/users`);
   }
 
   getUserById(id: string | number) {
-    return this.http.get(`${this.apiUrl}/users/${id}`, this.getAuthHeaders());
+    return this.http.get(`${this.apiUrl}/users/${id}`);
   }
 
   updateUser(id: string | number, data: any) {
-    return this.http.put(`${this.apiUrl}/users/${id}`, data, this.getAuthHeaders());
+    return this.http.put(`${this.apiUrl}/users/${id}`, data);
   }
 
   deleteUser(id: string | number) {
-    return this.http.delete(`${this.apiUrl}/users/${id}`, this.getAuthHeaders());
+    return this.http.delete(`${this.apiUrl}/users/${id}`);
   }
 
   // Set sidebar state
