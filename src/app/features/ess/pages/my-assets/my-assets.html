@@ -1,0 +1,34 @@
+<section class="space-y-4">
+  <header class="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
+    <h2 class="text-xl font-semibold text-slate-900">My Assets</h2>
+    <p class="mt-1 text-sm text-slate-500">Track all IT and non-IT assets currently assigned to you.</p>
+  </header>
+
+  <p-card header="Assigned Assets">
+    <p-table [value]="assets" styleClass="p-datatable-sm">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Asset Name</th>
+          <th>Category</th>
+          <th>Serial Number</th>
+          <th>Status</th>
+          <th>Assignment Date</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-asset>
+        <tr>
+          <td class="font-medium text-slate-800">{{ asset.name }}</td>
+          <td>{{ asset.category }}</td>
+          <td><code class="text-xs bg-slate-100 px-1 py-0.5 rounded">{{ asset.serial }}</code></td>
+          <td>
+            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+              {{ asset.status }}
+            </span>
+          </td>
+          <td>{{ asset.date | date:'mediumDate' }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+</section>

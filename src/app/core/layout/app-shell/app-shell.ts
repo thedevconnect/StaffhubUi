@@ -13,10 +13,12 @@ interface UserDetails {
   role: string;
 }
 
-interface MenuItem {
-  menu: string;
-  icon: string;
-  route: string;
+interface SidebarMenuItem {
+  label: string;
+  icon?: string;
+  route?: string;
+  isOpen?: boolean;
+  children?: SidebarMenuItem[];
 }
 
 @Component({
@@ -48,7 +50,7 @@ export class AppShell {
       role: selectedRole?.rolDes ?? user?.roles[0]?.rolDes ?? '',
     };
   });
-  readonly menuItemsWithSubmenu = computed(() => this.getMenuItemsByRole(this.selectedRoleId()));
+  readonly menuItemsWithSubmenu = computed<SidebarMenuItem[]>(() => this.getMenuItemsByRole(this.selectedRoleId()));
 
   constructor(
     private readonly authService: AuthService,
@@ -59,6 +61,10 @@ export class AppShell {
 
   toggleSidebar(): void {
     this.sidebarOpen.update((isOpen) => !isOpen);
+  }
+
+  toggleMenuOpen(item: SidebarMenuItem): void {
+    item.isOpen = !item.isOpen;
   }
 
   getDashboardRoute(): string {
@@ -87,18 +93,83 @@ export class AppShell {
     });
   }
 
-  private getMenuItemsByRole(roleId: string): MenuItem[] {
+  private getMenuItemsByRole(roleId: string): SidebarMenuItem[] {
     if (roleId.toLowerCase().includes('ess')) {
       return [
-        { menu: 'Dashboard', icon: 'pi-home', route: '/dashboard/ess' },
-        { menu: 'My Profile', icon: 'pi-user', route: '/profile' },
+        { label: 'Dashboard', icon: 'pi-home', route: '/dashboard/ess' },
+        { label: 'My Profile', icon: 'pi-user', route: '/profile' },
+        {
+          label: 'EPSS',
+          icon: 'pi-shield',
+          isOpen: true,
+          children: [
+            {
+              label: 'ESS',
+              icon: 'pi-folder',
+              isOpen: true,
+              children: [
+                { label: 'My Assets', route: '/ess/my-assets' },
+                { label: 'Service File', route: '/ess/service-file' },
+                { label: 'Reportings Attendance', route: '/ess/reportings-attendance' },
+                { label: 'Get Employee Info', route: '/ess/get-employee-info' },
+                { label: 'Employee Attendance', route: '/ess/employee-attendance' },
+                { label: 'Attendance Regularization', route: '/ess/attendance-regularization' },
+                { label: 'Monthly Attendance Calendar', route: '/ess/monthly-attendance-calendar' },
+                { label: 'Leave Application', route: '/ess/leave-application' },
+                { label: 'Apply Short Leave', route: '/ess/apply-short-leave' },
+                { label: 'Final Attendance', route: '/ess/final-attendance' }
+              ]
+            }
+          ]
+        },
+        {
+          label: 'Exit',
+          icon: 'pi-sign-out',
+          isOpen: false,
+          children: [
+            { label: 'Employee Resignation', route: '/ess/employee-resignation' },
+            { label: 'Exit Interview Form', route: '/ess/exit-interview' }
+          ]
+        },
+        {
+          label: 'Expense Management',
+          icon: 'pi-wallet',
+          isOpen: false,
+          children: [
+            { label: 'Expense Requests', route: '/ess/expense-management' }
+          ]
+        },
+        {
+          label: 'Performance Management',
+          icon: 'pi-chart-line',
+          isOpen: false,
+          children: [
+            { label: 'Goals & Reviews', route: '/ess/performance-management' }
+          ]
+        },
+        {
+          label: 'Probation',
+          icon: 'pi-user-minus',
+          isOpen: false,
+          children: [
+            { label: 'Probation Details', route: '/ess/probation' }
+          ]
+        },
+        {
+          label: 'Ticket',
+          icon: 'pi-ticket',
+          isOpen: false,
+          children: [
+            { label: 'Raise Ticket', route: '/ess/ticket' }
+          ]
+        }
       ];
     }
 
     return [
-      { menu: 'Dashboard', icon: 'pi-home', route: '/dashboard/hr' },
-      { menu: 'Employees', icon: 'pi-users', route: '/employees' },
-      { menu: 'Attendance', icon: 'pi-calendar', route: '/attendance' },
+      { label: 'Dashboard', icon: 'pi-home', route: '/dashboard/hr' },
+      { label: 'Employees', icon: 'pi-users', route: '/employees' },
+      { label: 'Attendance', icon: 'pi-calendar', route: '/attendance' },
     ];
   }
 }

@@ -1,45 +1,103 @@
 <div class="flex min-h-screen bg-slate-100">
   <aside
     class="fixed left-0 top-0 z-30 h-screen border-r border-slate-200 bg-blue-700 text-white transition-all duration-300"
-    [class.w-64]="sidebarOpen()"
-    [class.w-16]="!sidebarOpen()"
-  >
+    [class.w-64]="sidebarOpen()" [class.w-16]="!sidebarOpen()">
     <div class="flex h-[72px] items-center justify-center border-b border-slate-200 bg-white px-2">
       <a [routerLink]="getDashboardRoute()" class="flex w-full items-center justify-center">
-        <img src="assets/img/OBLO.png" alt="OBLO Logo" class="max-h-10 w-auto object-contain" />
+        <img src="assets/download.png" alt="StaffHub Logo" class="max-h-15 w-50 object-contain" />
       </a>
     </div>
 
-    <nav class="space-y-1 p-3">
-      @for (menu of menuItemsWithSubmenu(); track menu.menu) {
-      <a
-        [routerLink]="menu.route"
-        routerLinkActive="bg-white/20 font-semibold"
-        class="flex items-center rounded-lg px-3 py-2 text-sm text-white transition hover:bg-white/15"
-        [class.justify-center]="!sidebarOpen()"
-        [class.justify-start]="sidebarOpen()"
-      >
-        <i [class]="'pi ' + menu.icon"></i>
-        @if (sidebarOpen()) {
-        <span class="ml-3">{{ menu.menu }}</span>
-        }
-      </a>
+    <nav class="space-y-1 p-3 select-none">
+      @for (item of menuItemsWithSubmenu(); track item.label) {
+        <div>
+          <!-- Parent Menu Item -->
+          @if (item.children && item.children.length > 0) {
+            <button
+              (click)="toggleMenuOpen(item)"
+              class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm text-white/90 transition hover:bg-white/10 cursor-pointer text-left focus:outline-none"
+              [class.justify-center]="!sidebarOpen()"
+            >
+              <div class="flex items-center">
+                <i [class]="'pi ' + (item.icon || 'pi-folder') + ' text-base'"></i>
+                @if (sidebarOpen()) {
+                  <span class="ml-3 font-medium">{{ item.label }}</span>
+                }
+              </div>
+              @if (sidebarOpen()) {
+                <i [class]="'pi pi-chevron-right text-[10px] transition-transform duration-200' + (item.isOpen ? ' rotate-90' : '')"></i>
+              }
+            </button>
+
+            <!-- Nested Submenus (First level) -->
+            @if (item.isOpen && sidebarOpen()) {
+              <div class="ml-4 mt-1 space-y-1 border-l border-white/20 pl-2 transition-all duration-300">
+                @for (sub of item.children; track sub.label) {
+                  <div>
+                    @if (sub.children && sub.children.length > 0) {
+                      <!-- Level 2 Parent -->
+                      <button
+                        (click)="toggleMenuOpen(sub)"
+                        class="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-xs text-white/80 transition hover:bg-white/10 cursor-pointer text-left focus:outline-none"
+                      >
+                        <span class="font-medium">{{ sub.label }}</span>
+                        <i [class]="'pi pi-chevron-right text-[9px] transition-transform duration-200' + (sub.isOpen ? ' rotate-90' : '')"></i>
+                      </button>
+
+                      <!-- Level 2 Children -->
+                      @if (sub.isOpen) {
+                        <div class="ml-3 mt-1 space-y-1 border-l border-white/10 pl-2 transition-all duration-300">
+                          @for (child of sub.children; track child.label) {
+                            <a
+                              [routerLink]="child.route"
+                              routerLinkActive="bg-white/20 font-semibold text-white"
+                              class="flex items-center rounded-lg px-3 py-1 text-xs text-white/70 transition hover:bg-white/10"
+                            >
+                              {{ child.label }}
+                            </a>
+                          }
+                        </div>
+                      }
+                    } @else {
+                      <a
+                        [routerLink]="sub.route"
+                        routerLinkActive="bg-white/20 font-semibold text-white"
+                        class="flex items-center rounded-lg px-3 py-1.5 text-xs text-white/85 transition hover:bg-white/10"
+                      >
+                        {{ sub.label }}
+                      </a>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          } @else {
+            <!-- Flat Menu Item -->
+            <a
+              [routerLink]="item.route"
+              routerLinkActive="bg-white/20 font-semibold text-white"
+              class="flex items-center rounded-lg px-3 py-2 text-sm text-white/95 transition hover:bg-white/10"
+              [class.justify-center]="!sidebarOpen()"
+              [class.justify-start]="sidebarOpen()"
+            >
+              <i [class]="'pi ' + item.icon + ' text-base'"></i>
+              @if (sidebarOpen()) {
+                <span class="ml-3 font-medium">{{ item.label }}</span>
+              }
+            </a>
+          }
+        </div>
       }
     </nav>
   </aside>
 
-  <div class="flex min-h-screen flex-1 flex-col transition-all duration-300" [class.ml-64]="sidebarOpen()" [class.ml-16]="!sidebarOpen()">
+  <div class="flex min-h-screen flex-1 flex-col transition-all duration-300" [class.ml-64]="sidebarOpen()"
+    [class.ml-16]="!sidebarOpen()">
     @if (userDetails(); as user) {
     <header class="sticky top-0 z-20 border-b border-slate-200 bg-white shadow-sm">
-      <app-app-header
-        [user]="user"
-        [sidebarOpen]="sidebarOpen()"
-        [selectedRoleId]="selectedRoleId()"
-        [roleOptions]="roleOptions()"
-        (onLogout)="logout()"
-        (onRoleChange)="onRoleChange($event)"
-        (onToggleSidebar)="toggleSidebar()"
-      />
+      <app-app-header [user]="user" [sidebarOpen]="sidebarOpen()" [selectedRoleId]="selectedRoleId()"
+        [roleOptions]="roleOptions()" (onLogout)="logout()" (onRoleChange)="onRoleChange($event)"
+        (onToggleSidebar)="toggleSidebar()" />
     </header>
     }
 

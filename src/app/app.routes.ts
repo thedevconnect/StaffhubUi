@@ -22,6 +22,10 @@ export const routes: Routes = [
         path: 'home',
         loadChildren: () => import('./features/dashboard/dashboard.routes').then(m => m.DASHBOARD_ROUTES)
       },
+      {
+        path: 'ess',
+        loadChildren: () => import('./features/ess/ess.routes').then(m => m.ESS_ROUTES)
+      },
       { path: 'dashboard/hr', component: WorkspacePage, data: { title: 'HR Dashboard' } },
       { path: 'dashboard/ess', component: WorkspacePage, data: { title: 'ESS Dashboard' } },
       { path: 'employees', component: WorkspacePage, data: { title: 'Employees' } },

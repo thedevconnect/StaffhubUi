@@ -1,0 +1,41 @@
+<section class="space-y-4">
+  <header class="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
+    <h2 class="text-xl font-semibold text-slate-900">Service File</h2>
+    <p class="mt-1 text-sm text-slate-500">Access and download your official company documents and records.</p>
+  </header>
+
+  <p-card header="Official Documents">
+    <p-table [value]="documents" styleClass="p-datatable-sm">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Document Title</th>
+          <th>Category</th>
+          <th>File Type</th>
+          <th>Size</th>
+          <th>Upload Date</th>
+          <th>Action</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-doc>
+        <tr>
+          <td class="font-medium text-slate-800">
+            <span class="inline-flex items-center gap-2">
+              <i class="pi pi-file text-blue-600"></i>
+              {{ doc.title }}
+            </span>
+          </td>
+          <td>{{ doc.category }}</td>
+          <td><span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700">{{ doc.type }}</span></td>
+          <td>{{ doc.size }}</td>
+          <td>{{ doc.uploadDate | date:'mediumDate' }}</td>
+          <td>
+            <button class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer">
+              <i class="pi pi-download text-[10px]"></i>
+              Download
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+</section>

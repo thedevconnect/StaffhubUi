@@ -124,15 +124,15 @@ export class AuthService {
   }
 
   setSessionFromLogin(res: any, username: string): void {
-    const roleId = String(res.role || 'hradmin').toLowerCase();
+    const normalizedRoles = this.normalizeRoles(res);
     const user: AuthUser = {
-      id: res.userId || 0,
+      id: res.userId || res.id || 0,
       username: username,
       employeeName: username,
-      roles: [{ rolDes: res.role || 'HR Admin', roleId: roleId }]
+      roles: normalizedRoles.length ? normalizedRoles : [{ rolDes: 'HR Admin', roleId: 'hradmin' }]
     };
     this._user.set(user);
-    this._selectedRoleId.set(roleId);
+    this._selectedRoleId.set(user.roles[0]?.roleId ?? '');
     this.persistSession();
   }
 }

@@ -1,0 +1,36 @@
+import { Routes } from '@angular/router';
+import { MyAssets } from './pages/my-assets/my-assets';
+import { ServiceFile } from './pages/service-file/service-file';
+import { ReportingsAttendance } from './pages/reportings-attendance/reportings-attendance';
+import { GetEmployeeInfo } from './pages/get-employee-info/get-employee-info';
+import { EmployeeAttendance } from './pages/employee-attendance/employee-attendance';
+import { AttendanceRegularization } from './pages/attendance-regularization/attendance-regularization';
+import { MonthlyAttendanceCalendar } from './pages/monthly-attendance-calendar/monthly-attendance-calendar';
+import { LeaveApplication } from './pages/leave-application/leave-application';
+import { ApplyShortLeave } from './pages/apply-short-leave/apply-short-leave';
+import { FinalAttendance } from './pages/final-attendance/final-attendance';
+import { EmployeeResignation } from './pages/employee-resignation/employee-resignation';
+import { ExitInterview } from './pages/exit-interview/exit-interview';
+import { ExpenseManagement } from './pages/expense-management/expense-management';
+import { PerformanceManagement } from './pages/performance-management/performance-management';
+import { Probation } from './pages/probation/probation';
+import { Ticket } from './pages/ticket/ticket';
+
+export const ESS_ROUTES: Routes = [
+  { path: 'my-assets', component: MyAssets },
+  { path: 'service-file', component: ServiceFile },
+  { path: 'reportings-attendance', component: ReportingsAttendance },
+  { path: 'get-employee-info', component: GetEmployeeInfo },
+  { path: 'employee-attendance', component: EmployeeAttendance },
+  { path: 'attendance-regularization', component: AttendanceRegularization },
+  { path: 'monthly-attendance-calendar', component: MonthlyAttendanceCalendar },
+  { path: 'leave-application', component: LeaveApplication },
+  { path: 'apply-short-leave', component: ApplyShortLeave },
+  { path: 'final-attendance', component: FinalAttendance },
+  { path: 'employee-resignation', component: EmployeeResignation },
+  { path: 'exit-interview', component: ExitInterview },
+  { path: 'expense-management', component: ExpenseManagement },
+  { path: 'performance-management', component: PerformanceManagement },
+  { path: 'probation', component: Probation },
+  { path: 'ticket', component: Ticket },
+];
