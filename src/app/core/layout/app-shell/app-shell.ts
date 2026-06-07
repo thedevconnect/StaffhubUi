@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
@@ -25,6 +26,7 @@ interface SidebarMenuItem {
   selector: 'app-shell',
   imports: [
     CommonModule,
+    FormsModule,
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
@@ -50,7 +52,14 @@ export class AppShell {
       role: selectedRole?.rolDes ?? user?.roles[0]?.rolDes ?? '',
     };
   });
+  
   readonly menuItemsWithSubmenu = computed<SidebarMenuItem[]>(() => this.getMenuItemsByRole(this.selectedRoleId()));
+  
+  // Search query state
+  readonly searchQuery = signal<string>('');
+  
+  // Filtered menu items using computed signal
+  readonly filteredMenuItems = computed(() => this.filterMenuItems(this.menuItemsWithSubmenu(), this.searchQuery()));
 
   constructor(
     private readonly authService: AuthService,
@@ -93,33 +102,69 @@ export class AppShell {
     });
   }
 
+  onSearchQueryChange(event: any): void {
+    this.searchQuery.set(event.target.value);
+  }
+
+  private filterMenuItems(items: SidebarMenuItem[], query: string): SidebarMenuItem[] {
+    if (!query.trim()) {
+      return items;
+    }
+    const lowerQuery = query.toLowerCase();
+    return items
+      .map(item => {
+        const cloned = { ...item };
+        if (cloned.children && cloned.children.length > 0) {
+          const matchedChildren = cloned.children.map(sub => {
+            const clonedSub = { ...sub };
+            if (clonedSub.children && clonedSub.children.length > 0) {
+              const matchedGrand = clonedSub.children.filter(child =>
+                child.label.toLowerCase().includes(lowerQuery)
+              );
+              if (matchedGrand.length > 0) {
+                clonedSub.children = matchedGrand;
+                clonedSub.isOpen = true;
+                return clonedSub;
+              }
+            } else if (clonedSub.label.toLowerCase().includes(lowerQuery)) {
+              return clonedSub;
+            }
+            return null;
+          }).filter(sub => sub !== null) as SidebarMenuItem[];
+
+          if (matchedChildren.length > 0) {
+            cloned.children = matchedChildren;
+            cloned.isOpen = true;
+            return cloned;
+          }
+        } else if (cloned.label.toLowerCase().includes(lowerQuery)) {
+          return cloned;
+        }
+        return null;
+      })
+      .filter(item => item !== null) as SidebarMenuItem[];
+  }
+
   private getMenuItemsByRole(roleId: string): SidebarMenuItem[] {
     if (roleId.toLowerCase().includes('ess')) {
       return [
         { label: 'Dashboard', icon: 'pi-home', route: '/dashboard/ess' },
         { label: 'My Profile', icon: 'pi-user', route: '/profile' },
         {
-          label: 'EPSS',
-          icon: 'pi-shield',
+          label: 'ESS',
+          icon: 'pi-folder',
           isOpen: true,
           children: [
-            {
-              label: 'ESS',
-              icon: 'pi-folder',
-              isOpen: true,
-              children: [
-                { label: 'My Assets', route: '/ess/my-assets' },
-                { label: 'Service File', route: '/ess/service-file' },
-                { label: 'Reportings Attendance', route: '/ess/reportings-attendance' },
-                { label: 'Get Employee Info', route: '/ess/get-employee-info' },
-                { label: 'Employee Attendance', route: '/ess/employee-attendance' },
-                { label: 'Attendance Regularization', route: '/ess/attendance-regularization' },
-                { label: 'Monthly Attendance Calendar', route: '/ess/monthly-attendance-calendar' },
-                { label: 'Leave Application', route: '/ess/leave-application' },
-                { label: 'Apply Short Leave', route: '/ess/apply-short-leave' },
-                { label: 'Final Attendance', route: '/ess/final-attendance' }
-              ]
-            }
+            { label: 'Employee Attendance', route: '/ess/employee-attendance' },
+            { label: 'My Assets', route: '/ess/my-assets' },
+            { label: 'Service File', route: '/ess/service-file' },
+            { label: 'Reportings Attendance', route: '/ess/reportings-attendance' },
+            { label: 'Get Employee Info', route: '/ess/get-employee-info' },
+            { label: 'Attendance Regularization', route: '/ess/attendance-regularization' },
+            { label: 'Monthly Attendance Calendar', route: '/ess/monthly-attendance-calendar' },
+            { label: 'Leave Application', route: '/ess/leave-application' },
+            { label: 'Apply Short Leave', route: '/ess/apply-short-leave' },
+            { label: 'Final Attendance', route: '/ess/final-attendance' }
           ]
         },
         {
