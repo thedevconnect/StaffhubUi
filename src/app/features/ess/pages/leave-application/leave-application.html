@@ -1,64 +1,203 @@
-<div class="-mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4">
-  <p-breadcrumb [model]="breadcrumbItems"
-    styleClass="!border-0 !border-b !border-slate-200 !rounded-none !bg-white !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
-</div>
-<section class="space-y-4">
-  <header class="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
-    <div class="flex items-center justify-between flex-wrap gap-4">
-      <div>
-        <h2 class="text-xl font-semibold text-slate-900">Leave Application</h2>
-        <p class="mt-1 text-sm text-slate-500">Apply for time-off, manage active applications, and track remaining leave balances.</p>
-      </div>
-      <button class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 transition cursor-pointer">
-        <i class="pi pi-plus text-xs"></i>
-        Apply Leave
-      </button>
-    </div>
-  </header>
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
 
-  <!-- Balances Grid -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-    <div class="rounded-xl border border-slate-200 bg-white p-4">
-      <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Casual Leaves</span>
-      <span class="text-2xl font-bold text-slate-800 mt-1 block">8.5 / 12</span>
+<div class="bg-[#FFFFFF] min-h-screen">
+  <div class="bg-white overflow-hidden">
+    <div
+      class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border-b border-gray-200 gap-3">
+      <h2 class="text-base font-semibold text-gray-800">
+        <p-breadcrumb [model]="breadcrumbItems"></p-breadcrumb>
+      </h2>
+      <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
+        <p-button label="Export" icon="pi pi-file-excel"
+          styleClass="p-button-sm p-button-success p-button-outlined rounded-lg" [raised]="true">
+        </p-button>
+        <p-button (click)="showDialog('add', [])" label="Add Leave" icon="pi pi-plus"
+          styleClass="p-button-sm p-button-info rounded-lg" [raised]="true">
+        </p-button>
+      </div>
     </div>
-    <div class="rounded-xl border border-slate-200 bg-white p-4">
-      <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Sick Leaves</span>
-      <span class="text-2xl font-bold text-slate-800 mt-1 block">6.0 / 8</span>
+
+    <div class="overflow-x-auto">
+      <p-table [value]="paginatedData" styleClass="p-datatable-sm" responsiveLayout="scroll">
+        <ng-template pTemplate="header">
+          <tr>
+            <th *ngFor="let col of tableHeaders">{{col.header}}</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rowData>
+          <tr>
+            <td *ngFor="let col of tableHeaders">
+              <ng-container *ngIf="!col.isCustom">
+                {{rowData[col.key]}}
+              </ng-container>
+              <ng-container *ngIf="col.isCustom && col.key === 'actions'">
+                <ng-container *ngTemplateOutlet="actionTpl; context: {$implicit: rowData}"></ng-container>
+              </ng-container>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
     </div>
-    <div class="rounded-xl border border-slate-200 bg-white p-4">
-      <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Earned Leaves</span>
-      <span class="text-2xl font-bold text-slate-800 mt-1 block">15.0 / 18</span>
-    </div>
+
+    <!-- Template for Table Actions -->
+    <ng-template #actionTpl let-item>
+      <div class="flex items-center justify-center">
+        <p-button *ngIf="item['leave Status'] === 'Apply'" label="Withdraw" icon="pi pi-times"
+          (click)="onWithdraw(item.id)" styleClass="p-button-danger p-button-sm p-button-text font-bold"></p-button>
+      </div>
+    </ng-template>
   </div>
 
-  <p-card header="Leave History">
-    <p-table [value]="leaves" styleClass="p-datatable-sm">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>Leave Type</th>
-          <th>From Date</th>
-          <th>To Date</th>
-          <th>Duration</th>
-          <th>Reason</th>
-          <th>Status</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-leave>
-        <tr>
-          <td class="font-medium text-slate-800">{{ leave.type }}</td>
-          <td>{{ leave.fromDate | date:'mediumDate' }}</td>
-          <td>{{ leave.toDate | date:'mediumDate' }}</td>
-          <td>{{ leave.duration }}</td>
-          <td>{{ leave.reason }}</td>
-          <td>
-            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700">
-              <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-              {{ leave.status }}
-            </span>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </p-card>
-</section>
+  <p-drawer [(visible)]="visible" position="right" [modal]="true" [style]="{ width: '100%', maxWidth: '600px' }"
+    (onHide)="onDrawerHide()" styleClass="modern-drawer">
+
+    <!-- Header -->
+    <ng-template pTemplate="header">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm">
+          <i [class]="headerIcon" class="text-xl"></i>
+        </div>
+        <h3 class="text-xl font-black text-gray-800 m-0 uppercase tracking-tight">{{header}}</h3>
+      </div>
+    </ng-template>
+
+    <!-- Content -->
+    <ng-template pTemplate="content">
+      <div class="flex flex-col h-full bg-slate-50/50">
+        <form [formGroup]="leaveForm" class="flex flex-col gap-6 p-4 sm:p-6 pb-24">
+
+          <!-- Date Section -->
+          <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div class="flex flex-col gap-2">
+                <label class="text-[10px] uppercase font-black text-gray-400 tracking-widest px-1">From Date <span
+                    class="text-red-500">*</span></label>
+                <p-datepicker formControlName="dateFrom" [maxDate]="currentDate" dateFormat="dd/mm/yy"
+                  [minDate]="minDate" (onSelect)="onDateFromChange()" appendTo="body" styleClass="w-full"
+                  placeholder="Select start date"
+                  [inputStyleClass]="isInvalid('dateFrom') ? 'border-red-500 rounded-xl py-3' : 'rounded-xl py-3 border-gray-100 bg-gray-50/50'"
+                  [showIcon]="true" class="w-full">
+                </p-datepicker>
+                <p *ngIf="isInvalid('dateFrom')" class="text-red-500 text-[10px] font-bold px-1 transition-all">Required
+                  field</p>
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <label class="text-[10px] uppercase font-black text-gray-400 tracking-widest px-1">To Date <span
+                    class="text-red-500">*</span></label>
+                <p-datepicker formControlName="dateTo" [showIcon]="true" dateFormat="dd/mm/yy"
+                  [minDate]="leaveForm.get('dateFrom')?.value || minDate" appendTo="body" styleClass="w-full"
+                  placeholder="Select end date" [inputStyleClass]="'rounded-xl py-3 border-gray-100 bg-gray-50/50'"
+                  class="w-full">
+                </p-datepicker>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
+              <!-- Session From -->
+              <div class="flex flex-col gap-2">
+                <label class="text-[10px] uppercase font-black text-gray-400 tracking-widest px-1">Session From <span
+                    class="text-red-500">*</span></label>
+                <div class="grid grid-cols-2 gap-2 bg-gray-100/50 p-1 rounded-xl">
+                  <button *ngFor="let opt of sessionDrp" type="button" (click)="selectSessionFrom(opt.drpValue)"
+                    class="px-3 py-2.5 rounded-lg text-xs font-black transition-all" [ngClass]="{
+                                        'bg-white text-blue-600 shadow-sm scale-[0.98]': sessionFrom === opt.drpValue,
+                                        'text-gray-400 hover:text-gray-600': sessionFrom !== opt.drpValue
+                                    }">
+                    {{opt.drpOption}}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Session To -->
+              <div class="flex flex-col gap-2">
+                <label class="text-[10px] uppercase font-black text-gray-400 tracking-widest px-1">Session To <span
+                    class="text-red-500">*</span></label>
+                <div class="grid grid-cols-2 gap-2 bg-gray-100/50 p-1 rounded-xl">
+                  <button *ngFor="let opt of sessionDrp" type="button" (click)="selectSessionTo(opt.drpValue)"
+                    class="px-3 py-2.5 rounded-lg text-xs font-black transition-all" [ngClass]="{
+                                        'bg-white text-blue-600 shadow-sm scale-[0.98]': sessionTo === opt.drpValue,
+                                        'text-gray-400 hover:text-gray-600': sessionTo !== opt.drpValue
+                                    }">
+                    {{opt.drpOption}}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Leave Type -->
+          <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-3">
+            <label class="text-[10px] uppercase font-black text-gray-400 tracking-widest px-1">Leave Type <span
+                class="text-red-500">*</span></label>
+            <div class="flex flex-wrap gap-2">
+              <button *ngFor="let opt of leaveTypeDrp" type="button" (click)="selectLeaveType(opt.drpValue)"
+                class="px-4 py-2.5 rounded-xl text-[11px] font-black transition-all border" [ngClass]="{
+                                'bg-blue-600 text-white border-blue-600 shadow-lg scale-105': leaveTypedata === opt.drpValue,
+                                'bg-gray-50 text-gray-500 border-gray-100 hover:bg-gray-100': leaveTypedata !== opt.drpValue
+                            }">
+                {{opt.drpOption}}
+              </button>
+            </div>
+          </div>
+
+          <!-- Additional Details -->
+          <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-6">
+            <!-- Cc To -->
+            <div class="flex flex-col gap-2">
+              <label class="text-[10px] uppercase font-black text-gray-400 tracking-widest px-1">CC Notification</label>
+              <p-select formControlName="ccTo" [options]="ccDrp" optionLabel="drpOption" [filter]="true"
+                filterBy="drpOption" placeholder="Search team member..." styleClass="w-full rounded-xl py-1"
+                appendTo="body">
+                <ng-template pTemplate="selectedItem" let-selected>
+                  <div *ngIf="selected" class="flex flex-col">
+                    <span
+                      class="text-[11px] font-black text-gray-800 uppercase tracking-tight">{{selected.drpOption.split('/')[0]}}</span>
+                  </div>
+                </ng-template>
+                <ng-template pTemplate="item" let-option>
+                  <div class="flex flex-col py-1">
+                    <span class="text-xs font-bold text-gray-800">{{option.drpOption.split('/')[0]}}</span>
+                    <span class="text-[10px] text-gray-400 font-medium italic">{{option.drpOption.split('/')[1]}}</span>
+                  </div>
+                </ng-template>
+              </p-select>
+            </div>
+
+            <!-- Reason -->
+            <div class="flex flex-col gap-2">
+              <div class="flex justify-between items-center px-1">
+                <label class="text-[10px] uppercase font-black text-gray-400 tracking-widest">Reason for Leave <span
+                    class="text-red-500">*</span></label>
+                <span class="text-[9px] font-bold"
+                  [ngClass]="(leaveForm.get('reason')?.value?.length || 0) < 12 ? 'text-orange-400' : 'text-green-400'">
+                  {{leaveForm.get('reason')?.value?.length || 0}} / 200
+                </span>
+              </div>
+              <textarea pTextarea rows="4" formControlName="reason"
+                class="w-full rounded-2xl border-gray-100 bg-gray-50/50 p-4 text-xs font-medium focus:ring-2 focus:ring-blue-100 transition-all resize-none"
+                placeholder="Please describe the reason for your absence..."></textarea>
+              <div *ngIf="leaveForm.get('reason')?.touched">
+                <small class="text-red-500 text-[10px] font-bold px-1"
+                  *ngIf="leaveForm.get('reason')?.errors?.['required']">Reason is required</small>
+                <small class="text-orange-500 text-[10px] font-bold px-1"
+                  *ngIf="leaveForm.get('reason')?.errors?.['minlength']">Explain at least 12 characters</small>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <!-- Sticky Footer -->
+        <div
+          class="absolute bottom-0 left-0 right-0 p-4 sm:p-6 bg-white/80 backdrop-blur-md border-t border-gray-100 flex justify-end gap-3 z-20">
+          <p-button label="Cancel" (click)="onDrawerHide()"
+            styleClass="p-button-text p-button-secondary font-bold text-xs"></p-button>
+          <p-button label="Submit Request" icon="pi pi-check" (click)="onSubmit()" [loading]="isLoading"
+            styleClass="rounded-xl px-8 py-3 bg-blue-600 border-none shadow-lg hover:bg-blue-700 transition-all text-sm font-bold">
+          </p-button>
+        </div>
+      </div>
+    </ng-template>
+  </p-drawer>
+</div>
