@@ -72,6 +72,12 @@ export class AppShell {
     this.sidebarOpen.update((isOpen) => !isOpen);
   }
 
+  closeSidebarOnMobile(): void {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      this.sidebarOpen.set(false);
+    }
+  }
+
   toggleMenuOpen(item: SidebarMenuItem): void {
     item.isOpen = !item.isOpen;
   }
@@ -148,7 +154,7 @@ export class AppShell {
   private getMenuItemsByRole(roleId: string): SidebarMenuItem[] {
     if (roleId.toLowerCase().includes('ess')) {
       return [
-        { label: 'Dashboard', icon: 'pi-home', route: '/ess/employee-attendance' },
+        { label: 'Dashboard', icon: 'pi-home', route: '/ess/ess-dashboard' },
         { label: 'My Profile', icon: 'pi-user', route: '/profile' },
         {
           label: 'ESS',
@@ -212,7 +218,7 @@ export class AppShell {
     }
 
     return [
-      { label: 'Dashboard', icon: 'pi-home', route: '/ess/employee-attendance' },
+      { label: 'Dashboard', icon: 'pi-home', route: '/ess/ess-dashboard' },
       { label: 'Employees', icon: 'pi-users', route: '/employees' },
       { label: 'Attendance', icon: 'pi-calendar', route: '/attendance' },
     ];

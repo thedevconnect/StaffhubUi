@@ -4,6 +4,7 @@ import { ServiceFile } from '../shared/components/ess/service-file/service-file'
 import { ReportingsAttendance } from '../shared/components/ess/reportings-attendance/reportings-attendance';
 import { GetEmployeeInfo } from '../shared/components/ess/get-employee-info/get-employee-info';
 import { EmployeeAttendance } from '../shared/components/ess/employee-attendance/employee-attendance';
+import { EssDashboard } from '../shared/components/ess/ess-dashboard/ess-dashboard';
 import { AttendanceRegularization } from '../shared/components/ess/attendance-regularization/attendance-regularization';
 import { MonthlyAttendanceCalendar } from '../shared/components/ess/monthly-attendance-calendar/monthly-attendance-calendar';
 import { LeaveApplication } from '../shared/components/ess/leave-application/leave-application';
@@ -17,7 +18,8 @@ import { Probation } from '../shared/components/ess/probation/probation';
 import { Ticket } from '../shared/components/ess/ticket/ticket';
 
 export const essRoutes: Routes = [
-  { path: '', redirectTo: 'employee-attendance', pathMatch: 'full' },
+  { path: '', redirectTo: 'ess-dashboard', pathMatch: 'full' },
+  { path: 'ess-dashboard', component: EssDashboard },
   { path: 'my-assets', component: MyAssets },
   { path: 'service-file', component: ServiceFile },
   { path: 'reportings-attendance', component: ReportingsAttendance },

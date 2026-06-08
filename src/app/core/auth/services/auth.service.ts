@@ -62,7 +62,7 @@ export class AuthService {
   }
 
   getDashboardRoute(): string {
-    return this.selectedRoleId().toLowerCase().includes('ess') ? '/ess/employee-attendance' : '/ess/employee-attendance';
+    return this.selectedRoleId().toLowerCase().includes('ess') ? '/ess/ess-dashboard' : '/ess/ess-dashboard';
   }
 
   private restoreSession(): void {
