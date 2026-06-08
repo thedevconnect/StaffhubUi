@@ -1,1 +1,21 @@
-<p>pagenotfound works!</p>
+<div style="text-align: center;" class="hover-bg">
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="content flex flex-col items-center justify-center h-screen">
+        <div class="floating mb-6">
+            <img src="../../assets/space.png" alt="404" class="w-40 sm:w-52 md:w-64 lg:w-80 max-w-full h-auto" />
+        </div>
+
+        <div class="fade-in">
+            <h2 class="text-red-700 font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl">
+                Page Not Found
+            </h2>
+        </div>
+
+        <div class="mt-4 fade-in-delay">
+            <p-button label="Back To Home" (click)="gotoHome()" variant="text" [raised]="true"
+                styleClass="orange-button">
+            </p-button>
+        </div>
+    </div>
+</div>

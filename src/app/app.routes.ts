@@ -18,9 +18,7 @@ export const routes: Routes = [
       { path: 'dashboard/ess', component: WorkspacePage, data: { title: 'ESS Dashboard' } },
       { path: 'employees', component: WorkspacePage, data: { title: 'Employees' } },
       { path: 'attendance', component: WorkspacePage, data: { title: 'Attendance' } },
-      { path: 'profile', component: WorkspacePage, data: { title: 'Profile' } },
     ],
   },
   { path: '**', component: Pagenotfound },
-  // { path: '**', redirectTo: 'auth/login' },
 ];

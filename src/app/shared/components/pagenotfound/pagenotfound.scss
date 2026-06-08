@@ -1,0 +1,40 @@
+.hover-bg {
+  position: fixed;
+  inset: 0;
+  overflow: hidden; // ❌ no scroll
+  background-color: #ffffff;
+}
+
+#particle-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.orange-button {
+  background-color: orange;
+  color: white;
+}
+
+/* optional polish */
+.floating {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}
