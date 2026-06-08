@@ -1,6 +1,6 @@
 <div class="flex min-h-screen bg-slate-100">
   <aside
-    class="fixed left-0 top-0 z-30 h-screen border-r border-slate-200 bg-blue-700 text-white transition-all duration-300"
+    class="fixed left-0 top-0 z-30 h-screen border-r border-slate-200 bg-[#1976D2] text-white transition-all duration-300"
     [class.w-64]="sidebarOpen()" [class.w-16]="!sidebarOpen()">
     <div class="flex h-[56px] items-center justify-center border-b border-slate-200 bg-white px-2">
       <a [routerLink]="getDashboardRoute()" class="flex w-full items-center justify-center">
@@ -12,95 +12,79 @@
     <div class="p-3 pb-0" *ngIf="sidebarOpen()">
       <div class="relative flex items-center">
         <i class="pi pi-search absolute left-3 text-white/50 text-xs"></i>
-        <input
-          type="text"
-          placeholder="Search menu..."
+        <input type="text" placeholder="Search menu..."
           class="w-full pl-8 pr-3 py-1.5 bg-white/10 text-white placeholder-white/50 rounded-lg text-xs border border-transparent focus:outline-none focus:bg-white/15 focus:border-white/20 transition-all font-medium"
-          [(ngModel)]="searchQuery"
-          (input)="onSearchQueryChange($event)"
-        />
+          [(ngModel)]="searchQuery" (input)="onSearchQueryChange($event)" />
       </div>
     </div>
 
     <nav class="space-y-1 p-3 select-none">
       @for (item of filteredMenuItems(); track item.label) {
-        <div>
-          <!-- Parent Menu Item -->
-          @if (item.children && item.children.length > 0) {
-            <button
-              (click)="toggleMenuOpen(item)"
-              class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm text-white/90 transition hover:bg-white/10 cursor-pointer text-left focus:outline-none"
-              [class.justify-center]="!sidebarOpen()"
-            >
-              <div class="flex items-center">
-                <i [class]="'pi ' + (item.icon || 'pi-folder') + ' text-base'"></i>
-                @if (sidebarOpen()) {
-                  <span class="ml-3 font-medium">{{ item.label }}</span>
-                }
-              </div>
-              @if (sidebarOpen()) {
-                <i [class]="'pi pi-chevron-right text-[10px] transition-transform duration-200' + (item.isOpen ? ' rotate-90' : '')"></i>
-              }
+      <div>
+        <!-- Parent Menu Item -->
+        @if (item.children && item.children.length > 0) {
+        <button (click)="toggleMenuOpen(item)"
+          class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm text-white/90 transition hover:bg-white/10 cursor-pointer text-left focus:outline-none"
+          [class.justify-center]="!sidebarOpen()">
+          <div class="flex items-center">
+            <i [class]="'pi ' + (item.icon || 'pi-folder') + ' text-base'"></i>
+            @if (sidebarOpen()) {
+            <span class="ml-3 font-medium">{{ item.label }}</span>
+            }
+          </div>
+          @if (sidebarOpen()) {
+          <i
+            [class]="'pi pi-chevron-right text-[10px] transition-transform duration-200' + (item.isOpen ? ' rotate-90' : '')"></i>
+          }
+        </button>
+
+        <!-- Nested Submenus (First level) -->
+        @if (item.isOpen && sidebarOpen()) {
+        <div class="ml-4 mt-1 space-y-1 border-l border-white/20 pl-2 transition-all duration-300">
+          @for (sub of item.children; track sub.label) {
+          <div>
+            @if (sub.children && sub.children.length > 0) {
+            <!-- Level 2 Parent -->
+            <button (click)="toggleMenuOpen(sub)"
+              class="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-xs text-white/80 transition hover:bg-white/10 cursor-pointer text-left focus:outline-none">
+              <span class="font-medium">{{ sub.label }}</span>
+              <i
+                [class]="'pi pi-chevron-right text-[9px] transition-transform duration-200' + (sub.isOpen ? ' rotate-90' : '')"></i>
             </button>
 
-            <!-- Nested Submenus (First level) -->
-            @if (item.isOpen && sidebarOpen()) {
-              <div class="ml-4 mt-1 space-y-1 border-l border-white/20 pl-2 transition-all duration-300">
-                @for (sub of item.children; track sub.label) {
-                  <div>
-                    @if (sub.children && sub.children.length > 0) {
-                      <!-- Level 2 Parent -->
-                      <button
-                        (click)="toggleMenuOpen(sub)"
-                        class="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-xs text-white/80 transition hover:bg-white/10 cursor-pointer text-left focus:outline-none"
-                      >
-                        <span class="font-medium">{{ sub.label }}</span>
-                        <i [class]="'pi pi-chevron-right text-[9px] transition-transform duration-200' + (sub.isOpen ? ' rotate-90' : '')"></i>
-                      </button>
-
-                      <!-- Level 2 Children -->
-                      @if (sub.isOpen) {
-                        <div class="ml-3 mt-1 space-y-1 border-l border-white/10 pl-2 transition-all duration-300">
-                          @for (child of sub.children; track child.label) {
-                            <a
-                              [routerLink]="child.route"
-                              routerLinkActive="bg-white/20 font-semibold text-white"
-                              class="flex items-center rounded-lg px-3 py-1 text-xs text-white/70 transition hover:bg-white/10"
-                            >
-                              {{ child.label }}
-                            </a>
-                          }
-                        </div>
-                      }
-                    } @else {
-                      <a
-                        [routerLink]="sub.route"
-                        routerLinkActive="bg-white/20 font-semibold text-white"
-                        class="flex items-center rounded-lg px-3 py-1.5 text-xs text-white/85 transition hover:bg-white/10"
-                      >
-                        {{ sub.label }}
-                      </a>
-                    }
-                  </div>
-                }
-              </div>
-            }
-          } @else {
-            <!-- Flat Menu Item -->
-            <a
-              [routerLink]="item.route"
-              routerLinkActive="bg-white/20 font-semibold text-white"
-              class="flex items-center rounded-lg px-3 py-2 text-sm text-white/95 transition hover:bg-white/10"
-              [class.justify-center]="!sidebarOpen()"
-              [class.justify-start]="sidebarOpen()"
-            >
-              <i [class]="'pi ' + item.icon + ' text-base'"></i>
-              @if (sidebarOpen()) {
-                <span class="ml-3 font-medium">{{ item.label }}</span>
+            <!-- Level 2 Children -->
+            @if (sub.isOpen) {
+            <div class="ml-3 mt-1 space-y-1 border-l border-white/10 pl-2 transition-all duration-300">
+              @for (child of sub.children; track child.label) {
+              <a [routerLink]="child.route" routerLinkActive="bg-white/20 font-semibold text-white"
+                class="flex items-center rounded-lg px-3 py-1 text-xs text-white/70 transition hover:bg-white/10">
+                {{ child.label }}
+              </a>
               }
+            </div>
+            }
+            } @else {
+            <a [routerLink]="sub.route" routerLinkActive="bg-white/20 font-semibold text-white"
+              class="flex items-center rounded-lg px-3 py-1.5 text-xs text-white/85 transition hover:bg-white/10">
+              {{ sub.label }}
             </a>
+            }
+          </div>
           }
         </div>
+        }
+        } @else {
+        <!-- Flat Menu Item -->
+        <a [routerLink]="item.route" routerLinkActive="bg-white/20 font-semibold text-white"
+          class="flex items-center rounded-lg px-3 py-2 text-sm text-white/95 transition hover:bg-white/10"
+          [class.justify-center]="!sidebarOpen()" [class.justify-start]="sidebarOpen()">
+          <i [class]="'pi ' + item.icon + ' text-base'"></i>
+          @if (sidebarOpen()) {
+          <span class="ml-3 font-medium">{{ item.label }}</span>
+          }
+        </a>
+        }
+      </div>
       }
     </nav>
   </aside>

@@ -4,16 +4,21 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Breadcrumb } from 'primeng/breadcrumb';
 
 @Component({
   selector: 'app-get-employee-info',
   standalone: true,
-  imports: [CommonModule, CardModule, InputTextModule, ButtonModule, FormsModule],
+  imports: [CommonModule, CardModule, InputTextModule, ButtonModule, FormsModule, Breadcrumb],
   templateUrl: './get-employee-info.html',
   styleUrl: './get-employee-info.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GetEmployeeInfo {
+  breadcrumbItems: any[] = [
+    { label: 'Employee Self Service', icon: 'pi pi-home', routerLink: '/ess' },
+    { label: 'Get Employee Info', icon: 'pi pi-info-circle', routerLink: '/ess/get-employee-info' }
+  ];
   searchId = '';
   employeeData: any = null;
 

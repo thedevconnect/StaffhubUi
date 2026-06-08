@@ -2,11 +2,18 @@ import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, signal } from '@
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
+import { Breadcrumb } from 'primeng/breadcrumb';
 
 @Component({
   selector: 'app-employee-attendance',
   standalone: true,
-  imports: [CommonModule, CardModule, TableModule],
+  imports: [
+    CommonModule,
+    CardModule,
+    TableModule,
+    Breadcrumb,
+
+  ],
   templateUrl: './employee-attendance.html',
   styleUrl: './employee-attendance.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -15,12 +22,16 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   // Real-time clock signals
   readonly currentTime = signal<string>('');
   readonly currentDate = signal<string>('');
-  
+
+  breadcrumbItems: any[] = [
+    { label: 'Employee Self Service', icon: 'pi pi-home', routerLink: '/ess' },
+    { label: 'Attendance', icon: 'pi pi-clock', routerLink: '/ess/attendance' }
+  ];
   // Swipe state signals
   readonly isSwipedIn = signal<boolean>(false);
   readonly todayPunches = signal<Array<{ type: string; time: string }>>([]);
   readonly duration = signal<string>('00:00:00');
-  
+
   // Historical logs state
   readonly logs = signal([
     { date: '2026-06-05', checkIn: '09:02 AM', checkOut: '06:15 PM', status: 'Present', duration: '9h 13m' },
@@ -59,7 +70,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
       this.isSwipedIn.set(true);
       this.checkInTime = now;
       this.todayPunches.update(punches => [...punches, { type: 'Swipe In', time: timeStr }]);
-      
+
       // Start duration counter
       this.durationIntervalId = setInterval(() => {
         if (this.checkInTime) {
@@ -71,23 +82,23 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
       // Swipe Out
       this.isSwipedIn.set(false);
       this.todayPunches.update(punches => [...punches, { type: 'Swipe Out', time: timeStr }]);
-      
+
       if (this.durationIntervalId) {
         clearInterval(this.durationIntervalId);
       }
-      
+
       // Add record to history log
       const checkInStr = this.todayPunches()[0]?.time || '09:00 AM';
       const durationVal = this.duration();
       const hoursMinutes = this.formatDurationToHoursMinutes(durationVal);
-      
+
       const todayDateStr = now.toISOString().split('T')[0];
-      
+
       this.logs.update(history => [
         { date: todayDateStr, checkIn: checkInStr, checkOut: timeStr, status: 'Present', duration: hoursMinutes },
         ...history
       ]);
-      
+
       // Reset duration
       this.duration.set('00:00:00');
       this.checkInTime = null;
@@ -99,7 +110,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     const hours = Math.floor(totalSecs / 3600);
     const minutes = Math.floor((totalSecs % 3600) / 60);
     const seconds = totalSecs % 60;
-    
+
     return [hours, minutes, seconds]
       .map(v => v < 10 ? '0' + v : v)
       .join(':');

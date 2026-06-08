@@ -1,16 +1,21 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CardModule } from 'primeng/card';
 import { CommonModule } from '@angular/common';
+import { Breadcrumb } from 'primeng/breadcrumb';
 
 @Component({
   selector: 'app-monthly-attendance-calendar',
   standalone: true,
-  imports: [CommonModule, CardModule],
+  imports: [CommonModule, CardModule, Breadcrumb],
   templateUrl: './monthly-attendance-calendar.html',
   styleUrl: './monthly-attendance-calendar.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MonthlyAttendanceCalendar {
+  breadcrumbItems: any[] = [
+    { label: 'Employee Self Service', icon: 'pi pi-home', routerLink: '/ess' },
+    { label: 'Monthly Attendance Calendar', icon: 'pi pi-calendar', routerLink: '/ess/monthly-attendance-calendar' }
+  ];
   daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   calendarDays = [
