@@ -1,1 +1,81 @@
 /* Styles for EmployeeAttendance page component */
+
+@keyframes spin-slow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bounce-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 2s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+/* Custom primeNG overrides for dialog and table */
+::ng-deep {
+  .p-dialog {
+    border-radius: 12px !important;
+    overflow: hidden;
+
+    .p-dialog-header {
+      padding: 1.25rem 1.5rem 0.75rem 1.5rem !important;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .p-dialog-content {
+      padding: 1.5rem !important;
+    }
+  }
+
+  .p-datatable {
+    .p-datatable-thead > tr > th {
+      background-color: #f8fafc !important;
+      color: #475569 !important;
+      font-weight: 600 !important;
+      font-size: 0.75rem !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.05em !important;
+      border-bottom: 1px solid #e2e8f0 !important;
+      padding: 0.75rem 1rem !important;
+    }
+
+    .p-datatable-tbody > tr > td {
+      padding: 0.875rem 1rem !important;
+      border-bottom: 1px solid #f1f5f9 !important;
+    }
+  }
+}

@@ -1,73 +1,199 @@
+<p-toast></p-toast>
+
 <div class="-mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4">
   <p-breadcrumb [model]="breadcrumbItems"
     styleClass="!border-0 !border-b !border-slate-200 !rounded-none !bg-white !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
 </div>
+
 <section class="space-y-4">
   <!-- Page Header -->
-  <header class="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
-    <h2 class="text-xl font-semibold text-slate-900">Employee Attendance</h2>
-    <p class="mt-1 text-sm text-slate-500">Manage your daily check-in sessions and view your historical log sheets.</p>
+  <header
+    class="rounded-xl border border-slate-200 bg-white p-4 md:p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <h2 class="text-xl font-semibold text-slate-900">Employee Attendance</h2>
+      <p class="mt-1 text-sm text-slate-500">Manage your daily work shifts, track break sessions, and view your
+        historical log sheets.</p>
+    </div>
+    <button (click)="loadAllData()"
+      class="self-start md:self-auto px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors">
+      <i class="pi pi-refresh" [ngClass]="{'animate-spin': isActionLoading}"></i>
+      Sync Status
+    </button>
   </header>
+
+  <!-- Premium Stats Dashboard Grid -->
+  <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+    <!-- Present Days -->
+    <div
+      class="bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 rounded-xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+      <div class="space-y-1">
+        <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wider block">Present Days</span>
+        <span class="text-2xl font-extrabold text-slate-800 block">{{ dashboardSummary().presentDays }}</span>
+      </div>
+      <div class="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+        <i class="pi pi-check-circle text-xl"></i>
+      </div>
+    </div>
+    <!-- Late Days -->
+    <div
+      class="bg-gradient-to-br from-amber-50 to-white border border-amber-100 rounded-xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+      <div class="space-y-1">
+        <span class="text-xs font-semibold text-amber-600 uppercase tracking-wider block">Late Days</span>
+        <span class="text-2xl font-extrabold text-slate-800 block">{{ dashboardSummary().lateDays }}</span>
+      </div>
+      <div class="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600">
+        <i class="pi pi-exclamation-triangle text-xl"></i>
+      </div>
+    </div>
+    <!-- Half Days -->
+    <div
+      class="bg-gradient-to-br from-sky-50 to-white border border-sky-100 rounded-xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+      <div class="space-y-1">
+        <span class="text-xs font-semibold text-sky-600 uppercase tracking-wider block">Half Days</span>
+        <span class="text-2xl font-extrabold text-slate-800 block">{{ dashboardSummary().halfDays }}</span>
+      </div>
+      <div class="h-10 w-10 rounded-lg bg-sky-500/10 flex items-center justify-center text-sky-600">
+        <i class="pi pi-calendar-minus text-xl"></i>
+      </div>
+    </div>
+    <!-- Absent Days -->
+    <div
+      class="bg-gradient-to-br from-rose-50 to-white border border-rose-100 rounded-xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+      <div class="space-y-1">
+        <span class="text-xs font-semibold text-rose-600 uppercase tracking-wider block">Absent Days</span>
+        <span class="text-2xl font-extrabold text-slate-800 block">{{ dashboardSummary().absentDays }}</span>
+      </div>
+      <div class="h-10 w-10 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-600">
+        <i class="pi pi-times-circle text-xl"></i>
+      </div>
+    </div>
+    <!-- Total Shifts Hours -->
+    <div
+      class="bg-gradient-to-br from-violet-50 to-white border border-violet-100 rounded-xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow col-span-2 lg:col-span-1">
+      <div class="space-y-1">
+        <span class="text-xs font-semibold text-violet-600 uppercase tracking-wider block">Total Hours</span>
+        <span class="text-2xl font-extrabold text-slate-800 block">{{
+          formatTotalWorkingHours(dashboardSummary().totalWorkingMinutes) }}</span>
+      </div>
+      <div class="h-10 w-10 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-600">
+        <i class="pi pi-clock text-xl"></i>
+      </div>
+    </div>
+  </div>
 
   <!-- Swipe Panel -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <!-- Clock & Swipe Button Card -->
     <div
-      class="md:col-span-2 bg-white rounded-xl border border-slate-200 p-6 flex flex-col items-center justify-between min-h-[320px]">
+      class="md:col-span-2 bg-white rounded-xl border border-slate-200 p-6 flex flex-col items-center justify-between min-h-[350px] relative">
+      <!-- Loading Overlay -->
+      <div *ngIf="isActionLoading"
+        class="absolute inset-0 bg-white/70 backdrop-blur-[2px] rounded-xl flex flex-col items-center justify-center z-10 space-y-2">
+        <i class="pi pi-spin pi-spinner text-3xl text-blue-600"></i>
+        <span class="text-xs font-medium text-slate-500">Processing Request...</span>
+      </div>
+
+      <!-- Clock Display -->
       <div class="text-center space-y-1">
         <span class="text-slate-400 font-semibold text-xs uppercase tracking-wider">Current Time</span>
         <h3 class="text-4xl font-extrabold text-slate-800 tracking-tight font-mono">{{ currentTime() }}</h3>
         <p class="text-sm text-slate-500 font-medium">{{ currentDate() }}</p>
       </div>
 
-      <!-- Pulse Button -->
-      <div class="relative my-6">
-        <!-- Pulse Rings -->
-        <span *ngIf="isSwipedIn()" class="absolute inset-0 rounded-full bg-rose-500/20 animate-ping"></span>
-        <span *ngIf="!isSwipedIn()" class="absolute inset-0 rounded-full bg-emerald-500/10 animate-pulse"></span>
+      <!-- Pulse Button & Breaks -->
+      <div class="flex flex-col items-center space-y-4 my-4 w-full max-w-sm">
+        <div class="relative">
+          <!-- Pulse Rings -->
+          <span *ngIf="isSwipedIn()" class="absolute inset-0 rounded-full bg-rose-500/20 animate-ping"></span>
+          <span *ngIf="!isSwipedIn()" class="absolute inset-0 rounded-full bg-emerald-500/10 animate-pulse"></span>
 
-        <button (click)="toggleSwipe()"
-          class="relative h-36 w-36 rounded-full flex flex-col items-center justify-center font-bold text-white shadow-lg border-4 transition-all duration-300 transform active:scale-95 cursor-pointer focus:outline-none"
-          [ngClass]="isSwipedIn() ? 'bg-gradient-to-tr from-rose-600 to-rose-500 hover:from-rose-700 hover:to-rose-600 border-rose-200' : 'bg-gradient-to-tr from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 border-emerald-200'">
-          <i [class]="isSwipedIn() ? 'pi pi-power-off text-2xl mb-1.5' : 'pi pi-sign-in text-2xl mb-1.5'"></i>
-          <span class="text-base tracking-wide">{{ isSwipedIn() ? 'Swipe Out' : 'Swipe In' }}</span>
-        </button>
+          <button (click)="isSwipedIn() ? confirmSwipeOut() : performSwipeIn()" [disabled]="isActionLoading"
+            class="relative h-36 w-36 rounded-full flex flex-col items-center justify-center font-bold text-white shadow-lg border-4 transition-all duration-300 transform active:scale-95 cursor-pointer focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+            [ngClass]="isSwipedIn() ? 'bg-gradient-to-tr from-rose-600 to-rose-500 hover:from-rose-700 hover:to-rose-600 border-rose-200' : 'bg-gradient-to-tr from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 border-emerald-200'">
+            <i [class]="isSwipedIn() ? 'pi pi-power-off text-2xl mb-1.5' : 'pi pi-sign-in text-2xl mb-1.5'"></i>
+            <span class="text-base tracking-wide">{{ isSwipedIn() ? 'Swipe Out' : 'Swipe In' }}</span>
+          </button>
+        </div>
+
+        <!-- Break Actions (Enabled when checked in) -->
+        <div *ngIf="isSwipedIn()" class="flex items-center gap-3 w-full justify-center">
+          <button *ngIf="!isOnBreak()" (click)="openBreakDialog()"
+            class="px-5 py-2.5 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold text-xs flex items-center gap-2 transition-all cursor-pointer">
+            <i class="pi pi-coffee animate-bounce-slow"></i>
+            Start Break
+          </button>
+
+          <button *ngIf="isOnBreak()" (click)="performEndBreak()"
+            class="px-5 py-2.5 rounded-lg border border-sky-200 bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs flex items-center gap-2 transition-all cursor-pointer animate-pulse">
+            <i class="pi pi-play"></i>
+            End Break ({{ breakDuration() }})
+          </button>
+        </div>
       </div>
 
-      <div class="text-center">
-        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Duration (Current
-          Session)</span>
-        <span class="text-lg font-bold text-slate-700 font-mono mt-0.5 block">{{ duration() }}</span>
+      <!-- Durations Footers -->
+      <div class="text-center w-full flex justify-around border-t border-slate-100 pt-4">
+        <div>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Today's Shift
+            Duration</span>
+          <span class="text-lg font-extrabold text-slate-700 font-mono mt-0.5 block">{{ duration() }}</span>
+        </div>
+        <div *ngIf="isSwipedIn() && isOnBreak()">
+          <span class="text-[10px] font-bold text-amber-500 uppercase tracking-wider block">Active Break Duration</span>
+          <span class="text-lg font-extrabold text-amber-600 font-mono mt-0.5 block">{{ breakDuration() }}</span>
+        </div>
+      </div>
+
+      <!-- Current Session Metadata Badges -->
+      <div *ngIf="activeRecord() as record"
+        class="w-full flex flex-wrap gap-2 justify-center items-center text-[10px] font-semibold text-slate-400 border-t border-slate-100 pt-3 mt-3">
+        <span class="inline-flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded border border-slate-100"
+          *ngIf="record.device_name">
+          <i class="pi pi-desktop"></i> {{ record.device_name }}
+        </span>
+        <span class="inline-flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded border border-slate-100"
+          *ngIf="record.os_name">
+          <i class="pi pi-microsoft"></i> {{ record.os_name }}
+        </span>
+        <span class="inline-flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded border border-slate-100"
+          *ngIf="record.browser_name">
+          <i class="pi pi-globe"></i> {{ record.browser_name }}
+        </span>
+        <span
+          class="inline-flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded border border-slate-100 max-w-[200px] truncate"
+          *ngIf="record.location_address" [title]="record.location_address">
+          <i class="pi pi-map-marker text-rose-500"></i> {{ record.location_address }}
+        </span>
       </div>
     </div>
 
     <!-- Today's Logs Sidebar Card -->
-    <div class="bg-white rounded-xl border border-slate-200 p-6 flex flex-col">
-      <h4 class="font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
-        <i class="pi pi-history text-blue-600"></i>
-        Today's Sessions
-      </h4>
+    <div class="bg-white rounded-xl border border-slate-200 p-6 flex flex-col justify-between">
+      <div>
+        <h4 class="font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+          <i class="pi pi-history text-blue-600"></i>
+          Today's Timeline
+        </h4>
 
-      <div class="flex-1 overflow-y-auto space-y-4">
-        <div *ngIf="todayPunches().length === 0"
-          class="flex flex-col items-center justify-center h-full text-center text-slate-400 py-8 space-y-2">
-          <i class="pi pi-calendar text-2xl opacity-50"></i>
-          <p class="text-xs font-medium">No activity recorded for today.</p>
-        </div>
+        <div class="overflow-y-auto max-h-[280px] space-y-4 pr-1">
+          <div *ngIf="todayPunches().length === 0"
+            class="flex flex-col items-center justify-center py-12 text-center text-slate-400 space-y-2">
+            <i class="pi pi-calendar text-2xl opacity-40"></i>
+            <p class="text-xs font-semibold">No activity recorded for today.</p>
+          </div>
 
-        <!-- Timeline Log -->
-        <div class="relative border-l border-slate-100 ml-3 pl-5 space-y-5" *ngIf="todayPunches().length > 0">
-          <div *ngFor="let punch of todayPunches()" class="relative">
-            <!-- Bullet Point -->
-            <span
-              class="absolute -left-[27px] top-0.5 h-3.5 w-3.5 rounded-full border-2 bg-white flex items-center justify-center"
-              [ngClass]="punch.type === 'Swipe In' ? 'border-emerald-500' : 'border-rose-500'">
-              <span class="h-1.5 w-1.5 rounded-full"
-                [ngClass]="punch.type === 'Swipe In' ? 'bg-emerald-500' : 'bg-rose-500'"></span>
-            </span>
-            <div>
-              <span class="text-xs font-bold text-slate-700 block">{{ punch.type }}</span>
-              <span class="text-[10px] text-slate-400 font-mono">{{ punch.time }}</span>
+          <!-- Timeline Log -->
+          <div class="relative border-l border-slate-200 ml-4 pl-6 space-y-6" *ngIf="todayPunches().length > 0">
+            <div *ngFor="let punch of todayPunches()" class="relative">
+              <span
+                class="absolute -left-[35px] top-0 h-6 w-6 rounded-full border-2 bg-white flex items-center justify-center shadow-sm"
+                [ngClass]="punch.colorClass">
+                <i [class]="punch.icon + ' text-[10px]'"></i>
+              </span>
+              <div>
+                <span class="text-xs font-bold text-slate-700 block leading-tight">{{ punch.type }}</span>
+                <span class="text-[10px] text-slate-400 font-mono">{{ punch.time }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -75,18 +201,19 @@
 
       <div class="mt-4 border-t border-slate-100 pt-4 flex items-center justify-between text-xs font-semibold">
         <span class="text-slate-500">Status</span>
-        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full"
-          [ngClass]="isSwipedIn() ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700'">
-          <span class="h-1.5 w-1.5 rounded-full" [ngClass]="isSwipedIn() ? 'bg-emerald-500' : 'bg-slate-400'"></span>
-          {{ isSwipedIn() ? 'Working' : 'Checked Out' }}
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full"
+          [ngClass]="isOnBreak() ? 'bg-amber-50 text-amber-700 border border-amber-100' : (isSwipedIn() ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-slate-100 text-slate-700 border border-slate-200')">
+          <span class="h-1.5 w-1.5 rounded-full"
+            [ngClass]="isOnBreak() ? 'bg-amber-500 animate-ping' : (isSwipedIn() ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400')"></span>
+          {{ isOnBreak() ? 'On Break' : (isSwipedIn() ? 'Working' : 'Checked Out') }}
         </span>
       </div>
     </div>
   </div>
 
   <!-- Historical logs list -->
-  <p-card header="My Attendance Logs">
-    <p-table [value]="logs()" styleClass="p-datatable-sm">
+  <p-card header="My Attendance History">
+    <p-table [value]="logs()" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" responsiveLayout="scroll">
       <ng-template pTemplate="header">
         <tr>
           <th>Date</th>
@@ -94,24 +221,94 @@
           <th>Check Out</th>
           <th>Worked Duration</th>
           <th>Status</th>
+          <th>Notes</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-log>
-        <tr>
-          <td class="font-medium text-slate-800">{{ log.date | date:'fullDate' }}</td>
-          <td>{{ log.checkIn }}</td>
-          <td>{{ log.checkOut }}</td>
-          <td>{{ log.duration }}</td>
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="font-medium text-slate-800">{{ log.attendance_date | date:'fullDate' }}</td>
+          <td class="font-mono text-xs">{{ formatTimeString(log.swipe_in) }}</td>
+          <td class="font-mono text-xs">{{ formatTimeString(log.swipe_out) }}</td>
+          <td class="font-mono text-xs font-semibold text-slate-700">
+            {{ log.swipe_out ? formatTotalWorkingHours(log.total_work_minutes) : 'In Progress' }}
+          </td>
           <td>
-            <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold"
-              [ngClass]="log.status === 'Present' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700'">
-              <span class="h-1.5 w-1.5 rounded-full"
-                [ngClass]="log.status === 'Present' ? 'bg-emerald-500' : 'bg-slate-400'"></span>
-              {{ log.status }}
+            <span
+              class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold animate-fade-in"
+              [ngClass]="{
+                'bg-emerald-50 text-emerald-700 border border-emerald-100': log.attendance_status === 'PRESENT',
+                'bg-amber-50 text-amber-700 border border-amber-100': log.attendance_status === 'LATE',
+                'bg-sky-50 text-sky-700 border border-sky-100': log.attendance_status === 'HALF_DAY',
+                'bg-rose-50 text-rose-700 border border-rose-100': log.attendance_status === 'ABSENT'
+              }">
+              <span class="h-1.5 w-1.5 rounded-full" [ngClass]="{
+                  'bg-emerald-500': log.attendance_status === 'PRESENT',
+                  'bg-amber-500': log.attendance_status === 'LATE',
+                  'bg-sky-500': log.attendance_status === 'HALF_DAY',
+                  'bg-rose-500': log.attendance_status === 'ABSENT'
+                }"></span>
+              {{ log.attendance_status }}
             </span>
+          </td>
+          <td class="max-w-[200px] truncate text-xs text-slate-500" [title]="log.notes || ''">{{ log.notes || '-' }}
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="text-center py-6 text-slate-400 text-xs font-medium">
+            No historical logs found.
           </td>
         </tr>
       </ng-template>
     </p-table>
   </p-card>
 </section>
+
+<!-- Break Reason Dialog -->
+<p-dialog header="Select Break Reason" [(visible)]="breakDialogVisible" [modal]="true"
+  [style]="{ width: '90%', maxWidth: '400px' }" styleClass="rounded-xl border border-slate-100 shadow-2xl p-6 bg-white">
+  <div class="space-y-4 mt-2">
+    <div>
+      <label for="breakReason" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Why are you
+        taking a break?</label>
+      <select id="breakReason" [(ngModel)]="selectedBreakReason"
+        class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none cursor-pointer">
+        <option *ngFor="let reason of breakReasons" [value]="reason">{{ reason }}</option>
+      </select>
+    </div>
+    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+      <button (click)="breakDialogVisible = false"
+        class="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 cursor-pointer">Cancel</button>
+      <button (click)="performStartBreak()"
+        class="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow cursor-pointer transition-colors">Confirm
+        Start</button>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- Swipe Out Confirmation Dialog -->
+<p-dialog header="Confirm Swipe Out" [(visible)]="swipeOutDialogVisible" [modal]="true"
+  [style]="{ width: '90%', maxWidth: '400px' }" styleClass="rounded-xl border border-slate-100 shadow-2xl p-6 bg-white">
+  <div class="space-y-4 mt-2">
+    <div
+      class="flex items-center gap-3 text-amber-600 bg-amber-50 border border-amber-100 p-3 rounded-lg text-xs font-medium">
+      <i class="pi pi-exclamation-triangle text-lg"></i>
+      <span>Are you sure you want to end your work session for today? You will not be able to check in again.</span>
+    </div>
+    <div>
+      <label for="swipeOutNotes" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Shift
+        Notes / Handover Comments (Optional)</label>
+      <textarea id="swipeOutNotes" [(ngModel)]="swipeOutNote" rows="3"
+        placeholder="Enter notes or updates for the day..."
+        class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none resize-none"></textarea>
+    </div>
+    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+      <button (click)="swipeOutDialogVisible = false"
+        class="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 cursor-pointer">Cancel</button>
+      <button (click)="performSwipeOut()"
+        class="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow cursor-pointer transition-colors">Confirm
+        Check Out</button>
+    </div>
+  </div>
+</p-dialog>
