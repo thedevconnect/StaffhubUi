@@ -1,0 +1,310 @@
+@if (isLoading) {
+<div class="p-4 sm:p-6">
+  <div class="flex flex-col space-y-4">
+    <div class="flex justify-end">
+      <p-skeleton height="2rem" width="15rem" class="absolute right-0"></p-skeleton>
+    </div>
+    <div class="grid grid-cols-4 gap-4">
+      @for (row of skeletonRows; track row) {
+      <p-skeleton height="1.5rem"></p-skeleton> <p-skeleton height="1.5rem"></p-skeleton>
+      <p-skeleton height="1.5rem"></p-skeleton> <p-skeleton height="1.5rem"></p-skeleton>
+      }
+    </div>
+  </div>
+</div>
+} @else {
+<!-- Top Bar -->
+<div class="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0 md:space-x-4 md:p-0 p-4">
+  <!-- Tab Navigation -->
+  @if (tabs && tabs.length > 0) {
+  <div class="flex flex-wrap gap-2">
+    @for (tab of tabs; track tab.value) {
+    <button (click)="onTabClick(tab)" [ngClass]="{
+              'text-blue-600 border-b-2 border-blue-600 font-semibold transition-all duration-300': activeTab === tab.value,
+              'text-gray-500 hover:text-gray-800 border-b-2 border-transparent hover:border-gray-300 transition-all duration-300':
+                activeTab !== tab.value,
+            }" class="px-3 py-2 text-sm transition-colors duration-200 focus:outline-none flex items-center gap-2">
+      <i *ngIf="tab.icon" [class]="tab.icon"></i>
+      {{ tab.label }}
+      <span *ngIf="tab.count !== undefined" [ngClass]="{
+                'bg-blue-100 text-blue-800': activeTab === tab.value,
+                'bg-gray-100 text-gray-600': activeTab !== tab.value,
+              }" class="ml-1 py-0.5 px-2 rounded-full text-xs font-medium">
+        {{ tab.count }}
+      </span>
+    </button>
+    }
+  </div>
+  }
+
+  <!-- Sorting Buttons -->
+  @if (showSortButtons) {
+  <div class="flex flex-wrap gap-2 overflow-x-auto">
+    @for (col of columns; track col.key) {
+    <button *ngIf="col.isSortable"
+      class="flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 whitespace-nowrap"
+      (click)="onSort(col.key)" [attr.aria-label]="'Sort by ' + col.header">
+      {{ col.header }}
+      @if (sortColumn === col.key) {
+      <span>{{ sortDirection === 'asc' ? ' ↑' : ' ↓' }}</span>
+      }
+    </button>
+    }
+  </div>
+  }
+
+  <!-- Search and Refresh Container -->
+  <div style="padding: 0px 8px 0px 0px" class="flex items-center gap-2 w-full md:w-auto md:ml-auto">
+
+    <!-- Export Button (before search) -->
+    @if (showExport && paginatedData.length > 0) {
+    <button type="button" (click)="exportData.emit()" title="Export to Excel"
+      class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-green-700 bg-white border border-green-400 rounded-md hover:bg-green-50 hover:border-green-500 transition-colors focus:outline-none focus:ring-2 focus:ring-green-300">
+      <i class="pi pi-file-excel text-green-600"></i>
+      <span class="hidden sm:inline"></span>
+    </button>
+    }
+
+    <!-- Search -->
+    <div class="relative w-full md:w-64">
+      <input type="text" [(ngModel)]="searchText" (input)="onSearch()" (blur)="onSearch()" placeholder="Search"
+        class="w-full pl-10 pr-4 py-2 text-sm rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+        aria-label="Search table" />
+      <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"
+        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+    </div>
+
+    <!-- Refresh Button -->
+    @if (shouldShowRefresh) {
+    <button type="button" (click)="onRefreshClick()" [disabled]="isLoading" title="Click to refresh latest data"
+      class="group flex items-center justify-center p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+
+      <i class="pi pi-refresh text-lg transition-transform duration-500"
+        [ngClass]="{'animate-spin': isLoading,  'group-hover:rotate-180': !isLoading }">
+      </i>
+    </button>
+    }
+  </div>
+</div>
+
+@if (headerExtraTemplate) {
+<div class="px-4">
+  <ng-container *ngTemplateOutlet="headerExtraTemplate"></ng-container>
+</div>
+}
+
+<div class="table-wrapper" style="overflow-x: auto; max-height: 70vh; overflow-y: auto" [style.width]="tableWidth">
+  <div class="hidden md:block w-full text-pretty">
+    <div class="min-w-full">
+      <table class="w-full table-Fixed divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            @for (col of columns; track $index) {
+            <th *ngIf="col.isVisible !== false" [ngClass]="{ 'cursor-pointer': col.isSortable }"
+              class="sticky top-0 bg-gray-50 z-10 px-6 py-3 text-left text-sm font-semibold text-gray-500 uppercase tracking-wider text-pretty"
+              (click)="col.isSortable && onSort(col.key)"
+              [attr.aria-sort]="sortColumn === col.key ? sortDirection : 'none'">
+              @if (col.key === 'checkbox' && headerCheckbox) {
+              <ng-container *ngTemplateOutlet="headerCheckbox; context: { col: col }"></ng-container>
+              } @else {
+              {{ col.header }}
+              @if (sortColumn === col.key) {
+              <span>{{ sortDirection === 'asc' ? ' ↑' : ' ↓' }}</span>
+              }
+              }
+            </th>
+            }
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          @for (item of paginatedData; track getRowId(item, $index)) {
+          @if (rowTemplate) {
+          <ng-container
+            *ngTemplateOutlet="rowTemplate; context: { $implicit: item, columns: columns, index: $index }"></ng-container>
+          } @else {
+          <tr class="hover:bg-[#F9FAFB]">
+            @for (col of columns; track $index) {
+            <td *ngIf="col.isVisible !== false"
+              class="px-6 py-4 text-sm text-gray-900 text-justify max-w-[250px] text-pretty">
+              @if (col.key === 'actions' && actionTemplate) {
+              <ng-container
+                *ngTemplateOutlet="actionTemplate; context: { $implicit: item, index: $index }"></ng-container>
+              } @else if (col.key === 'jsonDetails' && jsonTemplate) {
+              <ng-container
+                *ngTemplateOutlet="jsonTemplate; context: { $implicit: item, index: $index }"></ng-container>
+              } @else if (col.key === 'jsonDetails1' && jsonTemplate1) {
+              <ng-container
+                *ngTemplateOutlet="jsonTemplate1; context: { $implicit: item, index: $index }"></ng-container>
+              } @else if (col.key === 'jsonDetails2' && jsonTemplate2) {
+              <ng-container
+                *ngTemplateOutlet="jsonTemplate2; context: { $implicit: item, index: $index }"></ng-container>
+              } @else if (col.key === 'jsonDetails3' && jsonTemplate3) {
+              <ng-container
+                *ngTemplateOutlet="jsonTemplate3; context: { $implicit: item, index: $index }"></ng-container>
+              } @else if (col.key === 'jsonDetails4' && jsonTemplate4) {
+              <ng-container
+                *ngTemplateOutlet="jsonTemplate4; context: { $implicit: item, index: $index }"></ng-container>
+              } @else if (col.key === 'jsonDetails5' && jsonTemplate5) {
+              <ng-container
+                *ngTemplateOutlet="jsonTemplate5; context: { $implicit: item, index: $index }"></ng-container>
+              } @else if (col.key === 'jsonDetails6' && jsonTemplate6) {
+              <ng-container
+                *ngTemplateOutlet="jsonTemplate6; context: { $implicit: item, index: $index }"></ng-container>
+              } @else if (col.key === 'jsonDetails7' && jsonTemplate7) {
+              <ng-container
+                *ngTemplateOutlet="jsonTemplate7; context: { $implicit: item, index: $index }"></ng-container>
+              } @else if (col.key === 'jsonDetails8' && jsonTemplate8) {
+              <ng-container
+                *ngTemplateOutlet="jsonTemplate8; context: { $implicit: item, index: $index }"></ng-container>
+              } @else if (col.key === 'jsonDetails9' && jsonTemplate9) {
+              <ng-container
+                *ngTemplateOutlet="jsonTemplate9; context: { $implicit: item, index: $index }"></ng-container>
+              } @else if (col.key === 'checkbox' && customTemplate) {
+              <ng-container
+                *ngTemplateOutlet="customTemplate; context: { col: col, item: item, index: $index }"></ng-container>
+              } @else if (col.format === 'date') {
+              <ng-container>{{ getDeepValue(item, col.key) | date: 'dd-MM-yyyy' }}</ng-container>
+              } @else {
+              <ng-container>
+                {{ getDisplayText(item, col.key, $index) }}
+                @if (shouldShowMore(item, col.key)) {
+                <button (click)="toggleExpand(item, col.key, $index)"
+                  class="text-blue-600 hover:text-blue-800 ml-1 text-xs font-semibold focus:outline-none focus:ring-0">
+                  {{ isExpanded(item, col.key, $index) ? 'Less' : 'More' }}
+                </button>
+                }
+              </ng-container>
+              }
+            </td>
+            }
+          </tr>
+          }
+          }
+          @if (!paginatedData || paginatedData.length === 0) {
+          <tr>
+            <td [attr.colspan]="visibleColumnsCount" class="color-red text-center py-4 text-gray-500">
+              No Data Found.
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Card Layout for Mobile -->
+<div class="block md:hidden space-y-4 p-4 overflow-y-auto max-h-[70vh]">
+  @for (item of paginatedData; track getRowId(item, $index)) {
+  <div class="border border-gray-200 rounded-md p-4 bg-white overflow-x-auto">
+    @if (customTemplate) {
+    @for (col of columns; track col.key) {
+    @if (col.isVisible && col.key === 'checkbox') {
+    <div class="flex justify-end pb-2 mb-2 border-b border-gray-200">
+      <ng-container *ngTemplateOutlet="customTemplate; context: { col: col, item: item, index: $index }"></ng-container>
+    </div>
+    }
+    }
+    }
+    @for (col of columns; track $index) {
+    @if (col.isVisible !== false && col.key !== 'checkbox') {
+    <div class="flex justify-between py-1">
+      <span class="font-medium text-gray-600">{{ col.header }}:</span>
+      <span class="text-gray-900 max-w-[60%] overflow-hidden text-ellipsis whitespace-nowrap">
+        @if (col.key === 'actions' && actionTemplate) {
+        <ng-container *ngTemplateOutlet="actionTemplate; context: { $implicit: item, index: $index }"></ng-container>
+        } @else if (col.key === 'jsonDetails' && jsonTemplate) {
+        <ng-container *ngTemplateOutlet="jsonTemplate; context: { $implicit: item, index: $index }"></ng-container>
+        } @else if (col.key === 'jsonDetails1' && jsonTemplate1) {
+        <ng-container *ngTemplateOutlet="jsonTemplate1; context: { $implicit: item, index: $index }"></ng-container>
+        } @else if (col.key === 'jsonDetails2' && jsonTemplate2) {
+        <ng-container *ngTemplateOutlet="jsonTemplate2; context: { $implicit: item, index: $index }"></ng-container>
+        } @else if (col.key === 'jsonDetails3' && jsonTemplate3) {
+        <ng-container *ngTemplateOutlet="jsonTemplate3; context: { $implicit: item, index: $index }"></ng-container>
+        } @else if (col.key === 'jsonDetails4' && jsonTemplate4) {
+        <ng-container *ngTemplateOutlet="jsonTemplate4; context: { $implicit: item, index: $index }"></ng-container>
+        } @else if (col.key === 'jsonDetails5' && jsonTemplate5) {
+        <ng-container *ngTemplateOutlet="jsonTemplate5; context: { $implicit: item, index: $index }"></ng-container>
+        } @else if (col.key === 'jsonDetails6' && jsonTemplate6) {
+        <ng-container *ngTemplateOutlet="jsonTemplate6; context: { $implicit: item, index: $index }"></ng-container>
+        } @else if (col.key === 'jsonDetails7' && jsonTemplate7) {
+        <ng-container *ngTemplateOutlet="jsonTemplate7; context: { $implicit: item, index: $index }"></ng-container>
+        } @else if (col.key === 'jsonDetails8' && jsonTemplate8) {
+        <ng-container *ngTemplateOutlet="jsonTemplate8; context: { $implicit: item, index: $index }"></ng-container>
+        } @else if (col.key === 'jsonDetails9' && jsonTemplate9) {
+        <ng-container *ngTemplateOutlet="jsonTemplate9; context: { $implicit: item, index: $index }"></ng-container>
+        } @else if (col.format === 'date') {
+        <ng-container>{{ getDeepValue(item, col.key) | date: 'dd-MM-yyyy' }}</ng-container>
+        } @else {
+        <ng-container>
+          {{ getDisplayText(item, col.key, $index) }}
+          @if (shouldShowMore(item, col.key)) {
+          <button (click)="toggleExpand(item, col.key, $index)"
+            class="text-blue-600 hover:text-blue-800 ml-1 text-xs font-semibold focus:outline-none focus:ring-0">
+            {{ isExpanded(item, col.key, $index) ? 'Less' : 'More' }}
+          </button>
+          }
+        </ng-container>
+        }
+      </span>
+    </div>
+    }
+    }
+  </div>
+  }
+  @if (!paginatedData || paginatedData.length === 0) {
+  <div class="color-red text-center py-4 text-gray-500 mb-4">No Data Found.</div>
+  }
+</div>
+
+<!-- Pagination -->
+<div *ngIf="totalCount > 5"
+  class="sticky bottom-0 bg-white z-10 p-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 space-y-4 sm:space-y-0">
+  <!-- Page Size Dropdown -->
+  <div class="flex items-center space-x-2">
+    <!-- <label class="text-sm text-gray-700 hidden sm:block">Records:</label> -->
+    <select [(ngModel)]="pageSize" (change)="changePageSize(pageSize)" title="Select records per page"
+      class="border border-gray-300 rounded-md px-2 py-1 text-sm" aria-label="Select rows per page">
+      @for (size of pageSizeOptions; track size) {
+      <option [value]="size">{{ size }}</option>
+      }
+    </select>
+    <!-- Page Info -->
+    <div class="text-sm text-gray-600">
+      Showing {{ (currentPage - 1) * pageSize + 1 }} -
+      {{ Math.min(currentPage * pageSize, totalCount) }} of {{ totalCount }}
+    </div>
+  </div>
+
+  <!-- Pagination Buttons -->
+  <div class="flex items-center space-x-1 overflow-x-auto">
+    <button class="p-2 text-gray-400 hover:text-gray-600" (click)="goToFirst()" title="First page"
+      [disabled]="currentPage === 1" aria-label="Go to first page">
+      ⟪
+    </button>
+    <button class="p-2 text-gray-400 hover:text-gray-600" (click)="changePage(currentPage - 1)" title="Previous page"
+      [disabled]="currentPage === 1" aria-label="Previous page"> Previous
+    </button>
+    <span class="flex items-center space-x-1 text-sm">
+      @for (page of visiblePages; track page) {
+      <button class="px-3 py-1 rounded-md" [ngClass]="{
+              'text-blue-600 bg-blue-100 font-medium': currentPage === page,
+              'text-gray-700 hover:bg-gray-100': currentPage !== page,
+            }" (click)="changePage(page)" [attr.aria-label]="'Go to page ' + page">
+        {{ page }}
+      </button>
+      }
+    </span>
+    <button class="p-2 text-gray-400 hover:text-gray-600" (click)="changePage(currentPage + 1)" title="Next page"
+      [disabled]="currentPage === totalPages" aria-label="Next page"> Next
+    </button>
+    <button class="p-2 text-gray-400 hover:text-gray-600" (click)="goToLast()" title="Last page"
+      [disabled]="currentPage === totalPages" aria-label="Go to last page">
+      ⟫
+    </button>
+  </div>
+</div>
+}

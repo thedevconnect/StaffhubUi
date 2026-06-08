@@ -1,29 +1,28 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, timer } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class LoadingService {
-  private readonly loadingState = signal<boolean>(false);
+  private _loading = new BehaviorSubject<boolean>(false);
+  readonly loading$ = this._loading.asObservable();
+  private readonly MIN_LOADING_TIME_MS = 2000; // 2 second
 
-  // Get loading state (readonly)
-  isLoading() {
-    return this.loadingState.asReadonly();
+  constructor() { }
+
+  startLoading() {
+    this._loading.next(true);
   }
 
-  // Set loading state
-  setLoading(isLoading: boolean): void {
-    this.loadingState.set(isLoading);
+  stopLoading() {
+    // Ensure the loader is visible for at least the minimum time
+    timer(this.MIN_LOADING_TIME_MS).pipe(
+      finalize(() => this._loading.next(false))
+    ).subscribe();
   }
 
-  // Show loading
-  show(): void {
-    this.loadingState.set(true);
-  }
 
-  // Hide loading
-  hide(): void {
-    this.loadingState.set(false);
-  }
+
 }
-

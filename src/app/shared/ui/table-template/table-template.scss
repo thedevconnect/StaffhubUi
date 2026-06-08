@@ -1,0 +1,70 @@
+.table-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 600px;
+  max-height: calc(100vh - 200px);
+}
+
+.table-header {
+  flex-shrink: 0;
+  z-index: 20;
+  background: white;
+}
+
+.table-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-pagination {
+  flex-shrink: 0;
+  z-index: 20;
+  background: white;
+}
+
+table {
+  width: max-content !important;
+  min-width: 100% !important;
+  border-collapse: collapse;
+  white-space: wrap;
+}
+
+table th,
+table td {
+  padding: 12px 20px;
+  white-space: wrap;
+}
+
+table thead th {
+  background-color: #f9fafb;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+::ng-deep .custom-small-icon .pi {
+  font-size: 0.70rem;
+  margin: 2px;
+}
+
+.hover-spin:hover i {
+  animation: spinOnce 0.6s ease-in-out;
+}
+
+@keyframes spinOnce {
+  from {
+    transform: rotate(0deg);
+  }
+
+  50% {
+    transform: rotate(180deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
