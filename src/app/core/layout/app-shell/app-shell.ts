@@ -148,7 +148,7 @@ export class AppShell {
   private getMenuItemsByRole(roleId: string): SidebarMenuItem[] {
     if (roleId.toLowerCase().includes('ess')) {
       return [
-        { label: 'Dashboard', icon: 'pi-home', route: '/dashboard/ess' },
+        { label: 'Dashboard', icon: 'pi-home', route: '/ess/employee-attendance' },
         { label: 'My Profile', icon: 'pi-user', route: '/profile' },
         {
           label: 'ESS',
@@ -212,7 +212,7 @@ export class AppShell {
     }
 
     return [
-      { label: 'Dashboard', icon: 'pi-home', route: '/dashboard/hr' },
+      { label: 'Dashboard', icon: 'pi-home', route: '/ess/employee-attendance' },
       { label: 'Employees', icon: 'pi-users', route: '/employees' },
       { label: 'Attendance', icon: 'pi-calendar', route: '/attendance' },
     ];

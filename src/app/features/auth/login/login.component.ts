@@ -167,8 +167,7 @@ export class LoginComponent implements OnInit {
         this.authService.setSessionFromLogin(res, username);
 
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Login successfully' });
-        // this.router.navigate([this.authService.getDashboardRoute()]);
-        this.router.navigate(['/home']);
+        this.router.navigate([this.authService.getDashboardRoute()]);
       },
       error: (err: any) => {
         this.isProcess = false;

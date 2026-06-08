@@ -129,7 +129,7 @@ export class RegisterComponent implements OnInit {
             this.authService.setSessionFromLogin(loginRes, payload.email);
 
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Registration successful. Welcome!' });
-            this.router.navigate(['/home']);
+            this.router.navigate([this.authService.getDashboardRoute()]);
           },
           error: (loginErr: any) => {
             this.isProcess = false;

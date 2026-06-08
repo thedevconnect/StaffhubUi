@@ -2,12 +2,11 @@ import { Routes } from '@angular/router';
 import { AppShell } from './core/layout/app-shell/app-shell';
 import { authGuard, guestGuard } from './core/auth/guards/auth.guard';
 import { Pagenotfound } from './shared/components/pagenotfound/pagenotfound';
+import { LoginComponent } from './features/auth/login/login.component';
 
 export const routes: Routes = [
-  { path: 'auth', loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES), canActivate: [guestGuard] },
-  { path: 'login', redirectTo: 'auth/login', pathMatch: 'full' },
-  { path: 'register', redirectTo: 'auth/register', pathMatch: 'full' },
-  { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: 'login', component: LoginComponent },
   {
     path: '', component: AppShell, canActivate: [authGuard],
     children: [
