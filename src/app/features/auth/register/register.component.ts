@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { UserService } from '../../../../shared/services/user-service';
-import { AuthService } from '../../../../core/auth/services/auth.service';
+import { UserService } from '../../../shared/services/user-service';
+import { AuthService } from '../../../core/auth/services/auth.service';
 import { MessageService } from 'primeng/api';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -131,7 +131,7 @@ export class RegisterComponent implements OnInit {
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Registration successful. Welcome!' });
             this.router.navigate(['/home']);
           },
-          error: (loginErr) => {
+          error: (loginErr: any) => {
             this.isProcess = false;
             // If auto-login fails, redirect to login page with success message
             this.messageService.add({ severity: 'success', summary: 'Registration Success', detail: `Your password is ${generatedPassword}. Please log in.` });
@@ -139,7 +139,7 @@ export class RegisterComponent implements OnInit {
           }
         });
       },
-      error: (err) => {
+      error: (err: any) => {
         this.isProcess = false;
         this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.error?.message || 'Registration failed' });
         this.refreshCaptcha();

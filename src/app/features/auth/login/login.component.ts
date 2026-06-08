@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { UserService } from '../../../../shared/services/user-service';
-import { AuthService } from '../../../../core/auth/services/auth.service';
+import { UserService } from '../../../shared/services/user-service';
+import { AuthService } from '../../../core/auth/services/auth.service';
 import { MessageService } from 'primeng/api';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -170,7 +170,7 @@ export class LoginComponent implements OnInit {
         // this.router.navigate([this.authService.getDashboardRoute()]);
         this.router.navigate(['/home']);
       },
-      error: (err) => {
+      error: (err: any) => {
         this.isProcess = false;
         this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.error?.message || 'Invalid username or password' });
       }

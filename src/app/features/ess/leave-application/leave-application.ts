@@ -1,12 +1,10 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { LoadingService } from '../../../../shared/services/loading.service';
 import { BreadcrumbModule } from "primeng/breadcrumb";
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
-import { UserService } from '../../../../shared/services/user-service';
 import { DialogModule } from 'primeng/dialog';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { DrawerModule } from 'primeng/drawer';
@@ -17,6 +15,8 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { CardModule } from 'primeng/card';
+import { UserService } from '../../../shared/services/user-service';
+import { LoadingService } from '../../../shared/services/loading.service';
 
 @Component({
   selector: 'app-leave-application',

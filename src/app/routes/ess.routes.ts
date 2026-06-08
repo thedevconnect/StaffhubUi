@@ -1,0 +1,36 @@
+import { Routes } from '@angular/router';
+import { MyAssets } from '../features/ess/my-assets/my-assets';
+import { ServiceFile } from '../features/ess/service-file/service-file';
+import { ReportingsAttendance } from '../features/ess/reportings-attendance/reportings-attendance';
+import { GetEmployeeInfo } from '../features/ess/get-employee-info/get-employee-info';
+import { EmployeeAttendance } from '../features/ess/employee-attendance/employee-attendance';
+import { AttendanceRegularization } from '../features/ess/attendance-regularization/attendance-regularization';
+import { MonthlyAttendanceCalendar } from '../features/ess/monthly-attendance-calendar/monthly-attendance-calendar';
+import { LeaveApplication } from '../features/ess/leave-application/leave-application';
+import { ApplyShortLeave } from '../features/ess/apply-short-leave/apply-short-leave';
+import { FinalAttendance } from '../features/ess/final-attendance/final-attendance';
+import { EmployeeResignation } from '../features/ess/employee-resignation/employee-resignation';
+import { ExitInterview } from '../features/ess/exit-interview/exit-interview';
+import { ExpenseManagement } from '../features/ess/expense-management/expense-management';
+import { PerformanceManagement } from '../features/ess/performance-management/performance-management';
+import { Probation } from '../features/ess/probation/probation';
+import { Ticket } from '../features/ess/ticket/ticket';
+
+export const essRoutes: Routes = [
+  { path: 'my-assets', component: MyAssets },
+  { path: 'service-file', component: ServiceFile },
+  { path: 'reportings-attendance', component: ReportingsAttendance },
+  { path: 'get-employee-info', component: GetEmployeeInfo },
+  { path: 'employee-attendance', component: EmployeeAttendance },
+  { path: 'attendance-regularization', component: AttendanceRegularization },
+  { path: 'monthly-attendance-calendar', component: MonthlyAttendanceCalendar },
+  { path: 'leave-application', component: LeaveApplication },
+  { path: 'apply-short-leave', component: ApplyShortLeave },
+  { path: 'final-attendance', component: FinalAttendance },
+  { path: 'employee-resignation', component: EmployeeResignation },
+  { path: 'exit-interview', component: ExitInterview },
+  { path: 'expense-management', component: ExpenseManagement },
+  { path: 'performance-management', component: PerformanceManagement },
+  { path: 'probation', component: Probation },
+  { path: 'ticket', component: Ticket },
+];
