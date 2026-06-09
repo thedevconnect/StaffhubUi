@@ -15,8 +15,8 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { CardModule } from 'primeng/card';
-import { LoadingService } from '../../../services/loading.service';
-import { UserService } from '../../../services/user-service';
+import { LoadingService } from '../../../shared/services/loading.service';
+import { UserService } from '../../../shared/services/user-service';
 
 @Component({
   selector: 'app-leave-application',

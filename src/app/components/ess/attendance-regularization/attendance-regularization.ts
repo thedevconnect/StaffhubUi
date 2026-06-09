@@ -11,7 +11,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
-import { TableTemplate, TableColumn, TableAction } from '../../../ui/table-template/table-template';
+import { TableTemplate, TableColumn, TableAction } from '../../../shared/ui/table-template/table-template';
 
 @Component({
   selector: 'app-attendance-regularization',

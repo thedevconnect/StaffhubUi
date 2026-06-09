@@ -12,7 +12,7 @@ import {
   AttendanceRecord,
   BreakRecord,
   DashboardSummary
-} from '../../../services/attendance.service';
+} from '../../../shared/services/attendance.service';
 
 @Component({
   selector: 'app-employee-attendance',
@@ -314,7 +314,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     this.isActionLoading = true;
 
     this.attendanceService.startBreak(this.selectedBreakReason).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.isActionLoading = false;
         if (res.success) {
           this.messageService.add({
@@ -343,7 +343,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     this.isActionLoading = true;
 
     this.attendanceService.endBreak().subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.isActionLoading = false;
         if (res.success) {
           this.messageService.add({

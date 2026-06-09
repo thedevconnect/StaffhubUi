@@ -4,12 +4,8 @@ import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { Breadcrumb } from 'primeng/breadcrumb';
 import { RouterLink } from '@angular/router';
-import { AuthService } from '../../../../core/auth/services/auth.service';
-import { 
-  AttendanceService, 
-  AttendanceRecord, 
-  DashboardSummary 
-} from '../../../services/attendance.service';
+import { AuthService } from '../../../core/auth/services/auth.service';
+import { AttendanceRecord, AttendanceService, DashboardSummary } from '../../../shared/services/attendance.service';
 
 @Component({
   selector: 'app-ess-dashboard',
@@ -33,7 +29,7 @@ export class EssDashboard implements OnInit {
 
   readonly employeeName = signal<string>('');
   readonly employeeEmail = signal<string>('');
-  
+
   readonly dashboardSummary = signal<DashboardSummary>({
     presentDays: 0,
     absentDays: 0,
@@ -48,7 +44,7 @@ export class EssDashboard implements OnInit {
   constructor(
     private readonly authService: AuthService,
     private readonly attendanceService: AttendanceService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const user = this.authService.user();
@@ -61,10 +57,10 @@ export class EssDashboard implements OnInit {
 
   loadDashboardData(): void {
     this.loading.set(true);
-    
+
     // Fetch dashboard summary
     this.attendanceService.getDashboardSummary().subscribe({
-      next: (res) => {
+      next: (res: any) => {
         if (res.success && res.data) {
           this.dashboardSummary.set(res.data);
         }
@@ -73,7 +69,7 @@ export class EssDashboard implements OnInit {
 
     // Fetch history logs
     this.attendanceService.getHistory().subscribe({
-      next: (res) => {
+      next: (res: any) => {
         if (res.success && Array.isArray(res.data)) {
           // Take only latest 5 logs for dashboard overview
           this.recentLogs.set(res.data.slice(0, 5));
