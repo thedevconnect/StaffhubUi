@@ -1,8 +1,8 @@
 <p-toast></p-toast>
 
-<div class="-mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4">
+<div class="-mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 overflow-x-auto overflow-y-hidden" style="scrollbar-width: none;">
   <p-breadcrumb [model]="breadcrumbItems"
-    styleClass="!border-0 !border-b !border-slate-200 !rounded-none !bg-white !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
+    styleClass="!border-0 !border-b !border-slate-200 !rounded-none !bg-white !px-4 md:!px-6 !py-2.5 text-xs md:text-sm !w-max !min-w-full"></p-breadcrumb>
 </div>
 
 <section class="space-y-4">
@@ -73,7 +73,7 @@
       </div>
 
       <!-- Durations Footers -->
-      <div class="text-center w-full flex justify-around border-t border-slate-100 pt-4">
+      <div class="text-center w-full flex justify-around border-t border-slate-100 pt-4 mt-auto">
         <div>
           <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Today's Shift
             Duration</span>

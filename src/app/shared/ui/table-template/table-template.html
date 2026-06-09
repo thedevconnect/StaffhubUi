@@ -96,7 +96,7 @@
 </div>
 }
 
-<div class="table-wrapper" style="overflow-x: auto; max-height: 70vh; overflow-y: auto" [style.width]="tableWidth">
+<div class="table-wrapper w-full" style="overflow-x: auto; max-height: 70vh; overflow-y: auto">
   <div class="hidden md:block w-full text-pretty">
     <div class="min-w-full">
       <table class="w-full table-Fixed divide-y divide-gray-200">
@@ -129,9 +129,16 @@
             @for (col of columns; track $index) {
             <td *ngIf="col.isVisible !== false"
               class="px-6 py-4 text-sm text-gray-900 text-justify max-w-[250px] text-pretty">
-              @if (col.key === 'actions' && actionTemplate) {
-              <ng-container
-                *ngTemplateOutlet="actionTemplate; context: { $implicit: item, index: $index }"></ng-container>
+              @if (col.key === 'actions') {
+                @if (rowActions && rowActions.length > 0) {
+                  <div class="flex items-center">
+                    <p-menu #menu [model]="menuItems" [popup]="true" appendTo="body"></p-menu>
+                    <button pButton icon="pi pi-ellipsis-v" class="p-button-rounded p-button-text p-button-sm text-slate-500 hover:text-slate-700" (click)="toggleMenu(menu, $event, item)"></button>
+                  </div>
+                } @else if (actionTemplate) {
+                  <ng-container
+                    *ngTemplateOutlet="actionTemplate; context: { $implicit: item, index: $index }"></ng-container>
+                }
               } @else if (col.key === 'jsonDetails' && jsonTemplate) {
               <ng-container
                 *ngTemplateOutlet="jsonTemplate; context: { $implicit: item, index: $index }"></ng-container>
@@ -166,7 +173,18 @@
               <ng-container
                 *ngTemplateOutlet="customTemplate; context: { col: col, item: item, index: $index }"></ng-container>
               } @else if (col.format === 'date') {
-              <ng-container>{{ getDeepValue(item, col.key) | date: 'dd-MM-yyyy' }}</ng-container>
+              <ng-container>{{ getDeepValue(item, col.key) | date: 'mediumDate' }}</ng-container>
+              } @else if (col.format === 'time') {
+              <ng-container>{{ getDeepValue(item, col.key) | date: 'shortTime' }}</ng-container>
+              } @else if (col.format === 'status') {
+              <ng-container>
+                <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold"
+                      [ngClass]="getDeepValue(item, col.key) === 'Approved' ? 'bg-emerald-50 text-emerald-700' : (getDeepValue(item, col.key) === 'Pending' ? 'bg-amber-50 text-amber-700' : 'bg-slate-50 text-slate-700')">
+                  <span class="h-1.5 w-1.5 rounded-full"
+                        [ngClass]="getDeepValue(item, col.key) === 'Approved' ? 'bg-emerald-500' : (getDeepValue(item, col.key) === 'Pending' ? 'bg-amber-500' : 'bg-slate-500')"></span>
+                  {{ getDeepValue(item, col.key) }}
+                </span>
+              </ng-container>
               } @else {
               <ng-container>
                 {{ getDisplayText(item, col.key, $index) }}
@@ -199,60 +217,87 @@
 <!-- Card Layout for Mobile -->
 <div class="block md:hidden space-y-4 p-4 overflow-y-auto max-h-[70vh]">
   @for (item of paginatedData; track getRowId(item, $index)) {
-  <div class="border border-gray-200 rounded-md p-4 bg-white overflow-x-auto">
+  <div class="border border-gray-200 rounded-md p-4 bg-white relative">
+    
     @if (customTemplate) {
     @for (col of columns; track col.key) {
     @if (col.isVisible && col.key === 'checkbox') {
-    <div class="flex justify-end pb-2 mb-2 border-b border-gray-200">
+    <div class="pb-2 mb-2 border-b border-gray-200">
       <ng-container *ngTemplateOutlet="customTemplate; context: { col: col, item: item, index: $index }"></ng-container>
     </div>
     }
     }
     }
-    @for (col of columns; track $index) {
-    @if (col.isVisible !== false && col.key !== 'checkbox') {
-    <div class="flex justify-between py-1">
-      <span class="font-medium text-gray-600">{{ col.header }}:</span>
-      <span class="text-gray-900 max-w-[60%] overflow-hidden text-ellipsis whitespace-nowrap">
-        @if (col.key === 'actions' && actionTemplate) {
-        <ng-container *ngTemplateOutlet="actionTemplate; context: { $implicit: item, index: $index }"></ng-container>
-        } @else if (col.key === 'jsonDetails' && jsonTemplate) {
-        <ng-container *ngTemplateOutlet="jsonTemplate; context: { $implicit: item, index: $index }"></ng-container>
-        } @else if (col.key === 'jsonDetails1' && jsonTemplate1) {
-        <ng-container *ngTemplateOutlet="jsonTemplate1; context: { $implicit: item, index: $index }"></ng-container>
-        } @else if (col.key === 'jsonDetails2' && jsonTemplate2) {
-        <ng-container *ngTemplateOutlet="jsonTemplate2; context: { $implicit: item, index: $index }"></ng-container>
-        } @else if (col.key === 'jsonDetails3' && jsonTemplate3) {
-        <ng-container *ngTemplateOutlet="jsonTemplate3; context: { $implicit: item, index: $index }"></ng-container>
-        } @else if (col.key === 'jsonDetails4' && jsonTemplate4) {
-        <ng-container *ngTemplateOutlet="jsonTemplate4; context: { $implicit: item, index: $index }"></ng-container>
-        } @else if (col.key === 'jsonDetails5' && jsonTemplate5) {
-        <ng-container *ngTemplateOutlet="jsonTemplate5; context: { $implicit: item, index: $index }"></ng-container>
-        } @else if (col.key === 'jsonDetails6' && jsonTemplate6) {
-        <ng-container *ngTemplateOutlet="jsonTemplate6; context: { $implicit: item, index: $index }"></ng-container>
-        } @else if (col.key === 'jsonDetails7' && jsonTemplate7) {
-        <ng-container *ngTemplateOutlet="jsonTemplate7; context: { $implicit: item, index: $index }"></ng-container>
-        } @else if (col.key === 'jsonDetails8' && jsonTemplate8) {
-        <ng-container *ngTemplateOutlet="jsonTemplate8; context: { $implicit: item, index: $index }"></ng-container>
-        } @else if (col.key === 'jsonDetails9' && jsonTemplate9) {
-        <ng-container *ngTemplateOutlet="jsonTemplate9; context: { $implicit: item, index: $index }"></ng-container>
-        } @else if (col.format === 'date') {
-        <ng-container>{{ getDeepValue(item, col.key) | date: 'dd-MM-yyyy' }}</ng-container>
-        } @else {
-        <ng-container>
-          {{ getDisplayText(item, col.key, $index) }}
-          @if (shouldShowMore(item, col.key)) {
-          <button (click)="toggleExpand(item, col.key, $index)"
-            class="text-blue-600 hover:text-blue-800 ml-1 text-xs font-semibold focus:outline-none focus:ring-0">
-            {{ isExpanded(item, col.key, $index) ? 'Less' : 'More' }}
-          </button>
-          }
-        </ng-container>
+
+    <!-- Top Right Actions -->
+    @for (col of columns; track col.key) {
+      @if (col.isVisible !== false && col.key === 'actions') {
+      <div class="absolute top-2 right-2">
+        @if (rowActions && rowActions.length > 0) {
+          <p-menu #menu [model]="menuItems" [popup]="true" appendTo="body"></p-menu>
+          <button pButton icon="pi pi-ellipsis-v" class="p-button-rounded p-button-text p-button-sm text-slate-500 hover:text-slate-700" (click)="toggleMenu(menu, $event, item)"></button>
+        } @else if (actionTemplate) {
+          <ng-container *ngTemplateOutlet="actionTemplate; context: { $implicit: item, index: $index }"></ng-container>
         }
-      </span>
+      </div>
+      }
+    }
+
+    <div class="space-y-1 mt-2">
+      @for (col of columns; track $index) {
+      @if (col.isVisible !== false && col.key !== 'checkbox' && col.key !== 'actions') {
+      <div class="flex justify-between py-1">
+        <span class="font-medium text-gray-600">{{ col.header }}:</span>
+        <span class="text-gray-900 max-w-[60%] overflow-hidden text-ellipsis whitespace-nowrap">
+          @if (col.key === 'jsonDetails' && jsonTemplate) {
+          <ng-container *ngTemplateOutlet="jsonTemplate; context: { $implicit: item, index: $index }"></ng-container>
+          } @else if (col.key === 'jsonDetails1' && jsonTemplate1) {
+          <ng-container *ngTemplateOutlet="jsonTemplate1; context: { $implicit: item, index: $index }"></ng-container>
+          } @else if (col.key === 'jsonDetails2' && jsonTemplate2) {
+          <ng-container *ngTemplateOutlet="jsonTemplate2; context: { $implicit: item, index: $index }"></ng-container>
+          } @else if (col.key === 'jsonDetails3' && jsonTemplate3) {
+          <ng-container *ngTemplateOutlet="jsonTemplate3; context: { $implicit: item, index: $index }"></ng-container>
+          } @else if (col.key === 'jsonDetails4' && jsonTemplate4) {
+          <ng-container *ngTemplateOutlet="jsonTemplate4; context: { $implicit: item, index: $index }"></ng-container>
+          } @else if (col.key === 'jsonDetails5' && jsonTemplate5) {
+          <ng-container *ngTemplateOutlet="jsonTemplate5; context: { $implicit: item, index: $index }"></ng-container>
+          } @else if (col.key === 'jsonDetails6' && jsonTemplate6) {
+          <ng-container *ngTemplateOutlet="jsonTemplate6; context: { $implicit: item, index: $index }"></ng-container>
+          } @else if (col.key === 'jsonDetails7' && jsonTemplate7) {
+          <ng-container *ngTemplateOutlet="jsonTemplate7; context: { $implicit: item, index: $index }"></ng-container>
+          } @else if (col.key === 'jsonDetails8' && jsonTemplate8) {
+          <ng-container *ngTemplateOutlet="jsonTemplate8; context: { $implicit: item, index: $index }"></ng-container>
+          } @else if (col.key === 'jsonDetails9' && jsonTemplate9) {
+          <ng-container *ngTemplateOutlet="jsonTemplate9; context: { $implicit: item, index: $index }"></ng-container>
+          } @else if (col.format === 'date') {
+          <ng-container>{{ getDeepValue(item, col.key) | date: 'mediumDate' }}</ng-container>
+          } @else if (col.format === 'time') {
+          <ng-container>{{ getDeepValue(item, col.key) | date: 'shortTime' }}</ng-container>
+          } @else if (col.format === 'status') {
+          <ng-container>
+            <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold"
+                  [ngClass]="getDeepValue(item, col.key) === 'Approved' ? 'bg-emerald-50 text-emerald-700' : (getDeepValue(item, col.key) === 'Pending' ? 'bg-amber-50 text-amber-700' : 'bg-slate-50 text-slate-700')">
+              <span class="h-1.5 w-1.5 rounded-full"
+                    [ngClass]="getDeepValue(item, col.key) === 'Approved' ? 'bg-emerald-500' : (getDeepValue(item, col.key) === 'Pending' ? 'bg-amber-500' : 'bg-slate-500')"></span>
+              {{ getDeepValue(item, col.key) }}
+            </span>
+          </ng-container>
+          } @else {
+          <ng-container>
+            {{ getDisplayText(item, col.key, $index) }}
+            @if (shouldShowMore(item, col.key)) {
+            <button (click)="toggleExpand(item, col.key, $index)"
+              class="text-blue-600 hover:text-blue-800 ml-1 text-xs font-semibold focus:outline-none focus:ring-0">
+              {{ isExpanded(item, col.key, $index) ? 'Less' : 'More' }}
+            </button>
+            }
+          </ng-container>
+          }
+        </span>
+      </div>
+      }
+      }
     </div>
-    }
-    }
   </div>
   }
   @if (!paginatedData || paginatedData.length === 0) {

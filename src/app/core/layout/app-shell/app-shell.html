@@ -1,4 +1,4 @@
-<div class="flex min-h-screen bg-slate-100 overflow-x-hidden">
+<div class="flex h-screen bg-slate-100 overflow-hidden w-full relative">
   <!-- Mobile Sidebar Backdrop Overlay -->
   <div *ngIf="sidebarOpen()" (click)="toggleSidebar()" class="fixed inset-0 z-20 bg-slate-900/40 backdrop-blur-[1px] md:hidden"></div>
 
@@ -96,22 +96,22 @@
     </nav>
   </aside>
 
-  <div class="flex min-h-screen flex-1 flex-col transition-all duration-300"
+  <div class="flex h-screen flex-1 flex-col transition-all duration-300 relative w-full"
     [class.md:ml-64]="sidebarOpen()"
     [class.md:ml-16]="!sidebarOpen()">
     @if (userDetails(); as user) {
-    <header class="sticky top-0 z-20 border-b border-slate-200 bg-white shadow-sm">
+    <header class="flex-none sticky top-0 z-20 border-b border-slate-200 bg-white shadow-sm w-full">
       <app-app-header [user]="user" [sidebarOpen]="sidebarOpen()" [selectedRoleId]="selectedRoleId()"
         [roleOptions]="roleOptions()" (onLogout)="logout()" (onRoleChange)="onRoleChange($event)"
         (onToggleSidebar)="toggleSidebar()" />
     </header>
     }
 
-    <main class="flex-1 overflow-y-auto p-4 md:p-6">
+    <main class="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 w-full">
       <router-outlet />
     </main>
 
-    <footer class="border-t border-slate-200 bg-white px-6 py-3 text-sm text-slate-500">
+    <footer class="flex-none border-t border-slate-200 bg-white px-6 py-3 text-sm text-slate-500 w-full">
       <div class="flex items-center justify-between">
         <span>© 2026 StaffHub.</span>
         <span class="text-blue-600">Privacy · Terms</span>

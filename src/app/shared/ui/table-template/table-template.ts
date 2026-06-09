@@ -11,6 +11,9 @@ import {
 import { CommonModule, NgClass, NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SkeletonModule } from 'primeng/skeleton';
+import { MenuModule } from 'primeng/menu';
+import { ButtonModule } from 'primeng/button';
+import { MenuItem } from 'primeng/api';
 import { UserService } from '../../services/user-service';
 
 export interface TableColumn {
@@ -20,6 +23,12 @@ export interface TableColumn {
   isVisible?: boolean;
   isCustom?: boolean;
   format?: string;
+}
+
+export interface TableAction {
+  label: string;
+  icon: string;
+  id: string;
 }
 
 export interface Tab {
@@ -32,7 +41,7 @@ export interface Tab {
 @Component({
   selector: 'app-table-template',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgClass, NgIf, SkeletonModule],
+  imports: [CommonModule, FormsModule, NgClass, NgIf, SkeletonModule, MenuModule, ButtonModule],
   templateUrl: './table-template.html',
   styleUrls: ['./table-template.scss'],
 })
@@ -75,6 +84,23 @@ export class TableTemplate implements OnChanges {
   @Output() pageSizeChange = new EventEmitter<number>();
   @Output() refresh = new EventEmitter<void>();
   @Output() exportData = new EventEmitter<void>();
+
+  // Actions Menu
+  @Input() rowActions: { label: string; icon: string; id: string }[] = [];
+  @Input() disableActionCondition: (actionId: string, row: any) => boolean = () => false;
+  @Output() actionClicked = new EventEmitter<{ actionId: string; row: any }>();
+
+  menuItems: MenuItem[] = [];
+
+  toggleMenu(menu: any, event: any, row: any) {
+    this.menuItems = this.rowActions.map(action => ({
+      label: action.label,
+      icon: action.icon,
+      disabled: this.disableActionCondition(action.id, row),
+      command: () => this.actionClicked.emit({ actionId: action.id, row })
+    }));
+    menu.toggle(event);
+  }
 
   // Tab Inputs/Outputs
   @Input() tabs: Tab[] = [];
@@ -136,14 +162,6 @@ export class TableTemplate implements OnChanges {
     if (changes['totalCount'] || changes['pageSize']) {
       this.totalPages = Math.ceil(this.totalCount / this.pageSize) || 1;
     }
-  }
-
-  isSidebarOpen() {
-    return this.userService.getSidebarState()();
-  }
-
-  get tableWidth() {
-    return this.isSidebarOpen() ? 'calc(100vw - 250px)' : 'calc(100vw - 80px)';
   }
 
   get visibleColumnsCount(): number {
