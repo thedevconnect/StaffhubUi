@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://api.your-prod-domain.com',
-  appBaseUrl: 'https://app.your-prod-domain.com',
+  apiBaseUrl: 'https://staffhub-qudi.onrender.com',
+  appBaseUrl: 'https://staffhub-qudi.onrender.com',
 };
