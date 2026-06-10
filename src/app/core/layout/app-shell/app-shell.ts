@@ -5,7 +5,7 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { AppHeader } from '../../../shared/ui/navigation/header/header';
+import { AppHeader } from '../header/header';
 import { AuthService } from '../../auth/services/auth.service';
 
 interface UserDetails {
@@ -52,12 +52,12 @@ export class AppShell {
       role: selectedRole?.rolDes ?? user?.roles[0]?.rolDes ?? '',
     };
   });
-  
+
   readonly menuItemsWithSubmenu = computed<SidebarMenuItem[]>(() => this.getMenuItemsByRole(this.selectedRoleId()));
-  
+
   // Search query state
   readonly searchQuery = signal<string>('');
-  
+
   // Filtered menu items using computed signal
   readonly filteredMenuItems = computed(() => this.filterMenuItems(this.menuItemsWithSubmenu(), this.searchQuery()));
 

@@ -28,6 +28,7 @@
     "@angular/core": "^20.2.0",
     "@angular/forms": "^20.2.0",
     "@angular/platform-browser": "^20.2.0",
+    "@angular/platform-browser-dynamic": "^20.3.21",
     "@angular/router": "^20.2.0",
     "@primeuix/themes": "^2.0.3",
     "@types/file-saver": "^2.0.7",
