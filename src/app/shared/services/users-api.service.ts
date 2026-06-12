@@ -38,7 +38,7 @@ export class UsersApiService {
   loadUsers(): void {
     if (this.loading()) return;
     this.loading.set(true);
-    this.http.get<UsersApiResponse>(`${this.apiBase}/users`).subscribe({
+    this.http.get<UsersApiResponse>(`${this.apiBase}/api/users`).subscribe({
       next: (response) => {
         if (response?.success && Array.isArray(response.data)) {
           this.users.set(response.data);

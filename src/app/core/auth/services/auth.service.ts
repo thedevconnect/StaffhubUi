@@ -29,7 +29,7 @@ export class AuthService {
   }
 
   login(payload: LoginRequest): Observable<{ message: string }> {
-    return this.http.post<LoginApiResponse>(`${this.apiBase}/users/login`, payload).pipe(
+    return this.http.post<LoginApiResponse>(`${this.apiBase}/api/auth/login`, payload).pipe(
       tap((response) => {
         if (!response?.success) {
           throw new Error(response?.message || 'Login failed');

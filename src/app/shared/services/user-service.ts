@@ -36,27 +36,27 @@ export class UserService {
   }
 
   createUser(data: any) {
-    return this.http.post(`${this.apiUrl}/users`, data);
+    return this.http.post(`${this.apiUrl}/api/users`, data);
   }
 
   getAllUsers() {
-    return this.http.get(`${this.apiUrl}/users`);
+    return this.http.get(`${this.apiUrl}/api/users`);
   }
 
   getAllAssets() {
-    return this.http.get(`${this.apiUrl}/myassets`);
+    return this.http.get(`${this.apiUrl}/api/myassets`);
   }
 
   getUserById(id: string | number) {
-    return this.http.get(`${this.apiUrl}/users/${id}`);
+    return this.http.get(`${this.apiUrl}/api/users/${id}`);
   }
 
   updateUser(id: string | number, data: any) {
-    return this.http.put(`${this.apiUrl}/users/${id}`, data);
+    return this.http.put(`${this.apiUrl}/api/users/${id}`, data);
   }
 
   deleteUser(id: string | number) {
-    return this.http.delete(`${this.apiUrl}/users/${id}`);
+    return this.http.delete(`${this.apiUrl}/api/users/${id}`);
   }
 
   // Set sidebar state

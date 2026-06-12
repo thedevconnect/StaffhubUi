@@ -73,38 +73,38 @@ export class AttendanceService {
   constructor(private readonly http: HttpClient) { }
 
   getTodayRecord(): Observable<ApiResponse<AttendanceRecord | null>> {
-    return this.http.get<ApiResponse<AttendanceRecord | null>>(`${this.apiBase}/attendance/today`);
+    return this.http.get<ApiResponse<AttendanceRecord | null>>(`${this.apiBase}/api/attendance/today`);
   }
 
   swipeIn(data?: Partial<AttendanceRecord>): Observable<ApiResponse<AttendanceRecord>> {
-    return this.http.post<ApiResponse<AttendanceRecord>>(`${this.apiBase}/attendance/swipe-in`, data || {});
+    return this.http.post<ApiResponse<AttendanceRecord>>(`${this.apiBase}/api/attendance/swipe-in`, data || {});
   }
 
   swipeOut(data?: { notes?: string }): Observable<ApiResponse<AttendanceRecord>> {
-    return this.http.post<ApiResponse<AttendanceRecord>>(`${this.apiBase}/attendance/swipe-out`, data || {});
+    return this.http.post<ApiResponse<AttendanceRecord>>(`${this.apiBase}/api/attendance/swipe-out`, data || {});
   }
 
   getHistory(): Observable<ApiResponse<AttendanceRecord[]>> {
-    return this.http.get<ApiResponse<AttendanceRecord[]>>(`${this.apiBase}/attendance/history`);
+    return this.http.get<ApiResponse<AttendanceRecord[]>>(`${this.apiBase}/api/attendance/history`);
   }
 
   getDashboardSummary(): Observable<ApiResponse<DashboardSummary>> {
-    return this.http.get<ApiResponse<DashboardSummary>>(`${this.apiBase}/attendance/dashboard-summary`);
+    return this.http.get<ApiResponse<DashboardSummary>>(`${this.apiBase}/api/attendance/dashboard-summary`);
   }
 
   startBreak(reason?: string): Observable<ApiResponse<BreakRecord>> {
-    return this.http.post<ApiResponse<BreakRecord>>(`${this.apiBase}/attendance/break/start`, { reason });
+    return this.http.post<ApiResponse<BreakRecord>>(`${this.apiBase}/api/attendance/break/start`, { reason });
   }
 
   endBreak(): Observable<ApiResponse<BreakRecord>> {
-    return this.http.post<ApiResponse<BreakRecord>>(`${this.apiBase}/attendance/break/end`, {});
+    return this.http.post<ApiResponse<BreakRecord>>(`${this.apiBase}/api/attendance/break/end`, {});
   }
 
   getBreakHistory(): Observable<ApiResponse<BreakRecord[]>> {
-    return this.http.get<ApiResponse<BreakRecord[]>>(`${this.apiBase}/attendance/break/history`);
+    return this.http.get<ApiResponse<BreakRecord[]>>(`${this.apiBase}/api/attendance/break/history`);
   }
 
   getAllLogs(): Observable<ApiResponse<SwipeLog[]>> {
-    return this.http.get<ApiResponse<SwipeLog[]>>(`${this.apiBase}/attendance/logs`);
+    return this.http.get<ApiResponse<SwipeLog[]>>(`${this.apiBase}/api/attendance/logs`);
   }
 }
