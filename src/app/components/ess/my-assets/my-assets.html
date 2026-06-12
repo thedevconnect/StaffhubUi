@@ -1,38 +1,227 @@
-<div class="-mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4">
-  <p-breadcrumb [model]="breadcrumbItems"
-    styleClass="!border-0 !border-b !border-slate-200 !rounded-none !bg-white !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
-</div>
-<section class="space-y-4">
-  <header class="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
-    <h2 class="text-xl font-semibold text-slate-900">My Assets</h2>
-    <p class="mt-1 text-sm text-slate-500">Track all IT and non-IT assets currently assigned to you.</p>
-  </header>
+<div class="min-h-screen bg-slate-50/50">
+  <p-confirmDialog></p-confirmDialog>
+  <p-toast></p-toast>
 
-  <p-card header="Assigned Assets">
-    <p-table [value]="assets" styleClass="p-datatable-sm">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>Asset Name</th>
-          <th>Category</th>
-          <th>Serial Number</th>
-          <th>Status</th>
-          <th>Assignment Date</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-asset>
-        <tr>
-          <td class="font-medium text-slate-800">{{ asset.name }}</td>
-          <td>{{ asset.category }}</td>
-          <td><code class="text-xs bg-slate-100 px-1 py-0.5 rounded">{{ asset.serial }}</code></td>
-          <td>
-            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700">
-              <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-              {{ asset.status }}
-            </span>
-          </td>
-          <td>{{ asset.date | date:'mediumDate' }}</td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </p-card>
-</section>
+  <!-- Top Bar: Breadcrumb + Add Button -->
+  <div class="-mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-6 bg-white border-b border-slate-200 shadow-sm">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 md:px-6 py-3.5">
+      <div class="w-full sm:w-auto overflow-x-auto">
+        <p-breadcrumb [model]="breadcrumbItems"
+          styleClass="!border-0 !rounded-none !bg-transparent !p-0 text-xs md:text-sm !w-max">
+        </p-breadcrumb>
+      </div>
+
+      <div class="w-full sm:w-auto flex justify-end">
+        <p-button label="Add Asset" icon="pi pi-plus"
+          styleClass="orange-button p-button-warning p-button-sm w-full sm:w-auto shadow-sm" (click)="openAddDrawer()">
+        </p-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page Content -->
+  <section class="space-y-4">
+
+    <!-- Table -->
+    <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+      <div class="w-full overflow-x-auto">
+        <app-table-template [data]="filteredAssets" [columns]="columns" [pageSize]="pageSize" [totalCount]="totalCount"
+          [isLoading]="isLoading" [currentPage]="pageNo" [searchText]="searchText" [showRefresh]="true"
+          [rowActions]="rowActions" (actionClicked)="onActionClicked($event)" (refresh)="getAllData(true)"
+          (pageChange)="onPageChange($event)" (searchChange)="onSearchChange($event)"
+          (sortChange)="onSortChange($event)" (pageSizeChange)="onPageSizeChange($event)">
+        </app-table-template>
+      </div>
+    </div>
+  </section>
+
+  <!-- Add / Update Drawer -->
+  <p-drawer [(visible)]="showAssetDrawer" position="right" [modal]="true" [style]="{ width: '100%', maxWidth: '560px' }"
+    styleClass="modern-drawer">
+
+    <ng-template pTemplate="header">
+      <div class="w-full">
+        <h3 class="text-base md:text-lg font-bold text-slate-800 m-0">
+          {{ isEditMode ? 'Update Asset' : 'Add Asset' }}
+        </h3>
+        <p class="text-xs text-slate-500 m-0">
+          Fill asset details below.
+        </p>
+      </div>
+    </ng-template>
+
+    <form [formGroup]="assetForm" class="p-4 md:p-5 space-y-4 overflow-y-auto">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="min-w-0">
+          <label class="block text-xs font-semibold text-slate-500">
+            Employee ID *
+          </label>
+          <input pInputText formControlName="EmployeeId" class="w-full mt-1" />
+        </div>
+
+        <div class="min-w-0">
+          <label class="block text-xs font-semibold text-slate-500">
+            Department *
+          </label>
+          <input pInputText formControlName="Department" class="w-full mt-1" />
+        </div>
+
+        <div class="min-w-0">
+          <label class="block text-xs font-semibold text-slate-500">
+            Asset Type *
+          </label>
+          <input pInputText formControlName="AssetType" class="w-full mt-1" />
+        </div>
+
+        <div class="min-w-0">
+          <label class="block text-xs font-semibold text-slate-500">
+            Asset Name *
+          </label>
+          <input pInputText formControlName="AssetName" class="w-full mt-1" />
+        </div>
+
+        <div class="min-w-0">
+          <label class="block text-xs font-semibold text-slate-500">
+            Assigned Date *
+          </label>
+          <input pInputText type="date" formControlName="AssignedDate" class="w-full mt-1" />
+        </div>
+
+        <div class="min-w-0">
+          <label class="block text-xs font-semibold text-slate-500">
+            Office Location ID
+          </label>
+          <input pInputText formControlName="OfficeLocationId" class="w-full mt-1" />
+        </div>
+      </div>
+
+      <div class="min-w-0">
+        <label class="block text-xs font-semibold text-slate-500">
+          Office Location
+        </label>
+        <input pInputText formControlName="OfficeLocation" class="w-full mt-1" />
+      </div>
+
+      <div class="min-w-0">
+        <label class="block text-xs font-semibold text-slate-500">
+          Department Remarks
+        </label>
+        <textarea pInputTextarea formControlName="DeptRemarks" rows="3" class="w-full mt-1 resize-none">
+        </textarea>
+      </div>
+
+      <div class="min-w-0">
+        <label class="block text-xs font-semibold text-slate-500">
+          Employee Remarks
+        </label>
+        <textarea pInputTextarea formControlName="EmployeeRemarks" rows="3" class="w-full mt-1 resize-none">
+        </textarea>
+      </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+      <div class="flex flex-col sm:flex-row sm:justify-end gap-2 p-4 border-t bg-white">
+        <button pButton type="button" label="Cancel" severity="secondary" [text]="true" class="w-full sm:w-auto"
+          (click)="showAssetDrawer = false">
+        </button>
+
+        <button pButton type="button" icon="pi pi-save" [label]="isEditMode ? 'Update' : 'Save'"
+          class="w-full sm:w-auto" (click)="saveAsset()">
+        </button>
+      </div>
+    </ng-template>
+  </p-drawer>
+
+  <!-- View Details Drawer -->
+  <p-drawer [(visible)]="showViewDrawer" position="right" [modal]="true" [style]="{ width: '100%', maxWidth: '560px' }"
+    styleClass="modern-drawer">
+
+    <ng-template pTemplate="header">
+      <div class="w-full">
+        <h3 class="text-base md:text-lg font-bold text-slate-800 m-0">
+          Asset Details
+        </h3>
+        <p class="text-xs text-slate-500 m-0">
+          Detailed overview of the assigned asset.
+        </p>
+      </div>
+    </ng-template>
+
+    <div class="p-5 space-y-6 overflow-y-auto animate-fade-in" *ngIf="selectedAsset">
+      <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-semibold text-slate-400">STATUS</span>
+          <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold" [ngClass]="{
+              'bg-emerald-50 text-emerald-700 border border-emerald-100': selectedAsset.Status === 'Approved',
+              'bg-amber-50 text-amber-700 border border-amber-100': selectedAsset.Status === 'Pending' || selectedAsset.Status === 'Pending ',
+              'bg-rose-50 text-rose-700 border border-rose-100': selectedAsset.Status === 'Rejected'
+            }">
+            <span class="h-1.5 w-1.5 rounded-full" [ngClass]="{
+              'bg-emerald-500': selectedAsset.Status === 'Approved',
+              'bg-amber-500': selectedAsset.Status === 'Pending' || selectedAsset.Status === 'Pending ',
+              'bg-rose-500': selectedAsset.Status === 'Rejected'
+            }"></span>
+            {{ selectedAsset.Status }}
+          </span>
+        </div>
+
+        <div class="flex justify-between items-center border-t border-slate-200/60 pt-3">
+          <span class="text-xs font-semibold text-slate-400">ASSET ID</span>
+          <span class="text-sm font-mono font-bold text-slate-700">#{{ selectedAsset.AssetTransactionId }}</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Asset Name</span>
+          <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedAsset.AssetName }}</span>
+        </div>
+        <div>
+          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Asset Type</span>
+          <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedAsset.AssetType }}</span>
+        </div>
+        <div>
+          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Department</span>
+          <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedAsset.Department }}</span>
+        </div>
+        <div>
+          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Assigned Date</span>
+          <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedAsset.AssignedDate |
+            date:'longDate' }}</span>
+        </div>
+        <div>
+          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Location</span>
+          <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedAsset.OfficeLocation || '-'
+            }}</span>
+        </div>
+        <div>
+          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Is Accessory</span>
+          <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedAsset.IsAccessory ? 'Yes' : 'No'
+            }}</span>
+        </div>
+      </div>
+
+      <div class="border-t border-slate-100 pt-4 space-y-4">
+        <div>
+          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Department Remarks</span>
+          <p
+            class="text-xs text-slate-600 mt-1 bg-slate-50 p-3 rounded-lg border border-slate-100 min-h-[50px] whitespace-pre-wrap">
+            {{ selectedAsset.DeptRemarks || 'No remarks added.' }}</p>
+        </div>
+        <div>
+          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Employee Remarks</span>
+          <p
+            class="text-xs text-slate-600 mt-1 bg-slate-50 p-3 rounded-lg border border-slate-100 min-h-[50px] whitespace-pre-wrap">
+            {{ selectedAsset.EmployeeRemarks || 'No remarks added.' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <div class="flex justify-end p-4 border-t bg-white">
+        <button pButton type="button" label="Close" class="w-full sm:w-auto" (click)="showViewDrawer = false">
+        </button>
+      </div>
+    </ng-template>
+  </p-drawer>
+</div>

@@ -37,3 +37,29 @@ export const essRoutes: Routes = [
   { path: 'probation', component: Probation },
   { path: 'ticket', component: Ticket },
 ];
+
+
+// export const essRoutes: Routes = [
+//     { path: 'my-assets', component: MyAssets },
+//     { path: 'employee-attendance', component: EmployeeAttendance },
+//     { path: 'attendance-regularization', component: AttendanceRegularization },
+//     { path: 'employee-calendar', component: EmployeeCalendar },
+//     { path: 'leave-application', component: LeaveApplication },
+//     { path: 'short-leave', component: ShortLeave },
+//     { path: 'final-attendance', component: FinalAttendance },
+//     { path: 'leave-card-detail', component: LeaveCardDetail },
+//     { path: 'holiday-list', component: HolidayList },
+//     { path: 'parental-leave', component: ParentalLeave },
+//     { path: 'employee-official-detail', component: EmployeeOfficialDetail },
+//     { path: 'attendance-regularization-action', component: AttendanceRegularizationAction },
+//     { path: 'leave-approval', component: LeaveApproval },
+//     { path: 'short-leave-approval', component: ShortLeaveApproval },
+//     { path: 'exit-interview-form', component: ExitInterviewForm },
+//     { path: 'employee-resignation', component: EmployeeResignation },
+//     { path: 'performance-appraisal-form', component: PerformanceAppraisalForm },
+//     { path: 'employee-accept-kra', component: EmployeeAcceptKra },
+//     { path: 'employee-letter-issued', component: EmployeeLetterIssued },
+//     { path: 'reportings-attendance', component: ReportingsAttendance },
+
+
+// ]

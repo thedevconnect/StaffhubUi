@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface AttendanceRecord {
+  attendanceId: number;
   id: number;
   company_id: number;
   employee_id: number;
@@ -69,7 +70,7 @@ export interface ApiResponse<T> {
 export class AttendanceService {
   private readonly apiBase = environment.apiBaseUrl;
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient) { }
 
   getTodayRecord(): Observable<ApiResponse<AttendanceRecord | null>> {
     return this.http.get<ApiResponse<AttendanceRecord | null>>(`${this.apiBase}/attendance/today`);

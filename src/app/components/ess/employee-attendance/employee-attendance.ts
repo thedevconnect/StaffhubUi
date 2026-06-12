@@ -32,7 +32,6 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EmployeeAttendance implements OnInit, OnDestroy {
-  // Real-time clock signals
   readonly currentTime = signal<string>('');
   readonly currentDate = signal<string>('');
 
@@ -41,18 +40,15 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     { label: 'Attendance', icon: 'pi pi-clock', routerLink: '/ess/employee-attendance' }
   ];
 
-  // Active status signals
   readonly isSwipedIn = signal<boolean>(false);
   readonly isOnBreak = signal<boolean>(false);
   readonly activeRecord = signal<AttendanceRecord | null>(null);
   readonly breakHistory = signal<BreakRecord[]>([]);
   readonly todayPunches = signal<Array<{ type: string; time: string; icon: string; colorClass: string }>>([]);
 
-  // Live timer signals
   readonly duration = signal<string>('00:00:00');
   readonly breakDuration = signal<string>('00:00:00');
 
-  // Dashboard & historical log summaries
   readonly dashboardSummary = signal<DashboardSummary>({
     presentDays: 0,
     absentDays: 0,
@@ -63,7 +59,6 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
 
   readonly logs = signal<AttendanceRecord[]>([]);
 
-  // UI interaction states (standard properties for direct template binding)
   isActionLoading = false;
   breakDialogVisible = false;
   selectedBreakReason = 'Lunch Break';
@@ -104,91 +99,71 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     this.currentDate.set(now.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
   }
 
-  /**
-   * Load all attendance data from the backend
-   */
   loadAllData(): void {
     this.isActionLoading = true;
 
-    // Fetch today's record
     this.attendanceService.getTodayRecord().subscribe({
       next: (res) => {
         if (res.success && res.data) {
           const record = res.data;
+          const allTodayRecords = (res as any).allToday || (record ? [record] : []);
           this.activeRecord.set(record);
 
-          // If swiped in (swipe_out is null)
           if (record.swipe_in && !record.swipe_out) {
             this.isSwipedIn.set(true);
 
-            // Fetch breaks for today
             this.attendanceService.getBreakHistory().subscribe({
               next: (breakRes) => {
-                if (breakRes.success && Array.isArray(breakRes.data)) {
-                  this.breakHistory.set(breakRes.data);
+                const breaks = breakRes.success && Array.isArray(breakRes.data) ? breakRes.data : [];
 
-                  // Check if any break is active
-                  const activeBreak = breakRes.data.find(b => b.break_end === null);
-                  if (activeBreak) {
-                    this.isOnBreak.set(true);
-                  } else {
-                    this.isOnBreak.set(false);
-                  }
+                this.breakHistory.set(breaks);
+                this.isOnBreak.set(breaks.some(b => b.break_end === null));
 
-                  this.buildTodayTimeline(record, breakRes.data);
-                  this.startTimerTicks(record, breakRes.data);
-                } else {
-                  this.buildTodayTimeline(record, []);
-                  this.startTimerTicks(record, []);
-                }
+                this.buildTodayTimeline(allTodayRecords, breaks);
+                this.startTimerTicks(record, breaks);
+
                 this.isActionLoading = false;
               },
               error: () => {
-                this.buildTodayTimeline(record, []);
+                this.breakHistory.set([]);
+                this.isOnBreak.set(false);
+                this.buildTodayTimeline(allTodayRecords, []);
                 this.startTimerTicks(record, []);
                 this.isActionLoading = false;
               }
             });
           } else {
-            // Already swiped out today or no session yet
             this.isSwipedIn.set(false);
             this.isOnBreak.set(false);
             this.stopTimerTicks();
 
-            // Show today's completed session duration
             if (record.swipe_out) {
-              const minutes = record.total_work_minutes || 0;
-              this.duration.set(this.formatMinutesToHMS(minutes));
+              this.duration.set(this.formatMinutesToHMS(record.total_work_minutes || 0));
             } else {
               this.duration.set('00:00:00');
             }
+
             this.breakDuration.set('00:00:00');
-            this.buildTodayTimeline(record, []);
+            this.buildTodayTimeline(allTodayRecords, []);
             this.isActionLoading = false;
           }
         } else {
-          // No record today
-          this.activeRecord.set(null);
-          this.isSwipedIn.set(false);
-          this.isOnBreak.set(false);
-          this.stopTimerTicks();
-          this.duration.set('00:00:00');
-          this.breakDuration.set('00:00:00');
-          this.todayPunches.set([]);
+          this.resetTodayState();
           this.isActionLoading = false;
         }
       },
       error: (err) => {
+        this.resetTodayState();
+        this.isActionLoading = false;
+
         this.messageService.add({
           severity: 'error',
           summary: 'Load Failed',
-          detail: err.error?.message || 'Failed to load today\'s status.'
+          detail: err.error?.message || 'Failed to load today status.'
         });
-        this.isActionLoading = false;
       }
     });
 
-    // Fetch dashboard summary
     this.attendanceService.getDashboardSummary().subscribe({
       next: (res) => {
         if (res.success && res.data) {
@@ -197,7 +172,6 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
       }
     });
 
-    // Fetch history
     this.attendanceService.getHistory().subscribe({
       next: (res) => {
         if (res.success && Array.isArray(res.data)) {
@@ -207,17 +181,25 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Start Swipe-In Action
-   */
   async performSwipeIn(): Promise<void> {
     this.isActionLoading = true;
 
-    // Detect environment metadata
     const os_name = this.getOSName();
     const browser_name = this.getBrowserName();
     const device_name = this.getDeviceName();
     const coords = await this.getGeolocation();
+
+    if (!coords.latitude || !coords.longitude) {
+      this.isActionLoading = false;
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Location Required',
+        detail: 'Location permission is mandatory to Swipe In. Please allow location access.'
+      });
+      return;
+    }
+
+    const ip_address = await this.getIpAddress();
 
     const payload: Partial<AttendanceRecord> = {
       os_name,
@@ -225,23 +207,56 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
       device_name,
       latitude: coords.latitude,
       longitude: coords.longitude,
-      location_address: coords.latitude ? `Lat: ${coords.latitude.toFixed(4)}, Long: ${coords.longitude?.toFixed(4)}` : 'Location Access Not Granted'
+      location_address: `Lat: ${coords.latitude.toFixed(4)}, Long: ${coords.longitude?.toFixed(4)}`,
+      ip_address: ip_address
     };
 
     this.attendanceService.swipeIn(payload).subscribe({
       next: (res) => {
         this.isActionLoading = false;
+
         if (res.success) {
+          const now = new Date().toISOString();
+
+          const newRecord: any = {
+            id: res.data?.id || res.data?.attendanceId,
+            attendance_date: now.split('T')[0],
+            swipe_in: now,
+            swipe_out: null,
+            total_work_minutes: 0,
+            attendance_status: 'PRESENT',
+            notes: '',
+            os_name,
+            browser_name,
+            device_name,
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+            location_address: payload.location_address,
+            ip_address: ip_address
+          };
+
+          this.activeRecord.set(newRecord);
+          this.isSwipedIn.set(true);
+          this.isOnBreak.set(false);
+          this.breakHistory.set([]);
+          this.duration.set('00:00:00');
+          this.breakDuration.set('00:00:00');
+
+          this.buildTodayTimeline(newRecord, []);
+          this.startTimerTicks(newRecord, []);
+
           this.messageService.add({
             severity: 'success',
             summary: 'Checked In',
             detail: 'Swiped in successfully!'
           });
+
           this.loadAllData();
         }
       },
       error: (err) => {
         this.isActionLoading = false;
+
         this.messageService.add({
           severity: 'error',
           summary: 'Swipe In Failed',
@@ -251,9 +266,6 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Show Swipe Out confirmation Dialog
-   */
   confirmSwipeOut(): void {
     if (this.isOnBreak()) {
       this.messageService.add({
@@ -263,31 +275,68 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
       });
       return;
     }
+
     this.swipeOutNote = '';
     this.swipeOutDialogVisible = true;
   }
 
-  /**
-   * Complete Swipe-Out Action
-   */
-  performSwipeOut(): void {
+  async performSwipeOut(): Promise<void> {
     this.swipeOutDialogVisible = false;
     this.isActionLoading = true;
 
-    this.attendanceService.swipeOut({ notes: this.swipeOutNote }).subscribe({
+    const os_name = this.getOSName();
+    const browser_name = this.getBrowserName();
+    const device_name = this.getDeviceName();
+    const coords = await this.getGeolocation();
+
+    const ip_address = await this.getIpAddress();
+
+    const payload = {
+      notes: this.swipeOutNote,
+      os_name,
+      browser_name,
+      device_name,
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+      location_address: coords.latitude ? `Lat: ${coords.latitude.toFixed(4)}, Long: ${coords.longitude?.toFixed(4)}` : 'Location Access Not Granted',
+      ip_address: ip_address || null
+    };
+
+    this.attendanceService.swipeOut(payload).subscribe({
       next: (res) => {
         this.isActionLoading = false;
+
         if (res.success) {
+          const current = this.activeRecord();
+          const now = new Date().toISOString();
+
+          if (current) {
+            const updatedRecord: any = {
+              ...current,
+              swipe_out: now,
+              notes: this.swipeOutNote
+            };
+
+            this.activeRecord.set(updatedRecord);
+          }
+
+          this.isSwipedIn.set(false);
+          this.isOnBreak.set(false);
+          this.breakDuration.set('00:00:00');
+          this.stopTimerTicks();
+
           this.messageService.add({
             severity: 'success',
             summary: 'Checked Out',
             detail: 'Swiped out successfully!'
           });
+
           this.loadAllData();
         }
       },
       error: (err) => {
         this.isActionLoading = false;
+
         this.messageService.add({
           severity: 'error',
           summary: 'Swipe Out Failed',
@@ -297,18 +346,12 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Open Break dialog
-   */
   openBreakDialog(): void {
     if (!this.isSwipedIn()) return;
     this.selectedBreakReason = 'Lunch Break';
     this.breakDialogVisible = true;
   }
 
-  /**
-   * Start break action
-   */
   performStartBreak(): void {
     this.breakDialogVisible = false;
     this.isActionLoading = true;
@@ -316,17 +359,22 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     this.attendanceService.startBreak(this.selectedBreakReason).subscribe({
       next: (res: any) => {
         this.isActionLoading = false;
+
         if (res.success) {
+          this.isOnBreak.set(true);
+
           this.messageService.add({
             severity: 'success',
             summary: 'Break Started',
             detail: `Started: ${this.selectedBreakReason}`
           });
+
           this.loadAllData();
         }
       },
       error: (err) => {
         this.isActionLoading = false;
+
         this.messageService.add({
           severity: 'error',
           summary: 'Break Failed',
@@ -336,26 +384,29 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * End break action
-   */
   performEndBreak(): void {
     this.isActionLoading = true;
 
     this.attendanceService.endBreak().subscribe({
       next: (res: any) => {
         this.isActionLoading = false;
+
         if (res.success) {
+          this.isOnBreak.set(false);
+          this.breakDuration.set('00:00:00');
+
           this.messageService.add({
             severity: 'success',
             summary: 'Break Ended',
             detail: 'Returned from break successfully!'
           });
+
           this.loadAllData();
         }
       },
       error: (err) => {
         this.isActionLoading = false;
+
         this.messageService.add({
           severity: 'error',
           summary: 'Action Failed',
@@ -365,26 +416,29 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Ticking interval logic for live shift and break counters
-   */
+  private resetTodayState(): void {
+    this.activeRecord.set(null);
+    this.isSwipedIn.set(false);
+    this.isOnBreak.set(false);
+    this.breakHistory.set([]);
+    this.todayPunches.set([]);
+    this.duration.set('00:00:00');
+    this.breakDuration.set('00:00:00');
+    this.stopTimerTicks();
+  }
+
   private startTimerTicks(record: AttendanceRecord, breaks: BreakRecord[]): void {
-    if (this.timerIntervalId) {
-      clearInterval(this.timerIntervalId);
-    }
+    if (this.timerIntervalId) clearInterval(this.timerIntervalId);
 
     const swipeInTime = this.parseDbDate(record.swipe_in);
     if (!swipeInTime) return;
 
-    // Retain total minutes from previous checked-out sessions
     const previousWorkMs = (record.total_work_minutes || 0) * 60000;
 
-    // Calculate sum of completed break minutes in ms
     const completedBreaksMs = breaks
       .filter(b => b.break_end !== null)
       .reduce((sum, b) => sum + (b.break_minutes || 0) * 60000, 0);
 
-    // Find if there is an active break session
     const activeBreak = breaks.find(b => b.break_end === null);
     const activeBreakStartTime = activeBreak ? this.parseDbDate(activeBreak.break_start) : null;
 
@@ -392,20 +446,16 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
       const now = new Date();
 
       if (activeBreakStartTime) {
-        // User is currently ON BREAK
-        // Break duration ticks up
         const breakElapsed = now.getTime() - activeBreakStartTime.getTime();
         this.breakDuration.set(this.formatMsToHMS(breakElapsed));
 
-        // Work duration frozen at the moment break started
-        const currentSessionElapsedAtBreakStart = activeBreakStartTime.getTime() - swipeInTime.getTime() - completedBreaksMs;
-        const totalWorkElapsedAtBreakStart = previousWorkMs + currentSessionElapsedAtBreakStart;
-        this.duration.set(this.formatMsToHMS(Math.max(0, totalWorkElapsedAtBreakStart)));
+        const currentSessionElapsedAtBreakStart =
+          activeBreakStartTime.getTime() - swipeInTime.getTime() - completedBreaksMs;
+
+        this.duration.set(this.formatMsToHMS(Math.max(0, previousWorkMs + currentSessionElapsedAtBreakStart)));
       } else {
-        // User is WORKING (Not on break)
         const currentSessionWorkElapsed = now.getTime() - swipeInTime.getTime() - completedBreaksMs;
-        const totalWorkElapsed = previousWorkMs + currentSessionWorkElapsed;
-        this.duration.set(this.formatMsToHMS(Math.max(0, totalWorkElapsed)));
+        this.duration.set(this.formatMsToHMS(Math.max(0, previousWorkMs + currentSessionWorkElapsed)));
         this.breakDuration.set('00:00:00');
       }
     }, 1000);
@@ -418,70 +468,73 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Helper to construct chronological today timeline
-   */
-  private buildTodayTimeline(record: AttendanceRecord | null, breaks: BreakRecord[]): void {
-    const timeline: Array<{ type: string; time: string; icon: string; colorClass: string }> = [];
-    if (!record) {
+  private buildTodayTimeline(records: AttendanceRecord[] | AttendanceRecord | null, breaks: BreakRecord[]): void {
+    const timeline: Array<{ type: string; time: string; timestamp: number; icon: string; colorClass: string }> = [];
+
+    if (!records) {
       this.todayPunches.set([]);
       return;
     }
 
-    // Add Swipe In
-    if (record.swipe_in) {
-      timeline.push({
-        type: 'Swipe In',
-        time: this.formatDateTimeToTime(record.swipe_in),
-        icon: 'pi pi-sign-in',
-        colorClass: 'border-emerald-500 bg-emerald-50 text-emerald-600'
-      });
-    }
+    const recordsList = Array.isArray(records) ? records : [records];
 
-    // Add breaks
-    // Sort breaks chronologically
-    const sortedBreaks = [...breaks].sort((a, b) => {
-      const dateA = this.parseDbDate(a.break_start)?.getTime() || 0;
-      const dateB = this.parseDbDate(b.break_start)?.getTime() || 0;
-      return dateA - dateB;
+    recordsList.forEach(record => {
+      if (record.swipe_in) {
+        const dt = this.parseDbDate(record.swipe_in);
+        timeline.push({
+          type: 'Swipe In',
+          time: this.formatDateTimeToTime(record.swipe_in),
+          timestamp: dt ? dt.getTime() : 0,
+          icon: 'pi pi-sign-in',
+          colorClass: 'border-emerald-500 bg-emerald-50 text-emerald-600'
+        });
+      }
+      if (record.swipe_out) {
+        const dt = this.parseDbDate(record.swipe_out);
+        timeline.push({
+          type: record.notes ? `Swipe Out (${record.notes})` : 'Swipe Out',
+          time: this.formatDateTimeToTime(record.swipe_out),
+          timestamp: dt ? dt.getTime() : 0,
+          icon: 'pi pi-sign-out',
+          colorClass: 'border-rose-500 bg-rose-50 text-rose-600'
+        });
+      }
     });
 
-    sortedBreaks.forEach(b => {
+    breaks.forEach(b => {
       if (b.break_start) {
+        const dt = this.parseDbDate(b.break_start);
         timeline.push({
-          type: `Break Started${b.reason ? ' (' + b.reason + ')' : ''}`,
+          type: b.reason ? `Break Started (${b.reason})` : 'Break Started',
           time: this.formatDateTimeToTime(b.break_start),
+          timestamp: dt ? dt.getTime() : 0,
           icon: 'pi pi-pause',
           colorClass: 'border-amber-500 bg-amber-50 text-amber-600'
         });
       }
+
       if (b.break_end) {
+        const dt = this.parseDbDate(b.break_end);
         timeline.push({
           type: 'Break Ended',
           time: this.formatDateTimeToTime(b.break_end),
+          timestamp: dt ? dt.getTime() : 0,
           icon: 'pi pi-play',
           colorClass: 'border-sky-500 bg-sky-50 text-sky-600'
         });
       }
     });
 
-    // Add Swipe Out
-    if (record.swipe_out) {
-      timeline.push({
-        type: 'Swipe Out',
-        time: this.formatDateTimeToTime(record.swipe_out),
-        icon: 'pi pi-sign-out',
-        colorClass: 'border-rose-500 bg-rose-50 text-rose-600'
-      });
-    }
+    timeline.sort((a, b) => b.timestamp - a.timestamp);
 
-    // Reverse timeline to show most recent activities first (looks much better in logs panel)
-    this.todayPunches.set(timeline.reverse());
+    this.todayPunches.set(timeline.map(item => ({
+      type: item.type,
+      time: item.time,
+      icon: item.icon,
+      colorClass: item.colorClass
+    })));
   }
 
-  /**
-   * Helper formatting functions
-   */
   private parseDbDate(dateStr: string | null): Date | null {
     if (!dateStr) return null;
     const normalized = dateStr.replace(' ', 'T');
@@ -525,9 +578,6 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     return Number(val).toFixed(4);
   }
 
-  /**
-   * Browser environment utilities
-   */
   private getBrowserName(): string {
     const userAgent = navigator.userAgent;
     if (userAgent.indexOf('Firefox') > -1) return 'Firefox';
@@ -561,6 +611,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
         resolve({ latitude: null, longitude: null });
         return;
       }
+
       navigator.geolocation.getCurrentPosition(
         (position) => {
           resolve({
@@ -574,5 +625,14 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
         { timeout: 5000 }
       );
     });
+  }
+
+  private async getIpAddress(): Promise<string | null> {
+    try {
+      const res = await fetch('https://api.ipify.org?format=json').then(r => r.json());
+      return res.ip || null;
+    } catch {
+      return null;
+    }
   }
 }

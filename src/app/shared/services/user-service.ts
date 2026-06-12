@@ -43,6 +43,10 @@ export class UserService {
     return this.http.get(`${this.apiUrl}/users`);
   }
 
+  getAllAssets() {
+    return this.http.get(`${this.apiUrl}/myassets`);
+  }
+
   getUserById(id: string | number) {
     return this.http.get(`${this.apiUrl}/users/${id}`);
   }
