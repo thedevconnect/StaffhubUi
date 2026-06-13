@@ -152,58 +152,22 @@
     </div>
   </div>
 
-  <!-- Historical logs list -->
-  <p-card header="My Attendance History">
-    <p-table [value]="logs()" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" responsiveLayout="scroll">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>Date</th>
-          <th>Check In</th>
-          <th>Check Out</th>
-          <th>Worked Duration</th>
-          <th>Status</th>
-          <th>Notes</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-log>
-        <tr class="hover:bg-slate-50 transition-colors">
-          <td class="font-medium text-slate-800">{{ log.attendance_date | date:'fullDate' }}</td>
-          <td class="font-mono text-xs">{{ formatTimeString(log.swipe_in) }}</td>
-          <td class="font-mono text-xs">{{ formatTimeString(log.swipe_out) }}</td>
-          <td class="font-mono text-xs font-semibold text-slate-700">
-            {{ log.swipe_out ? formatTotalWorkingHours(log.total_work_minutes) : 'In Progress' }}
-          </td>
-          <td>
-            <span
-              class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold animate-fade-in"
-              [ngClass]="{
-                'bg-emerald-50 text-emerald-700 border border-emerald-100': log.attendance_status === 'PRESENT',
-                'bg-amber-50 text-amber-700 border border-amber-100': log.attendance_status === 'LATE',
-                'bg-sky-50 text-sky-700 border border-sky-100': log.attendance_status === 'HALF_DAY',
-                'bg-rose-50 text-rose-700 border border-rose-100': log.attendance_status === 'ABSENT'
-              }">
-              <span class="h-1.5 w-1.5 rounded-full" [ngClass]="{
-                  'bg-emerald-500': log.attendance_status === 'PRESENT',
-                  'bg-amber-500': log.attendance_status === 'LATE',
-                  'bg-sky-500': log.attendance_status === 'HALF_DAY',
-                  'bg-rose-500': log.attendance_status === 'ABSENT'
-                }"></span>
-              {{ log.attendance_status }}
-            </span>
-          </td>
-          <td class="max-w-[200px] truncate text-xs text-slate-500" [title]="log.notes || ''">{{ log.notes || '-' }}
-          </td>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="6" class="text-center py-6 text-slate-400 text-xs font-medium">
-            No historical logs found.
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </p-card>
+  <section class="space-y-4">
+
+    <!-- Table -->
+    <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+      <div class="w-full overflow-x-auto">
+        <app-table-template [data]="logs()" [columns]="columns" [pageSize]="pageSize" [totalCount]="totalCount"
+          [isLoading]="isActionLoading" [currentPage]="pageNo" [searchText]="searchText" [showRefresh]="true"
+          [rowActions]="rowActions" (actionClicked)="onActionClicked($event)" (refresh)="loadAllData()"
+          (pageChange)="onPageChange($event)" (searchChange)="onSearchChange($event)"
+          (sortChange)="onSortChange($event)" (pageSizeChange)="onPageSizeChange($event)">
+        </app-table-template>
+
+      </div>
+    </div>
+
+  </section>
 </section>
 
 <!-- Break Reason Dialog -->

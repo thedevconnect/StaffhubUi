@@ -13,10 +13,13 @@ import {
   BreakRecord,
   DashboardSummary
 } from '../../../shared/services/attendance.service';
+import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-employee-attendance',
   standalone: true,
+
   imports: [
     CommonModule,
     CardModule,
@@ -24,7 +27,9 @@ import {
     Breadcrumb,
     DialogModule,
     ToastModule,
-    FormsModule
+    FormsModule,
+    RouterLink,
+    TableTemplate
   ],
   providers: [MessageService],
   templateUrl: './employee-attendance.html',
@@ -48,7 +53,12 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
 
   readonly duration = signal<string>('00:00:00');
   readonly breakDuration = signal<string>('00:00:00');
+  // Table Pagination
+  pageNo = 1
+  pageSize = 10
+  totalCount = 0
 
+  searchText = ''
   readonly dashboardSummary = signal<DashboardSummary>({
     presentDays: 0,
     absentDays: 0,
@@ -180,6 +190,120 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
       }
     });
   }
+
+  onPageChange(newPage: number) {
+    this.pageNo = newPage
+
+    this.loadAllData()
+  }
+
+  // Search
+
+  onSearchChange(value: string) {
+    this.searchText = value
+
+    this.pageNo = 1
+
+    this.loadAllData()
+  }
+
+  // Page Size
+
+  onPageSizeChange(size: number) {
+    this.pageSize = size
+
+    this.pageNo = 1
+
+    this.loadAllData()
+  }
+
+  // Sorting
+
+  onSortChange(event: any) {
+    console.log('Sort Event', event)
+
+    this.loadAllData()
+  }
+
+  onActionClicked(event: any) {
+    console.log('Action clicked', event)
+  }
+  // Table Columns
+
+  columns: TableColumn[] = [
+    {
+      key: 'actions',
+      header: 'Actions',
+      isVisible: true
+    },
+
+    {
+      key: 'employee_id',
+      header: 'Employee ID',
+      isVisible: true,
+      isSortable: true
+    },
+
+    {
+      key: 'attendance_date',
+      header: 'Attendance Date',
+      isVisible: true,
+      isSortable: true
+    },
+
+    {
+      key: 'swipe_in',
+      header: 'Swipe In',
+      isVisible: true,
+      isSortable: true
+    },
+
+    {
+      key: 'swipe_out',
+      header: 'Swipe Out',
+      isVisible: true,
+      isSortable: true
+    },
+
+    {
+      key: 'attendance_status',
+      header: 'Status',
+      isVisible: true,
+      isSortable: true
+    },
+
+    {
+      key: 'created_at',
+      header: 'Created At',
+      isVisible: true,
+      isSortable: true
+    },
+
+    {
+      key: 'updated_at',
+      header: 'Updated At',
+      isVisible: true,
+      isSortable: true
+    }
+  ]
+
+  rowActions = [
+    {
+      label: 'View',
+      icon: 'pi pi-eye',
+      id: 'view'
+    },
+    {
+      label: 'Edit',
+      icon: 'pi pi-pencil',
+      id: 'edit'
+    },
+    {
+      label: 'Delete',
+      icon: 'pi pi-trash',
+      id: 'delete'
+    }
+  ];
 
   async performSwipeIn(): Promise<void> {
     this.isActionLoading = true;

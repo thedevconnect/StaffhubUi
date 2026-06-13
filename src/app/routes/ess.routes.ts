@@ -21,16 +21,21 @@ export const essRoutes: Routes = [
   { path: '', redirectTo: 'ess-dashboard', pathMatch: 'full' },
   { path: 'ess-dashboard', component: EssDashboard },
   { path: 'my-assets', component: MyAssets },
-  { path: 'service-file', component: ServiceFile },
-  { path: 'reportings-attendance', component: ReportingsAttendance },
-  { path: 'get-employee-info', component: GetEmployeeInfo },
   { path: 'employee-attendance', component: EmployeeAttendance },
   { path: 'attendance-regularization', component: AttendanceRegularization },
-  { path: 'monthly-attendance-calendar', component: MonthlyAttendanceCalendar },
   { path: 'leave-application', component: LeaveApplication },
   { path: 'apply-short-leave', component: ApplyShortLeave },
+  { path: 'monthly-attendance-calendar', component: MonthlyAttendanceCalendar },
   { path: 'final-attendance', component: FinalAttendance },
   { path: 'employee-resignation', component: EmployeeResignation },
+  { path: 'reportings-attendance', component: ReportingsAttendance },
+
+
+
+  { path: 'service-file', component: ServiceFile },
+  { path: 'get-employee-info', component: GetEmployeeInfo },
+  { path: 'monthly-attendance-calendar', component: MonthlyAttendanceCalendar },
+  { path: 'apply-short-leave', component: ApplyShortLeave },
   { path: 'exit-interview', component: ExitInterview },
   { path: 'expense-management', component: ExpenseManagement },
   { path: 'performance-management', component: PerformanceManagement },
@@ -43,14 +48,14 @@ export const essRoutes: Routes = [
 //     { path: 'my-assets', component: MyAssets },
 //     { path: 'employee-attendance', component: EmployeeAttendance },
 //     { path: 'attendance-regularization', component: AttendanceRegularization },
-//     { path: 'employee-calendar', component: EmployeeCalendar },
+//     { path: 'employee-calendar', component: EmployeeCalendar },111
 //     { path: 'leave-application', component: LeaveApplication },
 //     { path: 'short-leave', component: ShortLeave },
 //     { path: 'final-attendance', component: FinalAttendance },
-//     { path: 'leave-card-detail', component: LeaveCardDetail },
-//     { path: 'holiday-list', component: HolidayList },
-//     { path: 'parental-leave', component: ParentalLeave },
-//     { path: 'employee-official-detail', component: EmployeeOfficialDetail },
+//     { path: 'leave-card-detail', component: LeaveCardDetail },111
+//     { path: 'holiday-list', component: HolidayList }, 1111
+//     { path: 'parental-leave', component: ParentalLeave },11
+//     { path: 'employee-official-detail', component: EmployeeOfficialDetail },11
 //     { path: 'attendance-regularization-action', component: AttendanceRegularizationAction },
 //     { path: 'leave-approval', component: LeaveApproval },
 //     { path: 'short-leave-approval', component: ShortLeaveApproval },

@@ -89,9 +89,9 @@ export class AuthService {
   private toAuthUser(data: LoginApiResponse['data']): AuthUser {
     const normalizedRoles = this.normalizeRoles(data);
     return {
-      id: data.id,
-      username: data.username,
-      employeeName: data.employeeName ?? data.username,
+      id: data.userId || data.id || 0,
+      username: data.username || data.userName || '',
+      employeeName: data.employeeName || data.userName || data.username || 'User',
       roles: normalizedRoles.length ? normalizedRoles : [{ rolDes: 'HR Admin', roleId: 'hradmin' }],
     };
   }
@@ -99,8 +99,8 @@ export class AuthService {
   private normalizeRoles(data: LoginApiResponse['data']): RoleOption[] {
     if (Array.isArray(data.roles) && data.roles.length) {
       return data.roles.map((role) => ({
-        rolDes: role.role,
-        roleId: String(role.roleId ?? role.role).toLowerCase(),
+        rolDes: role.roleName || role.role || '',
+        roleId: String(role.roleCode || role.roleId || role.role || '').toLowerCase(),
       }));
     }
 
@@ -112,6 +112,15 @@ export class AuthService {
     }
 
     if (typeof data.role === 'string') {
+      if (data.role.includes(',')) {
+        return data.role.split(',').map((r) => {
+          const trimmed = r.trim();
+          return {
+            rolDes: trimmed,
+            roleId: trimmed.toLowerCase(),
+          };
+        });
+      }
       return [
         {
           rolDes: data.role,
@@ -128,7 +137,7 @@ export class AuthService {
     const user: AuthUser = {
       id: res.userId || res.id || 0,
       username: username,
-      employeeName: username,
+      employeeName: res.userName || username,
       roles: normalizedRoles.length ? normalizedRoles : [{ rolDes: 'HR Admin', roleId: 'hradmin' }]
     };
     this._user.set(user);

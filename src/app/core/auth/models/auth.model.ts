@@ -4,12 +4,20 @@ export interface LoginRequest {
 }
 
 export interface LoginResponseData {
-  id: number;
-  username: string;
-  employeeName: string;
+  id?: number;
+  userId?: number;
+  username?: string;
+  userName?: string;
+  employeeName?: string;
   role?: string | string[];
-  roleId?: number | number[];
-  roles?: Array<{ role: string; roleId: number }>;
+  roleId?: number | number[] | string | string[];
+  roles?: Array<{
+    role?: string;
+    roleId?: number | string;
+    roleCode?: string;
+    roleName?: string;
+  }>;
+  token?: string;
 }
 
 export interface LoginApiResponse {
