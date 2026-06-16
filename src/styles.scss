@@ -16,4 +16,18 @@ body {
   font-family: Inter, 'Segoe UI', sans-serif;
   background: #f1f5f9;
 }
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
  

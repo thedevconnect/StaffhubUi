@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
@@ -7,20 +7,7 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AppHeader } from '../header/header';
 import { AuthService } from '../../auth/services/auth.service';
-
-interface UserDetails {
-  name: string;
-  email: string;
-  role: string;
-}
-
-interface SidebarMenuItem {
-  label: string;
-  icon?: string;
-  route?: string;
-  isOpen?: boolean;
-  children?: SidebarMenuItem[];
-}
+import { SidebarMenuItem, UserDetails } from './app-shell.models';
 
 @Component({
   selector: 'app-shell',
@@ -40,7 +27,8 @@ interface SidebarMenuItem {
   providers: [MessageService, ConfirmationService],
 })
 export class AppShell {
-  readonly sidebarOpen = signal(true);
+  readonly isMobileView = signal(this.checkIsMobileView());
+  readonly sidebarOpen = signal(!this.isMobileView());
   readonly selectedRoleId = computed(() => this.authService.selectedRoleId());
   readonly roleOptions = computed(() => this.authService.roleOptions());
   readonly userDetails = computed<UserDetails>(() => {
@@ -67,6 +55,11 @@ export class AppShell {
     private readonly confirmationService: ConfirmationService,
     private readonly router: Router,
   ) { }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.syncLayoutForViewport();
+  }
 
   toggleSidebar(): void {
     this.sidebarOpen.update((isOpen) => !isOpen);
@@ -222,5 +215,21 @@ export class AppShell {
       { label: 'Employees', icon: 'pi-users', route: '/employees' },
       { label: 'Attendance', icon: 'pi-calendar', route: '/attendance' },
     ];
+  }
+
+  private checkIsMobileView(): boolean {
+    return typeof window !== 'undefined' && window.innerWidth < 768;
+  }
+
+  private syncLayoutForViewport(): void {
+    const nextIsMobile = this.checkIsMobileView();
+    const previousIsMobile = this.isMobileView();
+
+    if (nextIsMobile === previousIsMobile) {
+      return;
+    }
+
+    this.isMobileView.set(nextIsMobile);
+    this.sidebarOpen.set(!nextIsMobile);
   }
 }
