@@ -57,16 +57,9 @@ export class TableTemplate implements OnChanges {
   @Input() rowTemplate: TemplateRef<any> | null = null;
   @Input() customTemplate: TemplateRef<any> | null = null;
   @Input() headerCheckbox: TemplateRef<any> | null = null;
-  @Input() jsonTemplate: TemplateRef<any> | null = null;
-  @Input() jsonTemplate1: TemplateRef<any> | null = null;
-  @Input() jsonTemplate2: TemplateRef<any> | null = null;
-  @Input() jsonTemplate3: TemplateRef<any> | null = null;
-  @Input() jsonTemplate4: TemplateRef<any> | null = null;
-  @Input() jsonTemplate5: TemplateRef<any> | null = null;
-  @Input() jsonTemplate6: TemplateRef<any> | null = null;
-  @Input() jsonTemplate7: TemplateRef<any> | null = null;
-  @Input() jsonTemplate8: TemplateRef<any> | null = null;
-  @Input() jsonTemplate9: TemplateRef<any> | null = null;
+
+  // Custom Cell Templates mapped by column key
+  @Input() cellTemplates: { [key: string]: TemplateRef<any> } = {};
   @Input() headerExtraTemplate: TemplateRef<any> | null = null;
 
   @Input() currentPage = 1;
@@ -86,14 +79,18 @@ export class TableTemplate implements OnChanges {
   @Output() exportData = new EventEmitter<void>();
 
   // Actions Menu
-  @Input() rowActions: { label: string; icon: string; id: string }[] = [];
+  @Input() tableActions: TableAction[] = [
+    { label: 'View', icon: 'pi pi-eye', id: 'view' },
+    { label: 'Edit', icon: 'pi pi-pencil', id: 'edit' },
+    { label: 'Delete', icon: 'pi pi-trash', id: 'delete' }
+  ];
   @Input() disableActionCondition: (actionId: string, row: any) => boolean = () => false;
   @Output() actionClicked = new EventEmitter<{ actionId: string; row: any }>();
 
   menuItems: MenuItem[] = [];
 
   toggleMenu(menu: any, event: any, row: any) {
-    this.menuItems = this.rowActions.map(action => ({
+    this.menuItems = this.tableActions.map(action => ({
       label: action.label,
       icon: action.icon,
       disabled: this.disableActionCondition(action.id, row),

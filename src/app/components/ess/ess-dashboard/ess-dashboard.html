@@ -150,7 +150,7 @@
       <div class="w-full overflow-x-auto">
         <app-table-template [data]="resData" [columns]="columns" [pageSize]="pageSize" [totalCount]="totalCount"
           [isLoading]="loading()" [currentPage]="pageNo" [searchText]="searchText" [showRefresh]="true"
-          [rowActions]="rowActions" (actionClicked)="onActionClicked($event)" (refresh)="loadDashboardData()"
+          [tableActions]="rowActions" (actionClicked)="onActionClicked($event)" (refresh)="loadDashboardData()"
           (pageChange)="onPageChange($event)" (searchChange)="onSearchChange($event)"
           (sortChange)="onSortChange($event)" (pageSizeChange)="onPageSizeChange($event)">
         </app-table-template>

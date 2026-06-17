@@ -27,7 +27,7 @@
       <div class="w-full overflow-x-auto">
         <app-table-template [data]="filteredAssets" [columns]="columns" [pageSize]="pageSize" [totalCount]="totalCount"
           [isLoading]="isLoading" [currentPage]="pageNo" [searchText]="searchText" [showRefresh]="true"
-          [rowActions]="rowActions" (actionClicked)="onActionClicked($event)" (refresh)="getAllData(true)"
+          [tableActions]="rowActions" (actionClicked)="onActionClicked($event)" (refresh)="getAllData(true)"
           (pageChange)="onPageChange($event)" (searchChange)="onSearchChange($event)"
           (sortChange)="onSortChange($event)" (pageSizeChange)="onPageSizeChange($event)">
         </app-table-template>
