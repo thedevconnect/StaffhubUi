@@ -107,4 +107,9 @@ export class AttendanceService {
   getAllLogs(): Observable<ApiResponse<SwipeLog[]>> {
     return this.http.get<ApiResponse<SwipeLog[]>>(`${this.apiBase}/api/attendance/logs`);
   }
+
+  getHolidays(): Observable<ApiResponse<AttendanceRecord[]>> {
+    return this.http.get<ApiResponse<AttendanceRecord[]>>(`${this.apiBase}/api/holidays`);
+  }
+
 }

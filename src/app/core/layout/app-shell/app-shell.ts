@@ -163,7 +163,9 @@ export class AppShell {
             { label: 'Monthly Attendance Calendar', route: '/ess/monthly-attendance-calendar' },
             { label: 'Leave Application', route: '/ess/leave-application' },
             { label: 'Apply Short Leave', route: '/ess/apply-short-leave' },
-            { label: 'Final Attendance', route: '/ess/final-attendance' }
+            { label: 'Final Attendance', route: '/ess/final-attendance' },
+            { label: 'Holiday List', route: '/ess/holiday-list' }
+
           ]
         },
         {

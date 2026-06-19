@@ -16,6 +16,7 @@ import { ExpenseManagement } from '../components/ess/expense-management/expense-
 import { PerformanceManagement } from '../components/ess/performance-management/performance-management';
 import { Probation } from '../components/ess/probation/probation';
 import { Ticket } from '../components/ess/ticket/ticket';
+import { HolidayList } from '../components/ess/holiday/holiday-list/holiday-list';
 
 export const essRoutes: Routes = [
   { path: '', redirectTo: 'ess-dashboard', pathMatch: 'full' },
@@ -29,6 +30,8 @@ export const essRoutes: Routes = [
   { path: 'final-attendance', component: FinalAttendance },
   { path: 'employee-resignation', component: EmployeeResignation },
   { path: 'reportings-attendance', component: ReportingsAttendance },
+  { path: 'holiday-list', component: HolidayList },
+
 
 
 
