@@ -30,8 +30,8 @@ export class AuthService {
 
   login(payload: LoginRequest): Observable<{ message: string }> {
     return this.http.post<LoginApiResponse>(`${this.apiBase}/api/auth/login`, payload).pipe(
-      tap((response) => {
-        if (!response?.success) {
+      tap((response: any) => {
+        if (response?.status !== 'success' && response?.statusCode !== 200 && !response?.success) {
           throw new Error(response?.message || 'Login failed');
         }
       }),
@@ -112,10 +112,6 @@ export class AuthService {
 
   private toAuthUser(data: LoginApiResponse['data'], decoded: JwtPayload | null): AuthUser {
     let normalizedRoles = this.normalizeRoles(data);
-    
-    if (decoded?.role) {
-      normalizedRoles = [{ rolDes: decoded.role, roleId: decoded.role.toLowerCase() }];
-    }
 
     return {
       id: decoded?.userId || data.userId || data.id || 0,
@@ -167,9 +163,6 @@ export class AuthService {
     const decoded = this.decodeToken(token);
     
     let normalizedRoles = this.normalizeRoles(res);
-    if (decoded?.role) {
-       normalizedRoles = [{ rolDes: decoded.role, roleId: decoded.role.toLowerCase() }];
-    }
 
     const user: AuthUser = {
       id: decoded?.userId || res.userId || res.id || 0,

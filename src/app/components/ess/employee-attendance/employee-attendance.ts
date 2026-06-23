@@ -16,6 +16,18 @@ import {
 import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template';
 import { RouterLink } from '@angular/router';
 
+export interface CalendarDay {
+  date: Date;
+  dateStr: string;
+  dayNumber: number;
+  isCurrentMonth: boolean;
+  isToday: boolean;
+  status: 'P' | 'A' | 'EL' | 'CL' | 'LOP' | 'Week Off' | 'Holiday' | null;
+  swipeIn?: string;
+  swipeOut?: string;
+  records?: AttendanceRecord[];
+}
+
 @Component({
   selector: 'app-employee-attendance',
   standalone: true,
@@ -68,6 +80,12 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   });
 
   readonly logs = signal<AttendanceRecord[]>([]);
+
+  // Calendar View State
+  viewMode = signal<'table' | 'calendar'>('table');
+  currentMonthDate = signal<Date>(new Date());
+  calendarWeeks = signal<CalendarDay[][]>([]);
+  weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   isActionLoading = false;
   breakDialogVisible = false;
@@ -185,7 +203,18 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     this.attendanceService.getHistory().subscribe({
       next: (res) => {
         if (res.success && Array.isArray(res.data)) {
-          this.logs.set(res.data);
+          const formattedData = res.data.map((record: any) => ({
+            ...record,
+            attendance_date: record.attendance_date ? record.attendance_date.split('T')[0] : '-',
+            swipe_in: this.formatDateTimeToTime(record.swipe_in),
+            swipe_out: this.formatDateTimeToTime(record.swipe_out),
+            created_at: this.formatDateTime(record.created_at),
+            updated_at: this.formatDateTime(record.updated_at)
+          }));
+          this.logs.set(formattedData);
+          if (this.viewMode() === 'calendar') {
+            this.generateCalendar();
+          }
         }
       }
     });
@@ -231,79 +260,126 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   // Table Columns
 
   columns: TableColumn[] = [
-    {
-      key: 'actions',
-      header: 'Actions',
-      isVisible: true
-    },
-
-    {
-      key: 'employee_id',
-      header: 'Employee ID',
-      isVisible: true,
-      isSortable: true
-    },
-
-    {
-      key: 'attendance_date',
-      header: 'Attendance Date',
-      isVisible: true,
-      isSortable: true
-    },
-
-    {
-      key: 'swipe_in',
-      header: 'Swipe In',
-      isVisible: true,
-      isSortable: true
-    },
-
-    {
-      key: 'swipe_out',
-      header: 'Swipe Out',
-      isVisible: true,
-      isSortable: true
-    },
-
-    {
-      key: 'attendance_status',
-      header: 'Status',
-      isVisible: true,
-      isSortable: true
-    },
-
-    {
-      key: 'created_at',
-      header: 'Created At',
-      isVisible: true,
-      isSortable: true
-    },
-
-    {
-      key: 'updated_at',
-      header: 'Updated At',
-      isVisible: true,
-      isSortable: true
-    }
+    { key: 'actions', header: 'Actions', isVisible: true },
+    { key: 'employee_id', header: 'Employee ID', isVisible: true, isSortable: true },
+    { key: 'attendance_date', header: 'Attendance Date', isVisible: true, isSortable: true },
+    { key: 'swipe_in', header: 'Swipe In', isVisible: true, isSortable: true },
+    { key: 'swipe_out', header: 'Swipe Out', isVisible: true, isSortable: true },
+    { key: 'attendance_status', header: 'Status', isVisible: true, isSortable: true },
+    { key: 'created_at', header: 'Created At', isVisible: true, isSortable: true },
+    { key: 'updated_at', header: 'Updated At', isVisible: true, isSortable: true }
   ]
 
   rowActions = [
-    {
-      label: 'View',
-      icon: 'pi pi-eye',
-      id: 'view'
-    },
-    {
-      label: 'Edit',
-      icon: 'pi pi-pencil',
-      id: 'edit'
-    },
-    {
-      label: 'Delete',
-      icon: 'pi pi-trash',
-      id: 'delete'
-    }
+    { label: 'View', icon: 'pi pi-eye', id: 'view' },
+    { label: 'Edit', icon: 'pi pi-pencil', id: 'edit' },
+    { label: 'Delete', icon: 'pi pi-trash', id: 'delete' }
   ];
+
+  // Calendar Logic
+  toggleViewMode(mode: 'table' | 'calendar'): void {
+    this.viewMode.set(mode);
+    if (mode === 'calendar') {
+      this.generateCalendar();
+    }
+  }
+
+  prevMonth(): void {
+    const current = this.currentMonthDate();
+    this.currentMonthDate.set(new Date(current.getFullYear(), current.getMonth() - 1, 1));
+    this.generateCalendar();
+  }
+
+  nextMonth(): void {
+    const current = this.currentMonthDate();
+    this.currentMonthDate.set(new Date(current.getFullYear(), current.getMonth() + 1, 1));
+    this.generateCalendar();
+  }
+
+  generateCalendar(): void {
+    const year = this.currentMonthDate().getFullYear();
+    const month = this.currentMonthDate().getMonth();
+    
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - startDate.getDay()); 
+    
+    const endDate = new Date(lastDay);
+    if (endDate.getDay() !== 6) {
+      endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
+    }
+    
+    const weeks: CalendarDay[][] = [];
+    let currentWeek: CalendarDay[] = [];
+    
+    let loopDate = new Date(startDate);
+    
+    // Normalize today for comparison without time
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    
+    while (loopDate <= endDate) {
+      const dateStr = `${loopDate.getFullYear()}-${String(loopDate.getMonth() + 1).padStart(2, '0')}-${String(loopDate.getDate()).padStart(2, '0')}`;
+      const isCurrentMonth = loopDate.getMonth() === month;
+      
+      const day: CalendarDay = {
+        date: new Date(loopDate),
+        dateStr,
+        dayNumber: loopDate.getDate(),
+        isCurrentMonth,
+        isToday: dateStr === todayStr,
+        status: null,
+      };
+      
+      currentWeek.push(day);
+      
+      if (currentWeek.length === 7) {
+        weeks.push(currentWeek);
+        currentWeek = [];
+      }
+      
+      loopDate.setDate(loopDate.getDate() + 1);
+    }
+    
+    this.calendarWeeks.set(weeks);
+    this.mapDataToCalendar();
+  }
+
+  mapDataToCalendar(): void {
+    const weeks = this.calendarWeeks();
+    const logs = this.logs();
+    
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    const updatedWeeks = weeks.map(week => {
+      return week.map(day => {
+        const records = logs.filter(log => log.attendance_date === day.dateStr);
+        let status: CalendarDay['status'] = null;
+        let swipeIn = '';
+        let swipeOut = '';
+
+        const dayOfWeek = day.date.getDay();
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+        if (records.length > 0) {
+          status = 'P';
+          swipeIn = records[0].swipe_in || '';
+          swipeOut = records[records.length - 1].swipe_out || '';
+        } else if (isWeekend) {
+          status = 'Week Off';
+        } else if (day.dateStr < todayStr) {
+          status = 'A';
+        }
+
+        return { ...day, status, swipeIn, swipeOut, records };
+      });
+    });
+
+    this.calendarWeeks.set(updatedWeeks);
+  }
 
   async performSwipeIn(): Promise<void> {
     this.isActionLoading = true;
@@ -324,6 +400,17 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     }
 
     const ip_address = await this.getIpAddress();
+    if (!ip_address) {
+      this.isActionLoading = false;
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Network Error',
+        detail: 'Unable to retrieve IP Address. Please check your connection.'
+      });
+      return;
+    }
+
+    const location_address = await this.getDetailedLocation(coords.latitude, coords.longitude);
 
     const payload: Partial<AttendanceRecord> = {
       os_name,
@@ -331,7 +418,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
       device_name,
       latitude: coords.latitude,
       longitude: coords.longitude,
-      location_address: `Lat: ${coords.latitude.toFixed(4)}, Long: ${coords.longitude?.toFixed(4)}`,
+      location_address: location_address,
       ip_address: ip_address
     };
 
@@ -413,7 +500,28 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     const device_name = this.getDeviceName();
     const coords = await this.getGeolocation();
 
+    if (!coords.latitude || !coords.longitude) {
+      this.isActionLoading = false;
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Location Required',
+        detail: 'Location permission is mandatory to Swipe Out. Please allow location access.'
+      });
+      return;
+    }
+
     const ip_address = await this.getIpAddress();
+    if (!ip_address) {
+      this.isActionLoading = false;
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Network Error',
+        detail: 'Unable to retrieve IP Address. Please check your connection.'
+      });
+      return;
+    }
+
+    const location_address = await this.getDetailedLocation(coords.latitude, coords.longitude);
 
     const payload = {
       notes: this.swipeOutNote,
@@ -422,8 +530,8 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
       device_name,
       latitude: coords.latitude,
       longitude: coords.longitude,
-      location_address: coords.latitude ? `Lat: ${coords.latitude.toFixed(4)}, Long: ${coords.longitude?.toFixed(4)}` : 'Location Access Not Granted',
-      ip_address: ip_address || null
+      location_address: location_address,
+      ip_address: ip_address
     };
 
     this.attendanceService.swipeOut(payload).subscribe({
@@ -686,10 +794,20 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     return `${hours}h ${remainingMins}m`;
   }
 
-  private formatDateTimeToTime(dateStr: string): string {
+  private formatDateTimeToTime(dateStr: string | null): string {
+    if (!dateStr) return '-';
     const date = this.parseDbDate(dateStr);
     if (!date) return '-';
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+  }
+
+  private formatDateTime(dateStr: string | null): string {
+    if (!dateStr) return '-';
+    const date = this.parseDbDate(dateStr);
+    if (!date) return '-';
+    const d = date.toISOString().split('T')[0];
+    const t = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    return `${d} ${t}`;
   }
 
   formatTimeString(dateStr: string | null): string {
@@ -757,6 +875,16 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
       return res.ip || null;
     } catch {
       return null;
+    }
+  }
+
+  private async getDetailedLocation(lat: number, lon: number): Promise<string> {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+      const data = await res.json();
+      return data.display_name || `Lat: ${lat.toFixed(4)}, Long: ${lon.toFixed(4)}`;
+    } catch {
+      return `Lat: ${lat.toFixed(4)}, Long: ${lon.toFixed(4)}`;
     }
   }
 }
