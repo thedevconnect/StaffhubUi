@@ -114,7 +114,7 @@ export class AppShell {
       .map(item => {
         const cloned = { ...item };
         if (cloned.children && cloned.children.length > 0) {
-          const matchedChildren = cloned.children.map(sub => {
+          const matchedChildren = cloned.children.map((sub: SidebarMenuItem) => {
             const clonedSub = { ...sub };
             if (clonedSub.children && clonedSub.children.length > 0) {
               const matchedGrand = clonedSub.children.filter(child =>

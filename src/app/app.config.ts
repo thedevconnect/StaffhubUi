@@ -15,10 +15,13 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideAnimations(),
     providePrimeNG({
-    theme: {
-      preset: Aura
-    }
-  }),
+      theme: {
+        preset: Aura,
+        options: {
+          darkModeSelector: false
+        }
+      }
+    }),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideRouter(routes)
   ]

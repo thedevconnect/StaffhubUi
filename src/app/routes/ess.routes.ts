@@ -17,6 +17,7 @@ import { PerformanceManagement } from '../components/ess/performance-management/
 import { Probation } from '../components/ess/probation/probation';
 import { Ticket } from '../components/ess/ticket/ticket';
 import { HolidayList } from '../components/ess/holiday/holiday-list/holiday-list';
+import { Profile } from '../components/ess/profile/profile/profile';
 
 export const essRoutes: Routes = [
   { path: '', redirectTo: 'ess-dashboard', pathMatch: 'full' },
@@ -32,9 +33,6 @@ export const essRoutes: Routes = [
   { path: 'reportings-attendance', component: ReportingsAttendance },
   { path: 'holiday-list', component: HolidayList },
 
-
-
-
   { path: 'service-file', component: ServiceFile },
   { path: 'get-employee-info', component: GetEmployeeInfo },
   { path: 'monthly-attendance-calendar', component: MonthlyAttendanceCalendar },
@@ -44,30 +42,6 @@ export const essRoutes: Routes = [
   { path: 'performance-management', component: PerformanceManagement },
   { path: 'probation', component: Probation },
   { path: 'ticket', component: Ticket },
+  { path: 'profile', component: Profile },
+
 ];
-
-
-// export const essRoutes: Routes = [
-//     { path: 'my-assets', component: MyAssets },
-//     { path: 'employee-attendance', component: EmployeeAttendance },
-//     { path: 'attendance-regularization', component: AttendanceRegularization },
-//     { path: 'employee-calendar', component: EmployeeCalendar },111
-//     { path: 'leave-application', component: LeaveApplication },
-//     { path: 'short-leave', component: ShortLeave },
-//     { path: 'final-attendance', component: FinalAttendance },
-//     { path: 'leave-card-detail', component: LeaveCardDetail },111
-//     { path: 'holiday-list', component: HolidayList }, 1111
-//     { path: 'parental-leave', component: ParentalLeave },11
-//     { path: 'employee-official-detail', component: EmployeeOfficialDetail },11
-//     { path: 'attendance-regularization-action', component: AttendanceRegularizationAction },
-//     { path: 'leave-approval', component: LeaveApproval },
-//     { path: 'short-leave-approval', component: ShortLeaveApproval },
-//     { path: 'exit-interview-form', component: ExitInterviewForm },
-//     { path: 'employee-resignation', component: EmployeeResignation },
-//     { path: 'performance-appraisal-form', component: PerformanceAppraisalForm },
-//     { path: 'employee-accept-kra', component: EmployeeAcceptKra },
-//     { path: 'employee-letter-issued', component: EmployeeLetterIssued },
-//     { path: 'reportings-attendance', component: ReportingsAttendance },
-
-
-// ]

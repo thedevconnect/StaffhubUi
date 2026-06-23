@@ -21,6 +21,12 @@ export interface AttendanceRecord {
   os_name: string | null;
   notes: string | null;
   total_work_minutes: number | null;
+  swipe_in_address?: string | null;
+  swipe_in_latitude?: number | null;
+  swipe_in_longitude?: number | null;
+  swipe_out_address?: string | null;
+  swipe_out_latitude?: number | null;
+  swipe_out_longitude?: number | null;
 }
 
 export interface BreakRecord {

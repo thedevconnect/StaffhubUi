@@ -1,8 +1,11 @@
 // Floating Animation for background blobs
 @keyframes float-blob {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0) scale(1);
   }
+
   50% {
     transform: translateY(-20px) scale(1.05);
   }
@@ -22,6 +25,7 @@
     opacity: 0;
     transform: translateY(12px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -37,7 +41,7 @@
   .p-floatlabel {
     position: relative;
     width: 100%;
-    
+
     label {
       left: 0.875rem;
       transition: all 0.2s ease-out;
@@ -49,12 +53,12 @@
     }
 
     // Floating state
-    input:focus ~ label,
-    input.p-filled ~ label,
-    textarea:focus ~ label,
-    textarea.p-filled ~ label,
-    .p-inputwrapper-focus ~ label,
-    .p-inputwrapper-filled ~ label {
+    input:focus~label,
+    input.p-filled~label,
+    textarea:focus~label,
+    textarea.p-filled~label,
+    .p-inputwrapper-focus~label,
+    .p-inputwrapper-filled~label {
       top: -0.75rem;
       font-size: 0.75rem;
       transform: scale(0.9) translateY(0);
@@ -73,15 +77,16 @@
     font-size: 0.875rem;
     border: 1px solid #cbd5e1; // slate-300
     background-color: #ffffff;
+    color: #0f172a !important;
     transition: all 0.2s ease;
-    
+
     &:focus {
       border-color: #4f46e5; // indigo-600
       box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
       outline: none;
     }
-    
-    &.ng-invalid.ng-dirty { 
+
+    &.ng-invalid.ng-dirty {
       border-color: #f43f5e;
       box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.15);
     }
@@ -98,7 +103,7 @@
   .p-password {
     width: 100%;
     display: inline-flex;
-    
+
     input {
       width: 100%;
     }
@@ -116,11 +121,11 @@
       width: 1.25rem;
       height: 1.25rem;
       transition: all 0.2s;
-      
+
       &:hover {
         border-color: #4f46e5;
       }
-      
+
       &.p-highlight {
         background: #4f46e5;
         border-color: #4f46e5;
@@ -132,7 +137,7 @@
   .p-button {
     font-weight: 700;
     border-radius: 0.75rem;
-    
+
     &.p-button-text {
       padding: 0;
       background: transparent;

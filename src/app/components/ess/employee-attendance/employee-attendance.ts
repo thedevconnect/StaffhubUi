@@ -60,7 +60,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   readonly isSwipedIn = signal<boolean>(false);
   readonly isOnBreak = signal<boolean>(false);
   readonly activeRecord = signal<AttendanceRecord | null>(null);
-  readonly breakHistory = signal<BreakRecord[]>([]);
+  //readonly breakHistory = signal<BreakRecord[]>([]);
   readonly todayPunches = signal<Array<{ type: string; time: string; icon: string; colorClass: string }>>([]);
 
   readonly duration = signal<string>('00:00:00');
@@ -140,26 +140,26 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
           if (record.swipe_in && !record.swipe_out) {
             this.isSwipedIn.set(true);
 
-            this.attendanceService.getBreakHistory().subscribe({
-              next: (breakRes) => {
-                const breaks = breakRes.success && Array.isArray(breakRes.data) ? breakRes.data : [];
+            // this.attendanceService.getBreakHistory().subscribe({
+            //   next: (breakRes) => {
+            //     const breaks = breakRes.success && Array.isArray(breakRes.data) ? breakRes.data : [];
 
-                this.breakHistory.set(breaks);
-                this.isOnBreak.set(breaks.some(b => b.break_end === null));
+            //     this.breakHistory.set(breaks);
+            //     this.isOnBreak.set(breaks.some(b => b.break_end === null));
 
-                this.buildTodayTimeline(allTodayRecords, breaks);
-                this.startTimerTicks(record, breaks);
+            //     this.buildTodayTimeline(allTodayRecords, breaks);
+            //     this.startTimerTicks(record, breaks);
 
-                this.isActionLoading = false;
-              },
-              error: () => {
-                this.breakHistory.set([]);
-                this.isOnBreak.set(false);
-                this.buildTodayTimeline(allTodayRecords, []);
-                this.startTimerTicks(record, []);
-                this.isActionLoading = false;
-              }
-            });
+            //     this.isActionLoading = false;
+            //   },
+            //   error: () => {
+            //     this.breakHistory.set([]);
+            //     this.isOnBreak.set(false);
+            //     this.buildTodayTimeline(allTodayRecords, []);
+            //     this.startTimerTicks(record, []);
+            //     this.isActionLoading = false;
+            //   }
+            // });
           } else {
             this.isSwipedIn.set(false);
             this.isOnBreak.set(false);
@@ -208,6 +208,8 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
             attendance_date: record.attendance_date ? record.attendance_date.split('T')[0] : '-',
             swipe_in: this.formatDateTimeToTime(record.swipe_in),
             swipe_out: this.formatDateTimeToTime(record.swipe_out),
+            swipe_in_location: record.swipe_in_address || record.location_address || '-',
+            swipe_out_location: record.swipe_out_address || '-',
             created_at: this.formatDateTime(record.created_at),
             updated_at: this.formatDateTime(record.updated_at)
           }));
@@ -264,7 +266,9 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     { key: 'employee_id', header: 'Employee ID', isVisible: true, isSortable: true },
     { key: 'attendance_date', header: 'Attendance Date', isVisible: true, isSortable: true },
     { key: 'swipe_in', header: 'Swipe In', isVisible: true, isSortable: true },
+    { key: 'swipe_in_location', header: 'Swipe In Location', isVisible: true },
     { key: 'swipe_out', header: 'Swipe Out', isVisible: true, isSortable: true },
+    { key: 'swipe_out_location', header: 'Swipe Out Location', isVisible: true },
     { key: 'attendance_status', header: 'Status', isVisible: true, isSortable: true },
     { key: 'created_at', header: 'Created At', isVisible: true, isSortable: true },
     { key: 'updated_at', header: 'Updated At', isVisible: true, isSortable: true }
@@ -299,31 +303,31 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   generateCalendar(): void {
     const year = this.currentMonthDate().getFullYear();
     const month = this.currentMonthDate().getMonth();
-    
+
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    
+
     const startDate = new Date(firstDay);
-    startDate.setDate(startDate.getDate() - startDate.getDay()); 
-    
+    startDate.setDate(startDate.getDate() - startDate.getDay());
+
     const endDate = new Date(lastDay);
     if (endDate.getDay() !== 6) {
       endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
     }
-    
+
     const weeks: CalendarDay[][] = [];
     let currentWeek: CalendarDay[] = [];
-    
+
     let loopDate = new Date(startDate);
-    
+
     // Normalize today for comparison without time
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    
+
     while (loopDate <= endDate) {
       const dateStr = `${loopDate.getFullYear()}-${String(loopDate.getMonth() + 1).padStart(2, '0')}-${String(loopDate.getDate()).padStart(2, '0')}`;
       const isCurrentMonth = loopDate.getMonth() === month;
-      
+
       const day: CalendarDay = {
         date: new Date(loopDate),
         dateStr,
@@ -332,17 +336,17 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
         isToday: dateStr === todayStr,
         status: null,
       };
-      
+
       currentWeek.push(day);
-      
+
       if (currentWeek.length === 7) {
         weeks.push(currentWeek);
         currentWeek = [];
       }
-      
+
       loopDate.setDate(loopDate.getDate() + 1);
     }
-    
+
     this.calendarWeeks.set(weeks);
     this.mapDataToCalendar();
   }
@@ -350,7 +354,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   mapDataToCalendar(): void {
     const weeks = this.calendarWeeks();
     const logs = this.logs();
-    
+
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
@@ -449,7 +453,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
           this.activeRecord.set(newRecord);
           this.isSwipedIn.set(true);
           this.isOnBreak.set(false);
-          this.breakHistory.set([]);
+          //this.breakHistory.set([]);
           this.duration.set('00:00:00');
           this.breakDuration.set('00:00:00');
 
@@ -652,7 +656,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     this.activeRecord.set(null);
     this.isSwipedIn.set(false);
     this.isOnBreak.set(false);
-    this.breakHistory.set([]);
+    // this.breakHistory.set([]);
     this.todayPunches.set([]);
     this.duration.set('00:00:00');
     this.breakDuration.set('00:00:00');
@@ -713,8 +717,9 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     recordsList.forEach(record => {
       if (record.swipe_in) {
         const dt = this.parseDbDate(record.swipe_in);
+        const loc = record.swipe_in_address || record.location_address;
         timeline.push({
-          type: 'Swipe In',
+          type: loc ? `Swipe In (${loc})` : 'Swipe In',
           time: this.formatDateTimeToTime(record.swipe_in),
           timestamp: dt ? dt.getTime() : 0,
           icon: 'pi pi-sign-in',
@@ -723,8 +728,12 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
       }
       if (record.swipe_out) {
         const dt = this.parseDbDate(record.swipe_out);
+        const loc = record.swipe_out_address;
+        const typeStr = record.notes
+          ? `Swipe Out (${record.notes})${loc ? ' @ ' + loc : ''}`
+          : `Swipe Out${loc ? ' @ ' + loc : ''}`;
         timeline.push({
-          type: record.notes ? `Swipe Out (${record.notes})` : 'Swipe Out',
+          type: typeStr,
           time: this.formatDateTimeToTime(record.swipe_out),
           timestamp: dt ? dt.getTime() : 0,
           icon: 'pi pi-sign-out',
@@ -854,6 +863,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
         return;
       }
 
+      // First try with enableHighAccuracy: true and maximumAge: 0 to force bypass cache
       navigator.geolocation.getCurrentPosition(
         (position) => {
           resolve({
@@ -861,10 +871,23 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
             longitude: position.coords.longitude
           });
         },
-        () => {
-          resolve({ latitude: null, longitude: null });
+        (error) => {
+          console.warn('High accuracy geolocation failed or timed out. Trying standard resolution...', error);
+          // Fallback to enableHighAccuracy: false
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              resolve({
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+              });
+            },
+            () => {
+              resolve({ latitude: null, longitude: null });
+            },
+            { enableHighAccuracy: false, timeout: 5000, maximumAge: 0 }
+          );
         },
-        { timeout: 5000 }
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
       );
     });
   }
@@ -882,7 +905,14 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     try {
       const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
       const data = await res.json();
-      return data.display_name || `Lat: ${lat.toFixed(4)}, Long: ${lon.toFixed(4)}`;
+      let displayName = data.display_name || `Lat: ${lat.toFixed(4)}, Long: ${lon.toFixed(4)}`;
+
+      // Override OpenStreetMap's geocoding mistake for Uttam Nagar postcode 110059
+      if (displayName.includes('110059') && displayName.includes('Patel Nagar')) {
+        displayName = displayName.replace('Patel Nagar', 'Uttam Nagar');
+      }
+
+      return displayName;
     } catch {
       return `Lat: ${lat.toFixed(4)}, Long: ${lon.toFixed(4)}`;
     }

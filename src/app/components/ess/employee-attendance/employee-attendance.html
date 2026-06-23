@@ -100,10 +100,19 @@
           *ngIf="record.browser_name">
           <i class="pi pi-globe"></i> {{ record.browser_name }}
         </span>
+        <!-- Swipe In Location -->
         <span
           class="inline-flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded border border-slate-100 max-w-[200px] truncate"
-          *ngIf="record.location_address" [title]="record.location_address">
-          <i class="pi pi-map-marker text-rose-500"></i> {{ record.location_address }}
+          *ngIf="record.swipe_in_address || record.location_address" 
+          [title]="'Swipe In Location: ' + (record.swipe_in_address || record.location_address)">
+          <i class="pi pi-map-marker text-emerald-500"></i> In: {{ record.swipe_in_address || record.location_address }}
+        </span>
+        <!-- Swipe Out Location -->
+        <span
+          class="inline-flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded border border-slate-100 max-w-[200px] truncate"
+          *ngIf="record.swipe_out_address" 
+          [title]="'Swipe Out Location: ' + record.swipe_out_address">
+          <i class="pi pi-map-marker text-rose-500"></i> Out: {{ record.swipe_out_address }}
         </span>
       </div>
     </div>
