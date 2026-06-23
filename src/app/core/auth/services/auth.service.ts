@@ -2,7 +2,7 @@ import { Injectable, computed, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { AuthUser, LoginApiResponse, LoginRequest, RoleOption } from '../models/auth.model';
+import { AuthUser, JwtPayload, LoginApiResponse, LoginRequest, RoleOption } from '../models/auth.model';
 import { environment } from '../../../../environments/environment';
 
 const SESSION_KEY = 'staffhub_auth_session';
@@ -36,7 +36,12 @@ export class AuthService {
         }
       }),
       map((response) => {
-        const user = this.toAuthUser(response.data);
+        const token = response.data.token || '';
+        if (token) {
+           localStorage.setItem('userToken', token);
+        }
+        const decoded = this.decodeToken(token);
+        const user = this.toAuthUser(response.data, decoded);
         this._user.set(user);
         this._selectedRoleId.set(user.roles[0]?.roleId ?? '');
         this.persistSession();
@@ -62,7 +67,11 @@ export class AuthService {
   }
 
   getDashboardRoute(): string {
-    return this.selectedRoleId().toLowerCase().includes('ess') ? '/ess/ess-dashboard' : '/ess/ess-dashboard';
+    const roleId = this.selectedRoleId().toLowerCase();
+    if (roleId === 'hradmin' || roleId === 'hr_admin') {
+      return '/hradmin/hradmin-dashboard';
+    }
+    return '/ess/ess-dashboard';
   }
 
   private restoreSession(): void {
@@ -86,12 +95,33 @@ export class AuthService {
     localStorage.setItem(SESSION_KEY, JSON.stringify(payload));
   }
 
-  private toAuthUser(data: LoginApiResponse['data']): AuthUser {
-    const normalizedRoles = this.normalizeRoles(data);
+  decodeToken(token: string): JwtPayload | null {
+    if (!token) return null;
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+
+      return JSON.parse(jsonPayload) as JwtPayload;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  private toAuthUser(data: LoginApiResponse['data'], decoded: JwtPayload | null): AuthUser {
+    let normalizedRoles = this.normalizeRoles(data);
+    
+    if (decoded?.role) {
+      normalizedRoles = [{ rolDes: decoded.role, roleId: decoded.role.toLowerCase() }];
+    }
+
     return {
-      id: data.userId || data.id || 0,
+      id: decoded?.userId || data.userId || data.id || 0,
       username: data.username || data.userName || '',
       employeeName: data.employeeName || data.userName || data.username || 'User',
+      companyId: decoded?.companyId,
       roles: normalizedRoles.length ? normalizedRoles : [{ rolDes: 'HR Admin', roleId: 'hradmin' }],
     };
   }
@@ -133,11 +163,19 @@ export class AuthService {
   }
 
   setSessionFromLogin(res: any, username: string): void {
-    const normalizedRoles = this.normalizeRoles(res);
+    const token = res.token || localStorage.getItem('userToken') || '';
+    const decoded = this.decodeToken(token);
+    
+    let normalizedRoles = this.normalizeRoles(res);
+    if (decoded?.role) {
+       normalizedRoles = [{ rolDes: decoded.role, roleId: decoded.role.toLowerCase() }];
+    }
+
     const user: AuthUser = {
-      id: res.userId || res.id || 0,
+      id: decoded?.userId || res.userId || res.id || 0,
       username: username,
       employeeName: res.userName || username,
+      companyId: decoded?.companyId,
       roles: normalizedRoles.length ? normalizedRoles : [{ rolDes: 'HR Admin', roleId: 'hradmin' }]
     };
     this._user.set(user);

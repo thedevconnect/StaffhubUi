@@ -59,10 +59,14 @@ export class RegisterComponent implements OnInit {
     this.signupForm = this.fb.group({
       companyName: ['', Validators.required],
       shortName: ['', Validators.required],
+      companyEmail: ['', [Validators.required, Validators.email]],
+      companyPhone: ['', Validators.required],
       address: ['', Validators.required],
-      username: ['', Validators.required],
-      email: ['', [Validators.required, Validators.pattern('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}$')]],
-      mobile: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+      industry: ['', Validators.required],
+      adminName: ['', Validators.required],
+      adminEmail: ['', [Validators.required, Validators.email]],
+      mobileNumber: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+      password: ['', Validators.required],
       captcha: ['', Validators.required],
       acceptTerms: [false, Validators.requiredTrue]
     });
@@ -93,48 +97,24 @@ export class RegisterComponent implements OnInit {
 
     this.isProcess = true;
 
-    // Create payload according to API spec (remove acceptTerms/captcha if needed by backend, though backend usually ignores extra fields)
     const payload = { ...this.signupForm.value };
-
-    // UI uses 'username' control for the Full Name field
-    payload.fullName = payload.username;
-    // Derive username from email prefix
-    if (payload.email) {
-      payload.username = payload.email.split('@')[0];
-    }
-    // Generate a default empId since it's missing from the form
-    payload.empId = 'EMP' + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
 
     delete payload.acceptTerms;
     delete payload.captcha;
 
     this.userService.signup(payload).subscribe({
       next: (res: any) => {
-        const generatedPassword = res.password || 'NIPL@123';
-
         // Automatically log in using the newly created credentials
-        this.userService.login(payload.email, generatedPassword).subscribe({
+        this.authService.login({ username: payload.adminEmail, password: payload.password }).subscribe({
           next: (loginApiRes: any) => {
             this.isProcess = false;
-
-            const loginRes = loginApiRes.data || loginApiRes;
-
-            // Save authentication details
-            localStorage.setItem('userToken', loginRes.token);
-            localStorage.setItem('userId', loginRes.userId);
-            localStorage.setItem('companyId', loginRes.companyId);
-            localStorage.setItem('role', loginRes.role);
-
-            // Update AuthService session
-            this.authService.setSessionFromLogin(loginRes, payload.email);
-
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Registration successful. Welcome!' });
             this.router.navigate([this.authService.getDashboardRoute()]);
           },
           error: (loginErr: any) => {
             this.isProcess = false;
             // If auto-login fails, redirect to login page with success message
-            this.messageService.add({ severity: 'success', summary: 'Registration Success', detail: `Your password is ${generatedPassword}. Please log in.` });
+            this.messageService.add({ severity: 'success', summary: 'Registration Success', detail: `Registration successful. Please log in with your credentials.` });
             this.router.navigate(['/login']);
           }
         });

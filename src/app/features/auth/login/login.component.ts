@@ -152,26 +152,15 @@ export class LoginComponent implements OnInit {
 
     this.isProcess = true;
 
-    this.userService.login(username, password).subscribe({
-      next: (apiRes: any) => {
+    this.authService.login({ username, password }).subscribe({
+      next: (res: any) => {
         this.isProcess = false;
-
-        const res = apiRes.data || apiRes;
-
-        localStorage.setItem('userToken', res.token);
-        localStorage.setItem('userId', res.userId);
-        localStorage.setItem('companyId', res.companyId);
-        localStorage.setItem('role', res.role);
-
-        // Update AuthService session
-        this.authService.setSessionFromLogin(res, username);
-
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Login successfully' });
         this.router.navigate([this.authService.getDashboardRoute()]);
       },
       error: (err: any) => {
         this.isProcess = false;
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.error?.message || 'Invalid username or password' });
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.message || 'Invalid username or password' });
       }
     });
   }

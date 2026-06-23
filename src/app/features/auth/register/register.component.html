@@ -130,6 +130,42 @@
                             </small>
                         </div>
 
+                        <!-- Company Email -->
+                        <div>
+                            <p-floatlabel>
+                                <input pInputText id="companyEmail" type="email" formControlName="companyEmail" class="w-full bg-white" [class.ng-invalid]="f2['companyEmail'].invalid && f2['companyEmail'].touched" [class.ng-dirty]="f2['companyEmail'].invalid && f2['companyEmail'].touched" />
+                                <label for="companyEmail">Company Email</label>
+                            </p-floatlabel>
+                            <small *ngIf="f2['companyEmail'].touched && f2['companyEmail'].errors" class="text-rose-500 text-xs mt-1.5 block font-medium">
+                                <span *ngIf="f2['companyEmail'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Company email is required.</span>
+                                <span *ngIf="f2['companyEmail'].errors?.['email']"><i class="pi pi-exclamation-circle mr-1"></i>Invalid email format.</span>
+                            </small>
+                        </div>
+
+                        <!-- Grid: Company Phone & Industry -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Company Phone -->
+                            <div>
+                                <p-floatlabel>
+                                    <input pInputText id="companyPhone" type="text" formControlName="companyPhone" class="w-full bg-white" [class.ng-invalid]="f2['companyPhone'].invalid && f2['companyPhone'].touched" [class.ng-dirty]="f2['companyPhone'].invalid && f2['companyPhone'].touched" />
+                                    <label for="companyPhone">Company Phone</label>
+                                </p-floatlabel>
+                                <small *ngIf="f2['companyPhone'].touched && f2['companyPhone'].errors" class="text-rose-500 text-xs mt-1.5 block font-medium">
+                                    <span *ngIf="f2['companyPhone'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Company phone is required.</span>
+                                </small>
+                            </div>
+                            <!-- Industry -->
+                            <div>
+                                <p-floatlabel>
+                                    <input pInputText id="industry" type="text" formControlName="industry" class="w-full bg-white" [class.ng-invalid]="f2['industry'].invalid && f2['industry'].touched" [class.ng-dirty]="f2['industry'].invalid && f2['industry'].touched" />
+                                    <label for="industry">Industry</label>
+                                </p-floatlabel>
+                                <small *ngIf="f2['industry'].touched && f2['industry'].errors" class="text-rose-500 text-xs mt-1.5 block font-medium">
+                                    <span *ngIf="f2['industry'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Industry is required.</span>
+                                </small>
+                            </div>
+                        </div>
+
                         <!-- Company Address -->
                         <div>
                             <p-floatlabel>
@@ -143,51 +179,58 @@
                         </div>
                     </div>
 
-                    <!-- Section: Contact Details -->
+                    <!-- Section: Admin Information -->
                     <div class="border border-slate-100 rounded-2xl p-5 bg-slate-50/50 flex flex-col gap-5">
                         <h3 class="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2 select-none">
-                            <i class="pi pi-user text-indigo-600"></i> Contact Representative
+                            <i class="pi pi-user text-indigo-600"></i> Admin Information
                         </h3>
 
-                        <!-- Full Name -->
+                        <!-- Admin Name -->
                         <div>
                             <p-floatlabel>
-                                <input pInputText id="contactName" formControlName="username" class="w-full bg-white" [class.ng-invalid]="f2['username'].invalid && f2['username'].touched" [class.ng-dirty]="f2['username'].invalid && f2['username'].touched" />
-                                <label for="contactName">Full Name</label>
+                                <input pInputText id="adminName" formControlName="adminName" class="w-full bg-white" [class.ng-invalid]="f2['adminName'].invalid && f2['adminName'].touched" [class.ng-dirty]="f2['adminName'].invalid && f2['adminName'].touched" />
+                                <label for="adminName">Admin Name</label>
                             </p-floatlabel>
-                            <small *ngIf="f2['username'].touched && f2['username'].errors" class="text-rose-500 text-xs mt-1.5 block font-medium">
-                                <span *ngIf="f2['username'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Name is required.</span>
-                                <span *ngIf="f2['username'].errors?.['whitespace']"><i class="pi pi-exclamation-circle mr-1"></i>Name cannot be only whitespace.</span>
-                                <span *ngIf="f2['username'].errors?.['minlength']"><i class="pi pi-exclamation-circle mr-1"></i>Name must be at least 3 characters.</span>
-                                <span *ngIf="f2['username'].errors?.['maxlength']"><i class="pi pi-exclamation-circle mr-1"></i>Name must not exceed 20 characters.</span>
-                                <span *ngIf="f2['username'].errors?.['pattern']"><i class="pi pi-exclamation-circle mr-1"></i>Please enter a valid name.</span>
+                            <small *ngIf="f2['adminName'].touched && f2['adminName'].errors" class="text-rose-500 text-xs mt-1.5 block font-medium">
+                                <span *ngIf="f2['adminName'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Admin Name is required.</span>
                             </small>
                         </div>
 
                         <!-- Grid: Email & Mobile -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Email -->
+                            <!-- Admin Email -->
                             <div>
                                 <p-floatlabel>
-                                    <input pInputText id="contactEmail" type="email" formControlName="email" class="w-full bg-white" [class.ng-invalid]="f2['email'].invalid && f2['email'].touched" [class.ng-dirty]="f2['email'].invalid && f2['email'].touched" />
-                                    <label for="contactEmail">Email Address</label>
+                                    <input pInputText id="adminEmail" type="email" formControlName="adminEmail" class="w-full bg-white" [class.ng-invalid]="f2['adminEmail'].invalid && f2['adminEmail'].touched" [class.ng-dirty]="f2['adminEmail'].invalid && f2['adminEmail'].touched" />
+                                    <label for="adminEmail">Admin Email Address</label>
                                 </p-floatlabel>
-                                <small *ngIf="f2['email'].touched && f2['email'].errors" class="text-rose-500 text-xs mt-1.5 block font-medium">
-                                    <span *ngIf="f2['email'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Required.</span>
-                                    <span *ngIf="f2['email'].errors?.['pattern']"><i class="pi pi-exclamation-circle mr-1"></i>Invalid email.</span>
+                                <small *ngIf="f2['adminEmail'].touched && f2['adminEmail'].errors" class="text-rose-500 text-xs mt-1.5 block font-medium">
+                                    <span *ngIf="f2['adminEmail'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Required.</span>
+                                    <span *ngIf="f2['adminEmail'].errors?.['email']"><i class="pi pi-exclamation-circle mr-1"></i>Invalid email format.</span>
                                 </small>
                             </div>
                             <!-- Mobile -->
                             <div>
                                 <p-floatlabel>
-                                    <input pInputText id="contactMobile" type="text" formControlName="mobile" class="w-full bg-white" [class.ng-invalid]="f2['mobile'].invalid && f2['mobile'].touched" [class.ng-dirty]="f2['mobile'].invalid && f2['mobile'].touched" />
-                                    <label for="contactMobile">Mobile Number</label>
+                                    <input pInputText id="mobileNumber" type="text" formControlName="mobileNumber" class="w-full bg-white" [class.ng-invalid]="f2['mobileNumber'].invalid && f2['mobileNumber'].touched" [class.ng-dirty]="f2['mobileNumber'].invalid && f2['mobileNumber'].touched" />
+                                    <label for="mobileNumber">Mobile Number</label>
                                 </p-floatlabel>
-                                <small *ngIf="f2['mobile'].touched && f2['mobile'].errors" class="text-rose-500 text-xs mt-1.5 block font-medium">
-                                    <span *ngIf="f2['mobile'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Required.</span>
-                                    <span *ngIf="f2['mobile'].errors?.['pattern']"><i class="pi pi-exclamation-circle mr-1"></i>Invalid number.</span>
+                                <small *ngIf="f2['mobileNumber'].touched && f2['mobileNumber'].errors" class="text-rose-500 text-xs mt-1.5 block font-medium">
+                                    <span *ngIf="f2['mobileNumber'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Required.</span>
+                                    <span *ngIf="f2['mobileNumber'].errors?.['pattern']"><i class="pi pi-exclamation-circle mr-1"></i>Invalid number.</span>
                                 </small>
                             </div>
+                        </div>
+
+                        <!-- Admin Password -->
+                        <div>
+                            <p-floatlabel>
+                                <p-password id="password" formControlName="password" [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full bg-white" [feedback]="false" [class.ng-invalid]="f2['password'].invalid && f2['password'].touched" [class.ng-dirty]="f2['password'].invalid && f2['password'].touched"></p-password>
+                                <label for="password">Admin Password</label>
+                            </p-floatlabel>
+                            <small *ngIf="f2['password'].touched && f2['password'].errors" class="text-rose-500 text-xs mt-1.5 block font-medium">
+                                <span *ngIf="f2['password'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Password is required.</span>
+                            </small>
                         </div>
                     </div>
 
@@ -240,7 +283,7 @@
                             </div>
                             <div class="flex-1">
                                 <div class="text-xs font-bold text-slate-400 uppercase tracking-wider select-none">Email Code</div>
-                                <div class="text-sm font-black text-slate-800 mb-2 truncate max-w-[200px] sm:max-w-none">{{ signupForm.get('email')?.value }}</div>
+                                <div class="text-sm font-black text-slate-800 mb-2 truncate max-w-[200px] sm:max-w-none">{{ signupForm.get('adminEmail')?.value }}</div>
                                 <div class="flex gap-2 items-center" *ngIf="!emailVerified">
                                     <input pInputText type="text" placeholder="OTP Code" class="w-32 py-1.5 px-3 text-xs bg-white" />
                                     <p-button label="Verify" [text]="true" size="small" styleClass="text-indigo-600 font-bold p-0 hover:underline" />
@@ -260,7 +303,7 @@
                             </div>
                             <div class="flex-1">
                                 <div class="text-xs font-bold text-slate-400 uppercase tracking-wider select-none">Mobile Code</div>
-                                <div class="text-sm font-black text-slate-800 mb-2">{{ signupForm.get('mobile')?.value }}</div>
+                                <div class="text-sm font-black text-slate-800 mb-2">{{ signupForm.get('mobileNumber')?.value }}</div>
                                 <div class="flex gap-2 items-center" *ngIf="!mobileVerified">
                                     <input pInputText type="text" placeholder="OTP Code" class="w-32 py-1.5 px-3 text-xs bg-white" />
                                     <p-button label="Verify" [text]="true" size="small" styleClass="text-indigo-600 font-bold p-0 hover:underline" />

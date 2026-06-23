@@ -35,5 +35,14 @@ export interface AuthUser {
   id: number;
   username: string;
   employeeName: string;
+  companyId?: number;
   roles: RoleOption[];
+}
+
+export interface JwtPayload {
+  userId: number;
+  companyId: number;
+  role: string;
+  exp?: number;
+  iat?: number;
 }
