@@ -69,12 +69,28 @@ export class AppShell {
 
     this.userService.getUserSidebar(roleId).subscribe({
       next: (res: any) => {
-        if (res && res.data) {
+        const sidebarData = Array.isArray(res) ? res : (res.data || []);
+        
+        if (sidebarData && sidebarData.length > 0) {
+          const mappedMenus = sidebarData.map((menu: any) => ({
+            label: menu.menuName,
+            icon: menu.icon || 'pi-folder',
+            route: menu.routePath,
+            isOpen: false,
+            children: menu.children && menu.children.length > 0 ? menu.children.map((child: any) => ({
+              label: child.activityName,
+              route: '/' + (child.formValue || '').replace(/^\//, ''),
+              icon: child.iconClass || 'pi-file'
+            })) : undefined
+          }));
+
           const menus = [
             { label: 'Dashboard', icon: 'pi-home', route: '/ess/ess-dashboard' },
-            ...res.data
+            ...mappedMenus
           ];
           this.dynamicMenuItems.set(menus);
+        } else {
+          this.dynamicMenuItems.set([{ label: 'Dashboard', icon: 'pi-home', route: '/ess/ess-dashboard' }]);
         }
       },
       error: (err) => {

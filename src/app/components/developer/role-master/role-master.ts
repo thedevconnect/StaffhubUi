@@ -55,6 +55,7 @@ export class RoleMaster {
   columns: TableColumn[] = [
     { key: 'actions', header: '⚙️', isVisible: true, isSortable: false, isCustom: true },
     { key: 'role_name', header: 'Role', isVisible: true, isSortable: false },
+
   ];
   pageNo = 1;
   pageSize = 5;
