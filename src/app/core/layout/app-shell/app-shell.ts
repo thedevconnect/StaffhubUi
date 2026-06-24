@@ -64,7 +64,10 @@ export class AppShell {
   }
 
   fetchUserSidebar(): void {
-    this.userService.getUserSidebar().subscribe({
+    const roleId = this.selectedRoleId();
+    if (!roleId) return;
+
+    this.userService.getUserSidebar(roleId).subscribe({
       next: (res: any) => {
         if (res && res.data) {
           const menus = [

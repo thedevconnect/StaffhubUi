@@ -86,8 +86,8 @@ export class UserService {
   }
 
   // Sidebar
-  getUserSidebar() {
-    return this.http.get(`${this.apiUrl}/api/auth/user-sidebar`);
+  getUserSidebar(roleId: number | string) {
+    return this.http.get(`${this.apiUrl}/api/auth/user-sidebar?roleId=${roleId}`);
   }
 
   // Toggle sidebar
