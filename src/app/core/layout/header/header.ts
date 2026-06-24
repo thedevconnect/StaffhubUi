@@ -14,7 +14,7 @@ import { MenuItem } from 'primeng/api';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { AuthService } from '../../auth/services/auth.service';
+import { AuthService } from '../../../shared/services/services/auth.service';
 
 interface UserDetails {
   name: string;

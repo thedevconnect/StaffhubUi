@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
-import { AppShell } from './core/layout/app-shell/app-shell';
-import { authGuard, guestGuard } from './core/auth/guards/auth.guard';
+import { authGuard, guestGuard } from './shared/services/guards/auth.guard';
 import { Pagenotfound } from './shared/components/pagenotfound/pagenotfound';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
+import { AppShell } from './core/layout/app-shell/app-shell';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -14,6 +14,8 @@ export const routes: Routes = [
     children: [
       { path: 'ess', loadChildren: () => import('./routes/ess.routes').then(m => m.essRoutes) },
       { path: 'hradmin', loadChildren: () => import('./routes/hradmin.routes').then(m => m.hradminRoutes) },
+      { path: 'developer', loadChildren: () => import('./routes/developer.routes').then(m => m.developerRoutes) },
+      { path: 'payroll', loadChildren: () => import('./routes/payroll.routes').then(m => m.payrollRoutes) },
 
     ],
   },

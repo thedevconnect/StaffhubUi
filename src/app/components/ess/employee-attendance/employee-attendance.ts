@@ -14,7 +14,6 @@ import {
   DashboardSummary
 } from '../../../shared/services/attendance.service';
 import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template';
-import { RouterLink } from '@angular/router';
 
 export interface CalendarDay {
   date: Date;
@@ -22,7 +21,7 @@ export interface CalendarDay {
   dayNumber: number;
   isCurrentMonth: boolean;
   isToday: boolean;
-  status: 'P' | 'A' | 'EL' | 'CL' | 'LOP' | 'Week Off' | 'Holiday' | null;
+  status: 'P' | 'A' | 'EL' | 'CL' | 'LOP' | 'EL/2' | 'CL/2' | 'LOP/2' | 'Week Off' | 'Holiday' | null;
   swipeIn?: string;
   swipeOut?: string;
   records?: AttendanceRecord[];
@@ -40,7 +39,6 @@ export interface CalendarDay {
     DialogModule,
     ToastModule,
     FormsModule,
-    RouterLink,
     TableTemplate
   ],
   providers: [MessageService],

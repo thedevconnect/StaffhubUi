@@ -4,7 +4,7 @@ import { provideRouter } from '@angular/router';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { authInterceptor } from './core/auth/interceptors/auth.interceptor';
+import { authInterceptor } from './shared/services/interceptors/auth.interceptor';
 
 
 import { routes } from './app.routes';

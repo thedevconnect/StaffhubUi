@@ -18,6 +18,16 @@ export class UserService {
   getSidebarState() {
     return this.sidebarState.asReadonly();
   }
+  getQuestionPaper(query: string) {
+    return this.http.get(`${this.apiUrl}/api/questionpaper?${query}`);
+  }
+  getMenuMaster(query: string) {
+    return this.http.get(`${this.apiUrl}/api/uspGetMenuMasterDetails|${query}`);
+  }
+
+  SubmitPostTypeData(query: string) {
+    return this.http.get(`${this.apiUrl}/api/uspGetMenuMasterDetails|${query}`);
+  }
 
   // Toggle sidebar
   toggleSidebar(): void {

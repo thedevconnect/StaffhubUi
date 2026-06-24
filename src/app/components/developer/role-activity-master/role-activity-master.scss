@@ -1,0 +1,46 @@
+/* custom style for p-select to match input height */
+.custom-p-select .p-dropdown,
+.custom-p-select .p-dropdown-label {
+    height: 2.5rem;
+    /* same as input py + px */
+    line-height: 2.5rem;
+    /* vertically center text */
+    padding: 0 0.75rem;
+    /* match px-3 in Tailwind */
+}
+
+.custom-p-select .p-dropdown-label {
+    display: flex;
+    align-items: center;
+}
+
+.custom-p-select .p-dropdown-trigger {
+    height: 0rem !important;
+    /* same as input */
+}
+
+.custom-p-select .p-dropdown-panel {
+    font-size: 10.5px !important;
+    /* match text-sm if needed */
+}
+
+::ng-deep .custom-p-select .p-select-label {
+    font-size: 13px !important;
+    padding: 6px 6px 6px 6px;
+    font-weight: 600;
+    /* match text-sm if needed */
+}
+
+// multiselect
+
+::ng-deep .custom-p-select .p-multiselect-label {
+    font-size: 13px !important;
+    padding: 6px 6px 6px 6px;
+    font-weight: 600;
+    /* match text-sm if needed */
+}
+
+::ng-deep .p-drawer-content {
+    padding: 2rem !important;
+}
+

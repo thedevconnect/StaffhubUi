@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
-import { AuthService } from '../../../core/auth/services/auth.service';
+import { AuthService } from '../../services/services/auth.service';
 
 @Component({
   selector: 'app-pagenotfound',

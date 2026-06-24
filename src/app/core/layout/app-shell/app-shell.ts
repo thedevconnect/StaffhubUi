@@ -6,7 +6,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AppHeader } from '../header/header';
-import { AuthService } from '../../auth/services/auth.service';
+import { AuthService } from '../../../shared/services/services/auth.service';
 import { SidebarMenuItem, UserDetails } from './app-shell.models';
 
 @Component({
@@ -96,6 +96,10 @@ export class AppShell {
           summary: 'Logged out',
           detail: 'You have been logged out successfully.',
         });
+        sessionStorage.removeItem('user');
+        sessionStorage.removeItem('selectedRoleId');
+        sessionStorage.removeItem('roleOptions');
+        sessionStorage.removeItem('token');
         this.router.navigate(['/login']);
       },
     });
@@ -150,10 +154,7 @@ export class AppShell {
         { label: 'Dashboard', icon: 'pi-home', route: '/ess/ess-dashboard' },
         { label: 'My Profile', icon: 'pi-user', route: '/profile' },
         {
-          label: 'ESS',
-          icon: 'pi-folder',
-          isOpen: true,
-          children: [
+          label: 'ESS', icon: 'pi-folder', isOpen: true, children: [
             { label: 'Employee Attendance', route: '/ess/employee-attendance' },
             { label: 'My Assets', route: '/ess/my-assets' },
             { label: 'Service File', route: '/ess/service-file' },
@@ -169,45 +170,31 @@ export class AppShell {
           ]
         },
         {
-          label: 'Exit',
-          icon: 'pi-sign-out',
-          isOpen: false,
-          children: [
-            { label: 'Employee Resignation', route: '/ess/employee-resignation' },
-            { label: 'Exit Interview Form', route: '/ess/exit-interview' }
-          ]
+          label: 'Exit', icon: 'pi-sign-out', isOpen: false,
+          children:
+            [
+              { label: 'Employee Resignation', route: '/ess/employee-resignation' },
+              { label: 'Exit Interview Form', route: '/ess/exit-interview' }
+            ]
         },
         {
-          label: 'Expense Management',
-          icon: 'pi-wallet',
-          isOpen: false,
-          children: [
-            { label: 'Expense Requests', route: '/ess/expense-management' }
-          ]
+          label: 'Expense Management', icon: 'pi-wallet', isOpen: false,
+          children:
+            [
+              { label: 'Expense Requests', route: '/ess/expense-management' }
+            ]
         },
         {
-          label: 'Performance Management',
-          icon: 'pi-chart-line',
-          isOpen: false,
-          children: [
-            { label: 'Goals & Reviews', route: '/ess/performance-management' }
-          ]
+          label: 'Performance Management', icon: 'pi-chart-line', isOpen: false,
+          children: [{ label: 'Goals & Reviews', route: '/ess/performance-management' }]
         },
         {
-          label: 'Probation',
-          icon: 'pi-user-minus',
-          isOpen: false,
-          children: [
-            { label: 'Probation Details', route: '/ess/probation' }
-          ]
+          label: 'Probation', icon: 'pi-user-minus', isOpen: false,
+          children: [{ label: 'Probation Details', route: '/ess/probation' }]
         },
         {
-          label: 'Ticket',
-          icon: 'pi-ticket',
-          isOpen: false,
-          children: [
-            { label: 'Raise Ticket', route: '/ess/ticket' }
-          ]
+          label: 'Ticket', icon: 'pi-ticket', isOpen: false,
+          children: [{ label: 'Raise Ticket', route: '/ess/ticket' }]
         }
       ];
     }

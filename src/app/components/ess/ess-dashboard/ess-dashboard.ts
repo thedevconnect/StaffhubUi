@@ -5,7 +5,7 @@ import { TableModule } from 'primeng/table'
 import { Breadcrumb } from 'primeng/breadcrumb'
 import { RouterLink } from '@angular/router'
 
-import { AuthService } from '../../../core/auth/services/auth.service'
+import { AuthService } from '../../../shared/services/services/auth.service'
 import {
   AttendanceRecord,
   AttendanceService,
