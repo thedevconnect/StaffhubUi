@@ -57,9 +57,9 @@ export class MenuMaster {
 
   columns: TableColumn[] = [
     { key: 'actions', header: '⚙️', isVisible: true, isSortable: false, isCustom: true },
-    { key: 'text', header: 'Menu', isVisible: true, isSortable: false },
+    { key: 'menuName', header: 'Menu', isVisible: true, isSortable: false },
     { key: 'imageUrl', header: 'ImageUrl', isVisible: true, isSortable: false },
-    { key: 'iconClass', header: 'Icon', isVisible: true, isSortable: false },
+    { key: 'icon', header: 'Icon', isVisible: true, isSortable: false },
   ];
   pageNo = 1;
   pageSize = 5;
@@ -93,55 +93,28 @@ export class MenuMaster {
 
 
   getTableData(isTrue: boolean) {
-    try {
-      if (isTrue) {
-        this.isLoading = true;
-      }
-      else {
-        this.pageNo = 1;
-      }
-      const query = `userID=${sessionStorage.getItem('userId')}|searchText=${this.searchText}|pageIndex=${this.pageNo}|size=${this.pageSize}`;
-      this.userService.getQuestionPaper(`uspGetMenuMasterDetails|${query}`).subscribe({
-        next: (res: any) => {
-          try {
-            setTimeout(() => {
-              this.data = res?.table1 || [];
-              this.totalCount = res?.table?.[0]?.totalCnt || this.data.length;
-              this.cdr.detectChanges();
-            }, 0);
-          }
-          catch (innerErr) {
-            console.error('Error processing response:', innerErr);
-            this.data = [];
-            this.totalCount = 0;
-          } finally {
-            setTimeout(() => {
-              this.isLoading = false;
-              this.cdr.detectChanges();
-            }, 1000);
-          }
-        },
-        error: (err) => {
-          console.error('API call failed:=====', err);
+    if (isTrue) {
+      this.isLoading = true;
+    } else {
+      this.pageNo = 1;
+    }
+    this.userService.getMenus(this.pageNo, this.pageSize, this.searchText).subscribe({
+      next: (res: any) => {
+        this.data = res.data || [];
+        this.totalCount = res.meta?.total || 0;
+        setTimeout(() => {
           this.isLoading = false;
-          if (err.status === 403) {
-            //this.Customvalidation.loginroute(err.status);
-          } else {
-            this.data = [];
-            this.totalCount = 0;
-          }
-        }
-      });
-    }
-    catch (error) {
-      console.error('Unexpected error in getTableData():', error);
-      this.isLoading = false;
-      // this.data = [];
-      // this.totalCount = 0;
-      // sessionStorage.clear();
-      // localStorage.clear();
-      // this.router.navigate(['/login']);
-    }
+          this.cdr.detectChanges();
+        }, 500);
+      },
+      error: (err) => {
+        console.error('API call failed:', err);
+        this.isLoading = false;
+        this.data = [];
+        this.totalCount = 0;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
 
@@ -204,9 +177,9 @@ export class MenuMaster {
         }, 1000);
       }
       this.activityMaster.patchValue({
-        menu: data.text ? data.text : '',
+        menu: data.menuName ? data.menuName : '',
         imageurl: data.imageUrl ? data.imageUrl : '',
-        icontype: data.iconClass ? data.iconClass : '',
+        icontype: data.icon ? data.icon : '',
       })
       setTimeout(() => {
         this.isFormLoading = false
@@ -258,65 +231,59 @@ export class MenuMaster {
       this.activityMaster.markAllAsTouched();
       return;
     }
-    this.paramvaluedata = ``
-    let menu = this.activityMaster.get('menu')?.value
-    let imageurl = this.activityMaster.get('imageurl')?.value
-    let icontype = this.activityMaster.get('icontype')?.value
-    this.paramvaluedata = `menu=${menu}|imageUrl=${imageurl}|icon=${icontype}`
     this.openConfirmation('Confirm?', "Are you sure you want to proceed?", '1', '1', event);
   }
 
-
-
   submitcall() {
     this.isFormLoading = true;
-    let query = '';
-    let SP = '';
+
+    const payload = {
+      menuName: this.activityMaster.get('menu')?.value,
+      imageUrl: this.activityMaster.get('imageurl')?.value,
+      icon: this.activityMaster.get('icontype')?.value,
+      parentId: null,
+      sortOrder: 0,
+      isActive: 1
+    };
 
     if (this.postType === 'update') {
-      query = `action=update|${this.paramvaluedata}|id=${this.selectedIndex.id}|userId=${sessionStorage.getItem('userId')}`;
-      SP = `uspUpdateDeleteMenuMaster`;
+      this.userService.updateMenu(this.selectedIndex.id, payload).subscribe({
+        next: (res: any) => {
+          this.isFormLoading = false;
+          this.getTableData(false);
+          this.message.add({ severity: 'success', summary: 'Success', detail: 'Data Updated Successfully.' });
+          this.onDrawerHide();
+        },
+        error: (err) => {
+          this.isFormLoading = false;
+          this.message.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to update' });
+        }
+      });
+    } else {
+      this.userService.createMenu(payload).subscribe({
+        next: (res: any) => {
+          this.isFormLoading = false;
+          this.getTableData(false);
+          this.message.add({ severity: 'success', summary: 'Success', detail: 'Data Saved Successfully.' });
+          this.onDrawerHide();
+        },
+        error: (err) => {
+          this.isFormLoading = false;
+          this.message.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to save' });
+        }
+      });
     }
-    else {
-      query = `${this.paramvaluedata}|userID=${sessionStorage.getItem('userId')}`;
-      SP = `uspPostMenuMasterDetails`;
-    }
-
-    this.userService.SubmitPostTypeData(SP,).subscribe((datacom: any) => {
-      this.isFormLoading = false;
-      if (!datacom) return;
-      const resultarray = datacom.split("-");
-      if (resultarray[1] === "success") {
-        this.getTableData(false);
-        this.message.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: this.postType === 'update' ? 'Data Updated Successfully.' : 'Data Saved Successfully.',
-        });
-        this.onDrawerHide();
-      }
-      else if (resultarray[0] == "2") {
-        this.message.add({ severity: 'warn', summary: 'Warn', detail: resultarray[1] || datacom });
-      }
-      else {
-        this.message.add({ severity: 'warn', summary: 'Warn', detail: datacom, });
-      }
-    });
-
   }
 
   deleteData() {
-    let query = `action=delete|id=${this.selectedIndex.id}|menu=''|imageUrl=''|icon=''|userId=${sessionStorage.getItem('userId')}`;
-    this.userService.SubmitPostTypeData(`uspUpdateDeleteMenuMaster`,).subscribe((datacom: any) => {
-      this.isFormLoading = false;
-      if (!datacom) return;
-      const resultarray = datacom.split("-");
-      if (resultarray[1] === "success") {
+    this.userService.deleteMenu(this.selectedIndex.id).subscribe({
+      next: (res: any) => {
         this.getTableData(true);
         this.message.add({ severity: 'success', summary: 'Success', detail: 'Data deleted' });
         this.onDrawerHide();
-      } else {
-        this.message.add({ severity: 'warn', summary: 'Warn', detail: resultarray[1] || datacom, });
+      },
+      error: (err) => {
+        this.message.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to delete' });
       }
     });
   }

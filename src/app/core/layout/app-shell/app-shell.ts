@@ -7,6 +7,7 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AppHeader } from '../header/header';
 import { AuthService } from '../../../shared/services/services/auth.service';
+import { UserService } from '../../../shared/services/user-service';
 import { SidebarMenuItem, UserDetails } from './app-shell.models';
 
 @Component({
@@ -41,7 +42,8 @@ export class AppShell {
     };
   });
 
-  readonly menuItemsWithSubmenu = computed<SidebarMenuItem[]>(() => this.getMenuItemsByRole(this.selectedRoleId()));
+  readonly dynamicMenuItems = signal<SidebarMenuItem[]>([]);
+  readonly menuItemsWithSubmenu = computed<SidebarMenuItem[]>(() => this.dynamicMenuItems());
 
   // Search query state
   readonly searchQuery = signal<string>('');
@@ -54,7 +56,30 @@ export class AppShell {
     private readonly messageService: MessageService,
     private readonly confirmationService: ConfirmationService,
     private readonly router: Router,
+    private readonly userService: UserService
   ) { }
+
+  ngOnInit(): void {
+    this.fetchUserSidebar();
+  }
+
+  fetchUserSidebar(): void {
+    this.userService.getUserSidebar().subscribe({
+      next: (res: any) => {
+        if (res && res.data) {
+          const menus = [
+            { label: 'Dashboard', icon: 'pi-home', route: '/ess/ess-dashboard' },
+            ...res.data
+          ];
+          this.dynamicMenuItems.set(menus);
+        }
+      },
+      error: (err) => {
+        console.error('Failed to fetch sidebar', err);
+        this.dynamicMenuItems.set([{ label: 'Dashboard', icon: 'pi-home', route: '/ess/ess-dashboard' }]);
+      }
+    });
+  }
 
   @HostListener('window:resize')
   onWindowResize(): void {
@@ -81,6 +106,7 @@ export class AppShell {
 
   onRoleChange(roleId: string): void {
     this.authService.setSelectedRole(roleId);
+    this.fetchUserSidebar();
     this.router.navigate([this.getDashboardRoute()]);
   }
 
@@ -148,63 +174,7 @@ export class AppShell {
       .filter(item => item !== null) as SidebarMenuItem[];
   }
 
-  private getMenuItemsByRole(roleId: string): SidebarMenuItem[] {
-    if (roleId.toLowerCase().includes('ess')) {
-      return [
-        { label: 'Dashboard', icon: 'pi-home', route: '/ess/ess-dashboard' },
-        { label: 'My Profile', icon: 'pi-user', route: '/profile' },
-        {
-          label: 'ESS', icon: 'pi-folder', isOpen: true, children: [
-            { label: 'Employee Attendance', route: '/ess/employee-attendance' },
-            { label: 'My Assets', route: '/ess/my-assets' },
-            { label: 'Service File', route: '/ess/service-file' },
-            { label: 'Reportings Attendance', route: '/ess/reportings-attendance' },
-            { label: 'Get Employee Info', route: '/ess/get-employee-info' },
-            { label: 'Attendance Regularization', route: '/ess/attendance-regularization' },
-            { label: 'Monthly Attendance Calendar', route: '/ess/monthly-attendance-calendar' },
-            { label: 'Leave Application', route: '/ess/leave-application' },
-            { label: 'Apply Short Leave', route: '/ess/apply-short-leave' },
-            { label: 'Final Attendance', route: '/ess/final-attendance' },
-            { label: 'Holiday List', route: '/ess/holiday-list' }
 
-          ]
-        },
-        {
-          label: 'Exit', icon: 'pi-sign-out', isOpen: false,
-          children:
-            [
-              { label: 'Employee Resignation', route: '/ess/employee-resignation' },
-              { label: 'Exit Interview Form', route: '/ess/exit-interview' }
-            ]
-        },
-        {
-          label: 'Expense Management', icon: 'pi-wallet', isOpen: false,
-          children:
-            [
-              { label: 'Expense Requests', route: '/ess/expense-management' }
-            ]
-        },
-        {
-          label: 'Performance Management', icon: 'pi-chart-line', isOpen: false,
-          children: [{ label: 'Goals & Reviews', route: '/ess/performance-management' }]
-        },
-        {
-          label: 'Probation', icon: 'pi-user-minus', isOpen: false,
-          children: [{ label: 'Probation Details', route: '/ess/probation' }]
-        },
-        {
-          label: 'Ticket', icon: 'pi-ticket', isOpen: false,
-          children: [{ label: 'Raise Ticket', route: '/ess/ticket' }]
-        }
-      ];
-    }
-
-    return [
-      { label: 'Dashboard', icon: 'pi-home', route: '/ess/ess-dashboard' },
-      { label: 'Employees', icon: 'pi-users', route: '/employees' },
-      { label: 'Attendance', icon: 'pi-calendar', route: '/attendance' },
-    ];
-  }
 
   private checkIsMobileView(): boolean {
     return typeof window !== 'undefined' && window.innerWidth < 768;

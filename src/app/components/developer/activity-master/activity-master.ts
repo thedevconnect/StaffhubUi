@@ -59,9 +59,9 @@ export class ActivityMaster {
 
   columns: TableColumn[] = [
     { key: 'actions', header: '⚙️', isVisible: true, isSortable: false, isCustom: true },
-    { key: 'formName', header: 'Activity', isVisible: true, isSortable: false },
-    { key: 'formValue', header: 'Form Value', isVisible: true, isSortable: false },
-    { key: 'formType', header: 'Form Type', isVisible: true, isSortable: false },
+    { key: 'activity_name', header: 'Activity', isVisible: true, isSortable: false },
+    { key: 'form_value', header: 'Form Value', isVisible: true, isSortable: false },
+    { key: 'calling_page', header: 'Form Type', isVisible: true, isSortable: false },
   ];
   pageNo = 1;
   pageSize = 5;
@@ -109,60 +109,29 @@ export class ActivityMaster {
 
 
 
-  // getTableData(isTrue: boolean) {
-  //   try {
-  //     if (isTrue) {
-  //       this.isLoading = true;
-  //     } else {
-  //       this.pageNo = 1;
-  //     }
-
-  //     const currentRole = JSON.parse(sessionStorage.getItem('currentRole') || '{}');
-  //     const roleId = currentRole?.roleId || '';
-  //     const userId = sessionStorage.getItem('userId') || '';
-  //     const districtId = sessionStorage.getItem('District') || '';
-
-  //     const query = `appUserId=${userId}|appUserRole=${roleId}|districtId=${districtId}|searchText=${this.searchText}|pageIndex=${this.pageNo}|size=${this.pageSize}|activity=header`;
-  //     this.userService.getQuestionPaper(`uspGetActivityMaster|${query}`).subscribe({
-  //       next: (res: any) => {
-  //         try {
-  //           this.data = res?.table1 || [];
-  //           this.totalCount = res?.table?.[0]?.totalCnt || this.data.length;
-  //         } catch (innerErr) {
-  //           console.error('Error processing response:', innerErr);
-  //           this.data = [];
-  //           this.totalCount = 0;
-  //         } finally {
-  //           setTimeout(() => {
-  //             this.isLoading = false;
-  //             this.cdr.detectChanges();
-  //           }, 1000);
-  //         }
-  //       },
-  //       error: (err) => {
-  //         console.error('API call failed:', err);
-  //         this.isLoading = false;
-  //         if (err.status === 403) {
-  //           this.Customvalidation.loginroute(err.status);
-  //         } else {
-  //           this.data = [];
-  //           this.totalCount = 0;
-  //         }
-  //       }
-  //     });
-
-  //   } catch (error) {
-  //     console.error('Unexpected error in getTableData():', error);
-  //     this.isLoading = false;
-  //   }
-  // }
-
   getTableData(isTrue: boolean) {
-    try {
-
-    } catch (error) {
-
+    if (isTrue) {
+      this.isLoading = true;
+    } else {
+      this.pageNo = 1;
     }
+    this.userService.getActivities(this.pageNo, this.pageSize, this.searchText).subscribe({
+      next: (res: any) => {
+        this.data = res.data || [];
+        this.totalCount = res.meta?.total || 0;
+        setTimeout(() => {
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }, 500);
+      },
+      error: (err) => {
+        console.error('API call failed:', err);
+        this.isLoading = false;
+        this.data = [];
+        this.totalCount = 0;
+        this.cdr.detectChanges();
+      }
+    });
   }
   onPageChange(newPage: number) {
     this.pageNo = newPage;
@@ -223,9 +192,9 @@ export class ActivityMaster {
         }, 1000);
       }
       this.activityMaster.patchValue({
-        activity: data.formName ? data.formName : '',
-        formValue: data.formValue ? data.formValue : '',
-        formType: data.formType ? data.formType : '',
+        activity: data.activity_name ? data.activity_name : '',
+        formValue: data.form_value ? data.form_value : '',
+        formType: data.calling_page ? data.calling_page : '',
       })
       setTimeout(() => {
         this.isFormLoading = false
@@ -239,12 +208,6 @@ export class ActivityMaster {
       this.activityMaster.markAllAsTouched();
       return;
     }
-
-    this.paramvaluedata = ``
-    let activity = this.activityMaster.get('activity')?.value
-    let formValue = this.activityMaster.get('formValue')?.value
-    let formType = this.activityMaster.get('formType')?.value
-    this.paramvaluedata = `activity=${activity}|formValue=${formValue}|formType=${formType}`
     this.openConfirmation('Confirm?', "Are you sure you want to proceed?", '1', '1', event);
   }
 
@@ -261,10 +224,10 @@ export class ActivityMaster {
       acceptButtonProps: { label: 'Yes' },
       accept: () => {
         if (option === '1') {
-          //  this.submitcall();
+          this.submitcall();
         }
         else if (option === '2') {
-          //  this.deleteData();
+          this.deleteData();
         } else if (option === '4') {
 
         } else if (option === '5') {
@@ -286,62 +249,57 @@ export class ActivityMaster {
     this.openConfirmation("Confirm", "Are you sure want to delete?", '1', '2');
   }
 
-  // submitcall() {
+  submitcall() {
+    this.isFormLoading = true;
 
-  //   this.isFormLoading = true;
-  //   // const roleID = JSON.parse(sessionStorage.getItem('currentRole') || '{}').roleId;
-  //   let query = '';
-  //   let SP = '';
+    const payload = {
+      activity_name: this.activityMaster.get('activity')?.value,
+      form_value: this.activityMaster.get('formValue')?.value,
+      calling_page: this.activityMaster.get('formType')?.value,
+      is_active: 1
+    };
 
-  //   if (this.postType === 'update') {
-  //     query = `action=UPDATE|id=${this.selectedIndex.activityId}|${this.paramvaluedata}|appUserId=${sessionStorage.getItem('userId')}`;
-  //     SP = `uspPostAndUpdateActivityMaster`;
-  //   }
-  //   else {
-  //     query = `action=ADD|id=0|${this.paramvaluedata}|appUserId=${sessionStorage.getItem('userId')}`;
-  //     SP = `uspPostAndUpdateActivityMaster`;
-  //   }
+    if (this.postType === 'update') {
+      this.userService.updateActivity(this.selectedIndex.id, payload).subscribe({
+        next: (res: any) => {
+          this.isFormLoading = false;
+          this.getTableData(false);
+          this.message.add({ severity: 'success', summary: 'Success', detail: 'Data Updated Successfully.' });
+          this.onDrawerHide();
+        },
+        error: (err) => {
+          this.isFormLoading = false;
+          this.message.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to update' });
+        }
+      });
+    } else {
+      this.userService.createActivity(payload).subscribe({
+        next: (res: any) => {
+          this.isFormLoading = false;
+          this.getTableData(false);
+          this.message.add({ severity: 'success', summary: 'Success', detail: 'Data Saved Successfully.' });
+          this.onDrawerHide();
+        },
+        error: (err) => {
+          this.isFormLoading = false;
+          this.message.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to save' });
+        }
+      });
+    }
+  }
 
-  //   this.userService.SubmitPostTypeData(SP, query, 'header').subscribe((datacom: any) => {
-  //     this.isFormLoading = false;
-  //     if (!datacom) return;
-  //     const resultarray = datacom.split("-");
-  //     if (resultarray[1] === "success") {
-  //       this.getTableData(false);
-  //       this.message.add({
-  //         severity: 'success',
-  //         summary: 'Success',
-  //         detail: this.postType === 'update' ? 'Data Updated Successfully.' : 'Data Saved Successfully.',
-  //       });
-  //       this.onDrawerHide();
-  //     }
-  //     else if (resultarray[0] == "2") {
-  //       this.message.add({ severity: 'warn', summary: 'Warn', detail: resultarray[1] || datacom });
-  //     }
-  //     else {
-  //       this.message.add({ severity: 'warn', summary: 'Warn', detail: datacom, });
-  //     }
-  //   });
-
-  // }
-
-  // deleteData() {
-
-  //   const roleID = JSON.parse(sessionStorage.getItem('currentRole') || '{}').roleId;
-  //   let query = `action=DELETE|id=${this.selectedIndex.activityId}|activity=|formValue=|formType=|appUserId=${sessionStorage.getItem('userId')}`;
-  //   this.userService.SubmitPostTypeData(`uspPostAndUpdateActivityMaster`, query, 'header').subscribe((datacom: any) => {
-  //     this.isFormLoading = false;
-  //     if (!datacom) return;
-  //     const resultarray = datacom.split("-");
-  //     if (resultarray[1] === "success") {
-  //       this.getTableData(true);
-  //       this.message.add({ severity: 'success', summary: 'Success', detail: 'Data deleted' });
-  //       this.onDrawerHide();
-  //     } else {
-  //       this.message.add({ severity: 'warn', summary: 'Warn', detail: resultarray[1] || datacom, });
-  //     }
-  //   });
-  // }
+  deleteData() {
+    this.userService.deleteActivity(this.selectedIndex.id).subscribe({
+      next: (res: any) => {
+        this.getTableData(true);
+        this.message.add({ severity: 'success', summary: 'Success', detail: 'Data deleted' });
+        this.onDrawerHide();
+      },
+      error: (err) => {
+        this.message.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to delete' });
+      }
+    });
+  }
 
 
 

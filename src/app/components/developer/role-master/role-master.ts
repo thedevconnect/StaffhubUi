@@ -54,7 +54,7 @@ export class RoleMaster {
 
   columns: TableColumn[] = [
     { key: 'actions', header: '⚙️', isVisible: true, isSortable: false, isCustom: true },
-    { key: 'role', header: 'Role', isVisible: true, isSortable: false },
+    { key: 'role_name', header: 'Role', isVisible: true, isSortable: false },
   ];
   pageNo = 1;
   pageSize = 5;
@@ -85,60 +85,29 @@ export class RoleMaster {
   }
 
   getTableData(isTrue: boolean) {
+    if (isTrue) {
+      this.isLoading = true;
+    } else {
+      this.pageNo = 1;
+    }
+    this.userService.getRoles(this.pageNo, this.pageSize, this.searchText).subscribe({
+      next: (res: any) => {
+        this.data = res.data || [];
+        this.totalCount = res.meta?.total || 0;
+        setTimeout(() => {
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }, 500);
+      },
+      error: (err) => {
+        console.error('API call failed:', err);
+        this.isLoading = false;
+        this.data = [];
+        this.totalCount = 0;
+        this.cdr.detectChanges();
+      }
+    });
   }
-
-
-  // getTableData(isTrue: boolean) {
-  //   try {
-  //     if (isTrue) {
-  //       this.isLoading = true;
-  //     }
-  //     else {
-  //       this.pageNo = 1;
-  //     }
-  //     const query = `userID=${sessionStorage.getItem('userId')}|searchText=${this.searchText}|pageIndex=${this.pageNo}|size=${this.pageSize}`;
-  //     this.userService.getQuestionPaper(`uspGetRoleMasterDetails|${query}`).subscribe({
-  //       next: (res: any) => {
-  //         try {
-  //           setTimeout(() => {
-  //             this.data = res?.table1 || [];
-  //             this.totalCount = res?.table?.[0]?.totalCnt || this.data.length;
-  //             this.cdr.detectChanges();
-  //           }, 0);
-  //         }
-  //         catch (innerErr) {
-  //           console.error('Error processing response:', innerErr);
-  //           this.data = [];
-  //           this.totalCount = 0;
-  //         } finally {
-  //           setTimeout(() => {
-  //             this.isLoading = false;
-  //             this.cdr.detectChanges();
-  //           }, 1000);
-  //         }
-  //       },
-  //       error: (err) => {
-  //         console.error('API call failed:=====', err);
-  //         this.isLoading = false;
-  //         if (err.status === 403) {
-  //           this.Customvalidation.loginroute(err.status);
-  //         } else {
-  //           this.data = [];
-  //           this.totalCount = 0;
-  //         }
-  //       }
-  //     });
-  //   }
-  //   catch (error) {
-  //     console.error('Unexpected error in getTableData():', error);
-  //     this.isLoading = false;
-  //     // this.data = [];
-  //     // this.totalCount = 0;
-  //     // sessionStorage.clear();
-  //     // localStorage.clear();
-  //     // this.router.navigate(['/login']);
-  //   }
-  // }
 
 
   onPageChange(newPage: number) {
@@ -200,7 +169,7 @@ export class RoleMaster {
         }, 1000);
       }
       this.activityMaster.patchValue({
-        roletype: data.role ? data.role : '',
+        roletype: data.role_name ? data.role_name : '',
       })
       setTimeout(() => {
         this.isFormLoading = false
@@ -221,10 +190,10 @@ export class RoleMaster {
       acceptButtonProps: { label: 'Yes' },
       accept: () => {
         if (option === '1') {
-          ///  this.submitcall();
+          this.submitcall();
         }
         else if (option === '2') {
-          //  this.deleteData();
+          this.deleteData();
         } else if (option === '4') {
 
         } else if (option === '5') {
@@ -249,66 +218,59 @@ export class RoleMaster {
       this.activityMaster.markAllAsTouched();
       return;
     }
-    this.paramvaluedata = ``
-    let roletype = this.activityMaster.get('roletype')?.value
-    this.paramvaluedata = `role=${roletype}`
     this.openConfirmation('Confirm?', "Are you sure you want to proceed?", '1', '1', event);
   }
 
 
 
-  // submitcall() {
-  //   this.isFormLoading = true;
-  //   let query = '';
-  //   let SP = '';
+  submitcall() {
+    this.isFormLoading = true;
 
-  //   if (this.postType === 'update') {
-  //     query = `action=update|${this.paramvaluedata}|id=${this.selectedIndex.id}|userId=${sessionStorage.getItem('userId')}`;
-  //     SP = `uspUpdateDeleteRoleMaster`;
-  //   }
-  //   else {
-  //     query = `${this.paramvaluedata}|userID=${sessionStorage.getItem('userId')}`;
-  //     SP = `uspPostRoleMaster`;
-  //   }
+    const payload = {
+      role_name: this.activityMaster.get('roletype')?.value,
+    };
 
-  //   this.userService.SubmitPostTypeData(SP, query, 'header').subscribe((datacom: any) => {
-  //     this.isFormLoading = false;
-  //     if (!datacom) return;
-  //     const resultarray = datacom.split("-");
-  //     if (resultarray[1] === "success") {
-  //       this.getTableData(false);
-  //       this.message.add({
-  //         severity: 'success',
-  //         summary: 'Success',
-  //         detail: this.postType === 'update' ? 'Data Updated Successfully.' : 'Data Saved Successfully.',
-  //       });
-  //       this.onDrawerHide();
-  //     }
-  //     else if (resultarray[0] == "2") {
-  //       this.message.add({ severity: 'warn', summary: 'Warn', detail: resultarray[1] || datacom });
-  //     }
-  //     else {
-  //       this.message.add({ severity: 'warn', summary: 'Warn', detail: datacom, });
-  //     }
-  //   });
+    if (this.postType === 'update') {
+      this.userService.updateRole(this.selectedIndex.id, payload).subscribe({
+        next: (res: any) => {
+          this.isFormLoading = false;
+          this.getTableData(false);
+          this.message.add({ severity: 'success', summary: 'Success', detail: 'Data Updated Successfully.' });
+          this.onDrawerHide();
+        },
+        error: (err) => {
+          this.isFormLoading = false;
+          this.message.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to update' });
+        }
+      });
+    } else {
+      this.userService.createRole(payload).subscribe({
+        next: (res: any) => {
+          this.isFormLoading = false;
+          this.getTableData(false);
+          this.message.add({ severity: 'success', summary: 'Success', detail: 'Data Saved Successfully.' });
+          this.onDrawerHide();
+        },
+        error: (err) => {
+          this.isFormLoading = false;
+          this.message.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to save' });
+        }
+      });
+    }
+  }
 
-  // }
-
-  // deleteData() {
-  //   let query = `action=Delete|id=${this.selectedIndex.id}|role=''|userId=${sessionStorage.getItem('userId')}`;
-  //   this.userService.SubmitPostTypeData(`uspUpdateDeleteRoleMaster`, query, 'header').subscribe((datacom: any) => {
-  //     this.isFormLoading = false;
-  //     if (!datacom) return;
-  //     const resultarray = datacom.split("-");
-  //     if (resultarray[1] === "success") {
-  //       this.getTableData(true);
-  //       this.message.add({ severity: 'success', summary: 'Success', detail: 'Data deleted' });
-  //       this.onDrawerHide();
-  //     } else {
-  //       this.message.add({ severity: 'warn', summary: 'Warn', detail: resultarray[1] || datacom, });
-  //     }
-  //   });
-  // }
+  deleteData() {
+    this.userService.deleteRole(this.selectedIndex.id).subscribe({
+      next: (res: any) => {
+        this.getTableData(true);
+        this.message.add({ severity: 'success', summary: 'Success', detail: 'Data deleted' });
+        this.onDrawerHide();
+      },
+      error: (err) => {
+        this.message.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to delete' });
+      }
+    });
+  }
 
 
   isInvalid(field: string): boolean {

@@ -29,6 +29,67 @@ export class UserService {
     return this.http.get(`${this.apiUrl}/api/uspGetMenuMasterDetails|${query}`);
   }
 
+  // Menus
+  getMenus(page: number = 1, limit: number = 10, search: string = '') {
+    return this.http.get(`${this.apiUrl}/api/menus?page=${page}&limit=${limit}&search=${search}`);
+  }
+  getActiveMenus() {
+    return this.http.get(`${this.apiUrl}/api/menus/active`);
+  }
+  createMenu(data: any) {
+    return this.http.post(`${this.apiUrl}/api/menus`, data);
+  }
+  updateMenu(id: number, data: any) {
+    return this.http.put(`${this.apiUrl}/api/menus/${id}`, data);
+  }
+  deleteMenu(id: number) {
+    return this.http.delete(`${this.apiUrl}/api/menus/${id}`);
+  }
+
+  // Activities
+  getActivities(page: number = 1, limit: number = 10, search: string = '') {
+    return this.http.get(`${this.apiUrl}/api/activities?page=${page}&limit=${limit}&search=${search}`);
+  }
+  createActivity(data: any) {
+    return this.http.post(`${this.apiUrl}/api/activities`, data);
+  }
+  updateActivity(id: number, data: any) {
+    return this.http.put(`${this.apiUrl}/api/activities/${id}`, data);
+  }
+  deleteActivity(id: number) {
+    return this.http.delete(`${this.apiUrl}/api/activities/${id}`);
+  }
+
+  // Roles
+  getRoles(page: number = 1, limit: number = 10, search: string = '') {
+    return this.http.get(`${this.apiUrl}/api/roles?page=${page}&limit=${limit}&search=${search}`);
+  }
+  getActiveRoles() {
+    return this.http.get(`${this.apiUrl}/api/roles/active`);
+  }
+  createRole(data: any) {
+    return this.http.post(`${this.apiUrl}/api/roles`, data);
+  }
+  updateRole(id: number, data: any) {
+    return this.http.put(`${this.apiUrl}/api/roles/${id}`, data);
+  }
+  deleteRole(id: number) {
+    return this.http.delete(`${this.apiUrl}/api/roles/${id}`);
+  }
+
+  // Permissions
+  getPermissions(roleId: number) {
+    return this.http.get(`${this.apiUrl}/api/permissions/${roleId}`);
+  }
+  saveBulkPermissions(data: any) {
+    return this.http.post(`${this.apiUrl}/api/permissions/bulk-save`, data);
+  }
+
+  // Sidebar
+  getUserSidebar() {
+    return this.http.get(`${this.apiUrl}/api/auth/user-sidebar`);
+  }
+
   // Toggle sidebar
   toggleSidebar(): void {
     this.sidebarState.update((state) => !state);
