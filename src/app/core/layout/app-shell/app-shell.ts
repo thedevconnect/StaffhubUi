@@ -67,35 +67,57 @@ export class AppShell {
     const roleId = this.selectedRoleId();
     if (!roleId) return;
 
+    const rawRoleId = roleId.toLowerCase();
+    const rolePrefix = (rawRoleId === 'hr_admin' || rawRoleId === 'hradmin') ? 'hradmin' : rawRoleId;
+
+    const formatIcon = (iconStr: string | null | undefined, defaultIcon: string): string => {
+      if (!iconStr) return defaultIcon;
+      return iconStr.startsWith('pi-') ? iconStr : 'pi-' + iconStr;
+    };
+
     this.userService.getUserSidebar(roleId).subscribe({
       next: (res: any) => {
         const sidebarData = Array.isArray(res) ? res : (res.data || []);
-        
+
         if (sidebarData && sidebarData.length > 0) {
-          const mappedMenus = sidebarData.map((menu: any) => ({
-            label: menu.menuName,
-            icon: menu.icon || 'pi-folder',
-            route: menu.routePath,
-            isOpen: false,
-            children: menu.children && menu.children.length > 0 ? menu.children.map((child: any) => ({
-              label: child.activityName,
-              route: '/' + (child.formValue || '').replace(/^\//, ''),
-              icon: child.iconClass || 'pi-file'
-            })) : undefined
-          }));
+          const mappedMenus = sidebarData.map((menu: any) => {
+            const menuRouteClean = (menu.routePath || '').replace(/^\//, '');
+            const parentRoute = menuRouteClean
+              ? (menuRouteClean.startsWith(`${rolePrefix}/`) ? `/${menuRouteClean}` : `/${rolePrefix}/${menuRouteClean}`)
+              : undefined;
+
+            return {
+              label: menu.menuName,
+              icon: formatIcon(menu.icon, 'pi-folder'),
+              route: parentRoute,
+              isOpen: false,
+              children: menu.children && menu.children.length > 0 ? menu.children.map((child: any) => {
+                const childRouteClean = (child.formValue || '').replace(/^\//, '');
+                const childRoute = childRouteClean
+                  ? (childRouteClean.startsWith(`${rolePrefix}/`) ? `/${childRouteClean}` : `/${rolePrefix}/${childRouteClean}`)
+                  : undefined;
+
+                return {
+                  label: child.activityName,
+                  route: childRoute,
+                  icon: formatIcon(child.iconClass, 'pi-file')
+                };
+              }) : undefined
+            };
+          });
 
           const menus = [
-            { label: 'Dashboard', icon: 'pi-home', route: '/ess/ess-dashboard' },
+            { label: 'Dashboard', icon: 'pi-home', route: this.getDashboardRoute() },
             ...mappedMenus
           ];
           this.dynamicMenuItems.set(menus);
         } else {
-          this.dynamicMenuItems.set([{ label: 'Dashboard', icon: 'pi-home', route: '/ess/ess-dashboard' }]);
+          this.dynamicMenuItems.set([{ label: 'Dashboard', icon: 'pi-home', route: this.getDashboardRoute() }]);
         }
       },
       error: (err) => {
         console.error('Failed to fetch sidebar', err);
-        this.dynamicMenuItems.set([{ label: 'Dashboard', icon: 'pi-home', route: '/ess/ess-dashboard' }]);
+        this.dynamicMenuItems.set([{ label: 'Dashboard', icon: 'pi-home', route: this.getDashboardRoute() }]);
       }
     });
   }

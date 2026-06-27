@@ -1,9 +1,6 @@
 <p-toast></p-toast>
 
-<div class="-mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 overflow-x-auto overflow-y-hidden" style="scrollbar-width: none;">
-  <p-breadcrumb [model]="breadcrumbItems"
-    styleClass="!border-0 !border-b !border-slate-200 !rounded-none !bg-white !px-4 md:!px-6 !py-2.5 text-xs md:text-sm !w-max !min-w-full"></p-breadcrumb>
-</div>
+<app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
 
 <section class="space-y-4">
   <!-- Page Header -->
@@ -14,11 +11,7 @@
       <p class="mt-1 text-sm text-slate-500">Manage your daily work shifts, track break sessions, and view your
         historical log sheets.</p>
     </div>
-    <button (click)="loadAllData()"
-      class="self-start md:self-auto px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors">
-      <i class="pi pi-refresh" [ngClass]="{'animate-spin': isActionLoading}"></i>
-      Sync Status
-    </button>
+
   </header>
 
 
@@ -56,20 +49,18 @@
           </button>
         </div>
 
-        <!-- Break Actions (Enabled when checked in) -->
-        <div *ngIf="isSwipedIn()" class="flex items-center gap-3 w-full justify-center">
-          <button *ngIf="!isOnBreak()" (click)="openBreakDialog()"
-            class="px-5 py-2.5 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold text-xs flex items-center gap-2 transition-all cursor-pointer">
-            <i class="pi pi-coffee animate-bounce-slow"></i>
-            Start Break
-          </button>
+      </div>
 
-          <button *ngIf="isOnBreak()" (click)="performEndBreak()"
-            class="px-5 py-2.5 rounded-lg border border-sky-200 bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs flex items-center gap-2 transition-all cursor-pointer animate-pulse">
-            <i class="pi pi-play"></i>
-            End Break ({{ breakDuration() }})
-          </button>
+      <!-- Progress Bar (Only visible when swiped in, or when there is a shift duration today) -->
+      <div class="w-full max-w-md mt-2 mb-4 px-4" *ngIf="isSwipedIn() || duration() !== '00:00:00'">
+        <div
+          class="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+          <span>Shift Progress (9 Hours Target)</span>
+          <span class="font-mono text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full text-xs font-bold">{{
+            shiftProgressPercentage() }}%</span>
         </div>
+        <p-progressbar [value]="shiftProgressPercentage()" [showValue]="false" [style]="{ height: '8px' }"
+          styleClass="!rounded-full !overflow-hidden !bg-slate-100 !border !border-slate-200/50 shadow-inner" />
       </div>
 
       <!-- Durations Footers -->
@@ -78,10 +69,6 @@
           <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Today's Shift
             Duration</span>
           <span class="text-lg font-extrabold text-slate-700 font-mono mt-0.5 block">{{ duration() }}</span>
-        </div>
-        <div *ngIf="isSwipedIn() && isOnBreak()">
-          <span class="text-[10px] font-bold text-amber-500 uppercase tracking-wider block">Active Break Duration</span>
-          <span class="text-lg font-extrabold text-amber-600 font-mono mt-0.5 block">{{ breakDuration() }}</span>
         </div>
       </div>
 
@@ -103,15 +90,14 @@
         <!-- Swipe In Location -->
         <span
           class="inline-flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded border border-slate-100 max-w-[200px] truncate"
-          *ngIf="record.swipe_in_address || record.location_address" 
+          *ngIf="record.swipe_in_address || record.location_address"
           [title]="'Swipe In Location: ' + (record.swipe_in_address || record.location_address)">
           <i class="pi pi-map-marker text-emerald-500"></i> In: {{ record.swipe_in_address || record.location_address }}
         </span>
         <!-- Swipe Out Location -->
         <span
           class="inline-flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded border border-slate-100 max-w-[200px] truncate"
-          *ngIf="record.swipe_out_address" 
-          [title]="'Swipe Out Location: ' + record.swipe_out_address">
+          *ngIf="record.swipe_out_address" [title]="'Swipe Out Location: ' + record.swipe_out_address">
           <i class="pi pi-map-marker text-rose-500"></i> Out: {{ record.swipe_out_address }}
         </span>
       </div>
@@ -152,141 +138,18 @@
       <div class="mt-4 border-t border-slate-100 pt-4 flex items-center justify-between text-xs font-semibold">
         <span class="text-slate-500">Status</span>
         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full"
-          [ngClass]="isOnBreak() ? 'bg-amber-50 text-amber-700 border border-amber-100' : (isSwipedIn() ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-slate-100 text-slate-700 border border-slate-200')">
+          [ngClass]="isSwipedIn() ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-slate-100 text-slate-700 border border-slate-200'">
           <span class="h-1.5 w-1.5 rounded-full"
-            [ngClass]="isOnBreak() ? 'bg-amber-500 animate-ping' : (isSwipedIn() ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400')"></span>
-          {{ isOnBreak() ? 'On Break' : (isSwipedIn() ? 'Working' : 'Checked Out') }}
+            [ngClass]="isSwipedIn() ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'"></span>
+          {{ isSwipedIn() ? 'Working' : 'Checked Out' }}
         </span>
       </div>
     </div>
   </div>
 
-  <section class="space-y-4">
-    <!-- Header with Toggle -->
-    <div class="flex items-center justify-between mb-4 mt-6">
-      <h3 class="text-lg font-bold text-slate-800">Attendance Log</h3>
-      <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
-        <button (click)="toggleViewMode('table')"
-          [class.bg-white]="viewMode() === 'table'"
-          [class.shadow-sm]="viewMode() === 'table'"
-          [class.text-blue-600]="viewMode() === 'table'"
-          [class.text-slate-500]="viewMode() !== 'table'"
-          class="px-4 py-1.5 text-xs font-semibold rounded-md transition-all">
-          <i class="pi pi-list mr-1"></i> List
-        </button>
-        <button (click)="toggleViewMode('calendar')"
-          [class.bg-white]="viewMode() === 'calendar'"
-          [class.shadow-sm]="viewMode() === 'calendar'"
-          [class.text-blue-600]="viewMode() === 'calendar'"
-          [class.text-slate-500]="viewMode() !== 'calendar'"
-          class="px-4 py-1.5 text-xs font-semibold rounded-md transition-all">
-          <i class="pi pi-calendar mr-1"></i> Calendar
-        </button>
-      </div>
-    </div>
-
-    <!-- Table View -->
-    <div *ngIf="viewMode() === 'table'" class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-      <div class="w-full overflow-x-auto">
-        <app-table-template [data]="logs()" [columns]="columns" [pageSize]="pageSize" [totalCount]="totalCount"
-          [isLoading]="isActionLoading" [currentPage]="pageNo" [searchText]="searchText" [showRefresh]="true"
-          [tableActions]="rowActions" (actionClicked)="onActionClicked($event)" (refresh)="loadAllData()"
-          (pageChange)="onPageChange($event)" (searchChange)="onSearchChange($event)"
-          (sortChange)="onSortChange($event)" (pageSizeChange)="onPageSizeChange($event)">
-        </app-table-template>
-      </div>
-    </div>
-
-    <!-- Calendar View -->
-    <div *ngIf="viewMode() === 'calendar'" class="bg-white rounded-xl border border-slate-200 p-4 md:p-6 shadow-sm">
-      <!-- Calendar Header -->
-      <div class="flex items-center justify-between mb-6">
-        <h4 class="text-lg font-bold text-slate-800">
-          {{ currentMonthDate() | date:'MMMM yyyy' }}
-        </h4>
-        <div class="flex items-center gap-2">
-          <button (click)="prevMonth()" class="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors">
-            <i class="pi pi-chevron-left text-sm"></i>
-          </button>
-          <button (click)="nextMonth()" class="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors">
-            <i class="pi pi-chevron-right text-sm"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- Calendar Grid -->
-      <div class="w-full">
-        <!-- Days Header -->
-        <div class="grid grid-cols-7 gap-1 md:gap-2 mb-2">
-          <div *ngFor="let day of weekDays" class="text-center text-[10px] md:text-xs font-bold text-slate-500 uppercase py-2">
-            {{ day }}
-          </div>
-        </div>
-
-        <!-- Weeks -->
-        <div class="space-y-1 md:space-y-2">
-          <div *ngFor="let week of calendarWeeks()" class="grid grid-cols-7 gap-1 md:gap-2">
-            <div *ngFor="let day of week" 
-              class="relative flex flex-col min-h-[80px] md:min-h-[100px] p-1 md:p-2 border rounded-lg transition-colors"
-              [ngClass]="{
-                'bg-white border-slate-200': day.isCurrentMonth,
-                'bg-slate-50/50 border-slate-100 text-slate-400': !day.isCurrentMonth,
-                'border-blue-300 ring-1 ring-blue-100 bg-blue-50/20': day.isToday
-              }">
-              
-              <span class="text-xs md:text-sm font-semibold mb-1"
-                [ngClass]="day.isToday ? 'text-blue-600' : 'text-slate-700'">
-                {{ day.dayNumber }}
-              </span>
-
-              <!-- Status Badge -->
-              <div *ngIf="day.status" class="mt-auto flex flex-col items-start gap-1 w-full">
-                <span class="inline-flex items-center justify-center px-1.5 md:px-2 py-0.5 text-[9px] md:text-[10px] font-bold rounded-md"
-                  [ngClass]="{
-                    'bg-emerald-100 text-emerald-700': day.status === 'P',
-                    'bg-rose-100 text-rose-700': day.status === 'A' || day.status === 'LOP',
-                    'bg-slate-100 text-slate-600': day.status === 'Week Off',
-                    'bg-amber-100 text-amber-700': day.status === 'EL' || day.status === 'CL',
-                    'bg-purple-100 text-purple-700': day.status === 'Holiday'
-                  }">
-                  {{ day.status }}
-                </span>
-
-                <!-- In/Out Times for Present -->
-                <div *ngIf="day.status === 'P' && day.swipeIn" class="flex flex-col text-[8px] md:text-[9px] text-slate-500 font-mono w-full truncate">
-                  <div class="truncate" title="In: {{ day.swipeIn }}">In: {{ day.swipeIn }}</div>
-                  <div class="truncate" *ngIf="day.swipeOut" title="Out: {{ day.swipeOut }}">Out: {{ day.swipeOut }}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 </section>
 
-<!-- Break Reason Dialog -->
-<p-dialog header="Select Break Reason" [(visible)]="breakDialogVisible" [modal]="true"
-  [style]="{ width: '90%', maxWidth: '400px' }" styleClass="rounded-xl border border-slate-100 shadow-2xl p-6 bg-white">
-  <div class="space-y-4 mt-2">
-    <div>
-      <label for="breakReason" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Why are you
-        taking a break?</label>
-      <select id="breakReason" [(ngModel)]="selectedBreakReason"
-        class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none cursor-pointer">
-        <option *ngFor="let reason of breakReasons" [value]="reason">{{ reason }}</option>
-      </select>
-    </div>
-    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-      <button (click)="breakDialogVisible = false"
-        class="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 cursor-pointer">Cancel</button>
-      <button (click)="performStartBreak()"
-        class="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow cursor-pointer transition-colors">Confirm
-        Start</button>
-    </div>
-  </div>
-</p-dialog>
+
 
 <!-- Swipe Out Confirmation Dialog -->
 <p-dialog header="Confirm Swipe Out" [(visible)]="swipeOutDialogVisible" [modal]="true"

@@ -8,7 +8,7 @@ import {
   FormsModule
 } from '@angular/forms';
 
-import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { AppBreadcrumb } from '../../../../shared/ui/breadcrumb/breadcrumb';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { TableModule } from 'primeng/table';
@@ -38,7 +38,7 @@ import {
     FormsModule,
 
     CardModule,
-    BreadcrumbModule,
+    AppBreadcrumb,
     ButtonModule,
     TooltipModule,
     TableModule,

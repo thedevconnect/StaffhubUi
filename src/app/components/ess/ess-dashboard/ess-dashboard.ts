@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/cor
 import { CommonModule } from '@angular/common'
 import { CardModule } from 'primeng/card'
 import { TableModule } from 'primeng/table'
-import { Breadcrumb } from 'primeng/breadcrumb'
 import { RouterLink } from '@angular/router'
+import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb'
 
 import { AuthService } from '../../../shared/services/services/auth.service'
 import {
@@ -17,7 +17,7 @@ import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/ta
 @Component({
   selector: 'app-ess-dashboard',
   standalone: true,
-  imports: [CommonModule, CardModule, TableModule, Breadcrumb, RouterLink, TableTemplate],
+  imports: [CommonModule, CardModule, TableModule, AppBreadcrumb, RouterLink, TableTemplate],
   templateUrl: './ess-dashboard.html',
   styleUrl: './ess-dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

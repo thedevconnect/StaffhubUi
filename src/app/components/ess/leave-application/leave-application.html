@@ -1,13 +1,16 @@
 <p-toast></p-toast>
 <p-confirmDialog></p-confirmDialog>
 
+<app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+
 <div class="bg-[#FFFFFF] min-h-screen">
   <div class="bg-white overflow-hidden">
     <div
-      class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border-b border-gray-200 gap-3">
-      <h2 class="text-base font-semibold text-gray-800">
-        <p-breadcrumb [model]="breadcrumbItems"></p-breadcrumb>
-      </h2>
+      class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border-b border-gray-200 gap-3">
+      <div>
+        <h2 class="text-xl font-semibold text-gray-800">Leave Applications</h2>
+        <p class="text-xs text-slate-500 mt-1">Apply for leaves, track approval status, and manage holiday balances.</p>
+      </div>
       <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
         <p-button label="Export" icon="pi pi-file-excel"
           styleClass="p-button-sm p-button-success p-button-outlined rounded-lg" [raised]="true">

@@ -51,11 +51,24 @@ export class RoleMaster {
   data: any[] = [];
   activityMaster: FormGroup;
 
+  //  "Id": 2,
+  //           "RoleId": 2,
+  //           "RoleCode": "SUPER_ADMIN",
+  //           "RoleName": "Super Admin",
+  //           "RoleDescription": "Complete System",
+  //           "IsActive": 1,
+  //           "CreatedBy": 1,
+  //           "CreatedAt": "2026-05-13T12:18:28.000Z",
 
   columns: TableColumn[] = [
     { key: 'actions', header: '⚙️', isVisible: true, isSortable: false, isCustom: true },
-    { key: 'role_name', header: 'Role', isVisible: true, isSortable: false },
-
+    { key: 'RoleName', header: 'Role Name', isVisible: true, isSortable: false },
+    { key: 'RoleDescription', header: 'Role Description', isVisible: true, isSortable: false },
+    { key: 'IsActive', header: 'Status', isVisible: true, isSortable: false },
+    // createdby
+    { key: 'CreatedBy', header: 'Created By', isVisible: true, isSortable: false },
+    // createdat
+    { key: 'CreatedAt', header: 'Created Date', isVisible: true, isSortable: false },
   ];
   pageNo = 1;
   pageSize = 5;

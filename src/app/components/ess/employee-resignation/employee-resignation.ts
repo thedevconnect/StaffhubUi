@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CardModule } from 'primeng/card';
 import { CommonModule } from '@angular/common';
-import { Breadcrumb } from 'primeng/breadcrumb';
+import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb';
 
 @Component({
   selector: 'app-employee-resignation',
   standalone: true,
-  imports: [CommonModule, CardModule, Breadcrumb],
+  imports: [CommonModule, CardModule, AppBreadcrumb],
   templateUrl: './employee-resignation.html',
   styleUrl: './employee-resignation.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

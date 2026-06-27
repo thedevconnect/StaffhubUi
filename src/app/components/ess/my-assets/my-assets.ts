@@ -7,7 +7,8 @@ import {
   FormsModule,
   Validators
 } from '@angular/forms'
-import { Breadcrumb, BreadcrumbModule } from 'primeng/breadcrumb'
+import { BreadcrumbModule } from 'primeng/breadcrumb'
+import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb'
 import { ButtonModule } from 'primeng/button'
 import { ConfirmDialogModule } from 'primeng/confirmdialog'
 import { ToastModule } from 'primeng/toast'
@@ -26,7 +27,7 @@ import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/ta
   standalone: true,
   imports: [
     CommonModule,
-    Breadcrumb,
+    AppBreadcrumb,
     TableTemplate,
     BreadcrumbModule,
     ButtonModule,

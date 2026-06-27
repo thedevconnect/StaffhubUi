@@ -1,45 +1,27 @@
 import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, signal } from '@angular/core';
-import { CardModule } from 'primeng/card';
-import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
-import { Breadcrumb } from 'primeng/breadcrumb';
+import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb';
 import { DialogModule } from 'primeng/dialog';
 import { ToastModule } from 'primeng/toast';
 import { FormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
+import { ProgressBarModule } from 'primeng/progressbar';
 import {
   AttendanceService,
   AttendanceRecord,
-  BreakRecord,
   DashboardSummary
 } from '../../../shared/services/attendance.service';
-import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template';
-
-export interface CalendarDay {
-  date: Date;
-  dateStr: string;
-  dayNumber: number;
-  isCurrentMonth: boolean;
-  isToday: boolean;
-  status: 'P' | 'A' | 'EL' | 'CL' | 'LOP' | 'EL/2' | 'CL/2' | 'LOP/2' | 'Week Off' | 'Holiday' | null;
-  swipeIn?: string;
-  swipeOut?: string;
-  records?: AttendanceRecord[];
-}
 
 @Component({
   selector: 'app-employee-attendance',
   standalone: true,
-
   imports: [
     CommonModule,
-    CardModule,
-    TableModule,
-    Breadcrumb,
+    AppBreadcrumb,
     DialogModule,
     ToastModule,
     FormsModule,
-    TableTemplate
+    ProgressBarModule
   ],
   providers: [MessageService],
   templateUrl: './employee-attendance.html',
@@ -56,19 +38,12 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   ];
 
   readonly isSwipedIn = signal<boolean>(false);
-  readonly isOnBreak = signal<boolean>(false);
   readonly activeRecord = signal<AttendanceRecord | null>(null);
-  //readonly breakHistory = signal<BreakRecord[]>([]);
   readonly todayPunches = signal<Array<{ type: string; time: string; icon: string; colorClass: string }>>([]);
 
   readonly duration = signal<string>('00:00:00');
-  readonly breakDuration = signal<string>('00:00:00');
-  // Table Pagination
-  pageNo = 1
-  pageSize = 10
-  totalCount = 0
+  readonly shiftProgressPercentage = signal<number>(0);
 
-  searchText = ''
   readonly dashboardSummary = signal<DashboardSummary>({
     presentDays: 0,
     absentDays: 0,
@@ -77,28 +52,10 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     totalWorkingMinutes: 0
   });
 
-  readonly logs = signal<AttendanceRecord[]>([]);
-
-  // Calendar View State
-  viewMode = signal<'table' | 'calendar'>('table');
-  currentMonthDate = signal<Date>(new Date());
-  calendarWeeks = signal<CalendarDay[][]>([]);
-  weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
   isActionLoading = false;
-  breakDialogVisible = false;
-  selectedBreakReason = 'Lunch Break';
   swipeOutDialogVisible = false;
   swipeOutNote = '';
-
-  readonly breakReasons: string[] = [
-    'Lunch Break',
-    'Tea/Coffee Break',
-    'Short Break',
-    'Client Meeting',
-    'Personal Work',
-    'Other'
-  ];
+  private allTodayRecords: AttendanceRecord[] = [];
 
   private clockIntervalId: any;
   private timerIntervalId: any;
@@ -133,44 +90,50 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
         if (res.success && res.data) {
           const record = res.data;
           const allTodayRecords = (res as any).allToday || (record ? [record] : []);
+          this.allTodayRecords = allTodayRecords;
           this.activeRecord.set(record);
 
           if (record.swipe_in && !record.swipe_out) {
             this.isSwipedIn.set(true);
+            this.buildTodayTimeline(allTodayRecords);
+            
+            const previousCompletedMs = allTodayRecords
+              .filter((r: any) => r.id !== record.id && r.swipe_in && r.swipe_out)
+              .reduce((sum: number, r: any) => {
+                const inTime = this.parseDbDate(r.swipe_in);
+                const outTime = this.parseDbDate(r.swipe_out);
+                if (inTime && outTime) {
+                  return sum + (outTime.getTime() - inTime.getTime());
+                }
+                return sum;
+              }, 0);
 
-            // this.attendanceService.getBreakHistory().subscribe({
-            //   next: (breakRes) => {
-            //     const breaks = breakRes.success && Array.isArray(breakRes.data) ? breakRes.data : [];
-
-            //     this.breakHistory.set(breaks);
-            //     this.isOnBreak.set(breaks.some(b => b.break_end === null));
-
-            //     this.buildTodayTimeline(allTodayRecords, breaks);
-            //     this.startTimerTicks(record, breaks);
-
-            //     this.isActionLoading = false;
-            //   },
-            //   error: () => {
-            //     this.breakHistory.set([]);
-            //     this.isOnBreak.set(false);
-            //     this.buildTodayTimeline(allTodayRecords, []);
-            //     this.startTimerTicks(record, []);
-            //     this.isActionLoading = false;
-            //   }
-            // });
+            this.startTimerTicks(record, previousCompletedMs);
+            this.isActionLoading = false;
           } else {
             this.isSwipedIn.set(false);
-            this.isOnBreak.set(false);
             this.stopTimerTicks();
 
-            if (record.swipe_out) {
-              this.duration.set(this.formatMinutesToHMS(record.total_work_minutes || 0));
+            const totalWorkMsToday = allTodayRecords
+              .filter((r: any) => r.swipe_in && r.swipe_out)
+              .reduce((sum: number, r: any) => {
+                const inTime = this.parseDbDate(r.swipe_in);
+                const outTime = this.parseDbDate(r.swipe_out);
+                if (inTime && outTime) {
+                  return sum + (outTime.getTime() - inTime.getTime());
+                }
+                return sum;
+              }, 0);
+
+            if (totalWorkMsToday > 0) {
+              this.duration.set(this.formatMsToHMS(totalWorkMsToday));
+              this.updateProgressPercentage(totalWorkMsToday);
             } else {
               this.duration.set('00:00:00');
+              this.shiftProgressPercentage.set(0);
             }
 
-            this.breakDuration.set('00:00:00');
-            this.buildTodayTimeline(allTodayRecords, []);
+            this.buildTodayTimeline(allTodayRecords);
             this.isActionLoading = false;
           }
         } else {
@@ -197,194 +160,27 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
         }
       }
     });
-
-    this.attendanceService.getHistory().subscribe({
-      next: (res) => {
-        if (res.success && Array.isArray(res.data)) {
-          const formattedData = res.data.map((record: any) => ({
-            ...record,
-            attendance_date: record.attendance_date ? record.attendance_date.split('T')[0] : '-',
-            swipe_in: this.formatDateTimeToTime(record.swipe_in),
-            swipe_out: this.formatDateTimeToTime(record.swipe_out),
-            swipe_in_location: record.swipe_in_address || record.location_address || '-',
-            swipe_out_location: record.swipe_out_address || '-',
-            created_at: this.formatDateTime(record.created_at),
-            updated_at: this.formatDateTime(record.updated_at)
-          }));
-          this.logs.set(formattedData);
-          if (this.viewMode() === 'calendar') {
-            this.generateCalendar();
-          }
-        }
-      }
-    });
-  }
-
-  onPageChange(newPage: number) {
-    this.pageNo = newPage
-
-    this.loadAllData()
-  }
-
-  // Search
-
-  onSearchChange(value: string) {
-    this.searchText = value
-
-    this.pageNo = 1
-
-    this.loadAllData()
-  }
-
-  // Page Size
-
-  onPageSizeChange(size: number) {
-    this.pageSize = size
-
-    this.pageNo = 1
-
-    this.loadAllData()
-  }
-
-  // Sorting
-
-  onSortChange(event: any) {
-    console.log('Sort Event', event)
-
-    this.loadAllData()
-  }
-
-  onActionClicked(event: any) {
-    console.log('Action clicked', event)
-  }
-  // Table Columns
-
-  columns: TableColumn[] = [
-    { key: 'actions', header: 'Actions', isVisible: true },
-    { key: 'employee_id', header: 'Employee ID', isVisible: true, isSortable: true },
-    { key: 'attendance_date', header: 'Attendance Date', isVisible: true, isSortable: true },
-    { key: 'swipe_in', header: 'Swipe In', isVisible: true, isSortable: true },
-    { key: 'swipe_in_location', header: 'Swipe In Location', isVisible: true },
-    { key: 'swipe_out', header: 'Swipe Out', isVisible: true, isSortable: true },
-    { key: 'swipe_out_location', header: 'Swipe Out Location', isVisible: true },
-    { key: 'attendance_status', header: 'Status', isVisible: true, isSortable: true },
-    { key: 'created_at', header: 'Created At', isVisible: true, isSortable: true },
-    { key: 'updated_at', header: 'Updated At', isVisible: true, isSortable: true }
-  ]
-
-  rowActions = [
-    { label: 'View', icon: 'pi pi-eye', id: 'view' },
-    { label: 'Edit', icon: 'pi pi-pencil', id: 'edit' },
-    { label: 'Delete', icon: 'pi pi-trash', id: 'delete' }
-  ];
-
-  // Calendar Logic
-  toggleViewMode(mode: 'table' | 'calendar'): void {
-    this.viewMode.set(mode);
-    if (mode === 'calendar') {
-      this.generateCalendar();
-    }
-  }
-
-  prevMonth(): void {
-    const current = this.currentMonthDate();
-    this.currentMonthDate.set(new Date(current.getFullYear(), current.getMonth() - 1, 1));
-    this.generateCalendar();
-  }
-
-  nextMonth(): void {
-    const current = this.currentMonthDate();
-    this.currentMonthDate.set(new Date(current.getFullYear(), current.getMonth() + 1, 1));
-    this.generateCalendar();
-  }
-
-  generateCalendar(): void {
-    const year = this.currentMonthDate().getFullYear();
-    const month = this.currentMonthDate().getMonth();
-
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-
-    const startDate = new Date(firstDay);
-    startDate.setDate(startDate.getDate() - startDate.getDay());
-
-    const endDate = new Date(lastDay);
-    if (endDate.getDay() !== 6) {
-      endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
-    }
-
-    const weeks: CalendarDay[][] = [];
-    let currentWeek: CalendarDay[] = [];
-
-    let loopDate = new Date(startDate);
-
-    // Normalize today for comparison without time
-    const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
-    while (loopDate <= endDate) {
-      const dateStr = `${loopDate.getFullYear()}-${String(loopDate.getMonth() + 1).padStart(2, '0')}-${String(loopDate.getDate()).padStart(2, '0')}`;
-      const isCurrentMonth = loopDate.getMonth() === month;
-
-      const day: CalendarDay = {
-        date: new Date(loopDate),
-        dateStr,
-        dayNumber: loopDate.getDate(),
-        isCurrentMonth,
-        isToday: dateStr === todayStr,
-        status: null,
-      };
-
-      currentWeek.push(day);
-
-      if (currentWeek.length === 7) {
-        weeks.push(currentWeek);
-        currentWeek = [];
-      }
-
-      loopDate.setDate(loopDate.getDate() + 1);
-    }
-
-    this.calendarWeeks.set(weeks);
-    this.mapDataToCalendar();
-  }
-
-  mapDataToCalendar(): void {
-    const weeks = this.calendarWeeks();
-    const logs = this.logs();
-
-    const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
-    const updatedWeeks = weeks.map(week => {
-      return week.map(day => {
-        const records = logs.filter(log => log.attendance_date === day.dateStr);
-        let status: CalendarDay['status'] = null;
-        let swipeIn = '';
-        let swipeOut = '';
-
-        const dayOfWeek = day.date.getDay();
-        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-
-        if (records.length > 0) {
-          status = 'P';
-          swipeIn = records[0].swipe_in || '';
-          swipeOut = records[records.length - 1].swipe_out || '';
-        } else if (isWeekend) {
-          status = 'Week Off';
-        } else if (day.dateStr < todayStr) {
-          status = 'A';
-        }
-
-        return { ...day, status, swipeIn, swipeOut, records };
-      });
-    });
-
-    this.calendarWeeks.set(updatedWeeks);
   }
 
   async performSwipeIn(): Promise<void> {
     this.isActionLoading = true;
+
+    if (typeof navigator !== 'undefined' && navigator.permissions) {
+      try {
+        const status = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
+        if (status.state === 'denied') {
+          this.isActionLoading = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Location Access Denied',
+            detail: 'Location permission is blocked in your browser. Please reset location permissions and try again.'
+          });
+          return;
+        }
+      } catch (e) {
+        console.warn('Permissions API query failed', e);
+      }
+    }
 
     const os_name = this.getOSName();
     const browser_name = this.getBrowserName();
@@ -450,13 +246,22 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
 
           this.activeRecord.set(newRecord);
           this.isSwipedIn.set(true);
-          this.isOnBreak.set(false);
-          //this.breakHistory.set([]);
           this.duration.set('00:00:00');
-          this.breakDuration.set('00:00:00');
+          this.shiftProgressPercentage.set(0);
 
-          this.buildTodayTimeline(newRecord, []);
-          this.startTimerTicks(newRecord, []);
+          const previousCompletedMs = this.allTodayRecords
+            .filter((r: any) => r.swipe_in && r.swipe_out)
+            .reduce((sum: number, r: any) => {
+              const inTime = this.parseDbDate(r.swipe_in);
+              const outTime = this.parseDbDate(r.swipe_out);
+              if (inTime && outTime) {
+                return sum + (outTime.getTime() - inTime.getTime());
+              }
+              return sum;
+            }, 0);
+
+          this.buildTodayTimeline(newRecord);
+          this.startTimerTicks(newRecord, previousCompletedMs);
 
           this.messageService.add({
             severity: 'success',
@@ -480,15 +285,6 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   }
 
   confirmSwipeOut(): void {
-    if (this.isOnBreak()) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Action Blocked',
-        detail: 'Please end your active break before checking out.'
-      });
-      return;
-    }
-
     this.swipeOutNote = '';
     this.swipeOutDialogVisible = true;
   }
@@ -496,6 +292,23 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   async performSwipeOut(): Promise<void> {
     this.swipeOutDialogVisible = false;
     this.isActionLoading = true;
+
+    if (typeof navigator !== 'undefined' && navigator.permissions) {
+      try {
+        const status = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
+        if (status.state === 'denied') {
+          this.isActionLoading = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Location Access Denied',
+            detail: 'Location permission is blocked in your browser. Please reset location permissions and try again.'
+          });
+          return;
+        }
+      } catch (e) {
+        console.warn('Permissions API query failed', e);
+      }
+    }
 
     const os_name = this.getOSName();
     const browser_name = this.getBrowserName();
@@ -555,8 +368,6 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
           }
 
           this.isSwipedIn.set(false);
-          this.isOnBreak.set(false);
-          this.breakDuration.set('00:00:00');
           this.stopTimerTicks();
 
           this.messageService.add({
@@ -580,118 +391,33 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     });
   }
 
-  openBreakDialog(): void {
-    if (!this.isSwipedIn()) return;
-    this.selectedBreakReason = 'Lunch Break';
-    this.breakDialogVisible = true;
-  }
-
-  performStartBreak(): void {
-    this.breakDialogVisible = false;
-    this.isActionLoading = true;
-
-    this.attendanceService.startBreak(this.selectedBreakReason).subscribe({
-      next: (res: any) => {
-        this.isActionLoading = false;
-
-        if (res.success) {
-          this.isOnBreak.set(true);
-
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Break Started',
-            detail: `Started: ${this.selectedBreakReason}`
-          });
-
-          this.loadAllData();
-        }
-      },
-      error: (err) => {
-        this.isActionLoading = false;
-
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Break Failed',
-          detail: err.error?.message || 'Unable to start break session.'
-        });
-      }
-    });
-  }
-
-  performEndBreak(): void {
-    this.isActionLoading = true;
-
-    this.attendanceService.endBreak().subscribe({
-      next: (res: any) => {
-        this.isActionLoading = false;
-
-        if (res.success) {
-          this.isOnBreak.set(false);
-          this.breakDuration.set('00:00:00');
-
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Break Ended',
-            detail: 'Returned from break successfully!'
-          });
-
-          this.loadAllData();
-        }
-      },
-      error: (err) => {
-        this.isActionLoading = false;
-
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Action Failed',
-          detail: err.error?.message || 'Unable to end break session.'
-        });
-      }
-    });
-  }
-
   private resetTodayState(): void {
     this.activeRecord.set(null);
     this.isSwipedIn.set(false);
-    this.isOnBreak.set(false);
-    // this.breakHistory.set([]);
     this.todayPunches.set([]);
     this.duration.set('00:00:00');
-    this.breakDuration.set('00:00:00');
+    this.shiftProgressPercentage.set(0);
     this.stopTimerTicks();
   }
 
-  private startTimerTicks(record: AttendanceRecord, breaks: BreakRecord[]): void {
+  private updateProgressPercentage(workMs: number): void {
+    const targetMs = 9 * 60 * 60 * 1000; // 9 hours
+    const percent = (workMs / targetMs) * 100;
+    this.shiftProgressPercentage.set(Math.min(100, Math.max(0, parseFloat(percent.toFixed(1)))));
+  }
+
+  private startTimerTicks(record: AttendanceRecord, previousCompletedMs: number = 0): void {
     if (this.timerIntervalId) clearInterval(this.timerIntervalId);
 
     const swipeInTime = this.parseDbDate(record.swipe_in);
     if (!swipeInTime) return;
 
-    const previousWorkMs = (record.total_work_minutes || 0) * 60000;
-
-    const completedBreaksMs = breaks
-      .filter(b => b.break_end !== null)
-      .reduce((sum, b) => sum + (b.break_minutes || 0) * 60000, 0);
-
-    const activeBreak = breaks.find(b => b.break_end === null);
-    const activeBreakStartTime = activeBreak ? this.parseDbDate(activeBreak.break_start) : null;
-
     this.timerIntervalId = setInterval(() => {
       const now = new Date();
-
-      if (activeBreakStartTime) {
-        const breakElapsed = now.getTime() - activeBreakStartTime.getTime();
-        this.breakDuration.set(this.formatMsToHMS(breakElapsed));
-
-        const currentSessionElapsedAtBreakStart =
-          activeBreakStartTime.getTime() - swipeInTime.getTime() - completedBreaksMs;
-
-        this.duration.set(this.formatMsToHMS(Math.max(0, previousWorkMs + currentSessionElapsedAtBreakStart)));
-      } else {
-        const currentSessionWorkElapsed = now.getTime() - swipeInTime.getTime() - completedBreaksMs;
-        this.duration.set(this.formatMsToHMS(Math.max(0, previousWorkMs + currentSessionWorkElapsed)));
-        this.breakDuration.set('00:00:00');
-      }
+      const currentSessionWorkElapsed = now.getTime() - swipeInTime.getTime();
+      const workMs = Math.max(0, previousCompletedMs + currentSessionWorkElapsed);
+      this.duration.set(this.formatMsToHMS(workMs));
+      this.updateProgressPercentage(workMs);
     }, 1000);
   }
 
@@ -702,7 +428,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     }
   }
 
-  private buildTodayTimeline(records: AttendanceRecord[] | AttendanceRecord | null, breaks: BreakRecord[]): void {
+  private buildTodayTimeline(records: AttendanceRecord[] | AttendanceRecord | null): void {
     const timeline: Array<{ type: string; time: string; timestamp: number; icon: string; colorClass: string }> = [];
 
     if (!records) {
@@ -740,30 +466,6 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
       }
     });
 
-    breaks.forEach(b => {
-      if (b.break_start) {
-        const dt = this.parseDbDate(b.break_start);
-        timeline.push({
-          type: b.reason ? `Break Started (${b.reason})` : 'Break Started',
-          time: this.formatDateTimeToTime(b.break_start),
-          timestamp: dt ? dt.getTime() : 0,
-          icon: 'pi pi-pause',
-          colorClass: 'border-amber-500 bg-amber-50 text-amber-600'
-        });
-      }
-
-      if (b.break_end) {
-        const dt = this.parseDbDate(b.break_end);
-        timeline.push({
-          type: 'Break Ended',
-          time: this.formatDateTimeToTime(b.break_end),
-          timestamp: dt ? dt.getTime() : 0,
-          icon: 'pi pi-play',
-          colorClass: 'border-sky-500 bg-sky-50 text-sky-600'
-        });
-      }
-    });
-
     timeline.sort((a, b) => b.timestamp - a.timestamp);
 
     this.todayPunches.set(timeline.map(item => ({
@@ -789,42 +491,11 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     return [hours, minutes, seconds].map(v => v < 10 ? '0' + v : v).join(':');
   }
 
-  private formatMinutesToHMS(minutes: number): string {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return [hours, mins, 0].map(v => v < 10 ? '0' + v : v).join(':');
-  }
-
-  formatTotalWorkingHours(minutes: number): string {
-    const hours = Math.floor(minutes / 60);
-    const remainingMins = minutes % 60;
-    return `${hours}h ${remainingMins}m`;
-  }
-
   private formatDateTimeToTime(dateStr: string | null): string {
     if (!dateStr) return '-';
     const date = this.parseDbDate(dateStr);
     if (!date) return '-';
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-  }
-
-  private formatDateTime(dateStr: string | null): string {
-    if (!dateStr) return '-';
-    const date = this.parseDbDate(dateStr);
-    if (!date) return '-';
-    const d = date.toISOString().split('T')[0];
-    const t = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-    return `${d} ${t}`;
-  }
-
-  formatTimeString(dateStr: string | null): string {
-    if (!dateStr) return '-';
-    return this.formatDateTimeToTime(dateStr);
-  }
-
-  formatDecimal(val: any): string {
-    if (val === null || val === undefined || isNaN(val)) return '-';
-    return Number(val).toFixed(4);
   }
 
   private getBrowserName(): string {
@@ -861,7 +532,6 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
         return;
       }
 
-      // First try with enableHighAccuracy: true and maximumAge: 0 to force bypass cache
       navigator.geolocation.getCurrentPosition(
         (position) => {
           resolve({
@@ -871,7 +541,6 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
         },
         (error) => {
           console.warn('High accuracy geolocation failed or timed out. Trying standard resolution...', error);
-          // Fallback to enableHighAccuracy: false
           navigator.geolocation.getCurrentPosition(
             (position) => {
               resolve({
@@ -905,7 +574,6 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
       const data = await res.json();
       let displayName = data.display_name || `Lat: ${lat.toFixed(4)}, Long: ${lon.toFixed(4)}`;
 
-      // Override OpenStreetMap's geocoding mistake for Uttam Nagar postcode 110059
       if (displayName.includes('110059') && displayName.includes('Patel Nagar')) {
         displayName = displayName.replace('Patel Nagar', 'Uttam Nagar');
       }

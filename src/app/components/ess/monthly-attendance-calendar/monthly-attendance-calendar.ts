@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { CardModule } from 'primeng/card';
 import { CommonModule } from '@angular/common';
-import { Breadcrumb } from 'primeng/breadcrumb';
+import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb';
 import { PopoverModule } from 'primeng/popover';
 import { AttendanceService } from '../../../shared/services/attendance.service';
 
 @Component({
   selector: 'app-monthly-attendance-calendar',
   standalone: true,
-  imports: [CommonModule, CardModule, Breadcrumb, PopoverModule],
+  imports: [CommonModule, CardModule, AppBreadcrumb, PopoverModule],
   templateUrl: './monthly-attendance-calendar.html',
   styleUrl: './monthly-attendance-calendar.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

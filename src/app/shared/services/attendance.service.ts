@@ -29,15 +29,6 @@ export interface AttendanceRecord {
   swipe_out_longitude?: number | null;
 }
 
-export interface BreakRecord {
-  id: number;
-  attendance_id: number;
-  break_start: string;
-  break_end: string | null;
-  break_minutes: number | null;
-  reason: string | null;
-}
-
 export interface DashboardSummary {
   presentDays: number;
   absentDays: number;
@@ -96,18 +87,6 @@ export class AttendanceService {
 
   getDashboardSummary(): Observable<ApiResponse<DashboardSummary>> {
     return this.http.get<ApiResponse<DashboardSummary>>(`${this.apiBase}/api/attendance/dashboard-summary`);
-  }
-
-  startBreak(reason?: string): Observable<ApiResponse<BreakRecord>> {
-    return this.http.post<ApiResponse<BreakRecord>>(`${this.apiBase}/api/attendance/break/start`, { reason });
-  }
-
-  endBreak(): Observable<ApiResponse<BreakRecord>> {
-    return this.http.post<ApiResponse<BreakRecord>>(`${this.apiBase}/api/attendance/break/end`, {});
-  }
-
-  getBreakHistory(): Observable<ApiResponse<BreakRecord[]>> {
-    return this.http.get<ApiResponse<BreakRecord[]>>(`${this.apiBase}/api/attendance/break/history`);
   }
 
   getAllLogs(): Observable<ApiResponse<SwipeLog[]>> {

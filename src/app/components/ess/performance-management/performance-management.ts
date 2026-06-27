@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CardModule } from 'primeng/card';
 import { CommonModule } from '@angular/common';
-import { Breadcrumb } from 'primeng/breadcrumb';
+import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb';
 
 @Component({
   selector: 'app-performance-management',
   standalone: true,
-  imports: [CommonModule, CardModule, Breadcrumb],
+  imports: [CommonModule, CardModule, AppBreadcrumb],
   templateUrl: './performance-management.html',
   styleUrl: './performance-management.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

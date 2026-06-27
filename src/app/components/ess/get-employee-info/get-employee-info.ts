@@ -4,12 +4,12 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Breadcrumb } from 'primeng/breadcrumb';
+import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb';
 
 @Component({
   selector: 'app-get-employee-info',
   standalone: true,
-  imports: [CommonModule, CardModule, InputTextModule, ButtonModule, FormsModule, Breadcrumb],
+  imports: [CommonModule, CardModule, InputTextModule, ButtonModule, FormsModule, AppBreadcrumb],
   templateUrl: './get-employee-info.html',
   styleUrl: './get-employee-info.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

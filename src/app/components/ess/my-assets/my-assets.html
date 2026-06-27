@@ -2,20 +2,18 @@
   <p-confirmDialog></p-confirmDialog>
   <p-toast></p-toast>
 
-  <!-- Top Bar: Breadcrumb + Add Button -->
-  <div class="-mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-6 bg-white border-b border-slate-200 shadow-sm">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 md:px-6 py-3.5">
-      <div class="w-full sm:w-auto overflow-x-auto">
-        <p-breadcrumb [model]="breadcrumbItems"
-          styleClass="!border-0 !rounded-none !bg-transparent !p-0 text-xs md:text-sm !w-max">
-        </p-breadcrumb>
-      </div>
+  <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
 
-      <div class="w-full sm:w-auto flex justify-end">
-        <p-button label="Add Asset" icon="pi pi-plus"
-          styleClass="orange-button p-button-warning p-button-sm w-full sm:w-auto shadow-sm" (click)="openAddDrawer()">
-        </p-button>
-      </div>
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+    <div>
+      <h2 class="text-xl font-semibold text-slate-900">My Assets</h2>
+      <p class="text-xs text-slate-500 mt-1">Manage and track hardware and software resources allocated to you.</p>
+    </div>
+    <div class="w-full sm:w-auto flex justify-end">
+      <p-button label="Add Asset" icon="pi pi-plus"
+        styleClass="orange-button p-button-warning p-button-sm w-full sm:w-auto shadow-sm" (click)="openAddDrawer()">
+      </p-button>
     </div>
   </div>
 
