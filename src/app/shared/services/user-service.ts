@@ -99,6 +99,22 @@ export class UserService {
     return this.http.post(`${this.apiUrl}/api/auth/signup`, data);
   }
 
+  registerCompany(data: any) {
+    return this.http.post(`${this.apiUrl}/api/companies/register`, data);
+  }
+
+  getPendingCompanies() {
+    return this.http.get(`${this.apiUrl}/api/companies/pending`);
+  }
+
+  approveCompany(id: string | number) {
+    return this.http.put(`${this.apiUrl}/api/companies/approve/${id}`, {});
+  }
+
+  rejectCompany(id: string | number) {
+    return this.http.put(`${this.apiUrl}/api/companies/reject/${id}`, {});
+  }
+
   login(username: string, password: string) {
     return this.http.post(`${this.apiUrl}/api/auth/login`, {
       username,

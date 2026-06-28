@@ -111,7 +111,7 @@ export class LoginComponent implements OnInit {
 
   redirectForm(type: string, val: number) {
     if (type === 'signup') {
-      this.router.navigate(['/register']);
+      this.router.navigate(['/register-company']);
       return;
     }
     this.formType = type;

@@ -1,0 +1,31 @@
+<div class="bg-[#FFFFFF] min-h-screen p-4 sm:p-6 lg:p-0">
+    <div class="bg-white overflow-hidden">
+        <div class="flex items-center justify-between p-3 border-b border-gray-200">
+            <div>
+                <h2 class="text-base font-semibold text-gray-800">Admin Approval (Company Requests)</h2>
+                <p class="text-xs text-slate-500 mt-1">Review and approve new company registration requests.</p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <p-button (click)="loadData()" label="Refresh" icon="pi pi-refresh" variant="text" [raised]="true"
+                    styleClass="orange-button" />
+            </div>
+        </div>
+        <app-table-template [data]="data" [columns]="columns" [pageSize]="pageSize" [totalCount]="totalCount"
+            [isLoading]="isLoading" [currentPage]="pageNo" [searchText]="searchText" 
+            [actionTemplate]="actionTemplateRef" (pageChange)="onPageChange($event)"
+            (searchChange)="onSearchChange($event)" (pageSizeChange)="onPageSizeChange($event)">
+        </app-table-template>
+
+        <ng-template #actionTemplateRef let-item>
+            <div class="flex items-center gap-2">
+                <p-button (onClick)="onApprove(item, $event)" icon="pi pi-check" label="Approve"
+                    styleClass="p-button-sm p-button-success rounded-lg" pTooltip="Approve Company Request" />
+                <p-button (onClick)="onReject(item, $event)" icon="pi pi-times" label="Reject"
+                    styleClass="p-button-sm p-button-danger p-button-outlined rounded-lg" pTooltip="Reject Company Request" />
+            </div>
+        </ng-template>
+    </div>
+</div>
+
+<p-confirmdialog></p-confirmdialog>
+<p-toast></p-toast>

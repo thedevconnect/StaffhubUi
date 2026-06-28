@@ -1,0 +1,212 @@
+<p-toast></p-toast>
+
+<div class="min-h-screen w-full flex bg-slate-50 font-sans">
+    <!-- Left Column: Branding (hidden on mobile) -->
+    <div
+        class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white flex-col justify-between p-16 relative overflow-hidden">
+        <!-- Animated Background Blur Blobs -->
+        <div
+            class="absolute -top-12 -left-12 w-96 h-96 bg-indigo-500 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-blob">
+        </div>
+        <div
+            class="absolute bottom-12 right-12 w-96 h-96 bg-emerald-500 rounded-full mix-blend-screen filter blur-3xl opacity-15 animate-blob animation-delay-2000">
+        </div>
+
+        <!-- Top Branding Section -->
+        <div class="flex items-center gap-3 z-10 select-none">
+            <svg class="w-10 h-10 text-emerald-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="3" width="8" height="8" rx="2" fill="currentColor" />
+                <rect x="13" y="3" width="8" height="8" rx="2" fill="currentColor" opacity="0.7" />
+                <rect x="3" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.8" />
+                <rect x="13" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.4" />
+            </svg>
+            <span
+                class="text-2xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-100 to-emerald-300">STAFFHUB</span>
+        </div>
+
+        <!-- Center Highlight Message -->
+        <div class="my-auto z-10 max-w-lg">
+            <h1 class="text-4xl font-extrabold leading-tight mb-4 tracking-tight">
+                Manage Your Workforce <br>
+                <span
+                    class="text-emerald-400 bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-indigo-300">Effortlessly
+                    & Smartly.</span>
+            </h1>
+            <p class="text-slate-300 text-base leading-relaxed mb-10">
+                The all-in-one HRMS solution to streamline employee tracking, attendance, real-time collaboration, and
+                payroll management.
+            </p>
+
+            <!-- Feature Checklist -->
+            <div class="flex flex-col gap-6">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 text-xl border border-white/10 shadow-lg">
+                        <i class="pi pi-shield"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-white text-base">Enterprise Security</h4>
+                        <p class="text-xs text-slate-400">Strict data access control and secure authentication.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 text-xl border border-white/10 shadow-lg">
+                        <i class="pi pi-chart-line"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-white text-base">Real-time Analytics</h4>
+                        <p class="text-xs text-slate-400">Monitor employee engagement and attendance trends.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 text-xl border border-white/10 shadow-lg">
+                        <i class="pi pi-bolt"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-white text-base">Automated Workflows</h4>
+                        <p class="text-xs text-slate-400">Reduce operational overhead with smart integrations.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Note -->
+        <div class="z-10 text-xs text-slate-400 select-none">
+            &copy; 2026 StaffHub. Powered by Oblo. All Rights Reserved.
+        </div>
+    </div>
+
+    <!-- Right Column: Interactive Forms -->
+    <div class="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 md:p-12 relative overflow-y-auto">
+        <!-- Floating Mobile Logo (only visible on mobile/tablet) -->
+        <div class="lg:hidden flex items-center gap-2 mb-8 select-none">
+            <svg class="w-8 h-8 text-indigo-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="3" width="8" height="8" rx="2" fill="currentColor" />
+                <rect x="13" y="3" width="8" height="8" rx="2" fill="currentColor" opacity="0.7" />
+                <rect x="3" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.8" />
+                <rect x="13" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.4" />
+            </svg>
+            <span class="text-xl font-black tracking-wider text-slate-900">STAFFHUB</span>
+        </div>
+
+        <!-- Card Outer Wrapper -->
+        <div class="w-full max-w-xl bg-white rounded-2xl shadow-xl border border-slate-100 p-8 md:p-10 relative">
+
+            <!-- Navigation header -->
+            <div class="flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
+                <span class="text-slate-400 text-sm font-semibold uppercase tracking-wider select-none">
+                    Register Company
+                </span>
+
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="text-slate-500">Already a user?</span>
+                    <p-button label="Login" [text]="true" size="small"
+                        styleClass="text-indigo-600 font-bold p-0 hover:underline" (onClick)="redirectToLogin()" />
+                </div>
+            </div>
+
+            <div class="animate-fade-in">
+                <h2 class="text-2xl font-black text-slate-950 mb-1">Register Company</h2>
+                <p class="text-sm text-slate-400 mb-8 font-medium">Register your company to set up StaffHub portal.</p>
+
+                <form [formGroup]="signupForm" class="flex flex-col gap-6">
+                    <div class="border border-slate-100 rounded-2xl p-6 bg-slate-50/50 flex flex-col gap-4">
+                        <h3 class="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2 select-none uppercase tracking-wide">
+                            <i class="pi pi-building text-indigo-600"></i> Company Registration
+                        </h3>
+
+                        <!-- Row 1: Company Name & Short Name -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="companyName" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Company Name</label>
+                                <input pInputText id="companyName" formControlName="companyName" class="w-full bg-white" [class.ng-invalid]="f2['companyName'].invalid && f2['companyName'].touched" [class.ng-dirty]="f2['companyName'].invalid && f2['companyName'].touched" />
+                                <small *ngIf="f2['companyName'].touched && f2['companyName'].invalid" class="text-rose-500 text-xs mt-1 block">Company name is required</small>
+                            </div>
+                            <div>
+                                <label for="shortName" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Short Name</label>
+                                <input pInputText id="shortName" formControlName="shortName" class="w-full bg-white" [class.ng-invalid]="f2['shortName'].invalid && f2['shortName'].touched" [class.ng-dirty]="f2['shortName'].invalid && f2['shortName'].touched" />
+                                <small *ngIf="f2['shortName'].touched && f2['shortName'].invalid" class="text-rose-500 text-xs mt-1 block">Short name is required</small>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Company Email & Company Phone -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="companyEmail" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Company Email</label>
+                                <input pInputText id="companyEmail" type="email" formControlName="companyEmail" class="w-full bg-white" [class.ng-invalid]="f2['companyEmail'].invalid && f2['companyEmail'].touched" [class.ng-dirty]="f2['companyEmail'].invalid && f2['companyEmail'].touched" />
+                                <small *ngIf="f2['companyEmail'].touched && f2['companyEmail'].invalid" class="text-rose-500 text-xs mt-1 block">Valid company email is required</small>
+                            </div>
+                            <div>
+                                <label for="companyPhone" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Company Phone</label>
+                                <input pInputText id="companyPhone" type="text" formControlName="companyPhone" class="w-full bg-white" [class.ng-invalid]="f2['companyPhone'].invalid && f2['companyPhone'].touched" [class.ng-dirty]="f2['companyPhone'].invalid && f2['companyPhone'].touched" />
+                                <small *ngIf="f2['companyPhone'].touched && f2['companyPhone'].invalid" class="text-rose-500 text-xs mt-1 block">Company phone is required</small>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: Industry & Company Address -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="industry" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Industry</label>
+                                <input pInputText id="industry" type="text" formControlName="industry" class="w-full bg-white" [class.ng-invalid]="f2['industry'].invalid && f2['industry'].touched" [class.ng-dirty]="f2['industry'].invalid && f2['industry'].touched" />
+                                <small *ngIf="f2['industry'].touched && f2['industry'].invalid" class="text-rose-500 text-xs mt-1 block">Industry is required</small>
+                            </div>
+                            <div>
+                                <label for="address" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Company Address</label>
+                                <input pInputText id="address" formControlName="address" class="w-full bg-white" [class.ng-invalid]="f2['address'].invalid && f2['address'].touched" [class.ng-dirty]="f2['address'].invalid && f2['address'].touched" />
+                                <small *ngIf="f2['address'].touched && f2['address'].invalid" class="text-rose-500 text-xs mt-1 block">Address is required</small>
+                            </div>
+                        </div>
+
+                        <!-- Row 4: Full Name & Employee ID -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="fullName" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Admin Full Name</label>
+                                <input pInputText id="fullName" formControlName="fullName" class="w-full bg-white" [class.ng-invalid]="f2['fullName'].invalid && f2['fullName'].touched" [class.ng-dirty]="f2['fullName'].invalid && f2['fullName'].touched" />
+                                <small *ngIf="f2['fullName'].touched && f2['fullName'].invalid" class="text-rose-500 text-xs mt-1 block">Full name is required</small>
+                            </div>
+                            <div>
+                                <label for="empId" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Employee ID</label>
+                                <input pInputText id="empId" formControlName="empId" class="w-full bg-white" [class.ng-invalid]="f2['empId'].invalid && f2['empId'].touched" [class.ng-dirty]="f2['empId'].invalid && f2['empId'].touched" />
+                                <small *ngIf="f2['empId'].touched && f2['empId'].invalid" class="text-rose-500 text-xs mt-1 block">Employee ID is required</small>
+                            </div>
+                        </div>
+
+                        <!-- Row 5: Username & Password -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="username" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Username</label>
+                                <input pInputText id="username" formControlName="username" class="w-full bg-white" [class.ng-invalid]="f2['username'].invalid && f2['username'].touched" [class.ng-dirty]="f2['username'].invalid && f2['username'].touched" />
+                                <small *ngIf="f2['username'].touched && f2['username'].invalid" class="text-rose-500 text-xs mt-1 block">Username is required</small>
+                            </div>
+                            <div>
+                                <label for="password" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Admin Password</label>
+                                <p-password id="password" formControlName="password" [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full bg-white" [feedback]="false" [class.ng-invalid]="f2['password'].invalid && f2['password'].touched" [class.ng-dirty]="f2['password'].invalid && f2['password'].touched"></p-password>
+                                <small *ngIf="f2['password'].touched && f2['password'].invalid" class="text-rose-500 text-xs mt-1 block">Password is required</small>
+                            </div>
+                        </div>
+
+                        <!-- Row 6: Email & Mobile -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="email" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Admin Email Address</label>
+                                <input pInputText id="email" type="email" formControlName="email" class="w-full bg-white" [class.ng-invalid]="f2['email'].invalid && f2['email'].touched" [class.ng-dirty]="f2['email'].invalid && f2['email'].touched" />
+                                <small *ngIf="f2['email'].touched && f2['email'].invalid" class="text-rose-500 text-xs mt-1 block">Valid admin email is required</small>
+                            </div>
+                            <div>
+                                <label for="mobile" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Mobile Number</label>
+                                <input pInputText id="mobile" type="text" formControlName="mobile" class="w-full bg-white" [class.ng-invalid]="f2['mobile'].invalid && f2['mobile'].touched" [class.ng-dirty]="f2['mobile'].invalid && f2['mobile'].touched" />
+                                <small *ngIf="f2['mobile'].touched && f2['mobile'].invalid" class="text-rose-500 text-xs mt-1 block">Valid mobile is required</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Register Button -->
+                    <p-button label="Register Company" type="submit" [loading]="isProcess" styleClass="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border-none shadow-md shadow-indigo-600/20" (onClick)="submitSignUpForm()" />
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
