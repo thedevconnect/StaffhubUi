@@ -19,7 +19,7 @@ export const routes: Routes = [
       { path: 'hradmin', loadChildren: () => import('./routes/hradmin.routes').then(m => m.hradminRoutes) },
       { path: 'developer', loadChildren: () => import('./routes/developer.routes').then(m => m.developerRoutes) },
       { path: 'payroll', loadChildren: () => import('./routes/payroll.routes').then(m => m.payrollRoutes) },
-
+      { path: 'superadmin', loadChildren: () => import('./routes/superadmin.routes').then(m => m.superadminRoutes) },
     ],
   },
   { path: '**', component: Pagenotfound },

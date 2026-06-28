@@ -37,3 +37,45 @@ canvas {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+
+/* Global Responsive Table helper styles */
+app-table-template {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-wrapper table {
+  width: max-content !important;
+  min-width: 100% !important;
+  border-collapse: collapse;
+}
+
+.table-wrapper th,
+.table-wrapper td {
+  min-width: 150px;
+  white-space: nowrap !important;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+/* Fix actions / checkbox columns to be more narrow */
+.table-wrapper th:first-child,
+.table-wrapper td:first-child,
+.table-wrapper th[dir="actions"],
+.table-wrapper td[dir="actions"] {
+  min-width: 80px !important;
+}
+
+/* Allow text wrap on address and other long text columns */
+.table-wrapper td.wrap-text,
+.table-wrapper th.wrap-text {
+  white-space: normal !important;
+  min-width: 250px !important;
+}

@@ -107,6 +107,11 @@ export class UserService {
     return this.http.get(`${this.apiUrl}/api/companies/pending`);
   }
 
+  getAllCompanies() {
+    return this.http.get(`${this.apiUrl}/api/companies/all`);
+  }
+
+
   approveCompany(id: string | number) {
     return this.http.put(`${this.apiUrl}/api/companies/approve/${id}`, {});
   }
