@@ -30,12 +30,16 @@ table {
   width: max-content !important;
   min-width: 100% !important;
   border-collapse: collapse;
-  white-space: normal;
 }
 
 table th,
 table td {
   padding: 12px 20px;
+  white-space: nowrap;
+}
+
+table td.wrap-text,
+table th.wrap-text {
   white-space: normal;
 }
 

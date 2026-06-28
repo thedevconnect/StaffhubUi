@@ -61,12 +61,13 @@ export class CompanyManagement implements OnInit {
   ];
 
   companyTabs: Tab[] = [
+    { label: 'All Requests', value: 'ALL', count: 0, icon: 'pi pi-list' },
     { label: 'Pending', value: 'PENDING', count: 0, icon: 'pi pi-clock' },
     { label: 'Approved', value: 'APPROVED', count: 0, icon: 'pi pi-check' },
     { label: 'Rejected', value: 'REJECTED', count: 0, icon: 'pi pi-times' }
   ];
 
-  activeTab = 'PENDING';
+  activeTab = 'ALL';
   pageNo = 1;
   pageSize = 10;
   searchText = '';
@@ -75,6 +76,7 @@ export class CompanyManagement implements OnInit {
   // Drawer States
   showDrawer = false;
   isEditMode = false;
+  isRegisterMode = false;
   selectedCompany: any = null;
 
   constructor(
@@ -113,7 +115,9 @@ export class CompanyManagement implements OnInit {
     let filtered = [...this.allData];
 
     // 1. Filter by active tab
-    filtered = filtered.filter(item => item.approval_status === this.activeTab);
+    if (this.activeTab !== 'ALL') {
+      filtered = filtered.filter(item => item.approval_status === this.activeTab);
+    }
 
     // 2. Filter by search text
     if (this.searchText.trim()) {
@@ -128,9 +132,10 @@ export class CompanyManagement implements OnInit {
     }
 
     // Update tab counts based on allData
-    this.companyTabs[0].count = this.allData.filter(item => item.approval_status === 'PENDING').length;
-    this.companyTabs[1].count = this.allData.filter(item => item.approval_status === 'APPROVED').length;
-    this.companyTabs[2].count = this.allData.filter(item => item.approval_status === 'REJECTED').length;
+    this.companyTabs[0].count = this.allData.length;
+    this.companyTabs[1].count = this.allData.filter(item => item.approval_status === 'PENDING').length;
+    this.companyTabs[2].count = this.allData.filter(item => item.approval_status === 'APPROVED').length;
+    this.companyTabs[3].count = this.allData.filter(item => item.approval_status === 'REJECTED').length;
 
     this.totalCount = filtered.length;
 
@@ -153,16 +158,74 @@ export class CompanyManagement implements OnInit {
     return false;
   };
 
+
+  openAddDrawer() {
+    this.isRegisterMode = true;
+    this.isEditMode = false;
+    this.selectedCompany = {
+      companyName: '',
+      shortName: '',
+      address: '',
+      companyEmail: '',
+      companyPhone: '',
+      industry: '',
+      fullName: '',
+      username: '',
+      email: '',
+      mobile: '',
+      password: '',
+      empId: ''
+    };
+    this.showDrawer = true;
+    this.cdr.detectChanges();
+  }
+
+  registerNewCompany() {
+    const payload = this.selectedCompany;
+    if (!payload.companyName || !payload.shortName || !payload.address || !payload.companyEmail || !payload.companyPhone || !payload.fullName || !payload.username || !payload.email || !payload.mobile || !payload.password || !payload.empId) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Validation Error',
+        detail: 'Please fill all required fields.'
+      });
+      return;
+    }
+
+    this.isLoading = true;
+    this.userService.registerCompany(payload).subscribe({
+      next: (res: any) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Company registered successfully!'
+        });
+        this.showDrawer = false;
+        this.loadData();
+      },
+      error: (err: any) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Registration Failed',
+          detail: err?.error?.message || 'Failed to register company.'
+        });
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   onActionClicked(event: { actionId: string; row: any }) {
     const item = event.row;
     switch (event.actionId) {
       case 'view':
+        this.isRegisterMode = false;
         this.selectedCompany = { ...item };
         this.isEditMode = false;
         this.showDrawer = true;
         this.cdr.detectChanges();
         break;
       case 'edit':
+        this.isRegisterMode = false;
         this.selectedCompany = { ...item };
         this.isEditMode = true;
         this.showDrawer = true;
@@ -298,6 +361,7 @@ export class CompanyManagement implements OnInit {
   onDrawerHide() {
     this.showDrawer = false;
     this.selectedCompany = null;
+    this.isRegisterMode = false;
   }
 
   onPageChange(newPage: number) {

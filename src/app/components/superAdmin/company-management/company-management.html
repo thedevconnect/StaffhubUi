@@ -1,22 +1,24 @@
 <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
 
 <div class="bg-[#FFFFFF] min-h-screen p-4 sm:p-6 lg:p-0">
-  <div class="bg-white overflow-hidden">
-    <div class="flex items-center justify-between p-3 border-b border-gray-200">
+  <div class="bg-white overflow-hidden rounded-xl border border-slate-200 shadow-sm p-4">
+    <div class="flex items-center justify-between p-3 border-b border-gray-200 mb-4">
       <div>
         <h2 class="text-base font-semibold text-gray-800">Company Management (Registration Requests)</h2>
         <p class="text-xs text-slate-500 mt-1">Review, approve, or reject pending company registration requests.</p>
       </div>
       <div class="flex items-center space-x-2">
         <p-button (click)="loadData()" label="Refresh" icon="pi pi-refresh" variant="text" [raised]="true"
-          styleClass="orange-button" />
+          styleClass="orange-button p-button-sm" />
+        <p-button (click)="openAddDrawer()" label="Add Company" icon="pi pi-plus"
+          styleClass="p-button-sm p-button-info rounded-lg" [raised]="true" />
       </div>
     </div>
+
     <app-table-template [data]="data" [columns]="columns" [pageSize]="pageSize" [totalCount]="totalCount"
-      [isLoading]="isLoading" [currentPage]="pageNo" [searchText]="searchText" 
-      [tabs]="companyTabs" [activeTab]="activeTab" (tabChange)="onTabChange($event)"
-      [tableActions]="rowActions" (actionClicked)="onActionClicked($event)"
-      [disableActionCondition]="disableActionCondition"
+      [isLoading]="isLoading" [currentPage]="pageNo" [searchText]="searchText" [tabs]="companyTabs"
+      [activeTab]="activeTab" (tabChange)="onTabChange($event)" [tableActions]="rowActions"
+      (actionClicked)="onActionClicked($event)" [disableActionCondition]="disableActionCondition"
       (pageChange)="onPageChange($event)" (searchChange)="onSearchChange($event)"
       (pageSizeChange)="onPageSizeChange($event)">
     </app-table-template>
@@ -25,136 +27,257 @@
 </div>
 
 <!-- View / Edit Details Drawer -->
-<p-drawer [(visible)]="showDrawer" position="right" [modal]="true" [style]="{ width: '100%', maxWidth: '560px' }"
+<p-drawer [(visible)]="showDrawer" position="right" [modal]="true" [style]="{ width: '100%', maxWidth: '760px' }"
   (onHide)="onDrawerHide()">
   <ng-template pTemplate="header">
     <div class="w-full">
       <h3 class="text-base md:text-lg font-bold text-slate-800 m-0">
-        {{ isEditMode ? 'Edit Company Request' : 'Company Details' }}
+        {{ isRegisterMode ? 'Register New Company' : (isEditMode ? 'Edit Company Request' : 'Company Details') }}
       </h3>
       <p class="text-xs text-slate-500 m-0 mt-0.5">
-        {{ isEditMode ? 'Modify registration request details.' : 'Detailed overview of the company registration request.' }}
+        {{ isRegisterMode ? 'Add a new company and its HR admin user account.' : (isEditMode ? 'Modify registration
+        request details.' : 'Detailed overview of the company registration request.') }}
       </p>
     </div>
   </ng-template>
 
   <div class="p-5 space-y-6 overflow-y-auto" *ngIf="selectedCompany">
-    <!-- Status Badge -->
-    <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-3">
-      <div class="flex justify-between items-center">
-        <span class="text-xs font-semibold text-slate-400">APPROVAL STATUS</span>
-        <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-100">
-          <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
-          {{ selectedCompany.approval_status }}
-        </span>
+
+    <!-- Registration Form (isRegisterMode) -->
+    <div *ngIf="isRegisterMode" class="space-y-6">
+
+      <!-- Company Information Section -->
+      <div>
+        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Company Details</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="col-span-2">
+            <label class="block text-xs font-bold text-slate-500 uppercase">Company Name *</label>
+            <input type="text"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.companyName" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase">Short Name *</label>
+            <input type="text"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.shortName" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase">Industry</label>
+            <input type="text"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.industry" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase">Company Email *</label>
+            <input type="email"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.companyEmail" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase">Company Phone *</label>
+            <input type="text"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.companyPhone" />
+          </div>
+          <div class="col-span-2">
+            <label class="block text-xs font-bold text-slate-500 uppercase">Address *</label>
+            <textarea rows="2"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500 resize-none"
+              [(ngModel)]="selectedCompany.address"></textarea>
+          </div>
+        </div>
       </div>
-      <div class="flex justify-between items-center border-t border-slate-200/60 pt-3">
-        <span class="text-xs font-semibold text-slate-400">REGISTRATION DATE</span>
-        <span class="text-xs font-medium text-slate-600">{{ selectedCompany.created_at | date:'medium' }}</span>
+
+      <!-- Divider -->
+      <div class="border-t border-slate-100 my-4"></div>
+
+      <!-- Admin User Information Section -->
+      <div>
+        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">HR Admin User Details</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase">HR Admin Full Name *</label>
+            <input type="text"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.fullName" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase">Username *</label>
+            <input type="text"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.username" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase">Admin Email *</label>
+            <input type="email"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.email" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase">Admin Mobile *</label>
+            <input type="text"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.mobile" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase">Password *</label>
+            <input type="password"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.password" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase">Employee ID *</label>
+            <input type="text"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.empId" />
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Company Section -->
-    <div>
-      <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Company Details</h4>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div *ngIf="!isEditMode">
-          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Company Name</span>
-          <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.company_name }}</span>
+    <!-- View / Edit mode (isRegisterMode === false) -->
+    <div *ngIf="!isRegisterMode" class="space-y-6">
+      <!-- Status Badge -->
+      <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-semibold text-slate-400">APPROVAL STATUS</span>
+          <span
+            class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-100">
+            <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+            {{ selectedCompany.approval_status }}
+          </span>
         </div>
-        <div *ngIf="isEditMode" class="col-span-2">
-          <label class="block text-xs font-bold text-slate-500 uppercase">Company Name *</label>
-          <input type="text" class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500" [(ngModel)]="selectedCompany.company_name" />
-        </div>
-
-        <div *ngIf="!isEditMode">
-          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Short Name</span>
-          <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.short_name }}</span>
-        </div>
-        <div *ngIf="isEditMode">
-          <label class="block text-xs font-bold text-slate-500 uppercase">Short Name *</label>
-          <input type="text" class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500" [(ngModel)]="selectedCompany.short_name" />
-        </div>
-
-        <div *ngIf="!isEditMode">
-          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Industry</span>
-          <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.industry || '-' }}</span>
-        </div>
-        <div *ngIf="isEditMode">
-          <label class="block text-xs font-bold text-slate-500 uppercase">Industry</label>
-          <input type="text" class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500" [(ngModel)]="selectedCompany.industry" />
-        </div>
-
-        <div *ngIf="!isEditMode">
-          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Company Email</span>
-          <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.company_email || '-' }}</span>
-        </div>
-        <div *ngIf="isEditMode">
-          <label class="block text-xs font-bold text-slate-500 uppercase">Company Email</label>
-          <input type="email" class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500" [(ngModel)]="selectedCompany.company_email" />
-        </div>
-
-        <div *ngIf="!isEditMode">
-          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Company Phone</span>
-          <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.company_phone || '-' }}</span>
-        </div>
-        <div *ngIf="isEditMode">
-          <label class="block text-xs font-bold text-slate-500 uppercase">Company Phone</label>
-          <input type="text" class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500" [(ngModel)]="selectedCompany.company_phone" />
-        </div>
-
-        <div *ngIf="!isEditMode" class="col-span-2">
-          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Address</span>
-          <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.address || '-' }}</span>
-        </div>
-        <div *ngIf="isEditMode" class="col-span-2">
-          <label class="block text-xs font-bold text-slate-500 uppercase">Address</label>
-          <textarea rows="2" class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500 resize-none" [(ngModel)]="selectedCompany.address"></textarea>
+        <div class="flex justify-between items-center border-t border-slate-200/60 pt-3">
+          <span class="text-xs font-semibold text-slate-400">REGISTRATION DATE</span>
+          <span class="text-xs font-medium text-slate-600">{{ selectedCompany.created_at | date:'medium' }}</span>
         </div>
       </div>
-    </div>
 
-    <!-- Divider -->
-    <div class="border-t border-slate-100 my-4"></div>
+      <!-- Company Section -->
+      <div>
+        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Company Details</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div *ngIf="!isEditMode">
+            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Company Name</span>
+            <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.company_name }}</span>
+          </div>
+          <div *ngIf="isEditMode" class="col-span-2">
+            <label class="block text-xs font-bold text-slate-500 uppercase">Company Name *</label>
+            <input type="text"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.company_name" />
+          </div>
 
-    <!-- Admin Section -->
-    <div>
-      <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Administrator Details</h4>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div *ngIf="!isEditMode">
-          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Admin Name</span>
-          <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.admin_name }}</span>
-        </div>
-        <div *ngIf="isEditMode">
-          <label class="block text-xs font-bold text-slate-500 uppercase">Admin Name *</label>
-          <input type="text" class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500" [(ngModel)]="selectedCompany.admin_name" />
-        </div>
+          <div *ngIf="!isEditMode">
+            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Short Name</span>
+            <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.short_name }}</span>
+          </div>
+          <div *ngIf="isEditMode">
+            <label class="block text-xs font-bold text-slate-500 uppercase">Short Name *</label>
+            <input type="text"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.short_name" />
+          </div>
 
-        <div *ngIf="!isEditMode">
-          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Username</span>
-          <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.admin_username }}</span>
-        </div>
-        <div *ngIf="isEditMode">
-          <label class="block text-xs font-bold text-slate-500 uppercase">Username *</label>
-          <input type="text" class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500" [(ngModel)]="selectedCompany.admin_username" readonly />
-        </div>
+          <div *ngIf="!isEditMode">
+            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Industry</span>
+            <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.industry || '-' }}</span>
+          </div>
+          <div *ngIf="isEditMode">
+            <label class="block text-xs font-bold text-slate-500 uppercase">Industry</label>
+            <input type="text"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.industry" />
+          </div>
 
-        <div *ngIf="!isEditMode">
-          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Admin Email</span>
-          <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.admin_email }}</span>
-        </div>
-        <div *ngIf="isEditMode">
-          <label class="block text-xs font-bold text-slate-500 uppercase">Admin Email *</label>
-          <input type="email" class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500" [(ngModel)]="selectedCompany.admin_email" />
-        </div>
+          <div *ngIf="!isEditMode">
+            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Company Email</span>
+            <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.company_email || '-'
+              }}</span>
+          </div>
+          <div *ngIf="isEditMode">
+            <label class="block text-xs font-bold text-slate-500 uppercase">Company Email</label>
+            <input type="email"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.company_email" />
+          </div>
 
-        <div *ngIf="!isEditMode">
-          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Admin Mobile</span>
-          <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.admin_mobile }}</span>
+          <div *ngIf="!isEditMode">
+            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Company Phone</span>
+            <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.company_phone || '-'
+              }}</span>
+          </div>
+          <div *ngIf="isEditMode">
+            <label class="block text-xs font-bold text-slate-500 uppercase">Company Phone</label>
+            <input type="text"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.company_phone" />
+          </div>
+
+          <div *ngIf="!isEditMode" class="col-span-2">
+            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Address</span>
+            <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.address || '-' }}</span>
+          </div>
+          <div *ngIf="isEditMode" class="col-span-2">
+            <label class="block text-xs font-bold text-slate-500 uppercase">Address</label>
+            <textarea rows="2"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500 resize-none"
+              [(ngModel)]="selectedCompany.address"></textarea>
+          </div>
         </div>
-        <div *ngIf="isEditMode">
-          <label class="block text-xs font-bold text-slate-500 uppercase">Admin Mobile *</label>
-          <input type="text" class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500" [(ngModel)]="selectedCompany.admin_mobile" />
+      </div>
+
+      <!-- Divider -->
+      <div class="border-t border-slate-100 my-4"></div>
+
+      <!-- Admin Section -->
+      <div>
+        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Administrator Details</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div *ngIf="!isEditMode">
+            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Admin Name</span>
+            <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.admin_name }}</span>
+          </div>
+          <div *ngIf="isEditMode">
+            <label class="block text-xs font-bold text-slate-500 uppercase">Admin Name *</label>
+            <input type="text"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.admin_name" />
+          </div>
+
+          <div *ngIf="!isEditMode">
+            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Username</span>
+            <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.admin_username }}</span>
+          </div>
+          <div *ngIf="isEditMode">
+            <label class="block text-xs font-bold text-slate-500 uppercase">Username *</label>
+            <input type="text"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.admin_username" readonly />
+          </div>
+
+          <div *ngIf="!isEditMode">
+            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Admin Email</span>
+            <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.admin_email }}</span>
+          </div>
+          <div *ngIf="isEditMode">
+            <label class="block text-xs font-bold text-slate-500 uppercase">Admin Email *</label>
+            <input type="email"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.admin_email" />
+          </div>
+
+          <div *ngIf="!isEditMode">
+            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Admin Mobile</span>
+            <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.admin_mobile }}</span>
+          </div>
+          <div *ngIf="isEditMode">
+            <label class="block text-xs font-bold text-slate-500 uppercase">Admin Mobile *</label>
+            <input type="text"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.admin_mobile" />
+          </div>
         </div>
       </div>
     </div>
@@ -162,9 +285,14 @@
 
   <ng-template pTemplate="footer">
     <div class="flex flex-col sm:flex-row sm:justify-end gap-2 p-4 border-t bg-white">
-      <button pButton type="button" label="Cancel" severity="secondary" [text]="true" class="w-full sm:w-auto" (click)="showDrawer = false">
+      <button pButton type="button" label="Cancel" severity="secondary" [text]="true" class="w-full sm:w-auto"
+        (click)="showDrawer = false">
       </button>
-      <button pButton *ngIf="isEditMode" type="button" icon="pi pi-save" label="Save Changes" class="w-full sm:w-auto" (click)="saveSimulatedEdit()">
+      <button pButton *ngIf="isRegisterMode" type="button" icon="pi pi-check" label="Register Company"
+        class="w-full sm:w-auto font-bold animate-pulse" (click)="registerNewCompany()">
+      </button>
+      <button pButton *ngIf="isEditMode" type="button" icon="pi pi-save" label="Save Changes" class="w-full sm:w-auto"
+        (click)="saveSimulatedEdit()">
       </button>
     </div>
   </ng-template>
