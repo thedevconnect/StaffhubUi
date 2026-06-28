@@ -59,7 +59,7 @@ export class RegisterCompanyComponent implements OnInit {
       companyPhone: ['', Validators.required],
       address: ['', Validators.required],
       industry: ['', Validators.required],
-      empId: ['', Validators.required],
+      empId: [''],
       fullName: ['', Validators.required],
       username: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],

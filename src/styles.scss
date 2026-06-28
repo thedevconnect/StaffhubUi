@@ -1,6 +1,9 @@
 @use 'tailwindcss';
 @import 'primeicons/primeicons.css';
 
+/* Force class-based dark mode in Tailwind v4 instead of system media queries */
+@variant dark (&:where(.dark, .dark *));
+
 *,
 *::before,
 *::after {
@@ -14,7 +17,11 @@ body {
   width: 100%;
   min-height: 100%;
   font-family: Inter, 'Segoe UI', sans-serif;
-  background: #f1f5f9;
+  background: #ffffff;
+}
+
+html.dark body {
+  background: #020617; /* slate-950 */
 }
 
 img,
@@ -30,4 +37,3 @@ canvas {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
- 
