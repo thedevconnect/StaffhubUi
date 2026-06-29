@@ -124,10 +124,10 @@ export class HolidayList implements OnInit {
   loadAllData(): void {
     this.loading.set(true);
 
-    this.user.getHolidays().subscribe({
+    this.user.getHolidays(this.pageNo, this.pageSize, this.searchText).subscribe({
       next: (res: any) => {
         this.holiday_calendar = res?.holiday_calendar ?? [];
-        this.totalCount = this.holiday_calendar.length;
+        this.totalCount = res?.totalCount ?? this.holiday_calendar.length;
         this.loading.set(false);
 
         console.log('Holiday Calendar:', this.holiday_calendar);
@@ -162,16 +162,19 @@ export class HolidayList implements OnInit {
 
   onPageChange(newPage: number): void {
     this.pageNo = newPage;
+    this.loadAllData();
   }
 
   onSearchChange(value: string): void {
     this.searchText = value;
     this.pageNo = 1;
+    this.loadAllData();
   }
 
   onPageSizeChange(size: number): void {
     this.pageSize = size;
     this.pageNo = 1;
+    this.loadAllData();
   }
 
   onSortChange(event: any): void {

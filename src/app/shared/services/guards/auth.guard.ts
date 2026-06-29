@@ -28,12 +28,27 @@ export const authGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: R
   }
 
   const targetUrl = state.url.toLowerCase();
-  const role = (decoded?.role || authService.selectedRoleId() || '').toLowerCase();
+  const activeRole = authService.selectedRoleId().toLowerCase();
 
-  console.log('targetUrl:', targetUrl, 'role:', role);
+  console.log('targetUrl:', targetUrl, 'activeRole:', activeRole);
 
-  if (targetUrl.includes('/hradmin') && !role.includes('hradmin') && !role.includes('hr_admin')) {
+  if (targetUrl.includes('/hradmin') && activeRole !== 'hradmin' && activeRole !== 'hr_admin') {
     console.log('HR Admin access denied, redirecting to dashboard');
+    return router.createUrlTree([authService.getDashboardRoute()]);
+  }
+
+  if (targetUrl.includes('/ess') && activeRole !== 'ess') {
+    console.log('ESS access denied, redirecting to dashboard');
+    return router.createUrlTree([authService.getDashboardRoute()]);
+  }
+
+  if (targetUrl.includes('/developer') && activeRole !== 'developer') {
+    console.log('Developer access denied, redirecting to dashboard');
+    return router.createUrlTree([authService.getDashboardRoute()]);
+  }
+
+  if (targetUrl.includes('/superadmin') && activeRole !== 'superadmin' && activeRole !== 'super_admin') {
+    console.log('Super Admin access denied, redirecting to dashboard');
     return router.createUrlTree([authService.getDashboardRoute()]);
   }
 

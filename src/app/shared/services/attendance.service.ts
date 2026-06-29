@@ -93,8 +93,17 @@ export class AttendanceService {
     return this.http.get<ApiResponse<SwipeLog[]>>(`${this.apiBase}/api/attendance/logs`);
   }
 
-  getHolidays(): Observable<ApiResponse<AttendanceRecord[]>> {
-    return this.http.get<ApiResponse<AttendanceRecord[]>>(`${this.apiBase}/api/holidays`);
+  getHolidays(page?: number, limit?: number, search?: string): Observable<any> {
+    let params = '';
+    if (page && limit) {
+      params = `?page=${page}&limit=${limit}`;
+      if (search) {
+        params += `&search=${search}`;
+      }
+    } else if (search) {
+      params = `?search=${search}`;
+    }
+    return this.http.get<any>(`${this.apiBase}/api/holidays${params}`);
   }
 
 }

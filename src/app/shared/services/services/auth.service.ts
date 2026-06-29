@@ -71,6 +71,12 @@ export class AuthService {
     if (roleId === 'hradmin' || roleId === 'hr_admin') {
       return '/hradmin/hradmin-dashboard';
     }
+    if (roleId === 'superadmin' || roleId === 'super_admin') {
+      return '/superadmin/company-management';
+    }
+    if (roleId === 'developer') {
+      return '/developer/activity-master';
+    }
     return '/ess/ess-dashboard';
   }
 

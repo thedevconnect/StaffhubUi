@@ -1,1 +1,37 @@
-<p>monthly-salary works!</p>
+<p-toast></p-toast>
+<app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+<div class="min-h-screen bg-slate-50/50">
+    <section class="space-y-4">
+        <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div class="w-full overflow-x-auto">
+                <div class="flex justify-end p-3 bg-slate-50">
+                    <button pButton type="button" label="Run Salary for Month" icon="pi pi-check"
+                        class="p-button-success" (click)="openRunSalaryDialog()">
+                    </button>
+                </div>
+                <app-table-template [data]="monthlySalary" [columns]="columns" [pageSize]="pageSize"
+                    [totalCount]="totalCount" [isLoading]="loading()" [currentPage]="pageNo"
+                    (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
+                    (sortChange)="onSortChange($event)" (searchChange)="onSearchChange($event)"
+                    [searchText]="searchText" [showRefresh]="true" (refresh)="loadDashboardData()">
+                </app-table-template>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Run Salary Dialog -->
+<p-dialog header="Run Salary" [(visible)]="runSalaryDialog" [modal]="true" [style]="{ width: '25rem' }">
+    <div class="flex flex-col space-y-3">
+        <div class="flex items-center gap-3">
+            <label class="font-medium w-28">Select Month:</label>
+            <p-datepicker [(ngModel)]="selectedMonth" view="month" [showIcon]="true" dateFormat="MM/yy" class="w-full"
+                inputId="monthpicker"></p-datepicker>
+        </div>
+    </div>
+    <div class="flex justify-end gap-2 mt-6">
+        <button pButton pRipple label="Cancel" severity="secondary" (click)="runSalaryDialog = false"
+            class="px-4 py-2"></button>
+        <button pButton pRipple label="Run" icon="pi pi-check" class="px-4 py-2" (click)="confirmRunSalary()"></button>
+    </div>
+</p-dialog>

@@ -9,6 +9,10 @@ import { AppHeader } from '../header/header';
 import { AuthService } from '../../../shared/services/services/auth.service';
 import { UserService } from '../../../shared/services/user-service';
 import { SidebarMenuItem, UserDetails } from './app-shell.models';
+import { essRoutes } from '../../../routes/ess.routes';
+import { hradminRoutes } from '../../../routes/hradmin.routes';
+import { developerRoutes } from '../../../routes/developer.routes';
+import { superadminRoutes } from '../../../routes/superadmin.routes';
 
 @Component({
   selector: 'app-shell',
@@ -68,58 +72,74 @@ export class AppShell {
     if (!roleId) return;
 
     const rawRoleId = roleId.toLowerCase();
-    const rolePrefix = (rawRoleId === 'hr_admin' || rawRoleId === 'hradmin') ? 'hradmin' : rawRoleId;
+    
+    // Determine prefix and select corresponding routes
+    let rolePrefix = rawRoleId;
+    let routesToMap: any[] = [];
 
-    const formatIcon = (iconStr: string | null | undefined, defaultIcon: string): string => {
-      if (!iconStr) return defaultIcon;
-      return iconStr.startsWith('pi-') ? iconStr : 'pi-' + iconStr;
-    };
+    if (rawRoleId === 'hr_admin' || rawRoleId === 'hradmin') {
+      rolePrefix = 'hradmin';
+      routesToMap = hradminRoutes;
+    } else if (rawRoleId === 'ess') {
+      rolePrefix = 'ess';
+      routesToMap = essRoutes;
+    } else if (rawRoleId === 'developer') {
+      rolePrefix = 'developer';
+      routesToMap = developerRoutes;
+    } else if (rawRoleId === 'super_admin' || rawRoleId === 'superadmin') {
+      rolePrefix = 'superadmin';
+      routesToMap = superadminRoutes;
+    }
 
-    this.userService.getUserSidebar(roleId).subscribe({
-      next: (res: any) => {
-        const sidebarData = Array.isArray(res) ? res : (res.data || []);
+    const menus = [
+      { label: 'Dashboard', icon: 'pi-home', route: this.getDashboardRoute(), isOpen: false }
+    ];
 
-        if (sidebarData && sidebarData.length > 0) {
-          const mappedMenus = sidebarData.map((menu: any) => {
-            const menuRouteClean = (menu.routePath || '').replace(/^\//, '');
-            const parentRoute = menuRouteClean
-              ? (menuRouteClean.startsWith(`${rolePrefix}/`) ? `/${menuRouteClean}` : `/${rolePrefix}/${menuRouteClean}`)
-              : undefined;
+    if (routesToMap && routesToMap.length > 0) {
+      routesToMap.forEach(route => {
+        // Skip default/redirect routes
+        if (!route.path || route.redirectTo !== undefined) return;
 
-            return {
-              label: menu.menuName,
-              icon: formatIcon(menu.icon, 'pi-folder'),
-              route: parentRoute,
-              isOpen: false,
-              children: menu.children && menu.children.length > 0 ? menu.children.map((child: any) => {
-                const childRouteClean = (child.formValue || '').replace(/^\//, '');
-                const childRoute = childRouteClean
-                  ? (childRouteClean.startsWith(`${rolePrefix}/`) ? `/${childRouteClean}` : `/${rolePrefix}/${childRouteClean}`)
-                  : undefined;
+        const label = route.title as string || this.formatPathToLabel(route.path);
+        const icon = this.getIconForPath(route.path);
 
-                return {
-                  label: child.activityName,
-                  route: childRoute,
-                  icon: formatIcon(child.iconClass, 'pi-file')
-                };
-              }) : undefined
-            };
-          });
+        menus.push({
+          label: label,
+          icon: icon,
+          route: `/${rolePrefix}/${route.path}`,
+          isOpen: false
+        });
+      });
+    }
 
-          const menus = [
-            { label: 'Dashboard', icon: 'pi-home', route: this.getDashboardRoute() },
-            ...mappedMenus
-          ];
-          this.dynamicMenuItems.set(menus);
-        } else {
-          this.dynamicMenuItems.set([{ label: 'Dashboard', icon: 'pi-home', route: this.getDashboardRoute() }]);
-        }
-      },
-      error: (err) => {
-        console.error('Failed to fetch sidebar', err);
-        this.dynamicMenuItems.set([{ label: 'Dashboard', icon: 'pi-home', route: this.getDashboardRoute() }]);
-      }
-    });
+    this.dynamicMenuItems.set(menus);
+  }
+
+  private formatPathToLabel(path: string): string {
+    return path
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  private getIconForPath(path: string): string {
+    const p = path.toLowerCase();
+    if (p.includes('dashboard')) return 'pi-home';
+    if (p.includes('asset')) return 'pi-briefcase';
+    if (p.includes('attendance') && p.includes('calendar')) return 'pi-calendar-times';
+    if (p.includes('attendance')) return 'pi-calendar';
+    if (p.includes('leave')) return 'pi-sign-out';
+    if (p.includes('resignation') || p.includes('exit')) return 'pi-times-circle';
+    if (p.includes('profile')) return 'pi-user';
+    if (p.includes('ticket')) return 'pi-ticket';
+    if (p.includes('expense')) return 'pi-dollar';
+    if (p.includes('performance')) return 'pi-chart-line';
+    if (p.includes('probation')) return 'pi-clock';
+    if (p.includes('company')) return 'pi-building';
+    if (p.includes('activity')) return 'pi-cog';
+    if (p.includes('menu')) return 'pi-list';
+    if (p.includes('role')) return 'pi-users';
+    return 'pi-file';
   }
 
   @HostListener('window:resize')
