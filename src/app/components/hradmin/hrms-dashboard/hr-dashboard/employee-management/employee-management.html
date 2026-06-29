@@ -1,0 +1,142 @@
+<app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+<div class="min-h-screen bg-slate-50/50">
+    <section class="space-y-4">
+        <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div class="flex justify-end bg-slate-50 px-4 py-2">
+                <button pButton type="button" label="Add Employee" icon="pi pi-plus" class="p-button-success"
+                    (click)="openAddDrawer()">
+                </button>
+            </div>
+            <div class="w-full overflow-x-auto">
+                <app-table-template [data]="employees" [columns]="columns" [pageSize]="pageSize"
+                    [totalCount]="totalCount" [isLoading]="loading()" [currentPage]="pageNo" [sortColumn]="sortColumn"
+                    [sortDirection]="sortDirection"
+                    [tableActions]="rowActions" (pageChange)="onPageChange($event)"
+                    (pageSizeChange)="onPageSizeChange($event)" (sortChange)="onSortChange($event)"
+                    (actionClicked)="handleRowAction($event)" (searchChange)="onSearchChange($event)"
+                    [searchText]="searchText" [showRefresh]="true" (refresh)="loadAllData()">
+                </app-table-template>
+            </div>
+        </div>
+    </section>
+
+    <!-- Add/Edit Employee Drawer -->
+    <p-drawer [(visible)]="showDrawer" position="right" [modal]="true"
+        [style]="{ width: '48rem', maxWidth: '100vw' }">
+        <h2 class="mb-4 text-xl font-semibold text-gray-800">
+            {{ isViewMode ? 'View Employee' : (isEditMode ? 'Edit Employee' : 'Add New Employee') }}
+        </h2>
+
+        <form [formGroup]="employeeForm" (ngSubmit)="saveEmployee()" class="space-y-4 pb-2">
+
+            @if (selectedEmployee?.employeeCode) {
+            <div class="space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                <label class="block text-sm font-medium text-gray-700">Employee Code</label>
+                <input type="text" pInputText [value]="selectedEmployee?.employeeCode" class="w-full" readonly>
+            </div>
+            }
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div class="space-y-2 md:col-span-2">
+                    <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name *</label>
+                    <input id="fullName" type="text" pInputText formControlName="fullName" class="w-full">
+                    @if (f['fullName'].touched && f['fullName'].invalid) {
+                    <small class="text-red-500">Full Name is required.</small>
+                    }
+                </div>
+
+                <div class="space-y-2 md:col-span-2">
+                    <label for="officialEmail" class="block text-sm font-medium text-gray-700">Official Email *</label>
+                    <input id="officialEmail" type="email" pInputText formControlName="officialEmail" class="w-full">
+                    @if (f['officialEmail'].touched && f['officialEmail'].hasError('required')) {
+                    <small class="text-red-500">Official Email is required.</small>
+                    }
+                    @if (f['officialEmail'].touched && f['officialEmail'].hasError('email')) {
+                    <small class="text-red-500">Please enter a valid email address.</small>
+                    }
+                </div>
+
+                <div class="space-y-2">
+                    <label for="mobileNumber" class="block text-sm font-medium text-gray-700">Mobile Number *</label>
+                    <input id="mobileNumber" type="tel" pInputText formControlName="mobileNumber" maxlength="10"
+                        class="w-full">
+                    @if (f['mobileNumber'].touched && f['mobileNumber'].hasError('required')) {
+                    <small class="text-red-500">Mobile Number is required.</small>
+                    }
+                    @if (f['mobileNumber'].touched && f['mobileNumber'].hasError('pattern')) {
+                    <small class="text-red-500">Mobile Number must be 10 digits.</small>
+                    }
+                </div>
+
+                <div class="space-y-2">
+                    <label for="designation" class="block text-sm font-medium text-gray-700">Designation *</label>
+                    <p-select id="designation" [options]="designationOptions" optionLabel="label" optionValue="value"
+                        formControlName="designation" placeholder="Select designation" [filter]="true"
+                        class="w-full custom-p-select"></p-select>
+                    @if (f['designation'].touched && f['designation'].invalid) {
+                    <small class="text-red-500">Designation is required.</small>
+                    }
+                </div>
+
+                <div class="space-y-2">
+                    <label for="department" class="block text-sm font-medium text-gray-700">Department *</label>
+                    <input id="department" type="text" pInputText formControlName="department" class="w-full">
+                    @if (f['department'].touched && f['department'].invalid) {
+                    <small class="text-red-500">Department is required.</small>
+                    }
+                </div>
+
+                <div class="space-y-2">
+                    <label for="reportingManager" class="block text-sm font-medium text-gray-700">Reporting Manager Name *</label>
+                    <input id="reportingManager" type="text" pInputText formControlName="reportingManager"
+                        class="w-full" placeholder="Enter reporting manager name">
+                    @if (f['reportingManager'].touched && f['reportingManager'].invalid) {
+                    <small class="text-red-500">Reporting Manager Name is required.</small>
+                    }
+                </div>
+
+                <div class="space-y-2">
+                    <label for="joiningDate" class="block text-sm font-medium text-gray-700">Joining Date *</label>
+                    <p-datepicker id="joiningDate" formControlName="joiningDate" class="w-full" [showIcon]="true"
+                        [showButtonBar]="true" dateFormat="yy-mm-dd"></p-datepicker>
+                    @if (f['joiningDate'].touched && f['joiningDate'].invalid) {
+                    <small class="text-red-500">Joining Date is required.</small>
+                    }
+                </div>
+
+                <div class="space-y-2">
+                    <label for="employmentType" class="block text-sm font-medium text-gray-700">Employment Type *</label>
+                    <p-select id="employmentType" [options]="employmentTypeOptions" optionLabel="label"
+                        optionValue="value" formControlName="employmentType" placeholder="Select employment type"
+                        class="w-full custom-p-select"></p-select>
+                    @if (f['employmentType'].touched && f['employmentType'].invalid) {
+                    <small class="text-red-500">Employment Type is required.</small>
+                    }
+                </div>
+
+                <div class="space-y-2">
+                    <label for="workLocation" class="block text-sm font-medium text-gray-700">Work Location *</label>
+                    <p-select id="workLocation" [options]="workLocationOptions" optionLabel="label" optionValue="value"
+                        formControlName="workLocation" placeholder="Select work location"
+                        class="w-full custom-p-select"></p-select>
+                    @if (f['workLocation'].touched && f['workLocation'].invalid) {
+                    <small class="text-red-500">Work Location is required.</small>
+                    }
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button" pButton pRipple label="Cancel" class="flex-1 p-button-secondary"
+                    (click)="closeDrawer()"></button>
+                @if (!isViewMode) {
+                <button type="submit" pButton pRipple [label]="isEditMode ? 'Update' : 'Save'" class="flex-1"
+                    [loading]="loading()" [disabled]="loading()">
+                </button>
+                }
+            </div>
+        </form>
+    </p-drawer>
+
+    <p-toast></p-toast>
+    <p-confirmDialog [style]="{ width: '25vw' }"></p-confirmDialog>
+</div>
