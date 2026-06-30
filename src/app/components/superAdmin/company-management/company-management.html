@@ -1,33 +1,38 @@
-<app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+<div class="min-h-screen bg-slate-50/50 max-w-full overflow-x-hidden">
+  <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
 
-<div class="bg-[#FFFFFF] min-h-screen p-4 sm:p-6 lg:p-0">
-  <div class="bg-white overflow-hidden rounded-xl border border-slate-200 shadow-sm p-4">
-    <div class="flex items-center justify-between p-3 border-b border-gray-200 mb-4">
-      <div>
-        <h2 class="text-base font-semibold text-gray-800">Company Management (Registration Requests)</h2>
-        <p class="text-xs text-slate-500 mt-1">Review, approve, or reject pending company registration requests.</p>
-      </div>
-      <div class="flex items-center space-x-2">
-        <p-button (click)="loadData()" label="Refresh" icon="pi pi-refresh" variant="text" [raised]="true"
-          styleClass="orange-button p-button-sm" />
-        <p-button (click)="openAddDrawer()" label="Add Company" icon="pi pi-plus"
-          styleClass="p-button-sm p-button-info rounded-lg" [raised]="true" />
+  <div
+    class="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6 bg-white border border-slate-200 rounded-xl p-4 shadow-sm overflow-hidden">
+    <div class="min-w-0 flex-1">
+      <h2 class="text-xl font-semibold text-slate-900">Company Management</h2>
+      <p class="text-xs text-slate-500 mt-1">Review, approve, and manage company registration requests.</p>
+    </div>
+    <div class="flex-none self-start sm:self-auto sm:ml-3 pr-1">
+      <p-button (click)="openAddDrawer()" label="Add Company" icon="pi pi-plus"
+        styleClass="orange-button p-button-warning p-button-sm shadow-sm" />
+    </div>
+  </div>
+
+  <section class="space-y-4 min-w-0 max-w-full overflow-x-hidden">
+    <div class="rounded-xl border border-slate-200 bg-white shadow-sm min-w-0 max-w-full overflow-x-hidden">
+      <div class="w-full min-w-0 max-w-full">
+        <app-table-template [data]="data" [columns]="columns" [pageSize]="pageSize" [totalCount]="totalCount"
+          [isLoading]="isLoading" [currentPage]="pageNo" [searchText]="searchText" [tabs]="companyTabs"
+          [activeTab]="activeTab" [showRefresh]="true" (refresh)="loadData()" (tabChange)="onTabChange($event)"
+          [tableActions]="rowActions" (actionClicked)="onActionClicked($event)"
+          [disableActionCondition]="disableActionCondition" (pageChange)="onPageChange($event)"
+          (searchChange)="onSearchChange($event)" (pageSizeChange)="onPageSizeChange($event)">
+        </app-table-template>
       </div>
     </div>
+  </section>
 
-    <app-table-template [data]="data" [columns]="columns" [pageSize]="pageSize" [totalCount]="totalCount"
-      [isLoading]="isLoading" [currentPage]="pageNo" [searchText]="searchText" [tabs]="companyTabs"
-      [activeTab]="activeTab" (tabChange)="onTabChange($event)" [tableActions]="rowActions"
-      (actionClicked)="onActionClicked($event)" [disableActionCondition]="disableActionCondition"
-      (pageChange)="onPageChange($event)" (searchChange)="onSearchChange($event)"
-      (pageSizeChange)="onPageSizeChange($event)">
-    </app-table-template>
-
-  </div>
+ 
 </div>
 
 <!-- View / Edit Details Drawer -->
-<p-drawer [(visible)]="showDrawer" position="right" [modal]="true" [style]="{ width: '100%', maxWidth: '760px' }"
+<p-drawer [(visible)]="showDrawer" position="right" [modal]="true"
+  [style]="{ width: '100%', maxWidth: '760px', height: '100vh' }"
   (onHide)="onDrawerHide()">
   <ng-template pTemplate="header">
     <div class="w-full">
@@ -41,7 +46,7 @@
     </div>
   </ng-template>
 
-  <div class="p-5 space-y-6 overflow-y-auto" *ngIf="selectedCompany">
+  <div class="px-5 py-4 space-y-6 h-[calc(100vh-11rem)] overflow-y-auto overflow-x-hidden" *ngIf="selectedCompany">
 
     <!-- Registration Form (isRegisterMode) -->
     <div *ngIf="isRegisterMode" class="space-y-6">

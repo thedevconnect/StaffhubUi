@@ -7,7 +7,12 @@ import { ConfirmDialog } from 'primeng/confirmdialog';
 import { Toast } from 'primeng/toast';
 import { DrawerModule } from 'primeng/drawer';
 import { MessageService, ConfirmationService } from 'primeng/api';
-import { TableColumn, TableTemplate, TableAction, Tab } from '../../../shared/ui/table-template/table-template';
+import {
+  TableColumn,
+  TableTemplate,
+  TableAction,
+  Tab,
+} from '../../../shared/ui/table-template/table-template';
 import { UserService } from '../../../shared/services/user-service';
 import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb';
 
@@ -23,7 +28,7 @@ import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb';
     Toast,
     DrawerModule,
     TableTemplate,
-    AppBreadcrumb
+    AppBreadcrumb,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './company-management.html',
@@ -33,11 +38,32 @@ export class CompanyManagement implements OnInit {
   isLoading = true;
   allData: any[] = [];
   data: any[] = [];
-  
+
   breadcrumbItems: any[] = [
     { label: 'Super Admin', icon: 'pi pi-user', routerLink: '/superadmin' },
-    { label: 'Company Management', icon: 'pi pi-building', routerLink: '/superadmin/company-management' }
+    {
+      label: 'Company Management',
+      icon: 'pi pi-building',
+      routerLink: '/superadmin/company-management',
+    },
   ];
+
+  // "id": 14,
+  //         "company_name": "advatix apac technologies",
+  //         "short_name": "advatix",
+  //         "address": "C-134,Rajendra Palce ,New Delhi",
+  //         "company_email": "thedevconnects@gmail.com",
+  //         "company_phone": "09821530215",
+  //         "industry": "software eng",
+  //         "approval_status": "APPROVED",
+  //         "status": "ACTIVE",
+  //         "created_at": "2026-06-28T06:17:37.000Z",
+  //         "admin_id": 23,
+  //         "admin_name": "dev connect",
+  //         "admin_email": "thedevconnec434ts@gmail.com",
+  //         "admin_mobile": "9821730215",
+  //         "admin_username": "advatix",
+  //         "admin_emp_id": "ADVATIX-100"
 
   columns: TableColumn[] = [
     { key: 'actions', header: '⚙️ Actions', isVisible: true, isSortable: false, isCustom: true },
@@ -47,9 +73,19 @@ export class CompanyManagement implements OnInit {
     { key: 'company_phone', header: 'Company Phone', isVisible: true, isSortable: true },
     { key: 'industry', header: 'Industry', isVisible: true, isSortable: true },
     { key: 'address', header: 'Address', isVisible: true, isSortable: false },
+    { key: 'status', header: 'Status', isVisible: true, isSortable: true, format: 'uppercase' },
+
+    {
+      key: 'approval_status',
+      header: 'Approval Status',
+      isVisible: true,
+      isSortable: true,
+      format: 'uppercase',
+    },
+    { key: 'admin_username', header: 'Admin Username', isVisible: true, isSortable: true },
     { key: 'admin_name', header: 'Admin Name', isVisible: true, isSortable: true },
     { key: 'admin_email', header: 'Admin Email', isVisible: true, isSortable: true },
-    { key: 'admin_mobile', header: 'Admin Mobile', isVisible: true, isSortable: true }
+    { key: 'admin_mobile', header: 'Admin Mobile', isVisible: true, isSortable: true },
   ];
 
   rowActions: TableAction[] = [
@@ -57,14 +93,14 @@ export class CompanyManagement implements OnInit {
     { label: 'Edit', icon: 'pi pi-pencil', id: 'edit' },
     { label: 'Delete', icon: 'pi pi-trash', id: 'delete' },
     { label: 'Approve', icon: 'pi pi-check', id: 'approve' },
-    { label: 'Reject', icon: 'pi pi-times', id: 'reject' }
+    { label: 'Reject', icon: 'pi pi-times', id: 'reject' },
   ];
 
   companyTabs: Tab[] = [
     { label: 'All Requests', value: 'ALL', count: 0, icon: 'pi pi-list' },
     { label: 'Pending', value: 'PENDING', count: 0, icon: 'pi pi-clock' },
     { label: 'Approved', value: 'APPROVED', count: 0, icon: 'pi pi-check' },
-    { label: 'Rejected', value: 'REJECTED', count: 0, icon: 'pi pi-times' }
+    { label: 'Rejected', value: 'REJECTED', count: 0, icon: 'pi pi-times' },
   ];
 
   activeTab = 'ALL';
@@ -83,7 +119,7 @@ export class CompanyManagement implements OnInit {
     private userService: UserService,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -103,11 +139,11 @@ export class CompanyManagement implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: err?.error?.message || 'Failed to fetch company requests.'
+          detail: err?.error?.message || 'Failed to fetch company requests.',
         });
         this.isLoading = false;
         this.cdr.detectChanges();
-      }
+      },
     });
   }
 
@@ -116,26 +152,33 @@ export class CompanyManagement implements OnInit {
 
     // 1. Filter by active tab
     if (this.activeTab !== 'ALL') {
-      filtered = filtered.filter(item => item.approval_status === this.activeTab);
+      filtered = filtered.filter((item) => item.approval_status === this.activeTab);
     }
 
     // 2. Filter by search text
     if (this.searchText.trim()) {
       const q = this.searchText.toLowerCase().trim();
-      filtered = filtered.filter(item => 
-        (item.company_name && item.company_name.toLowerCase().includes(q)) ||
-        (item.short_name && item.short_name.toLowerCase().includes(q)) ||
-        (item.company_email && item.company_email.toLowerCase().includes(q)) ||
-        (item.admin_name && item.admin_name.toLowerCase().includes(q)) ||
-        (item.admin_email && item.admin_email.toLowerCase().includes(q))
+      filtered = filtered.filter(
+        (item) =>
+          (item.company_name && item.company_name.toLowerCase().includes(q)) ||
+          (item.short_name && item.short_name.toLowerCase().includes(q)) ||
+          (item.company_email && item.company_email.toLowerCase().includes(q)) ||
+          (item.admin_name && item.admin_name.toLowerCase().includes(q)) ||
+          (item.admin_email && item.admin_email.toLowerCase().includes(q)),
       );
     }
 
     // Update tab counts based on allData
     this.companyTabs[0].count = this.allData.length;
-    this.companyTabs[1].count = this.allData.filter(item => item.approval_status === 'PENDING').length;
-    this.companyTabs[2].count = this.allData.filter(item => item.approval_status === 'APPROVED').length;
-    this.companyTabs[3].count = this.allData.filter(item => item.approval_status === 'REJECTED').length;
+    this.companyTabs[1].count = this.allData.filter(
+      (item) => item.approval_status === 'PENDING',
+    ).length;
+    this.companyTabs[2].count = this.allData.filter(
+      (item) => item.approval_status === 'APPROVED',
+    ).length;
+    this.companyTabs[3].count = this.allData.filter(
+      (item) => item.approval_status === 'REJECTED',
+    ).length;
 
     this.totalCount = filtered.length;
 
@@ -158,7 +201,6 @@ export class CompanyManagement implements OnInit {
     return false;
   };
 
-
   openAddDrawer() {
     this.isRegisterMode = true;
     this.isEditMode = false;
@@ -174,7 +216,7 @@ export class CompanyManagement implements OnInit {
       email: '',
       mobile: '',
       password: '',
-      empId: ''
+      empId: '',
     };
     this.showDrawer = true;
     this.cdr.detectChanges();
@@ -182,11 +224,23 @@ export class CompanyManagement implements OnInit {
 
   registerNewCompany() {
     const payload = this.selectedCompany;
-    if (!payload.companyName || !payload.shortName || !payload.address || !payload.companyEmail || !payload.companyPhone || !payload.fullName || !payload.username || !payload.email || !payload.mobile || !payload.password || !payload.empId) {
+    if (
+      !payload.companyName ||
+      !payload.shortName ||
+      !payload.address ||
+      !payload.companyEmail ||
+      !payload.companyPhone ||
+      !payload.fullName ||
+      !payload.username ||
+      !payload.email ||
+      !payload.mobile ||
+      !payload.password ||
+      !payload.empId
+    ) {
       this.messageService.add({
         severity: 'error',
         summary: 'Validation Error',
-        detail: 'Please fill all required fields.'
+        detail: 'Please fill all required fields.',
       });
       return;
     }
@@ -197,7 +251,7 @@ export class CompanyManagement implements OnInit {
         this.messageService.add({
           severity: 'success',
           summary: 'Success',
-          detail: 'Company registered successfully!'
+          detail: 'Company registered successfully!',
         });
         this.showDrawer = false;
         this.loadData();
@@ -206,11 +260,11 @@ export class CompanyManagement implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Registration Failed',
-          detail: err?.error?.message || 'Failed to register company.'
+          detail: err?.error?.message || 'Failed to register company.',
         });
         this.isLoading = false;
         this.cdr.detectChanges();
-      }
+      },
     });
   }
 
@@ -258,7 +312,7 @@ export class CompanyManagement implements OnInit {
             this.messageService.add({
               severity: 'success',
               summary: 'Approved',
-              detail: `Company "${company.company_name}" approved successfully!`
+              detail: `Company "${company.company_name}" approved successfully!`,
             });
             this.loadData();
           },
@@ -266,13 +320,13 @@ export class CompanyManagement implements OnInit {
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: err?.error?.message || 'Failed to approve company.'
+              detail: err?.error?.message || 'Failed to approve company.',
             });
             this.isLoading = false;
             this.cdr.detectChanges();
-          }
+          },
         });
-      }
+      },
     });
   }
 
@@ -291,7 +345,7 @@ export class CompanyManagement implements OnInit {
             this.messageService.add({
               severity: 'success',
               summary: 'Rejected',
-              detail: `Company "${company.company_name}" request rejected successfully.`
+              detail: `Company "${company.company_name}" request rejected successfully.`,
             });
             this.loadData();
           },
@@ -299,13 +353,13 @@ export class CompanyManagement implements OnInit {
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: err?.error?.message || 'Failed to reject company.'
+              detail: err?.error?.message || 'Failed to reject company.',
             });
             this.isLoading = false;
             this.cdr.detectChanges();
-          }
+          },
         });
-      }
+      },
     });
   }
 
@@ -318,15 +372,15 @@ export class CompanyManagement implements OnInit {
       rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
       acceptButtonProps: { label: 'Delete', severity: 'danger' },
       accept: () => {
-        this.allData = this.allData.filter(item => item.id !== company.id);
+        this.allData = this.allData.filter((item) => item.id !== company.id);
         this.applyFilters();
         this.messageService.add({
           severity: 'success',
           summary: 'Deleted',
-          detail: `Company "${company.company_name}" request deleted successfully (Simulation).`
+          detail: `Company "${company.company_name}" request deleted successfully (Simulation).`,
         });
         this.cdr.detectChanges();
-      }
+      },
     });
   }
 
@@ -335,13 +389,13 @@ export class CompanyManagement implements OnInit {
       this.messageService.add({
         severity: 'error',
         summary: 'Validation Error',
-        detail: 'Company Name and Short Name are required.'
+        detail: 'Company Name and Short Name are required.',
       });
       return;
     }
 
     // Update the local list
-    this.allData = this.allData.map(item => {
+    this.allData = this.allData.map((item) => {
       if (item.id === this.selectedCompany.id) {
         return { ...this.selectedCompany };
       }
@@ -352,7 +406,7 @@ export class CompanyManagement implements OnInit {
     this.messageService.add({
       severity: 'success',
       summary: 'Success',
-      detail: 'Company details updated successfully (Simulation).'
+      detail: 'Company details updated successfully (Simulation).',
     });
     this.showDrawer = false;
     this.cdr.detectChanges();
@@ -381,5 +435,3 @@ export class CompanyManagement implements OnInit {
     this.applyFilters();
   }
 }
-
-

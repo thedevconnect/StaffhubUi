@@ -1,0 +1,32 @@
+:host {
+	display: block;
+	min-width: 0;
+	max-width: 100%;
+	overflow-x: hidden;
+}
+
+/* Keep full table accessible when columns are many. */
+:host ::ng-deep app-table-template {
+	display: block;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+}
+
+:host ::ng-deep app-table-template .table-wrapper {
+	overflow-x: auto !important;
+	overflow-y: auto;
+	width: 100%;
+	max-width: 100%;
+	contain: inline-size;
+	scrollbar-gutter: stable both-edges;
+}
+
+:host ::ng-deep app-table-template .table-wrapper > .hidden {
+	min-width: max-content;
+}
+
+:host ::ng-deep app-table-template .table-wrapper table {
+	width: max-content !important;
+	min-width: 1700px !important;
+}
