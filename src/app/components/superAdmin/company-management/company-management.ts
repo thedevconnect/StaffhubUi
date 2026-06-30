@@ -66,7 +66,7 @@ export class CompanyManagement implements OnInit {
   //         "admin_emp_id": "ADVATIX-100"
 
   columns: TableColumn[] = [
-    { key: 'actions', header: '⚙️ Actions', isVisible: true, isSortable: false, isCustom: true },
+    { key: 'actions', header: 'Actions', isVisible: true, isSortable: false, isCustom: true },
     { key: 'company_name', header: 'Company Name', isVisible: true, isSortable: true },
     { key: 'short_name', header: 'Short Name', isVisible: true, isSortable: true },
     { key: 'company_email', header: 'Company Email', isVisible: true, isSortable: true },

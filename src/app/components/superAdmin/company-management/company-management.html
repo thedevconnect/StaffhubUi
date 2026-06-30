@@ -1,39 +1,74 @@
 <div class="min-h-screen bg-slate-50/50 max-w-full overflow-x-hidden">
-  <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+  <app-breadcrumb class="company-page-breadcrumb" [items]="breadcrumbItems"></app-breadcrumb>
 
-  <div
-    class="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6 bg-white border border-slate-200 rounded-xl p-4 shadow-sm overflow-hidden">
-    <div class="min-w-0 flex-1">
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+    <div>
       <h2 class="text-xl font-semibold text-slate-900">Company Management</h2>
-      <p class="text-xs text-slate-500 mt-1">Review, approve, and manage company registration requests.</p>
+      <p class="text-xs text-slate-500 mt-1">Register and manage client companies, their HR admins, and approval requests.</p>
     </div>
-    <div class="flex-none self-start sm:self-auto sm:ml-3 pr-1">
-      <p-button (click)="openAddDrawer()" label="Add Company" icon="pi pi-plus"
-        styleClass="orange-button p-button-warning p-button-sm shadow-sm" />
+    <div class="w-full sm:w-auto flex justify-end">
+      <p-button label="Add Company" icon="pi pi-plus"
+        styleClass="orange-button p-button-warning p-button-sm w-full sm:w-auto shadow-sm" (click)="openAddDrawer()">
+      </p-button>
     </div>
   </div>
 
-  <section class="space-y-4 min-w-0 max-w-full overflow-x-hidden">
-    <div class="rounded-xl border border-slate-200 bg-white shadow-sm min-w-0 max-w-full overflow-x-hidden">
-      <div class="w-full min-w-0 max-w-full">
+  <!-- Page Content -->
+  <section class="space-y-4">
+    <!-- Table -->
+    <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+      <div class="w-full overflow-x-auto">
         <app-table-template [data]="data" [columns]="columns" [pageSize]="pageSize" [totalCount]="totalCount"
           [isLoading]="isLoading" [currentPage]="pageNo" [searchText]="searchText" [tabs]="companyTabs"
           [activeTab]="activeTab" [showRefresh]="true" (refresh)="loadData()" (tabChange)="onTabChange($event)"
           [tableActions]="rowActions" (actionClicked)="onActionClicked($event)"
           [disableActionCondition]="disableActionCondition" (pageChange)="onPageChange($event)"
-          (searchChange)="onSearchChange($event)" (pageSizeChange)="onPageSizeChange($event)">
+          (searchChange)="onSearchChange($event)" (pageSizeChange)="onPageSizeChange($event)"
+          [cellTemplates]="{ approval_status: approvalStatusTpl, status: statusTpl }">
         </app-table-template>
       </div>
     </div>
   </section>
 
- 
+  <!-- Custom Cell Templates -->
+  <ng-template #approvalStatusTpl let-item>
+    <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold"
+      [ngClass]="{
+        'bg-emerald-50 text-emerald-700 border border-emerald-100': item.approval_status === 'APPROVED',
+        'bg-amber-50 text-amber-700 border border-amber-100': item.approval_status === 'PENDING',
+        'bg-rose-50 text-rose-700 border border-rose-100': item.approval_status === 'REJECTED'
+      }">
+      <span class="h-1.5 w-1.5 rounded-full"
+        [ngClass]="{
+          'bg-emerald-500': item.approval_status === 'APPROVED',
+          'bg-amber-500': item.approval_status === 'PENDING',
+          'bg-rose-500': item.approval_status === 'REJECTED'
+        }"></span>
+      {{ item.approval_status }}
+    </span>
+  </ng-template>
+
+  <ng-template #statusTpl let-item>
+    <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold"
+      [ngClass]="{
+        'bg-emerald-50 text-emerald-700 border border-emerald-100': item.status === 'ACTIVE',
+        'bg-rose-50 text-rose-700 border border-rose-100': item.status === 'INACTIVE'
+      }">
+      <span class="h-1.5 w-1.5 rounded-full"
+        [ngClass]="{
+          'bg-emerald-500': item.status === 'ACTIVE',
+          'bg-rose-500': item.status === 'INACTIVE'
+        }"></span>
+      {{ item.status }}
+    </span>
+  </ng-template>
+
 </div>
 
 <!-- View / Edit Details Drawer -->
 <p-drawer [(visible)]="showDrawer" position="right" [modal]="true"
-  [style]="{ width: '100%', maxWidth: '760px', height: '100vh' }"
-  (onHide)="onDrawerHide()">
+  [style]="{ width: '100%', maxWidth: '760px', height: '100vh' }" (onHide)="onDrawerHide()">
   <ng-template pTemplate="header">
     <div class="w-full">
       <h3 class="text-base md:text-lg font-bold text-slate-800 m-0">

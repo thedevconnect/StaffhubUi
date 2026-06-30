@@ -1,12 +1,21 @@
-<app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
 <div class="min-h-screen bg-slate-50/50">
+    <app-breadcrumb class="employee-page-breadcrumb" [items]="breadcrumbItems"></app-breadcrumb>
+
+    <div
+        class="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+        <div class="min-w-0 flex-1">
+            <h2 class="text-xl font-semibold text-slate-900">Employee Management</h2>
+            <p class="text-xs text-slate-500 mt-1">Manage employee records and workforce information efficiently.</p>
+        </div>
+        <div class="flex-none self-start sm:self-auto sm:ml-3">
+            <button pButton type="button" label="Add Employee" icon="pi pi-plus"
+                class="orange-button p-button-warning p-button-sm shadow-sm" (click)="openAddDrawer()">
+            </button>
+        </div>
+    </div>
+
     <section class="space-y-4">
         <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
-            <div class="flex justify-end bg-slate-50 px-4 py-2">
-                <button pButton type="button" label="Add Employee" icon="pi pi-plus" class="p-button-success"
-                    (click)="openAddDrawer()">
-                </button>
-            </div>
             <div class="w-full overflow-x-auto">
                 <app-table-template [data]="employees" [columns]="columns" [pageSize]="pageSize"
                     [totalCount]="totalCount" [isLoading]="loading()" [currentPage]="pageNo" [sortColumn]="sortColumn"
