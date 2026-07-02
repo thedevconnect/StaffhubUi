@@ -128,10 +128,18 @@ export class CompanyManagement implements OnInit {
 
   loadData() {
     this.isLoading = true;
-    this.userService.getAllCompanies().subscribe({
+    this.userService.getAllCompanies(this.pageNo, this.pageSize, this.searchText, this.activeTab).subscribe({
       next: (res: any) => {
-        this.allData = res.data || [];
-        this.applyFilters();
+        this.data = res.data || [];
+        this.totalCount = res.pagination?.totalItems || 0;
+        
+        if (res.tabCounts) {
+          this.companyTabs[0].count = res.tabCounts.ALL;
+          this.companyTabs[1].count = res.tabCounts.PENDING;
+          this.companyTabs[2].count = res.tabCounts.APPROVED;
+          this.companyTabs[3].count = res.tabCounts.REJECTED;
+        }
+
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -147,51 +155,10 @@ export class CompanyManagement implements OnInit {
     });
   }
 
-  applyFilters() {
-    let filtered = [...this.allData];
-
-    // 1. Filter by active tab
-    if (this.activeTab !== 'ALL') {
-      filtered = filtered.filter((item) => item.approval_status === this.activeTab);
-    }
-
-    // 2. Filter by search text
-    if (this.searchText.trim()) {
-      const q = this.searchText.toLowerCase().trim();
-      filtered = filtered.filter(
-        (item) =>
-          (item.company_name && item.company_name.toLowerCase().includes(q)) ||
-          (item.short_name && item.short_name.toLowerCase().includes(q)) ||
-          (item.company_email && item.company_email.toLowerCase().includes(q)) ||
-          (item.admin_name && item.admin_name.toLowerCase().includes(q)) ||
-          (item.admin_email && item.admin_email.toLowerCase().includes(q)),
-      );
-    }
-
-    // Update tab counts based on allData
-    this.companyTabs[0].count = this.allData.length;
-    this.companyTabs[1].count = this.allData.filter(
-      (item) => item.approval_status === 'PENDING',
-    ).length;
-    this.companyTabs[2].count = this.allData.filter(
-      (item) => item.approval_status === 'APPROVED',
-    ).length;
-    this.companyTabs[3].count = this.allData.filter(
-      (item) => item.approval_status === 'REJECTED',
-    ).length;
-
-    this.totalCount = filtered.length;
-
-    // 3. Paginate locally
-    const startIndex = (this.pageNo - 1) * this.pageSize;
-    this.data = filtered.slice(startIndex, startIndex + this.pageSize);
-    this.cdr.detectChanges();
-  }
-
   onTabChange(tabValue: string) {
     this.activeTab = tabValue;
     this.pageNo = 1;
-    this.applyFilters();
+    this.loadData();
   }
 
   disableActionCondition = (actionId: string, row: any): boolean => {
@@ -372,8 +339,7 @@ export class CompanyManagement implements OnInit {
       rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
       acceptButtonProps: { label: 'Delete', severity: 'danger' },
       accept: () => {
-        this.allData = this.allData.filter((item) => item.id !== company.id);
-        this.applyFilters();
+        this.data = this.data.filter((item) => item.id !== company.id);
         this.messageService.add({
           severity: 'success',
           summary: 'Deleted',
@@ -395,14 +361,13 @@ export class CompanyManagement implements OnInit {
     }
 
     // Update the local list
-    this.allData = this.allData.map((item) => {
+    this.data = this.data.map((item) => {
       if (item.id === this.selectedCompany.id) {
         return { ...this.selectedCompany };
       }
       return item;
     });
 
-    this.applyFilters();
     this.messageService.add({
       severity: 'success',
       summary: 'Success',
@@ -420,18 +385,18 @@ export class CompanyManagement implements OnInit {
 
   onPageChange(newPage: number) {
     this.pageNo = newPage;
-    this.applyFilters();
+    this.loadData();
   }
 
   onPageSizeChange(newSize: number) {
     this.pageSize = newSize;
     this.pageNo = 1;
-    this.applyFilters();
+    this.loadData();
   }
 
   onSearchChange(search: string) {
     this.searchText = search;
     this.pageNo = 1;
-    this.applyFilters();
+    this.loadData();
   }
 }

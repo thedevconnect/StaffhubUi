@@ -26,11 +26,9 @@
     <!-- Table -->
     <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
       <div class="w-full overflow-x-auto">
-        <app-table-template [data]="filteredAssets" [columns]="columns" [pageSize]="pageSize" [totalCount]="totalCount"
-          [isLoading]="isLoading" [currentPage]="pageNo" [searchText]="searchText" [showRefresh]="true"
-          [tableActions]="rowActions" (actionClicked)="onActionClicked($event)" (refresh)="getAllData(true)"
-          (pageChange)="onPageChange($event)" (searchChange)="onSearchChange($event)"
-          (sortChange)="onSortChange($event)" (pageSizeChange)="onPageSizeChange($event)">
+        <app-table-template [data]="assets" [columns]="columns"
+          [isLoading]="isLoading" [showRefresh]="true"
+          [tableActions]="rowActions" (actionClicked)="onActionClicked($event)" (refresh)="getAllData(true)">
         </app-table-template>
       </div>
     </div>

@@ -21,7 +21,7 @@
       <div class="w-full overflow-x-auto">
         <app-table-template [data]="data" [columns]="columns" [pageSize]="pageSize" [totalCount]="totalCount"
           [isLoading]="isLoading" [currentPage]="pageNo" [searchText]="searchText" [tabs]="companyTabs"
-          [activeTab]="activeTab" [showRefresh]="true" (refresh)="loadData()" (tabChange)="onTabChange($event)"
+          [activeTab]="activeTab" [showRefresh]="true" [serverSide]="true" (refresh)="loadData()" (tabChange)="onTabChange($event)"
           [tableActions]="rowActions" (actionClicked)="onActionClicked($event)"
           [disableActionCondition]="disableActionCondition" (pageChange)="onPageChange($event)"
           (searchChange)="onSearchChange($event)" (pageSizeChange)="onPageSizeChange($event)"

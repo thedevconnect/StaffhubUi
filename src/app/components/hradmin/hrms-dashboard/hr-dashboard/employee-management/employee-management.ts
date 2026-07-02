@@ -58,30 +58,31 @@ export class EmployeeManagement implements OnInit {
     { label: 'Employee Management' },
   ];
 
-  allEmployees: Employee[] = [];
   employees: Employee[] = [];
+  loading = signal(false);
   columns: TableColumn[] = [
-    { key: 'employeeCode', header: 'Employee Code', isVisible: true, isSortable: true },
-    { key: 'fullName', header: 'Full Name', isVisible: true, isSortable: true },
-    { key: 'officialEmail', header: 'Email', isVisible: true, isSortable: true },
-    { key: 'mobileNumber', header: 'Mobile', isVisible: true, isSortable: true },
+    { key: 'actions', header: 'Actions', isVisible: true },
+    { key: 'emp_id', header: 'Employee ID', isVisible: true, isSortable: true },
+    { key: 'full_name', header: 'Full Name', isVisible: true, isSortable: true },
+    { key: 'username', header: 'Username', isVisible: true, isSortable: true },
+    { key: 'email', header: 'Email', isVisible: true, isSortable: true },
+
+    { key: 'mobile', header: 'Mobile', isVisible: true, isSortable: true },
     { key: 'designation', header: 'Designation', isVisible: true, isSortable: true },
     { key: 'department', header: 'Department', isVisible: true, isSortable: true },
-    { key: 'reportingManager', header: 'Reporting Manager', isVisible: true, isSortable: true },
+    { key: 'reportingManagerName', header: 'Reporting Manager', isVisible: true, isSortable: true },
     { key: 'joiningDate', header: 'Joining Date', isVisible: true, isSortable: true, format: 'date' },
+    { key: 'employmentType', header: 'Employment Type', isVisible: true, isSortable: true },
+    { key: 'workLocation', header: 'Work Location', isVisible: true, isSortable: true },
+
+    { key: 'role', header: 'Role', isVisible: true, isSortable: true },
     { key: 'status', header: 'Status', isVisible: true, isSortable: true, format: 'status' },
+    { key: 'created_at', header: 'Created At', isVisible: true, isSortable: true, format: 'date' },
   ];
-  pageSize = 10;
-  totalCount = 0;
-  loading = signal(false);
-  pageNo = 1;
-  searchText = '';
-  sortColumn: string | null = null;
-  sortDirection: 'asc' | 'desc' = 'asc';
 
   rowActions = [
     { label: 'View', icon: 'pi pi-eye', id: 'view' },
-    { label: 'Edit', icon: 'pi pi-pencil', id: 'edit' },
+    { label: 'Update', icon: 'pi pi-pencil', id: 'update' },
     { label: 'Delete', icon: 'pi pi-trash', id: 'delete' },
   ];
 
@@ -109,7 +110,7 @@ export class EmployeeManagement implements OnInit {
     { label: 'Hybrid', value: 'HYBRID' }
   ];
 
-  
+
 
   showDrawer = false;
   isViewMode = false;
@@ -231,7 +232,7 @@ export class EmployeeManagement implements OnInit {
       return;
     }
 
-    if (event.actionId === 'edit') {
+    if (event.actionId === 'edit' || event.actionId === 'update') {
       this.openEditDrawer(event.row);
       return;
     }
@@ -293,28 +294,7 @@ export class EmployeeManagement implements OnInit {
       });
   }
 
-  onPageChange(event: number): void {
-    this.pageNo = event;
-    this.applyClientFilters();
-  }
 
-  onPageSizeChange(event: number): void {
-    this.pageSize = event;
-    this.pageNo = 1;
-    this.applyClientFilters();
-  }
-
-  onSortChange(event: { column: string; direction: 'asc' | 'desc' }): void {
-    this.sortColumn = event.column;
-    this.sortDirection = event.direction;
-    this.applyClientFilters();
-  }
-
-  onSearchChange(event: string): void {
-    this.searchText = event;
-    this.pageNo = 1;
-    this.applyClientFilters();
-  }
 
   loadAllData(): void {
     this.loading.set(true);
@@ -323,15 +303,12 @@ export class EmployeeManagement implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (employees) => {
-          this.allEmployees = employees ?? [];
-          this.applyClientFilters();
+          this.employees = employees ?? [];
           this.loading.set(false);
         },
         error: (err) => {
           this.loading.set(false);
-          this.allEmployees = [];
           this.employees = [];
-          this.totalCount = 0;
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
@@ -434,7 +411,7 @@ export class EmployeeManagement implements OnInit {
       return null;
     }
 
-    const matchedEmployee = this.allEmployees.find((employee) =>
+    const matchedEmployee = this.employees.find((employee) =>
       String(employee.fullName || '').trim().toLowerCase() === normalizedInput
     );
 
@@ -469,62 +446,7 @@ export class EmployeeManagement implements OnInit {
     return source?.message || fallback;
   }
 
-  private applyClientFilters(): void {
-    const search = this.searchText.trim().toLowerCase();
-    let filtered = [...this.allEmployees];
 
-    if (search) {
-      filtered = filtered.filter((employee) => {
-        const text = [
-          employee.employeeCode,
-          employee.fullName,
-          employee.officialEmail,
-          employee.mobileNumber,
-          employee.designation,
-          employee.department,
-          employee.reportingManager,
-          employee.status
-        ]
-          .join(' ')
-          .toLowerCase();
-
-        return text.includes(search);
-      });
-    }
-
-    if (this.sortColumn) {
-      filtered.sort((a: any, b: any) => {
-        const v1 = this.getSortableValue(a[this.sortColumn as string]);
-        const v2 = this.getSortableValue(b[this.sortColumn as string]);
-
-        if (v1 < v2) return this.sortDirection === 'asc' ? -1 : 1;
-        if (v1 > v2) return this.sortDirection === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-
-    this.totalCount = filtered.length;
-    const start = (this.pageNo - 1) * this.pageSize;
-    this.employees = filtered.slice(start, start + this.pageSize);
-  }
-
-  private getSortableValue(value: unknown): string | number {
-    if (value === null || value === undefined) {
-      return '';
-    }
-
-    if (typeof value === 'number') {
-      return value;
-    }
-
-    const normalized = String(value).trim();
-    const dateValue = Date.parse(normalized);
-    if (!Number.isNaN(dateValue)) {
-      return dateValue;
-    }
-
-    return normalized.toLowerCase();
-  }
 
   private toApiDate(value: unknown): string {
     if (!value) {

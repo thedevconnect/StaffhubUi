@@ -53,21 +53,11 @@ export class MyAssets implements OnInit {
   ]
 
   assets: any[] = []
-  filteredAssets: any[] = []
-
   isLoading = false
   showAssetDrawer = false
   showViewDrawer = false
   isEditMode = false
   selectedAsset: any = null
-
-  pageSize = 10
-  pageNo = 1
-  totalCount = 0
-  searchText = ''
-
-  sortColumn = 'AssetTransactionId'
-  sortDirection: 'asc' | 'desc' = 'desc'
 
   assetForm!: FormGroup
 
@@ -126,15 +116,12 @@ export class MyAssets implements OnInit {
     this.assetsService.getAllAssets().subscribe({
       next: (res: any) => {
         this.assets = (res?.data || []).map((item: any) => this.mapAsset(item))
-        this.applyClientFilterSort()
         this.isLoading = false
         this.cdr.markForCheck()
       },
       error: err => {
         console.log(err)
         this.assets = []
-        this.filteredAssets = []
-        this.totalCount = 0
         this.isLoading = false
         this.cdr.markForCheck()
       }
@@ -283,59 +270,4 @@ export class MyAssets implements OnInit {
     }
   }
 
-  onPageChange(newPage: number): void {
-    this.pageNo = newPage
-  }
-
-  onPageSizeChange(newSize: number): void {
-    this.pageSize = Number(newSize)
-    this.pageNo = 1
-  }
-
-  onSearchChange(search: string): void {
-    this.searchText = search
-    this.pageNo = 1
-    this.applyClientFilterSort()
-  }
-
-  onSortChange(event: { column: string; direction: 'asc' | 'desc' }): void {
-    this.sortColumn = event.column
-    this.sortDirection = event.direction
-    this.applyClientFilterSort()
-  }
-
-  applyClientFilterSort(): void {
-    const search = (this.searchText || '').toLowerCase().trim()
-
-    let data = [...this.assets]
-
-    if (search) {
-      data = data.filter((item: any) =>
-        Object.values(item).some((value: any) =>
-          String(value ?? '')
-            .toLowerCase()
-            .includes(search)
-        )
-      )
-    }
-
-    data.sort((a: any, b: any) => {
-      const av = a[this.sortColumn]
-      const bv = b[this.sortColumn]
-
-      if (av == null) return 1
-      if (bv == null) return -1
-
-      const result = String(av).localeCompare(String(bv), undefined, {
-        numeric: true,
-        sensitivity: 'base'
-      })
-
-      return this.sortDirection === 'asc' ? result : -result
-    })
-
-    this.filteredAssets = data
-    this.totalCount = data.length
-    this.cdr.markForCheck()
-  }
 }

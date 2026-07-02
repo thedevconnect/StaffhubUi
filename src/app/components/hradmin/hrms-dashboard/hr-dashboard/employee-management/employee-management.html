@@ -1,47 +1,46 @@
-<div class="min-h-screen bg-slate-50/50">
+<div class="min-h-screen bg-slate-50/50 max-w-full overflow-x-hidden">
     <app-breadcrumb class="employee-page-breadcrumb" [items]="breadcrumbItems"></app-breadcrumb>
 
+    <!-- Page Header -->
     <div
-        class="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+        class="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6 bg-white border border-slate-200 rounded-xl p-4 shadow-sm overflow-hidden">
         <div class="min-w-0 flex-1">
-            <h2 class="text-xl font-semibold text-slate-900">Employee Management</h2>
+            <h2 class="text-xl font-bold text-slate-800 tracking-tight">Employee Management</h2>
             <p class="text-xs text-slate-500 mt-1">Manage employee records and workforce information efficiently.</p>
         </div>
-        <div class="flex-none self-start sm:self-auto sm:ml-3">
+        <div class="w-full sm:w-auto flex justify-end">
             <button pButton type="button" label="Add Employee" icon="pi pi-plus"
-                class="orange-button p-button-warning p-button-sm shadow-sm" (click)="openAddDrawer()">
+                class="orange-button p-button-warning p-button-sm w-full sm:w-auto shadow-sm" (click)="openAddDrawer()">
             </button>
         </div>
     </div>
 
+    <!-- Page Content -->
     <section class="space-y-4">
-        <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+        <!-- Table -->
+        <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
             <div class="w-full overflow-x-auto">
-                <app-table-template [data]="employees" [columns]="columns" [pageSize]="pageSize"
-                    [totalCount]="totalCount" [isLoading]="loading()" [currentPage]="pageNo" [sortColumn]="sortColumn"
-                    [sortDirection]="sortDirection"
-                    [tableActions]="rowActions" (pageChange)="onPageChange($event)"
-                    (pageSizeChange)="onPageSizeChange($event)" (sortChange)="onSortChange($event)"
-                    (actionClicked)="handleRowAction($event)" (searchChange)="onSearchChange($event)"
-                    [searchText]="searchText" [showRefresh]="true" (refresh)="loadAllData()">
+                <app-table-template [data]="employees" [columns]="columns" [isLoading]="loading()"
+                    [tableActions]="rowActions" (actionClicked)="handleRowAction($event)" [showRefresh]="true"
+                    (refresh)="loadAllData()" [cellTemplates]="{ status: statusTpl }">
                 </app-table-template>
             </div>
         </div>
     </section>
 
     <!-- Add/Edit Employee Drawer -->
-    <p-drawer [(visible)]="showDrawer" position="right" [modal]="true"
-        [style]="{ width: '48rem', maxWidth: '100vw' }">
+    <p-drawer [(visible)]="showDrawer" position="right" [modal]="true" [style]="{ width: '48rem', maxWidth: '100vw' }">
         <h2 class="mb-4 text-xl font-semibold text-gray-800">
             {{ isViewMode ? 'View Employee' : (isEditMode ? 'Edit Employee' : 'Add New Employee') }}
         </h2>
 
         <form [formGroup]="employeeForm" (ngSubmit)="saveEmployee()" class="space-y-4 pb-2">
 
-            @if (selectedEmployee?.employeeCode) {
+            @if (selectedEmployee?.emp_id || selectedEmployee?.employeeCode) {
             <div class="space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
                 <label class="block text-sm font-medium text-gray-700">Employee Code</label>
-                <input type="text" pInputText [value]="selectedEmployee?.employeeCode" class="w-full" readonly>
+                <input type="text" pInputText [value]="selectedEmployee?.emp_id || selectedEmployee?.employeeCode"
+                    class="w-full" readonly>
             </div>
             }
 
@@ -96,7 +95,8 @@
                 </div>
 
                 <div class="space-y-2">
-                    <label for="reportingManager" class="block text-sm font-medium text-gray-700">Reporting Manager Name *</label>
+                    <label for="reportingManager" class="block text-sm font-medium text-gray-700">Reporting Manager Name
+                        *</label>
                     <input id="reportingManager" type="text" pInputText formControlName="reportingManager"
                         class="w-full" placeholder="Enter reporting manager name">
                     @if (f['reportingManager'].touched && f['reportingManager'].invalid) {
@@ -114,7 +114,8 @@
                 </div>
 
                 <div class="space-y-2">
-                    <label for="employmentType" class="block text-sm font-medium text-gray-700">Employment Type *</label>
+                    <label for="employmentType" class="block text-sm font-medium text-gray-700">Employment Type
+                        *</label>
                     <p-select id="employmentType" [options]="employmentTypeOptions" optionLabel="label"
                         optionValue="value" formControlName="employmentType" placeholder="Select employment type"
                         class="w-full custom-p-select"></p-select>
@@ -148,4 +149,20 @@
 
     <p-toast></p-toast>
     <p-confirmDialog [style]="{ width: '25vw' }"></p-confirmDialog>
+
+    <!-- Custom Cell Templates -->
+    <ng-template #statusTpl let-item>
+        <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold" [ngClass]="{
+                'bg-emerald-50 text-emerald-700 border border-emerald-100': item.status === 'ACTIVE',
+                'bg-rose-50 text-rose-700 border border-rose-100': item.status === 'INACTIVE',
+                'bg-amber-50 text-amber-700 border border-amber-100': item.status === 'PENDING'
+            }">
+            <span class="h-1.5 w-1.5 rounded-full" [ngClass]="{
+                    'bg-emerald-500': item.status === 'ACTIVE',
+                    'bg-rose-500': item.status === 'INACTIVE',
+                    'bg-amber-500': item.status === 'PENDING'
+                }"></span>
+            {{ item.status }}
+        </span>
+    </ng-template>
 </div>

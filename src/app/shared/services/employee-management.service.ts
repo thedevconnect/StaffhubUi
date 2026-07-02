@@ -15,7 +15,7 @@ import {
 export class EmployeeManagementService {
   private readonly apiBase = environment.apiBaseUrl;
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient) { }
 
   getEmployees(): Observable<Employee[]> {
     return this.http
@@ -63,11 +63,17 @@ export class EmployeeManagementService {
     const workLocation = this.toWorkLocation(payload.workLocation || payload.work_location || 'OFFICE');
     const employmentType = this.toEmploymentType(payload.employmentType || payload.employment_type || 'FULL_TIME');
     const joiningDate = String(payload.joiningDate ?? payload.joining_date ?? '').trim();
+    const email = officialEmail;
+    const mobile = mobileNumber;
+    const username = payload.username || (officialEmail.includes('@') ? officialEmail.split('@')[0] : officialEmail) || '';
 
     return {
       fullName,
       officialEmail,
+      email,
       mobileNumber,
+      mobile,
+      username,
       designation,
       department,
       reportingManagerName,
@@ -132,17 +138,29 @@ export class EmployeeManagementService {
   private normalizeEmployee(employee: any): Employee {
     return {
       id: employee?.id ?? employee?.employeeId ?? employee?.employee_id ?? '',
-      employeeCode: employee?.employeeCode ?? employee?.employee_code ?? employee?.code ?? '',
+      employeeCode: employee?.employeeCode ?? employee?.employee_code ?? employee?.code ?? employee?.emp_id ?? '',
+      emp_id: employee?.emp_id ?? employee?.employeeCode ?? employee?.employee_code ?? employee?.code ?? '',
       fullName: employee?.fullName ?? employee?.full_name ?? employee?.name ?? '',
+      full_name: employee?.full_name ?? employee?.fullName ?? employee?.name ?? '',
       officialEmail: employee?.officialEmail ?? employee?.email ?? employee?.official_email ?? '',
+      email: employee?.email ?? employee?.officialEmail ?? employee?.official_email ?? '',
       mobileNumber: employee?.mobileNumber ?? employee?.mobile ?? employee?.mobile_number ?? '',
+      mobile: employee?.mobile ?? employee?.mobileNumber ?? employee?.mobile_number ?? '',
       designation: employee?.designation ?? '',
       department: employee?.department ?? '',
       reportingManager: employee?.reportingManager ?? employee?.reporting_manager_name ?? employee?.reporting_manager ?? '',
+      reportingManagerName: employee?.reportingManagerName ?? employee?.reporting_manager_name ?? employee?.reportingManager ?? employee?.reporting_manager ?? '',
+      reporting_manager_name: employee?.reporting_manager_name ?? employee?.reportingManagerName ?? employee?.reportingManager ?? employee?.reporting_manager ?? '',
       joiningDate: employee?.joiningDate ?? employee?.joining_date ?? '',
+      joining_date: employee?.joining_date ?? employee?.joiningDate ?? '',
       employmentType: employee?.employmentType ?? employee?.employment_type ?? '',
+      employment_type: employee?.employment_type ?? employee?.employmentType ?? '',
       workLocation: employee?.workLocation ?? employee?.work_location ?? '',
-      status: employee?.status ?? employee?.employment_status ?? 'ACTIVE'
+      work_location: employee?.work_location ?? employee?.workLocation ?? '',
+      status: employee?.status ?? employee?.employment_status ?? 'ACTIVE',
+      role: employee?.role ?? '',
+      username: employee?.username ?? '',
+      created_at: employee?.created_at ?? ''
     };
   }
 }

@@ -107,8 +107,8 @@ export class UserService {
     return this.http.get(`${this.apiUrl}/api/companies/pending`);
   }
 
-  getAllCompanies() {
-    return this.http.get(`${this.apiUrl}/api/companies/all`);
+  getAllCompanies(page: number = 1, limit: number = 10, search: string = '', status: string = 'ALL') {
+    return this.http.get(`${this.apiUrl}/api/companies/all?page=${page}&limit=${limit}&search=${search}&status=${status}`);
   }
 
 

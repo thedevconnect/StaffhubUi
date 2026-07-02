@@ -15,6 +15,7 @@ import { MenuModule } from 'primeng/menu';
 import { ButtonModule } from 'primeng/button';
 import { MenuItem } from 'primeng/api';
 import { UserService } from '../../services/user-service';
+import { ExcelService } from '../../services/excel.service';
 
 export interface TableColumn {
   key: string;
@@ -70,6 +71,8 @@ export class TableTemplate implements OnChanges {
   @Input() showRefresh: boolean = false;
   @Input() showSortButtons: boolean = false;
   @Input() showExport: boolean = false;
+  @Input() exportFileName: string = 'Exported_Data';
+  @Input() serverSide: boolean = false;
 
   @Output() pageChange = new EventEmitter<number>();
   @Output() sortChange = new EventEmitter<{ column: string; direction: 'asc' | 'desc' }>();
@@ -150,14 +153,60 @@ export class TableTemplate implements OnChanges {
     return Array.from({ length: 5 }, (_, i) => i);
   }
 
-  constructor(private userService: UserService) { }
+  constructor(private userService: UserService, private excelService: ExcelService) { }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['data']) {
-      this.paginatedData = this.data;
+    if (changes['data'] || changes['currentPage'] || changes['pageSize'] || changes['totalCount']) {
+      this.updatePaginatedData();
     }
-    if (changes['totalCount'] || changes['pageSize']) {
+  }
+
+  updatePaginatedData(): void {
+    if (this.serverSide) {
+      this.paginatedData = this.data || [];
       this.totalPages = Math.ceil(this.totalCount / this.pageSize) || 1;
+    } else {
+      const rawData = this.data || [];
+      
+      // 1. Filter locally
+      let processed = [...rawData];
+      const search = (this.searchText || '').toLowerCase().trim();
+      if (search) {
+        processed = processed.filter(item => 
+          Object.values(item).some(val => 
+            String(val ?? '').toLowerCase().includes(search)
+          )
+        );
+      }
+
+      // 2. Sort locally
+      if (this.sortColumn) {
+        const col = this.sortColumn;
+        const dir = this.sortDirection;
+        processed.sort((a, b) => {
+          const av = this.getDeepValue(a, col);
+          const bv = this.getDeepValue(b, col);
+          if (av == null) return 1;
+          if (bv == null) return -1;
+          const result = String(av).localeCompare(String(bv), undefined, {
+            numeric: true,
+            sensitivity: 'base'
+          });
+          return dir === 'asc' ? result : -result;
+        });
+      }
+
+      // 3. Paginate locally
+      this.totalCount = processed.length;
+      this.totalPages = Math.ceil(this.totalCount / this.pageSize) || 1;
+      
+      // Safety check: if currentPage exceeds totalPages, reset to 1
+      if (this.currentPage > this.totalPages) {
+        this.currentPage = 1;
+      }
+      
+      const startIndex = (this.currentPage - 1) * this.pageSize;
+      this.paginatedData = processed.slice(startIndex, startIndex + this.pageSize);
     }
   }
 
@@ -199,6 +248,9 @@ export class TableTemplate implements OnChanges {
     if (page > 0 && page <= this.totalPages) {
       this.currentPage = page;
       this.pageChange.emit(page);
+      if (!this.serverSide) {
+        this.updatePaginatedData();
+      }
     }
   }
 
@@ -206,6 +258,9 @@ export class TableTemplate implements OnChanges {
     if (this.currentPage !== 1) {
       this.currentPage = 1;
       this.pageChange.emit(this.currentPage);
+      if (!this.serverSide) {
+        this.updatePaginatedData();
+      }
     }
   }
 
@@ -213,15 +268,27 @@ export class TableTemplate implements OnChanges {
     if (this.currentPage !== this.totalPages) {
       this.currentPage = this.totalPages;
       this.pageChange.emit(this.currentPage);
+      if (!this.serverSide) {
+        this.updatePaginatedData();
+      }
     }
   }
 
   changePageSize(newSize: number): void {
-    this.pageSizeChange.emit(newSize);
+    this.pageSize = Number(newSize);
+    this.pageSizeChange.emit(this.pageSize);
+    if (!this.serverSide) {
+      this.currentPage = 1;
+      this.updatePaginatedData();
+    }
   }
 
   onSearch(): void {
+    this.currentPage = 1;
     this.searchChange.emit(this.searchText);
+    if (!this.serverSide) {
+      this.updatePaginatedData();
+    }
   }
 
   onSort(columnKey: string): void {
@@ -229,7 +296,12 @@ export class TableTemplate implements OnChanges {
     if (this.sortColumn === columnKey && this.sortDirection === 'asc') {
       newDirection = 'desc';
     }
+    this.sortColumn = columnKey;
+    this.sortDirection = newDirection;
     this.sortChange.emit({ column: columnKey, direction: newDirection });
+    if (!this.serverSide) {
+      this.updatePaginatedData();
+    }
   }
 
   getDeepValue(o: any, key: string): any {
@@ -248,5 +320,49 @@ export class TableTemplate implements OnChanges {
     }, o);
   }
 
+  exportToExcel(): void {
+    if (!this.data || this.data.length === 0) return;
+
+    // Filter columns to export
+    const exportableCols = (this.columns || []).filter(col =>
+      col.isVisible !== false &&
+      col.key !== 'actions' &&
+      col.key !== 'checkbox'
+    );
+
+    if (exportableCols.length === 0) return;
+
+    // Map data to sheet format
+    const exportData = this.data.map(item => {
+      const row: any = {};
+      exportableCols.forEach(col => {
+        let val = this.getDeepValue(item, col.key);
+
+        // Strip out HTML tags or formatting details if they exist in string format
+        if (typeof val === 'string') {
+          val = val.trim();
+        }
+
+        // Format special column values
+        if (col.format === 'date' && val) {
+          try {
+            val = new Date(val).toLocaleDateString();
+          } catch (e) { }
+        } else if (col.format === 'time' && val) {
+          try {
+            val = new Date(val).toLocaleTimeString();
+          } catch (e) { }
+        } else if (col.format === 'uppercase' && val) {
+          val = String(val).toUpperCase();
+        }
+
+        row[col.header] = val ?? '';
+      });
+      return row;
+    });
+
+    // Use ExcelService to export
+    this.excelService.exportAsExcelFile(exportData, this.exportFileName);
+  }
 
 }
