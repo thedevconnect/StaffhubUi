@@ -1,0 +1,45 @@
+// Custom styles for emp-monthly-calendar
+:host ::ng-deep {
+  .p-select {
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid #cbd5e1;
+    background-color: #ffffff;
+    transition: all 0.2s ease;
+    padding: 0.25rem 0.5rem;
+
+    &:hover {
+      border-color: #4f46e5;
+    }
+
+    &:focus,
+    &.p-focus {
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    }
+  }
+
+  .p-select-panel {
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+
+    .p-select-items-wrapper {
+      padding: 0.25rem;
+    }
+
+    .p-select-item {
+      border-radius: 0.5rem;
+      padding: 0.625rem 0.875rem;
+      font-size: 0.875rem;
+      margin: 0.125rem 0;
+      transition: background-color 0.15s;
+
+      &.p-highlight {
+        background-color: #e0e7ff;
+        color: #4338ca;
+        font-weight: 600;
+      }
+    }
+  }
+}

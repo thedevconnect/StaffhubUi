@@ -70,12 +70,24 @@ export class RegisterCompanyComponent implements OnInit {
 
   get f2() { return this.signupForm.controls; }
 
-  submitSignUpForm() {
+  showConfirm = false;
+
+  onRegisterClick() {
     if (this.signupForm.invalid) {
       this.signupForm.markAllAsTouched();
       return;
     }
+    this.showConfirm = true;
+  }
 
+  confirmRegistration(confirm: boolean) {
+    this.showConfirm = false;
+    if (confirm) {
+      this.submitSignUpForm();
+    }
+  }
+
+  submitSignUpForm() {
     this.isProcess = true;
 
     const payload = { ...this.signupForm.value };

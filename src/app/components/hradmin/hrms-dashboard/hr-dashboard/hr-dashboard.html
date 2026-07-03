@@ -1,1 +1,359 @@
-<p>hr-dashboard works!</p>
+<div class="dashboard-container space-y-6">
+  <!-- Tabs Navigation Header -->
+  <div class="border-b border-slate-200 bg-white px-4 pt-1 shadow-sm rounded-xl">
+    <div class="flex items-center justify-between">
+      <nav class="flex -mb-px space-x-8" aria-label="Tabs">
+        <button (click)="setActiveTab('dashboard')"
+          class="tab-button py-4 px-1 text-sm font-semibold cursor-pointer border-b-2 border-transparent hover:text-blue-800"
+          [class.active-tab]="activeTab === 'dashboard'" [class.text-slate-500]="activeTab !== 'dashboard'">
+          <i class="pi pi-th-large mr-2 text-xs"></i> Dashboard
+        </button>
+        <button (click)="setActiveTab('pendency')"
+          class="tab-button py-4 px-1 text-sm font-semibold cursor-pointer border-b-2 border-transparent hover:text-blue-800 flex items-center"
+          [class.active-tab]="activeTab === 'pendency'" [class.text-slate-500]="activeTab !== 'pendency'">
+          <i class="pi pi-bell mr-2 text-xs"></i> Pendency
+          <span
+            class="ml-2 inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white transition-all"
+            [class.bg-blue-700]="activeTab === 'pendency'" [class.bg-slate-400]="activeTab !== 'pendency'">
+            {{ pendingCounts.total }}
+          </span>
+        </button>
+      </nav>
+
+      <div class="flex items-center gap-2 py-2">
+        <span class="text-xs font-semibold text-slate-400">Company:</span>
+        <span
+          class="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-200">
+          <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+          StaffHub
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Tab Content -->
+  <div *ngIf="activeTab === 'dashboard'" class="space-y-6">
+
+    <!-- Attendance Header -->
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <h2 class="text-lg font-bold text-slate-800 tracking-tight">Attendance Summary</h2>
+        <span
+          class="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 border border-blue-100">Live
+          Status</span>
+      </div>
+      <button (click)="calculateDonutSegments()"
+        class="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-blue-700 hover:border-blue-300 shadow-sm transition duration-150 cursor-pointer"
+        title="Refresh stats">
+        <i class="pi pi-refresh text-xs"></i>
+      </button>
+    </div>
+
+    <!-- 6 Column KPI Cards Grid -->
+    <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+      <div *ngFor="let card of attendanceCards"
+        class="kpi-card group rounded-xl border p-4 bg-white flex flex-col justify-between shadow-sm cursor-pointer"
+        [class]="card.borderClass">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500 truncate max-w-[80%]">{{ card.label }}</span>
+          <div class="flex h-7 w-7 items-center justify-center rounded-lg text-sm transition-all"
+            [class]="card.bgClass + ' ' + card.colorClass + ' group-hover:scale-105'">
+            <i [class]="'pi ' + card.icon"></i>
+          </div>
+        </div>
+        <div class="mt-4">
+          <h3 class="text-2xl font-bold tracking-tight text-slate-800">{{ card.count }}</h3>
+          <p class="text-[9px] text-slate-400 mt-0.5">Headcount today</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Layout Section -->
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-5">
+      <!-- Statistics (Donut Chart) -->
+      <div
+        class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2 flex flex-col justify-between">
+        <div>
+          <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">
+            Statistics</h3>
+
+          <!-- SVG Donut Chart container -->
+          <div class="relative flex items-center justify-center h-48 my-4">
+            <svg width="180" height="180" viewBox="0 0 120 120" class="donut-svg">
+              <circle cx="60" cy="60" r="50" fill="transparent" stroke="#f1f5f9" stroke-width="12"></circle>
+              <circle *ngFor="let seg of donutSegments" class="donut-segment-circle" cx="60" cy="60" r="50"
+                fill="transparent" [attr.stroke]="seg.color" stroke-width="12"
+                [attr.stroke-dasharray]="seg.strokeDashArray" [attr.stroke-dashoffset]="seg.strokeDashOffset">
+              </circle>
+            </svg>
+            <!-- Center Total text -->
+            <div class="absolute flex flex-col items-center justify-center">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total</span>
+              <span class="text-3xl font-extrabold text-slate-800 leading-none mt-1">{{ totalEmployees }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Donut Legend Grid -->
+        <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-slate-100 text-xs">
+          <div *ngFor="let seg of donutSegments"
+            class="flex items-center gap-1.5 py-1 px-1.5 rounded-lg hover:bg-slate-50">
+            <span class="h-2 w-2 rounded-full flex-shrink-0" [style.backgroundColor]="seg.color"></span>
+            <span class="text-slate-500 font-medium truncate max-w-[65px]">{{ seg.label }}:</span>
+            <span class="text-slate-800 font-bold ml-auto">{{ seg.value }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Swipe In Stacked Bar Chart -->
+      <div
+        class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-3 flex flex-col justify-between">
+        <div>
+          <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">(On
+            Time / Late) Swipe In</h3>
+
+          <!-- Flex Stacked Bar Graph -->
+          <div class="relative mt-8 flex h-48 w-full flex-col">
+            <!-- Y-Axis Lines -->
+            <div
+              class="absolute inset-x-0 bottom-0 top-0 flex flex-col justify-between text-[9px] font-semibold text-slate-400">
+              <div class="w-full border-t border-slate-100 text-right pr-1">
+                <span class="relative -top-2">120</span>
+              </div>
+              <div class="w-full border-t border-slate-100 text-right pr-1">
+                <span class="relative -top-2">100</span>
+              </div>
+              <div class="w-full border-t border-slate-100 text-right pr-1">
+                <span class="relative -top-2">80</span>
+              </div>
+              <div class="w-full border-t border-slate-100 text-right pr-1">
+                <span class="relative -top-2">60</span>
+              </div>
+              <div class="w-full border-t border-slate-100 text-right pr-1">
+                <span class="relative -top-2">40</span>
+              </div>
+              <div class="w-full border-t border-slate-100 text-right pr-1">
+                <span class="relative -top-2">20</span>
+              </div>
+              <div class="w-full border-b border-slate-200 text-right pr-1">
+                <span class="relative -top-2">0</span>
+              </div>
+            </div>
+
+            <!-- Bars Area -->
+            <div class="relative z-10 flex h-full flex-1 items-end justify-around pl-10 pr-2 pb-1">
+              <div *ngFor="let data of barChartData" class="stacked-bar-column w-12 sm:w-16">
+                <!-- Stacked Tooltip -->
+                <div class="stacked-bar-tooltip">
+                  <p class="font-bold text-white border-b border-white/20 pb-0.5 mb-1">{{ data.day }}</p>
+                  <p class="flex items-center justify-between gap-4 font-normal text-emerald-300">On Time: <span
+                      class="font-bold text-white">{{ data.onTime }}</span></p>
+                  <p class="flex items-center justify-between gap-4 font-normal text-slate-300">Late: <span
+                      class="font-bold text-white">{{ data.late }}</span></p>
+                  <p
+                    class="flex items-center justify-between gap-4 font-bold text-blue-200 mt-1 border-t border-white/10 pt-0.5">
+                    Total: <span>{{ data.total }}</span></p>
+                </div>
+
+                <!-- Late segment (Top) -->
+                <div class="bar-segment-late" [style.height.%]="(data.late / maxBarValue) * 100"></div>
+
+                <!-- On Time segment (Bottom) -->
+                <div class="bar-segment-ontime" [style.height.%]="(data.onTime / maxBarValue) * 100"></div>
+
+                <!-- X Axis Day Label -->
+                <div class="absolute -bottom-6 text-center w-full">
+                  <span class="text-[10px] font-bold text-slate-600 truncate block">{{ data.day.substring(0, 3)
+                    }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stacked Bar Legend -->
+        <div class="mt-8 flex items-center justify-center gap-6 text-xs border-t border-slate-100 pt-4">
+          <div class="flex items-center gap-2">
+            <span class="h-3 w-5 rounded bg-teal-600 block"></span>
+            <span class="text-slate-600 font-semibold">On Time</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="h-3 w-5 rounded bg-slate-700 block"></span>
+            <span class="text-slate-600 font-semibold">Late Coming</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Attendance Source, Exceptions, and Pending Requests Grid -->
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+
+      <!-- Card 1: Attendance Source -->
+      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="mb-4 flex items-center justify-between border-b border-slate-100 pb-2">
+          <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Attendance Source</h3>
+          <i class="pi pi-desktop text-slate-400"></i>
+        </div>
+        <div class="space-y-4">
+          <div *ngFor="let src of sources">
+            <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1">
+              <span>{{ src.label }}</span>
+              <span class="text-slate-800 font-bold">{{ src.count }}</span>
+            </div>
+            <div class="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-500" [class]="src.color"
+                [style.width.%]="src.percentage"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Exceptions -->
+      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="mb-4 flex items-center justify-between border-b border-slate-100 pb-2">
+          <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Exceptions</h3>
+          <i class="pi pi-exclamation-circle text-slate-400"></i>
+        </div>
+        <div class="space-y-3">
+          <div *ngFor="let ex of exceptions"
+            class="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:bg-slate-50 transition">
+            <div class="flex items-center gap-2.5">
+              <span class="flex h-8 w-8 items-center justify-center rounded-lg"
+                [class.bg-rose-50]="ex.severity === 'danger'" [class.text-rose-600]="ex.severity === 'danger'"
+                [class.bg-amber-50]="ex.severity === 'warning'" [class.text-amber-600]="ex.severity === 'warning'">
+                <i [class]="'pi ' + ex.icon"></i>
+              </span>
+              <span class="text-xs font-bold text-slate-700">{{ ex.label }}</span>
+            </div>
+            <span class="inline-flex items-center justify-center rounded-full h-6 w-6 font-bold text-xs"
+              [class.bg-rose-100]="ex.severity === 'danger'" [class.text-rose-800]="ex.severity === 'danger'"
+              [class.bg-amber-100]="ex.severity === 'warning'" [class.text-amber-800]="ex.severity === 'warning'">
+              {{ ex.count }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Pending Request -->
+      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between">
+        <div>
+          <div class="mb-4 flex items-center justify-between border-b border-slate-100 pb-2">
+            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Pending Request</h3>
+            <i class="pi pi-hourglass text-slate-400"></i>
+          </div>
+          <div class="space-y-3">
+            <div
+              class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100/80 transition cursor-pointer"
+              (click)="setActiveTab('pendency')">
+              <span class="text-xs font-bold text-slate-600">Regularization Request</span>
+              <span
+                class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+                {{ pendingCounts.regularization }}
+              </span>
+            </div>
+            <div
+              class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100/80 transition cursor-pointer"
+              (click)="navigateToLeaveApproval()">
+              <span class="text-xs font-bold text-slate-600">Leave Request</span>
+              <span
+                class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+                {{ pendingCounts.leave }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-slate-100">
+          <button (click)="setActiveTab('pendency')"
+            class="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-700 py-2 text-xs font-bold text-white hover:bg-blue-800 shadow-sm transition cursor-pointer">
+            View All Pendencies ({{ pendingCounts.total }})
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Pendency Tab Content -->
+  <div *ngIf="activeTab === 'pendency'" class="space-y-4">
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-lg font-bold text-slate-800">Pending Approvals Ledger</h2>
+        <p class="text-xs text-slate-400">Review and action pending leaves, regularizations, and expense claims</p>
+      </div>
+      <button (click)="setActiveTab('dashboard')"
+        class="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-blue-700 hover:border-blue-300 shadow-sm transition cursor-pointer">
+        <i class="pi pi-arrow-left"></i> Back to Dashboard
+      </button>
+    </div>
+
+    <!-- Approvals List -->
+    <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div *ngIf="pendingRequests.length > 0; else emptyRequests" class="table-responsive">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
+              <th class="px-6 py-4">Request ID</th>
+              <th class="px-6 py-4">Employee Name</th>
+              <th class="px-6 py-4">Request Type</th>
+              <th class="px-6 py-4">Description / Details</th>
+              <th class="px-6 py-4">Requested Date</th>
+              <th class="px-6 py-4">Status</th>
+              <th class="px-6 py-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-sm">
+            <tr *ngFor="let req of pendingRequests" class="hover:bg-slate-50/50 transition">
+              <td class="px-6 py-4 font-mono text-xs text-slate-500 font-bold">{{ req.id }}</td>
+              <td class="px-6 py-4 font-bold text-slate-700">{{ req.employeeName }}</td>
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold"
+                  [class.bg-blue-50]="req.type === 'Leave'" [class.text-blue-700]="req.type === 'Leave'"
+                  [class.bg-purple-50]="req.type === 'Regularization'"
+                  [class.text-purple-700]="req.type === 'Regularization'"
+                  [class.bg-orange-50]="req.type === 'Attendance Approval'"
+                  [class.text-orange-700]="req.type === 'Attendance Approval'"
+                  [class.bg-amber-50]="req.type === 'Expense Claim'"
+                  [class.text-amber-700]="req.type === 'Expense Claim'">
+                  {{ req.type }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-slate-600 text-xs">{{ req.details }}</td>
+              <td class="px-6 py-4 text-slate-500 text-xs">{{ req.date }}</td>
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-600">
+                  <span class="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                  {{ req.status }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <div class="flex items-center justify-end gap-2">
+                  <button (click)="approveRequest(req.id)"
+                    class="rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-600 hover:text-white transition cursor-pointer">
+                    Approve
+                  </button>
+                  <button (click)="rejectRequest(req.id)"
+                    class="rounded-lg bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700 hover:bg-rose-600 hover:text-white transition cursor-pointer">
+                    Reject
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #emptyRequests>
+        <div class="flex flex-col items-center justify-center text-center p-12">
+          <div class="h-12 w-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
+            <i class="pi pi-check text-xl"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-700">All caught up!</h3>
+          <p class="text-xs text-slate-400 mt-1">There are no pending approval requests currently in the queue.</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+</div>

@@ -2,10 +2,12 @@
   <app-breadcrumb class="company-page-breadcrumb" [items]="breadcrumbItems"></app-breadcrumb>
 
   <!-- Page Header -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+  <div
+    class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
     <div>
       <h2 class="text-xl font-semibold text-slate-900">Company Management</h2>
-      <p class="text-xs text-slate-500 mt-1">Register and manage client companies, their HR admins, and approval requests.</p>
+      <p class="text-xs text-slate-500 mt-1">Register and manage client companies, their HR admins, and approval
+        requests.</p>
     </div>
     <div class="w-full sm:w-auto flex justify-end">
       <p-button label="Add Company" icon="pi pi-plus"
@@ -21,8 +23,8 @@
       <div class="w-full overflow-x-auto">
         <app-table-template [data]="data" [columns]="columns" [pageSize]="pageSize" [totalCount]="totalCount"
           [isLoading]="isLoading" [currentPage]="pageNo" [searchText]="searchText" [tabs]="companyTabs"
-          [activeTab]="activeTab" [showRefresh]="true" [serverSide]="true" (refresh)="loadData()" (tabChange)="onTabChange($event)"
-          [tableActions]="rowActions" (actionClicked)="onActionClicked($event)"
+          [activeTab]="activeTab" [showRefresh]="true" [serverSide]="true" (refresh)="loadData()"
+          (tabChange)="onTabChange($event)" [tableActions]="rowActions" (actionClicked)="onActionClicked($event)"
           [disableActionCondition]="disableActionCondition" (pageChange)="onPageChange($event)"
           (searchChange)="onSearchChange($event)" (pageSizeChange)="onPageSizeChange($event)"
           [cellTemplates]="{ approval_status: approvalStatusTpl, status: statusTpl }">
@@ -33,14 +35,12 @@
 
   <!-- Custom Cell Templates -->
   <ng-template #approvalStatusTpl let-item>
-    <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold"
-      [ngClass]="{
+    <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold" [ngClass]="{
         'bg-emerald-50 text-emerald-700 border border-emerald-100': item.approval_status === 'APPROVED',
         'bg-amber-50 text-amber-700 border border-amber-100': item.approval_status === 'PENDING',
         'bg-rose-50 text-rose-700 border border-rose-100': item.approval_status === 'REJECTED'
       }">
-      <span class="h-1.5 w-1.5 rounded-full"
-        [ngClass]="{
+      <span class="h-1.5 w-1.5 rounded-full" [ngClass]="{
           'bg-emerald-500': item.approval_status === 'APPROVED',
           'bg-amber-500': item.approval_status === 'PENDING',
           'bg-rose-500': item.approval_status === 'REJECTED'
@@ -50,13 +50,11 @@
   </ng-template>
 
   <ng-template #statusTpl let-item>
-    <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold"
-      [ngClass]="{
+    <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold" [ngClass]="{
         'bg-emerald-50 text-emerald-700 border border-emerald-100': item.status === 'ACTIVE',
         'bg-rose-50 text-rose-700 border border-rose-100': item.status === 'INACTIVE'
       }">
-      <span class="h-1.5 w-1.5 rounded-full"
-        [ngClass]="{
+      <span class="h-1.5 w-1.5 rounded-full" [ngClass]="{
           'bg-emerald-500': item.status === 'ACTIVE',
           'bg-rose-500': item.status === 'INACTIVE'
         }"></span>
