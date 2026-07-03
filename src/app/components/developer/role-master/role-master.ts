@@ -1,8 +1,8 @@
-import { Component, ChangeDetectorRef, signal } from '@angular/core';
+import { Component, ChangeDetectorRef, signal, OnInit } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { Popover } from 'primeng/popover';
 import { Tooltip } from "primeng/tooltip";
-import { ConfirmDialog } from 'primeng/confirmdialog';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SelectModule } from 'primeng/select';
@@ -14,6 +14,8 @@ import { ProgressSpinner } from 'primeng/progressspinner';
 import { Toast } from 'primeng/toast';
 import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template';
 import { UserService } from '../../../shared/services/user-service';
+import { AuthService } from '../../../shared/services/services/auth.service';
+
 @Component({
   selector: 'app-role-master',
   imports: [
@@ -27,7 +29,7 @@ import { UserService } from '../../../shared/services/user-service';
     ReactiveFormsModule,
     SelectModule,
     DatePickerModule,
-    ConfirmDialog,
+    ConfirmDialogModule,
     ProgressSpinner,
     Toast,
     Tooltip,
@@ -39,7 +41,7 @@ import { UserService } from '../../../shared/services/user-service';
   templateUrl: './role-master.html',
   styleUrl: './role-master.scss'
 })
-export class RoleMaster {
+export class RoleMaster implements OnInit {
   isLoading = true;
   visible: boolean = false;
   postType: string = '';
@@ -51,24 +53,12 @@ export class RoleMaster {
   data: any[] = [];
   activityMaster: FormGroup;
 
-  //  "Id": 2,
-  //           "RoleId": 2,
-  //           "RoleCode": "SUPER_ADMIN",
-  //           "RoleName": "Super Admin",
-  //           "RoleDescription": "Complete System",
-  //           "IsActive": 1,
-  //           "CreatedBy": 1,
-  //           "CreatedAt": "2026-05-13T12:18:28.000Z",
-
   columns: TableColumn[] = [
     { key: 'actions', header: '⚙️', isVisible: true, isSortable: false, isCustom: true },
-    { key: 'RoleName', header: 'Role Name', isVisible: true, isSortable: false },
-    { key: 'RoleDescription', header: 'Role Description', isVisible: true, isSortable: false },
-    { key: 'IsActive', header: 'Status', isVisible: true, isSortable: false },
-    // createdby
-    { key: 'CreatedBy', header: 'Created By', isVisible: true, isSortable: false },
-    // createdat
-    { key: 'CreatedAt', header: 'Created Date', isVisible: true, isSortable: false },
+    { key: 'roleName', header: 'Role Name', isVisible: true, isSortable: false },
+    { key: 'roleCode', header: 'Role Code', isVisible: true, isSortable: false },
+    { key: 'isActive', header: 'Status', isVisible: true, isSortable: false },
+    { key: 'createdAt', header: 'Created Date', isVisible: true, isSortable: false },
   ];
   pageNo = 1;
   pageSize = 5;
@@ -77,14 +67,21 @@ export class RoleMaster {
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
 
+  statusOptions = [
+    { label: 'Active', value: true },
+    { label: 'Inactive', value: false }
+  ];
+
   constructor(private fb: FormBuilder,
     private userService: UserService,
+    private authService: AuthService,
     private confirmationService: ConfirmationService,
     private message: MessageService,
     private cdr: ChangeDetectorRef,
   ) {
     this.activityMaster = this.fb.group({
-      roletype: ['', [Validators.required,]],
+      roletype: ['', [Validators.required]],
+      isActive: [true]
     });
   }
 
@@ -98,6 +95,23 @@ export class RoleMaster {
     }, 1000);
   }
 
+  getCompanyId(): number {
+    const user = this.authService.user?.();
+    if (user && (user as any).companyId) {
+      return (user as any).companyId;
+    }
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload && payload.companyId) {
+          return payload.companyId;
+        }
+      }
+    } catch (e) { }
+    return 1;
+  }
+
   getTableData(isTrue: boolean) {
     if (isTrue) {
       this.isLoading = true;
@@ -106,8 +120,8 @@ export class RoleMaster {
     }
     this.userService.getRoles(this.pageNo, this.pageSize, this.searchText).subscribe({
       next: (res: any) => {
-        this.data = res.data || [];
-        this.totalCount = res.meta?.total || 0;
+        this.data = res.roleTable || res.data || [];
+        this.totalCount = res.total || res.meta?.total || 0;
         setTimeout(() => {
           this.isLoading = false;
           this.cdr.detectChanges();
@@ -123,7 +137,6 @@ export class RoleMaster {
     });
   }
 
-
   onPageChange(newPage: number) {
     this.pageNo = newPage;
     this.getTableData(true);
@@ -131,8 +144,8 @@ export class RoleMaster {
 
   onPageSizeChange(newSize: number) {
     this.pageSize = newSize;
-    this.pageNo = 1; // reset to first page
-    this.getTableData(true); // fetch data from API again
+    this.pageNo = 1;
+    this.getTableData(true);
   }
 
   onSearchChange(search: string) {
@@ -148,53 +161,58 @@ export class RoleMaster {
   }
 
   onDrawerHide() {
-    document.body.style.overflow = 'visible'; // restore scroll
-    this.activityMaster.enable()
+    document.body.style.overflow = 'visible';
+    this.activityMaster.enable();
     this.visible = false;
-    this.onClear()
+    this.onClear();
   }
   onClear() {
-    this.activityMaster.reset()
-
+    this.activityMaster.reset({
+      roletype: '',
+      isActive: true
+    });
   }
 
   showDialog(view: string, data: any) {
-    this.isFormLoading = true
-    if (view == 'add') {
-      this.visible = true;
-      this.postType = view;
-      this.header = view === 'add' ? 'Add' : (view === 'update' ? 'Update' : 'View');
-      this.headerIcon = view === 'add' ? 'pi pi-plus' : (view === 'update' ? 'pi pi-pencil' : 'pi pi-eye');
+    this.isFormLoading = true;
+    this.visible = true;
+    this.postType = view;
+    this.header = view === 'add' ? 'Add' : (view === 'update' ? 'Update' : 'View');
+    this.headerIcon = view === 'add' ? 'pi pi-plus' : (view === 'update' ? 'pi pi-pencil' : 'pi pi-eye');
+
+    if (view === 'add') {
+      this.activityMaster.reset({
+        roletype: '',
+        isActive: true
+      });
       setTimeout(() => {
-        this.isFormLoading = false
+        this.isFormLoading = false;
         this.cdr.detectChanges();
-      }, 1000);
+      }, 300);
     } else {
-      this.visible = true;
-      this.postType = view;
-      this.header = view === 'add' ? 'Add' : (view === 'update' ? 'Update' : 'View');
-      this.headerIcon = view === 'add' ? 'pi pi-plus' : (view === 'update' ? 'pi pi-pencil' : 'pi pi-eye');
       this.selectedIndex = data;
       if (view === 'view') {
         this.activityMaster.disable();
-        setTimeout(() => {
-          this.isFormLoading = false
-          this.cdr.detectChanges();
-        }, 1000);
+      } else {
+        this.activityMaster.enable();
       }
       this.activityMaster.patchValue({
-        roletype: data.role_name ? data.role_name : '',
-      })
+        roletype: data?.roleName ?? data?.RoleName ?? '',
+        isActive: data?.isActive === 1 || data?.isActive === true || data?.IsActive === 1 || data?.IsActive === true
+      });
       setTimeout(() => {
-        this.isFormLoading = false
+        this.isFormLoading = false;
         this.cdr.detectChanges();
-      }, 1000);
+      }, 300);
     }
   }
 
+  getRoleId(item: any): number | string | null {
+    return item?.id ?? item?.roleId ?? item?.RoleId ?? null;
+  }
+
   openConfirmation(title: string, msg: string, id: any, option?: string, event?: any) {
-    this.confirmationService.confirm({
-      target: event?.target as EventTarget,
+    const confirmConfig: any = {
       message: msg,
       header: title,
       closable: true,
@@ -208,24 +226,21 @@ export class RoleMaster {
         }
         else if (option === '2') {
           this.deleteData();
-        } else if (option === '4') {
-
-        } else if (option === '5') {
-
-        }
-      },
-      reject: () => {
-        if (option === '4') {
         }
       }
-    });
+    };
+
+    if (event?.target) {
+      confirmConfig.target = event.target;
+    }
+
+    this.confirmationService.confirm(confirmConfig);
   }
 
-  deleteItem(item: any) {
+  deleteItem(item: any, event?: any) {
     this.selectedIndex = item;
-    this.openConfirmation("Confirm", "Are you sure want to delete?", '1', '2');
+    this.openConfirmation("Confirm", "Are you sure want to delete?", '1', '2', event);
   }
-
 
   onSubmit(event: any) {
     if (!this.activityMaster.valid) {
@@ -235,17 +250,22 @@ export class RoleMaster {
     this.openConfirmation('Confirm?', "Are you sure you want to proceed?", '1', '1', event);
   }
 
-
-
   submitcall() {
     this.isFormLoading = true;
 
-    const payload = {
-      role_name: this.activityMaster.get('roletype')?.value,
-    };
-
     if (this.postType === 'update') {
-      this.userService.updateRole(this.selectedIndex.id, payload).subscribe({
+      const roleId = this.getRoleId(this.selectedIndex);
+      if (!roleId) {
+        this.isFormLoading = false;
+        this.message.add({ severity: 'error', summary: 'Error', detail: 'Role id not found for update.' });
+        return;
+      }
+
+      const payload = {
+        RoleName: this.activityMaster.get('roletype')?.value,
+        IsActive: this.activityMaster.get('isActive')?.value ? 1 : 0
+      };
+      this.userService.updateRole(Number(roleId), payload).subscribe({
         next: (res: any) => {
           this.isFormLoading = false;
           this.getTableData(false);
@@ -258,6 +278,10 @@ export class RoleMaster {
         }
       });
     } else {
+      const payload = {
+        RoleName: this.activityMaster.get('roletype')?.value,
+        CompanyId: this.getCompanyId()
+      };
       this.userService.createRole(payload).subscribe({
         next: (res: any) => {
           this.isFormLoading = false;
@@ -274,10 +298,16 @@ export class RoleMaster {
   }
 
   deleteData() {
-    this.userService.deleteRole(this.selectedIndex.id).subscribe({
+    const roleId = this.getRoleId(this.selectedIndex);
+    if (!roleId) {
+      this.message.add({ severity: 'error', summary: 'Error', detail: 'Role id not found for delete.' });
+      return;
+    }
+
+    this.userService.deleteRole(Number(roleId)).subscribe({
       next: (res: any) => {
         this.getTableData(true);
-        this.message.add({ severity: 'success', summary: 'Success', detail: 'Data deleted' });
+        this.message.add({ severity: 'success', summary: 'Success', detail: 'Data Deleted Successfully.' });
         this.onDrawerHide();
       },
       error: (err) => {
@@ -285,7 +315,6 @@ export class RoleMaster {
       }
     });
   }
-
 
   isInvalid(field: string): boolean {
     const control = this.activityMaster.get(field);

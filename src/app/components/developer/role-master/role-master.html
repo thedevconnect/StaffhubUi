@@ -11,8 +11,30 @@
             [isLoading]="isLoading" [currentPage]="pageNo" [sortColumn]="sortColumn" [sortDirection]="sortDirection"
             [searchText]="searchText" [actionTemplate]="actionTemplateRef" (pageChange)="onPageChange($event)"
             (searchChange)="onSearchChange($event)" (sortChange)="onSortChange($event)"
-            (pageSizeChange)="onPageSizeChange($event)">
+            (pageSizeChange)="onPageSizeChange($event)" [tableActions]="[]"
+            [cellTemplates]="{ isActive: statusTpl, createdAt: dateTpl }">
         </app-table-template>
+
+        <ng-template #statusTpl let-item>
+            <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                [ngClass]="{
+                    'bg-emerald-50 text-emerald-700 border border-emerald-100': item.isActive === 1,
+                    'bg-rose-50 text-rose-700 border border-rose-100': item.isActive !== 1
+                }">
+                <span class="h-1.5 w-1.5 rounded-full"
+                    [ngClass]="{
+                        'bg-emerald-500': item.isActive === 1,
+                        'bg-rose-500': item.isActive !== 1
+                    }"></span>
+                {{ item.isActive === 1 ? 'Active' : 'Inactive' }}
+            </span>
+        </ng-template>
+
+        <ng-template #dateTpl let-item>
+            <span class="text-xs text-gray-500">
+                {{ item.createdAt | date: 'mediumDate' }}
+            </span>
+        </ng-template>
 
         <ng-template #actionTemplateRef let-item>
             <button type="button" class="text-gray-400 hover:text-gray-600 cursor-pointer" (click)="op.toggle($event)">
@@ -28,7 +50,7 @@
                         class="px-4 py-2 hover:bg-gray-100 text-left">
                         <i class="pi pi-pencil"></i>
                     </button>
-                    <button (click)="deleteItem(item);op.hide()" class="px-4 py-2 hover:bg-gray-100 text-left"
+                    <button (click)="deleteItem(item, $event);op.hide()" class="px-4 py-2 hover:bg-gray-100 text-left"
                         pTooltip="Delete">
                         <i class="pi pi-trash"></i>
                     </button>
@@ -61,7 +83,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Role*</label>
                     <input type="text" formControlName="roletype" placeholder="Enter Role"
                         [class.border-red-500]="isInvalid('roletype')"
-                        class="w-full rounded-md text-base border-2 border-gray-300 px-3 py-1 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
+                        class="w-full rounded-md text-base border-2 border-gray-300 px-3 py-1.5 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
                     @if(isInvalid('roletype')){
                     <p class="text-red-500 text-xs mt-1">
                         @if(activityMaster.get('roletype')?.errors?.['required']){
@@ -74,6 +96,11 @@
                     </p>
                     }
 
+                </div>
+
+                <div *ngIf="postType !== 'add'">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <p-select [options]="statusOptions" formControlName="isActive" optionLabel="label" optionValue="value" class="w-full"></p-select>
                 </div>
 
             </form>
@@ -96,5 +123,5 @@
 </div>
 
 
-<p-confirmdialog></p-confirmdialog>
+<p-confirmDialog></p-confirmDialog>
 <p-toast></p-toast>
