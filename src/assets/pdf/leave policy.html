@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leave & Attendance Policy – Voletic Technologies (18 Leaves)</title>
+  <!-- Bootstrap 5 + Icons + Google Fonts -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: 'Poppins', sans-serif;
+    }
+    body {
+      background: #f4f7fc;
+      padding: 2rem 1rem;
+    }
+    .policy-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 32px;
+      box-shadow: 0 20px 60px rgba(0, 40, 80, 0.08);
+      padding: 2rem 2.5rem;
+    }
+    .brand-logo {
+      font-weight: 700;
+      font-size: 1.8rem;
+      letter-spacing: -0.5px;
+      color: #0b2b4a;
+    }
+    .brand-logo span {
+      color: #1a73e8;
+    }
+    .brand-tag {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #5e7b9c;
+      letter-spacing: 1px;
+    }
+    h1, h2, h3, h4 {
+      font-weight: 600;
+      color: #0b2b4a;
+    }
+    .section-title {
+      border-left: 6px solid #1a73e8;
+      padding-left: 1rem;
+      margin-top: 2.5rem;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+      font-size: 1.75rem;
+    }
+    .card-premium {
+      border: none;
+      border-radius: 24px;
+      background: white;
+      box-shadow: 0 8px 30px rgba(0, 20, 40, 0.04);
+      transition: 0.2s;
+      padding: 1.5rem 1.8rem;
+      margin-bottom: 2rem;
+    }
+    .card-premium:hover {
+      box-shadow: 0 12px 40px rgba(0, 40, 80, 0.06);
+    }
+    .info-badge {
+      background: #eef3fa;
+      padding: 0.5rem 1.2rem;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #1a4b7a;
+      display: inline-block;
+    }
+    .policy-meta {
+      background: #f0f5fe;
+      border-radius: 20px;
+      padding: 1.2rem 1.8rem;
+    }
+    .table-modern {
+      border-collapse: separate;
+      border-spacing: 0 6px;
+      width: 100%;
+    }
+    .table-modern th {
+      background: #e6eef9;
+      color: #0b2b4a;
+      font-weight: 600;
+      padding: 0.9rem 1rem;
+      border: none;
+    }
+    .table-modern td {
+      background: #f9fbfd;
+      padding: 0.9rem 1rem;
+      border: none;
+      vertical-align: middle;
+    }
+    .table-modern tr {
+      border-radius: 16px;
+    }
+    .alert-soft {
+      background: #f0f7ff;
+      border-left: 6px solid #1a73e8;
+      border-radius: 20px;
+      padding: 1.4rem 2rem;
+    }
+    .alert-soft-warning {
+      background: #fff6e5;
+      border-left: 6px solid #f9a825;
+      border-radius: 20px;
+      padding: 1.4rem 2rem;
+    }
+    .footer-corporate {
+      border-top: 2px solid #e3ecf5;
+      padding-top: 2rem;
+      margin-top: 3rem;
+      color: #3e5f7e;
+      font-size: 0.9rem;
+    }
+    .page-number {
+      font-size: 0.8rem;
+      color: #7a94b0;
+      font-weight: 500;
+    }
+    hr.sep {
+      opacity: 0.3;
+      margin: 2.5rem 0;
+    }
+    .highlight-box {
+      background: #e3f0ff;
+      border-radius: 20px;
+      padding: 1.2rem 1.8rem;
+      border: 1px dashed #1a73e8;
+    }
+    @media print {
+      body {
+        background: white;
+        padding: 0.2in;
+      }
+      .policy-wrapper {
+        box-shadow: none;
+        padding: 0.2in;
+        border-radius: 0;
+        max-width: 100%;
+      }
+      .card-premium {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .table-modern td, .table-modern th {
+        background: #f3f6fa !important;
+      }
+      .no-print {
+        display: none;
+      }
+      h1, h2, h3, h4, .section-title {
+        page-break-after: avoid;
+      }
+      .section-title {
+        margin-top: 1.8rem;
+      }
+      .table-modern {
+        page-break-inside: avoid;
+      }
+      .policy-meta, .alert-soft, .alert-soft-warning {
+        page-break-inside: avoid;
+      }
+    }
+    .list-styled {
+      padding-left: 1.2rem;
+      list-style-type: none;
+    }
+    .list-styled li::before {
+      content: "▹ ";
+      color: #1a73e8;
+      font-weight: 700;
+    }
+    .list-styled li {
+      margin-bottom: 0.4rem;
+    }
+    .text-accent {
+      color: #1a73e8;
+    }
+    .bg-soft-primary {
+      background: #eef4fe;
+    }
+  </style>
+</head>
+<body>
+<div class="policy-wrapper">
+
+  <!-- ========== COVER / HEADER ========== -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+      <div class="brand-logo">VOLETIC <span>TECHNOLOGIES</span></div>
+      <div class="brand-tag">Leave, Attendance & Office Timings Policy</div>
+    </div>
+    <div class="text-end">
+      <div class="info-badge"><i class="bi bi-file-earmark-text me-1"></i> HR/VTPL-LAOTP/06-02</div>
+      <div class="mt-1"><span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">Effective 1 Jan 2025</span></div>
+    </div>
+  </div>
+
+  <!-- ========== PAGE 1 CONTENT ========== -->
+  <div class="card-premium">
+    <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center">
+      <div><span class="fw-bold">FUNCTION:</span> Human Resource</div>
+      <div><span class="fw-bold">POLICY:</span> Leave, Attendance & Office Timings</div>
+      <div><span class="fw-bold">PREPARED BY:</span> HR Department</div>
+      <div><span class="fw-bold">APPROVED BY:</span> Managing Director</div>
+    </div>
+    <hr class="my-3">
+    <div class="row g-3">
+      <div class="col-md-3"><span class="fw-bold">POLICY NO.:</span> VTPL-HR-LAOTP/06</div>
+      <div class="col-md-3"><span class="fw-bold">VERSION:</span> VTPL-HR-LAOTP/06-02</div>
+      <div class="col-md-3"><span class="fw-bold">DATE:</span> 1 July 2019</div>
+      <div class="col-md-3"><span class="fw-bold">AMENDMENT:</span> 1 January 2025</div>
+    </div>
+  </div>
+
+  <!-- Policy Distribution & Objective -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="card-premium h-100">
+        <h5><i class="bi bi-shield-lock text-primary me-2"></i>Policy Distribution</h5>
+        <p>To all VTPL Employees (T2-D20) · Confidential to all employees of Voletic Technologies Pvt. Ltd. (VTPL).</p>
+        <p><span class="fw-bold">Calendar Year:</span> 1st January – 31st December</p>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card-premium h-100">
+        <h5><i class="bi bi-bullseye text-primary me-2"></i>Objective</h5>
+        <ul class="list-styled">
+          <li>Promote a healthy Work-Life balance</li>
+          <li>Reduce Absenteeism &amp; Disciplinary issues</li>
+          <li>Standardize and define eligible Leave categories &amp; Office timings</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Applicability -->
+  <div class="alert-soft mb-4">
+    <h5><i class="bi bi-people me-2"></i>Applicability</h5>
+    <p class="mb-0">This policy applies to all the employees on the payroll of the company including employees on probation.<br>
+    <span class="text-secondary fst-italic">Note: Employees on a contractual basis shall be governed as per the provisions of testing order.</span></p>
+  </div>
+
+  <!-- ========== ★ NEW: 18 LEAVES PER YEAR (TOTAL) ========== -->
+  <div class="highlight-box mb-4">
+    <h5><i class="bi bi-star-fill text-warning me-2"></i>Total Leave Entitlement (per Calendar Year)</h5>
+    <div class="row g-3 mt-2">
+      <div class="col-md-6"><span class="fw-bold fs-5">18</span> <span class="text-secondary">Total Leaves per year</span></div>
+      <div class="col-md-6"><span class="badge bg-primary bg-opacity-15 text-primary px-3 py-2">Flexible pool</span> – to be distributed as per business needs</div>
+    </div>
+    <p class="mt-2 mb-0"><i class="bi bi-info-circle text-primary me-1"></i> The total 18 leaves are a combination of Earned Leave (EL) and Casual Leave (CL) as defined below. <strong>HR, Manager &amp; Admin</strong> have the authority to modify this distribution at any time based on organizational requirements.</p>
+  </div>
+
+  <!-- Entitlement A–E (updated with 18 leaves) -->
+  <div class="card-premium">
+    <h5 class="fw-bold">Leave Entitlement (Calendar Year) – <span class="text-primary">18 Total</span></h5>
+    <div class="row g-3 mt-1">
+      <div class="col-md-5"><span class="fw-bold">Earned Leave (EL)</span> – <span class="text-primary">12 days</span> (accrued)</div>
+      <div class="col-md-5"><span class="fw-bold">Casual Leave (CL)</span> – <span class="text-primary">6 days</span> (including Sick leaves)</div>
+      <div class="col-md-2 text-primary fw-bold">= 18 Total</div>
+    </div>
+    <hr>
+    <p><span class="fw-bold">Note:</span> The above split (12 EL + 6 CL) is the default. <span class="badge bg-warning bg-opacity-15 text-dark">HR / Manager / Admin</span> may revise the ratio at any time, subject to business exigencies. The total remains 18 leaves per year unless otherwise changed by the management.</p>
+    <p><strong>B.</strong> Employees whose date of joining service falls between the 1st to the 15th of a month are entitled to get the leave credit for that month and those who have a date of joining service falls between the 16th to the end of the month are not entitled to the leave credit for that month.</p>
+    <p><strong>C.</strong> If an employee is relieved on any day between the 1st to 15th of a month, then he/she is not entitled to leaves due for that month, however, if the last day falls between the 16th to the end of the month then he/she is entitled for leaves due for that month.</p>
+    <p><strong>D.</strong> In case of an emergency, employees should inform his/her reporting authority over phone/e-mail/message. In such cases, Leave Application should be raised by the respective employee in the Voletic Employee Portal within 48 hours.</p>
+    <div class="alert-soft-warning mt-3">
+      <h6><i class="bi bi-calendar-event me-2"></i>Sandwich Policy</h6>
+      <ul class="list-styled">
+        <li>In this case of any holiday appearing between 2 leave dates, shall also be considered as a leave. Eg: leave on Saturday and Monday → 3 days leave (including Sunday)</li>
+        <li>In case of leaves availed between holiday &amp; Weekly off, such prefix &amp; suffix holiday/weekly off shall also be counted as leave. Eg: leave on Monday, Sunday WO, Tuesday Holiday → 3 days leave</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ========== PAGE 2 CONTENT (updated with 18 leaves) ========== -->
+  <div class="section-title">Earned Leave (EL) – Detailed</div>
+  <div class="card-premium">
+    <ul class="list-styled">
+      <li><strong>F.</strong> The Company shall grant <span class="text-primary">12 EL</span> in a year on pro-rata basis (1 per month) accrued based on total working days. (Part of the total 18 leaves).</li>
+      <li><strong>G.</strong> EL shall be accrued based on present working days (for every 20 working days, 1 EL shall be accrued).</li>
+      <li><strong>H.</strong> In case eligible EL is not availed at the end of the year, such EL shall be carried forward to the next year and added to the leave balance.</li>
+      <li><strong>I.</strong> Number of EL eligible for carry forward cannot exceed 30.</li>
+      <li><strong>J.</strong> Employees can accumulate the EL for a maximum of 45 days at any point.</li>
+      <li><strong>K.</strong> EL cannot be used in advance, however, can be availed based on management's discretion.</li>
+      <li><strong>L.</strong> A maximum of 15 days of EL can be availed in a year based on prior approval from Management. During medical exigencies, this limit could be extended (HR shall get approval).</li>
+      <li><strong>M.</strong> Employees on probation are not eligible to utilize their EL during the said period.</li>
+      <li><strong>N.</strong> EL should be preapproved by the Manager 10 days in advance in writing. Any unapproved absence will be considered a Leave of Pay.</li>
+    </ul>
+    <div class="alert-soft mt-3">
+      <i class="bi bi-arrow-repeat text-primary me-2"></i> <strong>Flexibility:</strong> HR, Manager &amp; Admin may adjust the EL/CL split at any time, as long as the total annual leave entitlement remains 18 (or as revised by management).
+    </div>
+  </div>
+
+  <!-- End of Contract + Encashment -->
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card-premium h-100">
+        <h5><i class="bi bi-box-arrow-right text-primary me-2"></i>End of Contract</h5>
+        <ul class="list-styled">
+          <li>Balance leave will be calculated on pro-rata basis and paid/deducted along with F&F settlement.</li>
+          <li>Any balance leaves not availed, will be encashed at F&F settlement as per leave encashment process.</li>
+          <li>When an employee resigns, he/she is required to inform the immediate Manager and HR in writing; notice period applicable from date of resignation.</li>
+          <li>HR department is required to freeze the leaves in notice period which will be adjusted in F&F settlement.</li>
+          <li>Leave taken during notice period will be considered as LOP or extension of days to be served.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card-premium h-100">
+        <h5><i class="bi bi-cash-stack text-primary me-2"></i>Encashment of Leave</h5>
+        <ul class="list-styled">
+          <li>Accumulated leave can be encashed at end of services at F&F settlement.</li>
+          <li>HR department shall maintain records relating to leave of all employees.</li>
+          <li>Finance department shall disburse leave encashment only upon confirmation from HR. Calculated at last basic pay, subject to tax deduction as per Income Tax rules.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== PAGE 3 CONTENT (updated CL = 6 days) ========== -->
+  <div class="section-title">Casual Leave (CL) &amp; Short Leave</div>
+  <div class="card-premium">
+    <p><strong>Casual Leave (CL)</strong> – leave to attend urgent or unforeseen contingencies including sickness.</p>
+    <ul class="list-styled">
+      <li><span class="text-primary">6 days</span> of CL in a calendar year on pro-rata basis (part of 18 total).</li>
+      <li>Maximum 2 days of CL in a month.</li>
+      <li>Cannot be taken for more than 2 days at a time. If &gt;2 days in a month or stretch, excess leaves shall be adjusted against Earned Leave.</li>
+      <li>CL cannot be carried forward to next year.</li>
+    </ul>
+    <p class="mt-2 text-secondary"><i class="bi bi-pencil-square me-1"></i> The CL quota may be revised by HR/Manager/Admin as per business needs.</p>
+  </div>
+
+  <div class="card-premium">
+    <h5><i class="bi bi-clock-history text-primary me-2"></i>Short Leave</h5>
+    <ul class="list-styled">
+      <li>For pressing emergencies, one short leave of max 2 hours per month allowed based on written approval from Manager. Manager may reject based on business requirements.</li>
+      <li>Short leaves cannot be accumulated if not availed per month.</li>
+      <li>Any excess absence will be treated as half/full day from CL/EL accordingly.</li>
+    </ul>
+  </div>
+
+  <div class="card-premium">
+    <h5><i class="bi bi-arrow-repeat text-primary me-2"></i>Compensatory Off</h5>
+    <ul class="list-styled">
+      <li>If required to work on National, Festival, Federal, or weekly off, eligible for compensatory off.</li>
+      <li>Applicable for all levels involved in Event Management.</li>
+      <li>Should be preapproved by Manager in writing and utilized within 60 days.</li>
+      <li>Only 2 days of compensatory off can be availed together.</li>
+      <li>If not utilized within 60 days, shall lapse.</li>
+      <li>Official approval required by Manager/HEO/Management to work on days other than regular working days.</li>
+      <li>Needs preapproval and recorded by HR.</li>
+      <li>4 hours = half day; 8 hours = full day of compensatory off.</li>
+      <li>On public holiday: min 3h = half day; min 6h = full day.</li>
+    </ul>
+  </div>
+
+  <!-- ========== PAGE 4 CONTENT ========== -->
+  <div class="section-title">Absence, Half Day, LOP &amp; Guidelines</div>
+  <div class="card-premium">
+    <h5><i class="bi bi-exclamation-triangle text-warning me-2"></i>Absence from Duty</h5>
+    <ul class="list-styled">
+      <li>Time off without prior approval or timely intimation → treated as absence from duty.</li>
+      <li>Days of absence may be considered as LOP depending on circumstances.</li>
+      <li>On critical medical exigencies, inform Establishment via email/message/call within two days of absence.</li>
+      <li>Employee shall report to Manager on re-joining and provide valid reasons.</li>
+    </ul>
+    <div class="alert-soft-warning mt-3">
+      <strong>Absconding:</strong> If absent without approval or intimation for 3 continuous days, considered 'Absconding' and official correspondence sent. Action deemed fit by Management.
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card-premium h-100">
+        <h5><i class="bi bi-clock text-primary me-2"></i>Half Day Leave</h5>
+        <p>Half a day of CL can be availed as per leave norms. Half day = first 4 hours or last 4 hours of work day.</p>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="card-premium h-100">
+        <h5><i class="bi bi-dash-circle text-danger me-2"></i>Loss of Pay (LOP)</h5>
+        <ul class="list-styled">
+          <li>LOP can be applied when no other leave available. No pay or allowance during LOP.</li>
+          <li>If employee fails to report on specified date after sanctioned LOP, deemed abandonment of service.</li>
+          <li>LOP days not counted for E. eligibility.</li>
+          <li>LOP can be imposed on disciplinary grounds regardless of other available leave.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- General Guidelines -->
+  <div class="card-premium">
+    <h5><i class="bi bi-list-check text-primary me-2"></i>General Guidelines</h5>
+    <ul class="list-styled">
+      <li>This leave policy applies to all employees (confirmed and on probation).</li>
+      <li>Manager is authorized to approve/reject leave based on business circumstances.</li>
+      <li>Approved leaves can be cancelled based on operational requirements (communicated 2 days before leave).</li>
+      <li>Leave needs to be applied via defined channels (Voletic Employee Portal).</li>
+      <li>Cancellation/Extension needs written approval intimated to HOD & HR.</li>
+      <li>Earned Leaves should be applied in advance (min 10 days before).</li>
+      <li>Different categories of leave cannot be clubbed.</li>
+      <li>No standard "Work from Home" policy; only in dire personal/professional exigencies, request to reporting authority and MD; approved by MD.</li>
+      <li>All early leaving, late coming, short leave & Outdoor duty must be requested via email or Voletic Employee Portal. Approval via email/WhatsApp must be sent via portal on same/following day for regularisation.</li>
+    </ul>
+    <div class="highlight-box mt-3">
+      <i class="bi bi-gear text-primary me-2"></i> <strong>Admin Note:</strong> HR, Manager &amp; Admin hold the right to modify, suspend, or amend any part of this leave policy, including the total number of leaves (currently 18), at any time. Changes will be communicated through official channels.
+    </div>
+  </div>
+
+  <!-- ========== PAGE 5 (numbered list – Office Timings) ========== -->
+  <div class="section-title">Office Timings &amp; Operational Guidelines</div>
+  <div class="card-premium">
+    <p><strong>1.</strong> The person working after 7.30 PM will ensure all electrical appliances including PCs are switched off before he/she leaves. Pantry boys not available after 7.30 PM.</p>
+    <h6 class="mt-3"><i class="bi bi-box-arrow-up-right text-primary me-2"></i>Out of Duty (OD)</h6>
+    <ul class="list-styled">
+      <li>OD should be put in the system in advance, on the same day with prior approvals. LOP or leave deduction may apply if not intimated promptly.</li>
+      <li>All employees expected to mark OD requests to Reporting Manager via portal/mobile app when going on OD. Onus on employee to obtain approval.</li>
+      <li>Employee can go for OD only after informing reporting manager on same day via portal/app. Where applicable, OD reports to be shared with reporting authority on subsequent day.</li>
+      <li>Non-receipt of approval of outdoor work from reporting officer would be considered unauthorized absence and could lead to loss of wages/leave plus disciplinary action.</li>
+    </ul>
+    <h6 class="mt-3"><i class="bi bi-cup-hot text-primary me-2"></i>Lunch and Break Periods</h6>
+    <ul class="list-styled">
+      <li>All employees eligible for lunch break of 30 minutes Monday to Saturday.</li>
+      <li>Additionally, 2 breaks of 15 minutes each during morning and evening hours.</li>
+      <li>Sundays shall be considered as weekly off.</li>
+    </ul>
+  </div>
+
+  <!-- ========== PAGE 6 (Adherence, Contact, Footer) ========== -->
+  <div class="section-title">Adherence &amp; Contact</div>
+  <div class="card-premium">
+    <div class="alert-soft">
+      <h6><i class="bi bi-check-circle-fill text-primary me-2"></i>Adherence Note</h6>
+      <p>This Policy shall be an integral part of all existing Human Resource Policies at Voletic Technologies Pvt. Ltd. and the contents as such thereto would be read in its totality and supersedes all the prior policies. In case of any conflict/confusion, this policy shall prevail.</p>
+      <p class="mb-0">In accordance with our commitment to compliance, regardless of these internal policies, we ensure to strictly adhere to all relevant regional and central laws as they amend/update over time, ensuring our Leave and Attendance practices remain legally sound and ethically responsible.</p>
+    </div>
+    <div class="mt-4 p-3 bg-soft-primary rounded-4">
+      <h6><i class="bi bi-envelope-paper text-primary me-2"></i>Contact</h6>
+      <p class="mb-0">All queries and clarifications on the policy and procedures may be referred to the HR department.</p>
+    </div>
+  </div>
+
+  <!-- ========== FOOTER ========== -->
+  <div class="footer-corporate d-flex flex-wrap justify-content-between align-items-center">
+    <div>
+      <span class="fw-bold">Voletic Technologies Pvt. Ltd.</span> · Leave & Attendance Policy (18 Leaves)
+    </div>
+    <div class="page-number">
+      <i class="bi bi-printer me-1"></i> v. VTPL-HR-LAOTP/06-02 · Page <span class="fw-bold">1/1</span>
+    </div>
+  </div>
+  <div class="text-center text-secondary small mt-2 opacity-50">
+    <i class="bi bi-dot"></i> Confidential – for internal use only <i class="bi bi-dot"></i> 
+    <span class="badge bg-light text-dark ms-2">HR/Manager/Admin may change anytime</span>
+  </div>
+</div> <!-- /.policy-wrapper -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

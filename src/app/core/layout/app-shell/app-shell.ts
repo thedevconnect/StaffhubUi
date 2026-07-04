@@ -53,15 +53,17 @@ export class AppShell {
   readonly searchQuery = signal<string>('');
 
   // Filtered menu items using computed signal
-  readonly filteredMenuItems = computed(() => this.filterMenuItems(this.menuItemsWithSubmenu(), this.searchQuery()));
+  readonly filteredMenuItems = computed(() =>
+    this.filterMenuItems(this.menuItemsWithSubmenu(), this.searchQuery()),
+  );
 
   constructor(
     private readonly authService: AuthService,
     private readonly messageService: MessageService,
     private readonly confirmationService: ConfirmationService,
     private readonly router: Router,
-    private readonly userService: UserService
-  ) { }
+    private readonly userService: UserService,
+  ) {}
 
   ngOnInit(): void {
     this.fetchUserSidebar();
@@ -72,7 +74,7 @@ export class AppShell {
     if (!roleId) return;
 
     const rawRoleId = roleId.toLowerCase();
-    
+
     // Determine prefix and select corresponding routes
     let rolePrefix = rawRoleId;
     let routesToMap: any[] = [];
@@ -89,25 +91,29 @@ export class AppShell {
     } else if (rawRoleId === 'super_admin' || rawRoleId === 'superadmin') {
       rolePrefix = 'superadmin';
       routesToMap = superadminRoutes;
+    } else {
+      // Default to ESS routes if role is unrecognized
+      rolePrefix = 'ess';
+      routesToMap = essRoutes;
     }
 
     const menus = [
-      { label: 'Dashboard', icon: 'pi-home', route: this.getDashboardRoute(), isOpen: false }
+      { label: 'Dashboard', icon: 'pi-home', route: this.getDashboardRoute(), isOpen: false },
     ];
 
     if (routesToMap && routesToMap.length > 0) {
-      routesToMap.forEach(route => {
+      routesToMap.forEach((route) => {
         // Skip default/redirect routes
         if (!route.path || route.redirectTo !== undefined) return;
 
-        const label = route.title as string || this.formatPathToLabel(route.path);
+        const label = (route.title as string) || this.formatPathToLabel(route.path);
         const icon = this.getIconForPath(route.path);
 
         menus.push({
           label: label,
           icon: icon,
           route: `/${rolePrefix}/${route.path}`,
-          isOpen: false
+          isOpen: false,
         });
       });
     }
@@ -118,7 +124,7 @@ export class AppShell {
   private formatPathToLabel(path: string): string {
     return path
       .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   }
 
@@ -148,6 +154,10 @@ export class AppShell {
   }
 
   toggleSidebar(): void {
+    if (!this.isMobileView()) {
+      this.sidebarOpen.set(true);
+      return;
+    }
     this.sidebarOpen.update((isOpen) => !isOpen);
   }
 
@@ -202,25 +212,27 @@ export class AppShell {
     }
     const lowerQuery = query.toLowerCase();
     return items
-      .map(item => {
+      .map((item) => {
         const cloned = { ...item };
         if (cloned.children && cloned.children.length > 0) {
-          const matchedChildren = cloned.children.map((sub: SidebarMenuItem) => {
-            const clonedSub = { ...sub };
-            if (clonedSub.children && clonedSub.children.length > 0) {
-              const matchedGrand = clonedSub.children.filter(child =>
-                child.label.toLowerCase().includes(lowerQuery)
-              );
-              if (matchedGrand.length > 0) {
-                clonedSub.children = matchedGrand;
-                clonedSub.isOpen = true;
+          const matchedChildren = cloned.children
+            .map((sub: SidebarMenuItem) => {
+              const clonedSub = { ...sub };
+              if (clonedSub.children && clonedSub.children.length > 0) {
+                const matchedGrand = clonedSub.children.filter((child) =>
+                  child.label.toLowerCase().includes(lowerQuery),
+                );
+                if (matchedGrand.length > 0) {
+                  clonedSub.children = matchedGrand;
+                  clonedSub.isOpen = true;
+                  return clonedSub;
+                }
+              } else if (clonedSub.label.toLowerCase().includes(lowerQuery)) {
                 return clonedSub;
               }
-            } else if (clonedSub.label.toLowerCase().includes(lowerQuery)) {
-              return clonedSub;
-            }
-            return null;
-          }).filter(sub => sub !== null) as SidebarMenuItem[];
+              return null;
+            })
+            .filter((sub) => sub !== null) as SidebarMenuItem[];
 
           if (matchedChildren.length > 0) {
             cloned.children = matchedChildren;
@@ -232,10 +244,8 @@ export class AppShell {
         }
         return null;
       })
-      .filter(item => item !== null) as SidebarMenuItem[];
+      .filter((item) => item !== null) as SidebarMenuItem[];
   }
-
-
 
   private checkIsMobileView(): boolean {
     return typeof window !== 'undefined' && window.innerWidth < 768;
