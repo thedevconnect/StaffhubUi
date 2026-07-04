@@ -16,13 +16,11 @@
         </app-table-template>
 
         <ng-template #statusTpl let-item>
-            <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                [ngClass]="{
+            <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold" [ngClass]="{
                     'bg-emerald-50 text-emerald-700 border border-emerald-100': item.isActive === 1,
                     'bg-rose-50 text-rose-700 border border-rose-100': item.isActive !== 1
                 }">
-                <span class="h-1.5 w-1.5 rounded-full"
-                    [ngClass]="{
+                <span class="h-1.5 w-1.5 rounded-full" [ngClass]="{
                         'bg-emerald-500': item.isActive === 1,
                         'bg-rose-500': item.isActive !== 1
                     }"></span>
@@ -75,10 +73,9 @@
                     [style]="{ width: '50px', height: '50px' }" />
             </div>
             }@else{
-
             <form [formGroup]="activityMaster" (ngSubmit)="onSubmit($event)"
                 class="grid grid-cols-1 md:grid-cols-2 gap-6">
-     
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Role*</label>
                     <input type="text" formControlName="roletype" placeholder="Enter Role"
@@ -87,7 +84,7 @@
                     @if(isInvalid('roletype')){
                     <p class="text-red-500 text-xs mt-1">
                         @if(activityMaster.get('roletype')?.errors?.['required']){
-                            Role is required.
+                        Role is required.
                         } @else if(activityMaster.get('roletype')?.errors?.['invalidValue']){
                         Only dots or blank spaces are not allowed.
                         } @else if(activityMaster.get('roletype')?.errors?.['noAlphaNumeric']){
@@ -100,7 +97,8 @@
 
                 <div *ngIf="postType !== 'add'">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <p-select [options]="statusOptions" formControlName="isActive" optionLabel="label" optionValue="value" class="w-full"></p-select>
+                    <p-select [options]="statusOptions" formControlName="isActive" optionLabel="label"
+                        optionValue="value" class="w-full"></p-select>
                 </div>
 
             </form>

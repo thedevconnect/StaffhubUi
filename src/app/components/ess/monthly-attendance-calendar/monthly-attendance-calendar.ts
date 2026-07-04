@@ -59,7 +59,7 @@ export class MonthlyAttendanceCalendar implements OnInit {
 
     for (let i = 1; i <= daysInMonth; i++) {
       const date = new Date(year, month, i);
-      const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+      const isSunday = date.getDay() === 0;
 
       const yyyy = date.getFullYear();
       const mm = String(date.getMonth() + 1).padStart(2, '0');
@@ -69,8 +69,8 @@ export class MonthlyAttendanceCalendar implements OnInit {
       daysArray.push({
         dayNum: i,
         dateString: dateString,
-        type: isWeekend ? 'WO' : '',
-        colorClass: isWeekend ? 'bg-slate-400 text-white' : ''
+        type: isSunday ? 'WO' : '',
+        colorClass: isSunday ? 'bg-slate-400 text-white' : ''
       });
     }
     this.calendarDays.set(daysArray);

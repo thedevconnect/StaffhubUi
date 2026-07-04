@@ -94,10 +94,8 @@ export class AppHeader {
   }
 
   private logout(): void {
-    // Clear auth session and redirect to login page
     this.authService.logout();
     this.router.navigate(['/login']);
-    // Emit event for any parent listeners (optional)
     this.onLogout.emit();
   }
 
