@@ -106,4 +106,20 @@ export class AttendanceService {
     return this.http.get<any>(`${this.apiBase}/api/holidays${params}`);
   }
 
+  submitRegularization(data: { attendanceDate: string; reason: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiBase}/api/attendance-regularization`, data);
+  }
+
+  getMyRegularizations(): Observable<any> {
+    return this.http.get<any>(`${this.apiBase}/api/attendance-regularization/my-requests`);
+  }
+
+  getCompanyRegularizations(page: number = 1, limit: number = 10, status: string = 'PENDING', search: string = ''): Observable<any> {
+    return this.http.get<any>(`${this.apiBase}/api/attendance-regularization?page=${page}&limit=${limit}&status=${status}&search=${search}`);
+  }
+
+  updateRegularizationStatus(requestId: number | string, status: 'APPROVED' | 'REJECTED', hrRemarks?: string): Observable<any> {
+    return this.http.put<any>(`${this.apiBase}/api/attendance-regularization/${requestId}/status`, { status, hrRemarks });
+  }
+
 }

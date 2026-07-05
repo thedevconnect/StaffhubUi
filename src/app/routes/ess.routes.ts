@@ -7,12 +7,12 @@ export const essRoutes: Routes = [
     loadComponent: () => import('../components/ess/ess-dashboard/ess-dashboard').then(c => c.EssDashboard)
   },
   {
-    path: 'my-assets',
-    loadComponent: () => import('../components/ess/my-assets/my-assets').then(c => c.MyAssets)
-  },
-  {
     path: 'employee-attendance',
     loadComponent: () => import('../components/ess/employee-attendance/employee-attendance').then(c => c.EmployeeAttendance)
+  },
+  {
+    path: 'my-assets',
+    loadComponent: () => import('../components/ess/my-assets/my-assets').then(c => c.MyAssets)
   },
   {
     path: 'attendance-regularization',
