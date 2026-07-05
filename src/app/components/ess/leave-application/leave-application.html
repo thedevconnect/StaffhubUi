@@ -44,7 +44,8 @@
         (pageChange)="onPageChange($event)"
         (searchChange)="onSearchChange($event)" 
         (pageSizeChange)="onPageSizeChange($event)"
-        [actionTemplate]="actionTpl">
+        [disableActionCondition]="disableAction"
+        (actionClicked)="onActionClicked($event)">
       </app-table-template>
     </div>
 
@@ -199,9 +200,9 @@
         <!-- Sticky Footer -->
         <div
           class="absolute bottom-0 left-0 right-0 p-4 sm:p-6 bg-white/80 backdrop-blur-md border-t border-gray-100 flex justify-end gap-3 z-20">
-          <p-button label="Cancel" (click)="onDrawerHide()"
+          <p-button [label]="postType === 'view' ? 'Close' : 'Cancel'" (click)="onDrawerHide()"
             styleClass="p-button-text p-button-secondary font-bold text-xs"></p-button>
-          <p-button label="Submit Request" icon="pi pi-check" (click)="onSubmit()" [loading]="isLoading"
+          <p-button *ngIf="postType !== 'view'" label="Submit Request" icon="pi pi-check" (click)="onSubmit()" [loading]="isLoading"
             styleClass="rounded-xl px-8 py-3 btn-submit border-none shadow-lg transition-all text-sm font-bold">
           </p-button>
         </div>

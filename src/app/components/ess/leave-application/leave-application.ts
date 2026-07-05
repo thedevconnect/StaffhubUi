@@ -180,6 +180,23 @@ export class LeaveApplication {
   tableHeaders: any[] = [];
   columns: TableColumn[] = [];
 
+  disableAction = (actionId: string, row: any): boolean => {
+    if (row['leave Status'] !== 'Apply') {
+      return actionId === 'edit' || actionId === 'delete';
+    }
+    return false;
+  };
+
+  onActionClicked(event: { actionId: string; row: any }) {
+    if (event.actionId === 'edit') {
+      this.showDialog('edit', event.row);
+    } else if (event.actionId === 'view') {
+      this.showDialog('view', event.row);
+    } else if (event.actionId === 'delete') {
+      this.onWithdraw(event.row.id);
+    }
+  }
+
   get filteredData() {
     if (!this.searchText) return this.tblData;
     const search = this.searchText.toLowerCase();
@@ -250,7 +267,7 @@ export class LeaveApplication {
         this.columns = [
           { key: 'rowNo', header: 'S.no', isVisible: true, isSortable: false },
           ...dynamicCols,
-          { key: 'actions', header: 'Action', isVisible: true, isSortable: false, isCustom: true }
+          { key: 'actions', header: 'Action', isVisible: true, isSortable: false }
         ];
         this.tableHeaders = this.columns;
 
@@ -269,13 +286,49 @@ export class LeaveApplication {
 
   onDrawerHide() {
     this.visible = false;
+    this.leaveForm.enable();
   }
 
   showDialog(type: string, data: any) {
     this.visible = true;
-    this.header = type == 'add' ? 'Add Leave Application' : 'Edit Leave Application';
-    this.headerIcon = type == 'add' ? 'pi pi-plus' : 'pi pi-pencil';
     this.postType = type;
+    
+    if (type === 'add') {
+      this.header = 'Add Leave Application';
+      this.headerIcon = 'pi pi-plus';
+      this.leaveForm.enable();
+    } else if (type === 'edit') {
+      this.header = 'Edit Leave Application';
+      this.headerIcon = 'pi pi-pencil';
+      this.leaveForm.enable();
+    } else if (type === 'view') {
+      this.header = 'View Leave Application';
+      this.headerIcon = 'pi pi-eye';
+      this.leaveForm.disable();
+    }
+
+    if (type === 'edit' || type === 'view') {
+      this.leaveForm.patchValue({
+        dateFrom: data['date From'] ? new Date(data['date From']) : null,
+        dateTo: data['date To'] ? new Date(data['date To']) : null,
+        sessionFrom: data['from Session'],
+        sessionTo: data['to Session'],
+        leaveType: data['leave Type'],
+        ccTo: data['cc To'],
+        reason: data['reason']
+      });
+      this.sessionFrom = data['from Session'];
+      this.sessionTo = data['to Session'];
+      this.leaveTypedata = data['leave Type'];
+    } else {
+      this.leaveForm.reset({
+        dateFrom: new Date(),
+        dateTo: new Date(),
+        sessionFrom: this.sessionDrp?.[0]?.drpValue,
+        sessionTo: this.sessionDrp?.[0]?.drpValue,
+        leaveType: this.leaveTypeDrp?.[0]?.drpValue
+      });
+    }
   }
 
   onSubmit() {
