@@ -1,18 +1,10 @@
-<div class="min-h-screen bg-slate-50/50 max-w-full overflow-x-hidden">
-    <app-breadcrumb class="employee-page-breadcrumb" [items]="breadcrumbItems"></app-breadcrumb>
+<app-breadcrumb class="employee-page-breadcrumb" [items]="breadcrumbItems"></app-breadcrumb>
 
-    <!-- Page Header -->
-    <div
-        class="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6 bg-white border border-slate-200 rounded-xl p-4 shadow-sm overflow-hidden">
-        <div class="min-w-0 flex-1">
-            <h2 class="text-xl font-bold text-slate-800 tracking-tight">Employee Management</h2>
-            <p class="text-xs text-slate-500 mt-1">Manage employee records and workforce information efficiently.</p>
-        </div>
-        <div class="w-full sm:w-auto flex justify-end">
-            <button pButton type="button" label="Add Employee" icon="pi pi-plus"
-                class="orange-button p-button-warning p-button-sm w-full sm:w-auto shadow-sm" (click)="openAddDrawer()">
-            </button>
-        </div>
+<div class="min-h-screen bg-slate-50/50 max-w-full overflow-x-hidden">
+    <div class="w-full sm:w-auto flex justify-end">
+        <button pButton type="button" label="Add Employee" icon="pi pi-plus"
+            class="orange-button p-button-warning p-button-sm w-full sm:w-auto shadow-sm" (click)="openAddDrawer()">
+        </button>
     </div>
 
     <!-- Page Content -->

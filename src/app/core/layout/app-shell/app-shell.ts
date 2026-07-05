@@ -97,25 +97,79 @@ export class AppShell {
       routesToMap = essRoutes;
     }
 
-    const menus = [
+    const menus: SidebarMenuItem[] = [
       { label: 'Dashboard', icon: 'pi-home', route: this.getDashboardRoute(), isOpen: false },
     ];
 
-    if (routesToMap && routesToMap.length > 0) {
+    if (rawRoleId === 'ess') {
+      const essSubmenus: SidebarMenuItem[] = [];
+      const exitSubmenus: SidebarMenuItem[] = [];
+      const standaloneMenus: SidebarMenuItem[] = [];
+
       routesToMap.forEach((route) => {
-        // Skip default/redirect routes
         if (!route.path || route.redirectTo !== undefined) return;
+        if (route.path === 'ess-dashboard') return;
 
         const label = (route.title as string) || this.formatPathToLabel(route.path);
         const icon = this.getIconForPath(route.path);
-
-        menus.push({
+        const item: SidebarMenuItem = {
           label: label,
           icon: icon,
           route: `/${rolePrefix}/${route.path}`,
           isOpen: false,
-        });
+        };
+
+        const pathLower = route.path.toLowerCase();
+
+        if (pathLower.includes('resignation') || pathLower.includes('exit-interview') || pathLower.includes('exit')) {
+          exitSubmenus.push(item);
+        } else if (
+          pathLower.includes('expense') ||
+          pathLower.includes('performance') ||
+          pathLower.includes('probation') ||
+          pathLower.includes('ticket')
+        ) {
+          standaloneMenus.push(item);
+        } else {
+          essSubmenus.push(item);
+        }
       });
+
+      if (essSubmenus.length > 0) {
+        menus.push({
+          label: 'ESS',
+          icon: 'pi-user',
+          isOpen: false,
+          children: essSubmenus,
+        });
+      }
+
+      if (exitSubmenus.length > 0) {
+        menus.push({
+          label: 'Exit',
+          icon: 'pi-times-circle',
+          isOpen: false,
+          children: exitSubmenus,
+        });
+      }
+
+      menus.push(...standaloneMenus);
+    } else {
+      if (routesToMap && routesToMap.length > 0) {
+        routesToMap.forEach((route) => {
+          if (!route.path || route.redirectTo !== undefined) return;
+
+          const label = (route.title as string) || this.formatPathToLabel(route.path);
+          const icon = this.getIconForPath(route.path);
+
+          menus.push({
+            label: label,
+            icon: icon,
+            route: `/${rolePrefix}/${route.path}`,
+            isOpen: false,
+          });
+        });
+      }
     }
 
     this.dynamicMenuItems.set(menus);
