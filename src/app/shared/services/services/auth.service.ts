@@ -77,6 +77,9 @@ export class AuthService {
     if (roleId === 'developer') {
       return '/developer/activity-master';
     }
+    if (roleId === 'payroll' || roleId === 'payroll_admin' || roleId.includes('payroll')) {
+      return '/payroll/payroll-dashboard';
+    }
     return '/ess/ess-dashboard';
   }
 

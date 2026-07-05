@@ -13,6 +13,7 @@ import { essRoutes } from '../../../routes/ess.routes';
 import { hradminRoutes } from '../../../routes/hradmin.routes';
 import { developerRoutes } from '../../../routes/developer.routes';
 import { superadminRoutes } from '../../../routes/superadmin.routes';
+import { payrollRoutes } from '../../../routes/payroll.routes';
 
 @Component({
   selector: 'app-shell',
@@ -91,6 +92,9 @@ export class AppShell {
     } else if (rawRoleId === 'super_admin' || rawRoleId === 'superadmin') {
       rolePrefix = 'superadmin';
       routesToMap = superadminRoutes;
+    } else if (rawRoleId === 'payroll' || rawRoleId === 'payroll_admin' || rawRoleId.includes('payroll')) {
+      rolePrefix = 'payroll';
+      routesToMap = payrollRoutes;
     } else {
       // Default to ESS routes if role is unrecognized
       rolePrefix = 'ess';
@@ -158,6 +162,7 @@ export class AppShell {
       if (routesToMap && routesToMap.length > 0) {
         routesToMap.forEach((route) => {
           if (!route.path || route.redirectTo !== undefined) return;
+          if (route.path === 'payroll-dashboard') return;
 
           const label = (route.title as string) || this.formatPathToLabel(route.path);
           const icon = this.getIconForPath(route.path);
@@ -254,6 +259,13 @@ export class AppShell {
         this.router.navigate(['/login']);
       },
     });
+  }
+
+  onHeaderLogout(): void {
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('selectedRoleId');
+    sessionStorage.removeItem('roleOptions');
+    sessionStorage.removeItem('token');
   }
 
   onSearchQueryChange(event: any): void {

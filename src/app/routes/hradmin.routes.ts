@@ -22,5 +22,6 @@ export const hradminRoutes: Routes = [
         path: 'employee-calendar',
         loadComponent: () => import('../components/hradmin/emp-monthly-calendar/emp-monthly-calendar').then(c => c.EmpMonthlyCalendar)
     },
+    { path: 'approval-attendance-regularization', loadComponent: () => import('../components/hradmin/approval-attendance-regularization/approval-attendance-regularization').then(c => c.ApprovalAttendanceRegularization) }
 
 ];
