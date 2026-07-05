@@ -1,24 +1,187 @@
-<app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
-<section class="flex flex-col items-center justify-center min-h-[400px] text-center p-8 bg-white border border-slate-200 rounded-xl space-y-6 relative overflow-hidden">
-  <!-- Decorative Background Glow -->
-  <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-blue-400/5 blur-2xl"></div>
-  <div class="absolute -left-16 -bottom-16 w-48 h-48 rounded-full bg-indigo-400/5 blur-2xl"></div>
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
 
-  <!-- Animated Orb -->
-  <div class="relative flex items-center justify-center">
-    <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 opacity-20 blur-xl animate-pulse"></div>
-    <div class="relative h-20 w-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-3xl shadow-sm border border-blue-100/50 transition duration-300 hover:scale-105">
-      <i class="pi pi-sign-out"></i>
+<div
+  class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6">
+  <div class="flex-1 min-w-0">
+    <p-breadcrumb [model]="breadcrumbItems"
+      styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
+  </div>
+  <div class="flex-none">
+    <p-button (click)="showDialog()" label="Resign" icon="pi pi-plus" styleClass="p-button-sm p-button-info rounded-lg"
+      [raised]="true">
+    </p-button>
+  </div>
+</div>
+
+<div class="bg-[#FFFFFF] min-h-screen p-4 sm:p-6 lg:p-0">
+  <div class="bg-white overflow-hidden">
+    <!-- Header Section -->
+    <div
+      class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border-b border-gray-200 gap-3">
+      <div>
+        <h2 class="text-xl font-semibold text-gray-800">Employee Resignation</h2>
+        <p class="text-xs text-slate-500 mt-1">Submit resignation requests, track clearance approvals, and monitor
+          notice period timelines.</p>
+      </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="overflow-x-auto">
+      <p-table [value]="resignationRecords" styleClass="p-datatable-sm" responsiveLayout="scroll">
+        <ng-template pTemplate="header">
+          <tr class="text-xs uppercase bg-slate-50/50 text-slate-500 tracking-wider">
+            <th class="p-3 text-left">Leaving Reason</th>
+            <th class="p-3 text-center">Will Join Again?</th>
+            <th class="p-3 text-center">Will Refer?</th>
+            <th class="p-3 text-center">LWD (Policy)</th>
+            <th class="p-3 text-center">LWD (Employee)</th>
+            <th class="p-3 text-center">Status</th>
+            <th class="p-3 class-center">Submitted Date</th>
+            <th class="p-3 text-center">Actions</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rowData>
+          <tr class="border-b border-slate-100 hover:bg-slate-50/40 text-sm">
+            <td class="p-3 text-slate-700 font-medium max-w-[200px] truncate" [title]="rowData.reason">
+              {{ rowData.reason }}
+            </td>
+            <td class="p-3 text-center text-slate-600">{{ rowData.joinAgain }}</td>
+            <td class="p-3 text-center text-slate-600">{{ rowData.referUs }}</td>
+            <td class="p-3 text-center text-slate-600">
+              {{ rowData.lwdPolicy | date: 'dd-MM-yyyy' }}
+            </td>
+            <td class="p-3 text-center text-slate-600 font-semibold text-blue-600">
+              {{ rowData.lwdEmployee | date: 'dd-MM-yyyy' }}
+            </td>
+            <td class="p-3 text-center">
+              <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold" [ngClass]="{
+                  'bg-amber-50 text-amber-700 border border-amber-100': rowData.status === 'PENDING',
+                  'bg-emerald-50 text-emerald-700 border border-emerald-100': rowData.status === 'APPROVED',
+                  'bg-rose-50 text-rose-700 border border-rose-100': rowData.status === 'REJECTED',
+                  'bg-slate-100 text-slate-600 border border-slate-200': rowData.status === 'WITHDRAWN'
+                }">
+                <span class="h-1.5 w-1.5 rounded-full" [ngClass]="{
+                    'bg-amber-500': rowData.status === 'PENDING',
+                    'bg-emerald-500': rowData.status === 'APPROVED',
+                    'bg-rose-500': rowData.status === 'REJECTED',
+                    'bg-slate-400': rowData.status === 'WITHDRAWN'
+                  }"></span>
+                {{ rowData.status }}
+              </span>
+            </td>
+            <td class="p-3 text-center text-slate-500 text-xs">
+              {{ rowData.createdDate | date: 'mediumDate' }}
+            </td>
+            <td class="p-3 text-center">
+              <p-button *ngIf="rowData.status === 'PENDING'" label="Withdraw" icon="pi pi-times"
+                (click)="onWithdraw(rowData.id, $event)"
+                styleClass="p-button-danger p-button-sm p-button-text font-bold"></p-button>
+              <span *ngIf="rowData.status !== 'PENDING'"
+                class="text-xs text-slate-400 font-semibold select-none">-</span>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
     </div>
   </div>
 
-  <div class="space-y-2 max-w-md">
-    <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Employee Resignation</h2>
-    <p class="text-slate-500 text-sm leading-relaxed">Submit resignation requests, track clearance approvals, and monitor notice period timelines.</p>
-  </div>
+  <!-- Resignation Form Drawer -->
+  <p-drawer [(visible)]="visible" position="right" [modal]="true" [style]="{ width: '100%', maxWidth: '600px' }"
+    (onHide)="onDrawerHide()" styleClass="modern-drawer">
+    <ng-template pTemplate="header">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-base">
+          <i class="pi pi-sign-out"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-800">Submit Resignation</h3>
+          <p class="text-xs text-slate-400">Fill the required resignation details</p>
+        </div>
+      </div>
+    </ng-template>
 
-  <span class="inline-flex items-center gap-2 rounded-full bg-blue-50/80 px-4 py-1.5 text-xs font-semibold text-blue-700 border border-blue-100 shadow-sm">
-    <span class="h-2 w-2 rounded-full bg-blue-500 animate-ping"></span>
-    Under Development
-  </span>
-</section>
+    <ng-template pTemplate="content">
+      <form [formGroup]="resignationForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5 pt-4">
+        <!-- Leaving Reason -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            Leaving Reason <span class="text-rose-500">*</span>
+          </label>
+          <p-select [options]="leavingReasons" formControlName="leavingReason" optionLabel="label" optionValue="value"
+            placeholder="Select leaving reason" class="w-full"></p-select>
+          <div *ngIf="resignationForm.get('leavingReason')?.touched && resignationForm.get('leavingReason')?.invalid"
+            class="text-rose-500 text-xs">
+            Leaving reason is required.
+          </div>
+        </div>
+
+        <!-- Will You Join Again -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            Will You Join Again <span class="text-rose-500">*</span>
+          </label>
+          <p-select [options]="joinAgainOptions" formControlName="willJoinAgain" optionLabel="label" optionValue="value"
+            placeholder="Select will you join again" class="w-full"></p-select>
+          <div *ngIf="resignationForm.get('willJoinAgain')?.touched && resignationForm.get('willJoinAgain')?.invalid"
+            class="text-rose-500 text-xs">
+            Please select an option.
+          </div>
+        </div>
+
+        <!-- Will You Refer To Join Us -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            Will You Refer To Join Us <span class="text-rose-500">*</span>
+          </label>
+          <p-select [options]="referOptions" formControlName="willRefer" optionLabel="label" optionValue="value"
+            placeholder="Select will you refer to join Us" class="w-full"></p-select>
+          <div *ngIf="resignationForm.get('willRefer')?.touched && resignationForm.get('willRefer')?.invalid"
+            class="text-rose-500 text-xs">
+            Please select an option.
+          </div>
+        </div>
+
+        <!-- LWD As Per Policy -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            LWD As Per Policy
+          </label>
+          <p-datepicker formControlName="lwdPolicy" dateFormat="dd-mm-yy" [showIcon]="true" class="w-full"
+            [disabled]="true"></p-datepicker>
+        </div>
+
+        <!-- LWD As Per Employee -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            LWD As Per Employee <span class="text-rose-500">*</span>
+          </label>
+          <p-datepicker formControlName="lwdEmployee" dateFormat="dd-mm-yy" [showIcon]="true"
+            class="w-full"></p-datepicker>
+          <div *ngIf="resignationForm.get('lwdEmployee')?.touched && resignationForm.get('lwdEmployee')?.invalid"
+            class="text-rose-500 text-xs">
+            Last working day is required.
+          </div>
+        </div>
+
+        <!-- Remarks -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            Remarks
+          </label>
+          <textarea formControlName="remarks" placeholder="Enter additional remarks or reasons..." rows="3"
+            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"></textarea>
+        </div>
+      </form>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <div class="flex justify-end space-x-3 pt-3 border-t border-slate-100">
+        <button pButton type="button" label="Cancel" (click)="onDrawerHide()"
+          class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg shadow-sm transition"></button>
+        <button pButton type="submit" label="Submit" (click)="onSubmit()"
+          class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm transition font-bold"></button>
+      </div>
+    </ng-template>
+  </p-drawer>
+</div>

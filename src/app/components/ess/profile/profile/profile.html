@@ -1,1 +1,361 @@
-<p>profile works!</p>
+<p-toast></p-toast>
+
+<div class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6">
+  <div class="flex-1 min-w-0">
+    <p-breadcrumb [model]="breadcrumbItems" styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
+  </div>
+  <div class="flex-none">
+    <p-button (click)="onRequestUpdate()" label="Request Update" icon="pi pi-user-edit"
+      styleClass="p-button-sm p-button-info rounded-lg" [raised]="true">
+    </p-button>
+  </div>
+</div>
+
+<div class="bg-slate-50/50 min-h-screen p-0 space-y-6">
+  <!-- Hero Header Section -->
+  <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+    <!-- Cover Banner -->
+    <div class="h-32 md:h-44 bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500 relative">
+      <span class="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-bold text-white tracking-wider uppercase">
+        Employee Profile
+      </span>
+    </div>
+    <!-- Profile Info Box -->
+    <div class="p-5 sm:p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-6 -mt-16 md:-mt-20 relative z-10">
+      <!-- Avatar -->
+      <div class="h-28 w-28 md:h-36 md:w-36 rounded-full border-4 border-white bg-slate-100 shadow-md overflow-hidden relative group">
+        <img [src]="profileData.personal.avatarUrl" alt="Avatar" class="h-full w-full object-cover">
+      </div>
+      <!-- Info Details -->
+      <div class="flex-1 space-y-2 mt-0 md:mt-6">
+        <div class="flex flex-col sm:flex-row items-center gap-3">
+          <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight">{{ profileData.personal.fullName }}</h1>
+          <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-100">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            {{ profileData.employment.status }}
+          </span>
+        </div>
+        <p class="text-sm font-semibold text-blue-600 tracking-wide uppercase">{{ profileData.employment.designation }}</p>
+        <div class="flex flex-wrap justify-center md:justify-start items-center gap-x-4 gap-y-2 text-xs text-slate-500 font-medium">
+          <span class="flex items-center gap-1.5"><i class="pi pi-building text-slate-400"></i> {{ profileData.employment.department }}</span>
+          <span class="hidden sm:inline text-slate-300">|</span>
+          <span class="flex items-center gap-1.5"><i class="pi pi-id-card text-slate-400"></i> {{ profileData.employment.employeeCode }}</span>
+          <span class="hidden sm:inline text-slate-300">|</span>
+          <span class="flex items-center gap-1.5"><i class="pi pi-map-marker text-slate-400"></i> {{ profileData.employment.workLocation }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Tabs Navigation -->
+  <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+    <!-- Tabs Header -->
+    <div class="flex border-b border-slate-200 select-none overflow-x-auto bg-slate-50/50" style="scrollbar-width: none;">
+      <button type="button" (click)="setTab('details')"
+        class="px-6 py-4 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-2 whitespace-nowrap"
+        [ngClass]="activeTab === 'details' ? 'border-blue-600 text-blue-600 bg-white font-extrabold' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'">
+        <i class="pi pi-id-card"></i>
+        <span>Personal & Job Details</span>
+      </button>
+      <button type="button" (click)="setTab('contact')"
+        class="px-6 py-4 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-2 whitespace-nowrap"
+        [ngClass]="activeTab === 'contact' ? 'border-blue-600 text-blue-600 bg-white font-extrabold' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'">
+        <i class="pi pi-phone"></i>
+        <span>Contact & Emergency</span>
+      </button>
+      <button type="button" (click)="setTab('financial')"
+        class="px-6 py-4 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-2 whitespace-nowrap"
+        [ngClass]="activeTab === 'financial' ? 'border-blue-600 text-blue-600 bg-white font-extrabold' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'">
+        <i class="pi pi-credit-card"></i>
+        <span>Finance & Identity</span>
+      </button>
+      <button type="button" (click)="setTab('assets')"
+        class="px-6 py-4 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-2 whitespace-nowrap"
+        [ngClass]="activeTab === 'assets' ? 'border-blue-600 text-blue-600 bg-white font-extrabold' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'">
+        <i class="pi pi-desktop"></i>
+        <span>Assigned Assets</span>
+      </button>
+      <button type="button" (click)="setTab('leaves')"
+        class="px-6 py-4 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-2 whitespace-nowrap"
+        [ngClass]="activeTab === 'leaves' ? 'border-blue-600 text-blue-600 bg-white font-extrabold' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'">
+        <i class="pi pi-calendar"></i>
+        <span>Leaves & Attendance</span>
+      </button>
+    </div>
+
+    <!-- Tab Contents -->
+    <div class="p-6">
+      
+      <!-- Tab 1: Details -->
+      <div *ngIf="activeTab === 'details'" class="space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Personal Details -->
+          <div class="space-y-4">
+            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2"><i class="pi pi-user text-blue-600"></i> Personal Information</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Full Name</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.fullName }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Username</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.username }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date of Birth</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.dob | date:'mediumDate' }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Gender</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.gender }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Marital Status</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.maritalStatus }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nationality</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.nationality }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Employment Details -->
+          <div class="space-y-4">
+            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2"><i class="pi pi-briefcase text-blue-600"></i> Employment Details</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Employee ID / Code</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.employment.employeeCode }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Employment Type</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.employment.employmentType }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Designation</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.employment.designation }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Department</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.employment.department }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Reporting Manager</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.employment.reportingManager }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Joining Date</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.employment.joiningDate | date:'mediumDate' }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Work Location</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.employment.workLocation }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Assigned System Role</label>
+                <p class="text-xs font-semibold text-blue-600 mt-1 uppercase">{{ profileData.employment.role }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Contact & Emergency -->
+      <div *ngIf="activeTab === 'contact'" class="space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Contact Details -->
+          <div class="space-y-4">
+            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2"><i class="pi pi-envelope text-blue-600"></i> Contact Information</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Official Email</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.contact.officialEmail }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Personal Email</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.contact.personalEmail }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mobile Number</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.contact.mobileNumber }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Work Extension</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.contact.extension }}</p>
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Current Address</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.contact.currentAddress }}</p>
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Permanent Address</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.contact.permanentAddress }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Emergency Contact Details -->
+          <div class="space-y-4">
+            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2"><i class="pi pi-phone text-blue-600"></i> Emergency Contacts</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Contact Name</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.emergency.contactName }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Relationship</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.emergency.relationship }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Primary Phone</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5 text-blue-600">{{ profileData.emergency.phone }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Alternate Phone</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.emergency.altPhone }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Financial & Identity -->
+      <div *ngIf="activeTab === 'financial'" class="space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Bank Account -->
+          <div class="space-y-4">
+            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2"><i class="pi pi-building text-blue-600"></i> Bank Account Information</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Bank Name</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.financial.bankName }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Account Holder Name</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.financial.accountName }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Account Number</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5 font-mono text-slate-800">{{ profileData.financial.accountNumber }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">IFSC Code</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5 font-mono">{{ profileData.financial.ifscCode }}</p>
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Bank Branch</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.financial.branch }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Identity Details -->
+          <div class="space-y-4">
+            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2"><i class="pi pi-shield text-blue-600"></i> Identity & Statutories</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">PAN Card</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5 font-mono">{{ profileData.financial.panCard }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Aadhaar Number</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5 font-mono">{{ profileData.financial.aadhaarNumber }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">UAN Number</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5 font-mono">{{ profileData.financial.uan }}</p>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">PF Account Number</label>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5 font-mono">{{ profileData.financial.pfNumber }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Assets -->
+      <div *ngIf="activeTab === 'assets'" class="space-y-4">
+        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2"><i class="pi pi-desktop text-blue-600"></i> Assigned Company Resources</h3>
+        <p class="text-xs text-slate-500 mb-2">The following hardware and software resources are currently allocated to you.</p>
+        <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+          <p-table [value]="profileData.assets" styleClass="p-datatable-sm">
+            <ng-template pTemplate="header">
+              <tr class="text-xs uppercase bg-slate-50 text-slate-500 tracking-wider">
+                <th class="p-3">Asset ID</th>
+                <th class="p-3">Asset Name</th>
+                <th class="p-3">Type</th>
+                <th class="p-3">Serial Number</th>
+                <th class="p-3">Assigned Date</th>
+                <th class="p-3 text-center">Status</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-asset>
+              <tr class="border-b border-slate-100 hover:bg-slate-50/50 text-sm text-slate-600">
+                <td class="p-3 font-semibold text-blue-600">{{ asset.id }}</td>
+                <td class="p-3 font-semibold text-slate-700">{{ asset.name }}</td>
+                <td class="p-3">{{ asset.type }}</td>
+                <td class="p-3 font-mono text-xs">{{ asset.serial }}</td>
+                <td class="p-3 text-xs">{{ asset.assignedDate | date:'mediumDate' }}</td>
+                <td class="p-3 text-center">
+                  <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 border border-blue-100">
+                    {{ asset.status }}
+                  </span>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </div>
+
+      <!-- Tab 5: Leaves & Attendance -->
+      <div *ngIf="activeTab === 'leaves'" class="space-y-6">
+        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2"><i class="pi pi-calendar text-blue-600"></i> Leaves & Time-off Summary</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Card 1 -->
+          <div class="border border-slate-200 bg-white p-5 rounded-xl flex items-center justify-between shadow-sm">
+            <div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Annual Leave Balance</p>
+              <h4 class="text-2xl font-black text-slate-800 mt-1">{{ profileData.leaves.annualBalance }} <span class="text-xs text-slate-400 font-normal">/ {{ profileData.leaves.annualTotal }} Days</span></h4>
+            </div>
+            <div class="h-10 w-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center text-sm">
+              <i class="pi pi-calendar"></i>
+            </div>
+          </div>
+          <!-- Card 2 -->
+          <div class="border border-slate-200 bg-white p-5 rounded-xl flex items-center justify-between shadow-sm">
+            <div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Sick Leave Balance</p>
+              <h4 class="text-2xl font-black text-slate-800 mt-1">{{ profileData.leaves.sickBalance }} <span class="text-xs text-slate-400 font-normal">/ {{ profileData.leaves.sickTotal }} Days</span></h4>
+            </div>
+            <div class="h-10 w-10 bg-rose-50 text-rose-600 rounded-lg flex items-center justify-center text-sm">
+              <i class="pi pi-heart"></i>
+            </div>
+          </div>
+          <!-- Card 3 -->
+          <div class="border border-slate-200 bg-white p-5 rounded-xl flex items-center justify-between shadow-sm">
+            <div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Short Leaves Consumed</p>
+              <h4 class="text-2xl font-black text-slate-800 mt-1">{{ profileData.leaves.shortLeaveCount }} <span class="text-xs text-slate-400 font-normal">Requests</span></h4>
+            </div>
+            <div class="h-10 w-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-sm">
+              <i class="pi pi-clock"></i>
+            </div>
+          </div>
+          <!-- Card 4 -->
+          <div class="border border-slate-200 bg-white p-5 rounded-xl flex items-center justify-between shadow-sm">
+            <div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Regularizations</p>
+              <h4 class="text-2xl font-black text-slate-800 mt-1">{{ profileData.leaves.regularizations }} <span class="text-xs text-slate-400 font-normal">Approved</span></h4>
+            </div>
+            <div class="h-10 w-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-sm">
+              <i class="pi pi-shield"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

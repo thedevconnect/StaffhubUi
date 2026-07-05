@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
-import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb';
+import { Breadcrumb } from 'primeng/breadcrumb';
 import { ButtonModule } from 'primeng/button';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { DrawerModule } from 'primeng/drawer';
@@ -20,7 +20,7 @@ import { TableTemplate, TableColumn, TableAction } from '../../../shared/ui/tabl
     CommonModule,
     CardModule,
     TableModule,
-    AppBreadcrumb,
+    Breadcrumb,
     ButtonModule,
     ReactiveFormsModule,
     FormsModule,

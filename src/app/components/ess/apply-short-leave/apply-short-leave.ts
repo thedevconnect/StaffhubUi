@@ -2,12 +2,13 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
-import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb';
+import { Breadcrumb } from 'primeng/breadcrumb';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-apply-short-leave',
   standalone: true,
-  imports: [CommonModule, CardModule, TableModule, AppBreadcrumb],
+  imports: [CommonModule, CardModule, TableModule, Breadcrumb, ButtonModule],
   templateUrl: './apply-short-leave.html',
   styleUrl: './apply-short-leave.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,4 +1,14 @@
-<app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+<div class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6">
+  <div class="flex-1 min-w-0">
+    <p-breadcrumb [model]="breadcrumbItems" styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
+  </div>
+  <div class="flex-none">
+    <p-button label="Request Short Leave" icon="pi pi-plus"
+      styleClass="p-button-sm p-button-info rounded-lg" [raised]="true">
+    </p-button>
+  </div>
+</div>
+
 <section class="space-y-4">
   <header class="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
     <div class="flex items-center justify-between flex-wrap gap-4">
@@ -6,10 +16,6 @@
         <h2 class="text-xl font-semibold text-slate-900">Apply Short Leave</h2>
         <p class="mt-1 text-sm text-slate-500">Submit requests for short leaves, such as arriving late or leaving early for specific personal reasons.</p>
       </div>
-      <button class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 transition cursor-pointer">
-        <i class="pi pi-plus text-xs"></i>
-        Request Short Leave
-      </button>
     </div>
   </header>
 
