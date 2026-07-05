@@ -10,9 +10,19 @@
                     [totalCount]="totalCount" [isLoading]="loading()" [currentPage]="pageNo" [searchText]="searchText"
                     [showRefresh]="true" (refresh)="loadDashboardData()" (pageChange)="onPageChange($event)"
                     (searchChange)="onSearchChange($event)" (sortChange)="onSortChange($event)"
-                    (pageSizeChange)="onPageSizeChange($event)">
+                    (pageSizeChange)="onPageSizeChange($event)"
+                    [cellTemplates]="{ image: imageTpl }">
                 </app-table-template>
             </div>
         </div>
     </section>
+
+    <!-- Custom Cell Template for Holiday Image -->
+    <ng-template #imageTpl let-item>
+        <div class="py-1">
+            <img [src]="getHolidayImage(item)" 
+                 alt="{{item.holiday_name}}" 
+                 class="h-9 w-14 object-cover rounded-lg shadow-sm border border-slate-100" />
+        </div>
+    </ng-template>
 </div>

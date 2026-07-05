@@ -211,6 +211,52 @@ export class ActivityMaster {
     this.openConfirmation('Confirm?', "Are you sure you want to proceed?", '1', '1', event);
   }
 
+  newGetTableData(isTrue: boolean) {
+    try {
+      if (isTrue) {
+        this.isLoading = true;
+      } else {
+        this.pageNo = 1;
+      }
+
+      const currentRole = JSON.parse(sessionStorage.getItem('currentRole') || '{}');
+      const roleId = currentRole?.roleId || '';
+      const userId = sessionStorage.getItem('userId') || '';
+      const districtId = sessionStorage.getItem('District') || '';
+
+      const query = `appUserId=${userId}|appUserRole=${roleId}|districtId=${districtId}|searchText=${this.searchText}|pageIndex=${this.pageNo}|size=${this.pageSize}|activity=header`;
+      this.userService.getQuestionPaper(`uspGetActivityMaster|${query}`).subscribe({
+        next: (res: any) => {
+          try {
+            this.data = res?.table1 || [];
+            this.totalCount = res?.table?.[0]?.totalCnt || this.data.length;
+          } catch (innerErr) {
+            console.error('Error processing response:', innerErr);
+            this.data = [];
+            this.totalCount = 0;
+          } finally {
+            setTimeout(() => {
+              this.isLoading = false;
+              this.cdr.detectChanges();
+            }, 1000);
+          }
+        },
+        error: (err) => {
+          console.error('API call failed:', err);
+          this.isLoading = false;
+          if (err.status === 403) {
+          } else {
+            this.data = [];
+            this.totalCount = 0;
+          }
+        }
+      });
+
+    } catch (error) {
+      console.error('Unexpected error in getTableData():', error);
+      this.isLoading = false;
+    }
+  }
 
   openConfirmation(title: string, msg: string, id: any, option?: string, event?: any) {
     this.confirmationService.confirm({
