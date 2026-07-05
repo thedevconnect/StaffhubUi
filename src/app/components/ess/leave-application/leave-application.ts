@@ -178,6 +178,7 @@ export class LeaveApplication {
   noDatafoundCard: boolean = false;
   tblData: any[] = [];
   tableHeaders: any[] = [];
+  columns: TableColumn[] = [];
 
   get filteredData() {
     if (!this.searchText) return this.tblData;
@@ -246,11 +247,12 @@ export class LeaveApplication {
             };
           });
 
-        this.tableHeaders = [
+        this.columns = [
           { key: 'rowNo', header: 'S.no', isVisible: true, isSortable: false },
           ...dynamicCols,
           { key: 'actions', header: 'Action', isVisible: true, isSortable: false, isCustom: true }
         ];
+        this.tableHeaders = this.columns;
 
         // Add row numbers and expansion state to data
         this.tblData = this.tblData.map((item, index) => ({
