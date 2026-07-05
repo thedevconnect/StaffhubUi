@@ -2,3 +2,106 @@
   display: block;
   width: 100%;
 }
+
+:host ::ng-deep .user-profile-menu.p-menu-overlay {
+  right: 0 !important;
+  left: auto !important;
+  transform: none !important;
+}
+
+@media (max-width: 768px) {
+  :host ::ng-deep .user-profile-menu.p-menu-overlay {
+    right: 8px !important;
+    max-width: 14rem;
+  }
+}
+
+::ng-deep .custom-button .p-button-text {
+  font-size: 10px !important;
+  background-color: #ece9fc !important;
+  color: #412b74 !important;
+}
+
+::ng-deep .p-tooltip-arrow {
+  display: none !important;
+}
+
+::ng-deep .p-tooltip .p-tooltip-text {
+  background-color: #a7a7a7 !important;
+  color: #fff !important;
+  padding: 0.5rem 0.75rem !important;
+  border-radius: 8px !important;
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  width: auto !important;
+}
+
+::ng-deep .p-listbox {
+  border: 1px solid #d4d4d4;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+::ng-deep .p-listbox-header {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+::ng-deep .p-listbox-filter-container .p-inputtext {
+  border: 1px solid #d4d4d4;
+  border-radius: 8px;
+  padding-right: 2.5rem;
+  font-size: 1rem;
+}
+
+::ng-deep .p-listbox-filter-icon {
+  right: 0.75rem;
+  color: #737373;
+}
+
+::ng-deep .p-listbox-item {
+  padding: 0.75rem 1rem;
+  transition: background-color 0.2s ease;
+}
+
+::ng-deep .p-listbox-item:hover {
+  background-color: #f3f4f6;
+}
+
+:host ::ng-deep .header-dropdown .p-select {
+  display: flex !important;
+  align-items: center !important;
+}
+
+:host ::ng-deep .header-dropdown .p-select-label {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+  padding: 0 !important;
+}
+
+:host ::ng-deep .header-dropdown .p-select-trigger {
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Dropdown panel items */
+:host ::ng-deep .p-select-panel .p-select-item {
+  display: flex !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+:host ::ng-deep .header-dropdown .p-select-label.p-placeholder {
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+:host ::ng-deep .p-select-panel .p-select-items .p-select-item {
+  text-align: center !important;
+  justify-content: center !important;
+  display: flex !important;
+}

@@ -1,0 +1,7 @@
+<div class="captcha-container">
+    <canvas #captchaCanvas width="250" height="50"></canvas>
+    <input type="text" [(ngModel)]="userInput" placeholder="Enter Captcha" class="captcha-input">
+    <button (click)="generateCaptcha()" class="captcha-refresh-btn">
+        <i class="pi pi-refresh"></i>
+    </button>
+</div>

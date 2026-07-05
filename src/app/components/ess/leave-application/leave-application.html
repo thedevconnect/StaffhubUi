@@ -8,11 +8,14 @@
       styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
   </div>
   <div class="flex-none flex items-center space-x-2">
-    <p-button label="Export" icon="pi pi-file-excel"
-      styleClass="p-button-sm p-button-success p-button-outlined rounded-lg" [raised]="true">
-    </p-button>
+    <div *ngIf="tblData.length > 0  ">
+      <p-button label="Export" icon="pi pi-file-excel"
+        styleClass="p-button-sm p-button-success p-button-outlined rounded-lg" [raised]="true">
+      </p-button>
+    </div>
     <p-button (click)="showDialog('add', [])" label="Add Leave" icon="pi pi-plus"
-      styleClass="p-button-sm rounded-lg btn-add text-xs font-semibold px-3 py-1.5 shadow-sm transition-all" [raised]="true">
+      styleClass="p-button-sm rounded-lg btn-add text-xs font-semibold px-3 py-1.5 shadow-sm transition-all"
+      [raised]="true">
     </p-button>
   </div>
 </div>

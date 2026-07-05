@@ -17,6 +17,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { CardModule } from 'primeng/card';
 import { LoadingService } from '../../../shared/services/loading.service';
 import { UserService } from '../../../shared/services/user-service';
+import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template';
 
 @Component({
   selector: 'app-leave-application',
@@ -36,7 +37,8 @@ import { UserService } from '../../../shared/services/user-service';
     DatePickerModule,
     TextareaModule,
     ToastModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    TableTemplate
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './leave-application.html',
