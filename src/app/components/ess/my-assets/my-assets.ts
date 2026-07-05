@@ -27,7 +27,6 @@ import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/ta
   standalone: true,
   imports: [
     CommonModule,
-    AppBreadcrumb,
     TableTemplate,
     BreadcrumbModule,
     ButtonModule,

@@ -1,24 +1,136 @@
+<p-toast></p-toast>
 <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
-<section class="flex flex-col items-center justify-center min-h-[400px] text-center p-8 bg-white border border-slate-200 rounded-xl space-y-6 relative overflow-hidden">
-  <!-- Decorative Background Glow -->
-  <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-blue-400/5 blur-2xl"></div>
-  <div class="absolute -left-16 -bottom-16 w-48 h-48 rounded-full bg-indigo-400/5 blur-2xl"></div>
 
-  <!-- Animated Orb -->
-  <div class="relative flex items-center justify-center">
-    <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 opacity-20 blur-xl animate-pulse"></div>
-    <div class="relative h-20 w-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-3xl shadow-sm border border-blue-100/50 transition duration-300 hover:scale-105">
-      <i class="pi pi-file-edit"></i>
+<div class="p-6 font-sans bg-slate-50 min-h-screen">
+  <div class="max-w-6xl mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <!-- Card Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 flex items-center justify-between text-white">
+      <div class="flex items-center gap-2">
+        <i class="pi pi-file-edit text-lg"></i>
+        <h2 class="text-lg font-bold tracking-tight">Exit Interview Form</h2>
+      </div>
+      <div class="flex items-center gap-4 text-xs opacity-90 select-none">
+        <div class="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-lg cursor-pointer">
+          <i class="pi pi-question-circle"></i>
+          <span>Help</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <i class="pi pi-expand cursor-pointer"></i>
+          <i class="pi pi-chevron-up cursor-pointer"></i>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <div class="space-y-2 max-w-md">
-    <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Exit Interview Form</h2>
-    <p class="text-slate-500 text-sm leading-relaxed">Share your experience, complete offboarding checklists, and submit official feedback forms.</p>
-  </div>
+    <!-- Form Content -->
+    <form [formGroup]="exitInterviewForm" (ngSubmit)="onSubmit()" class="p-6 md:p-8 space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Question 1 -->
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-semibold text-slate-700 leading-snug">
+            What were your expectations when you joined the company? <span class="text-rose-500">*</span>
+          </label>
+          <textarea formControlName="expectations" placeholder="Type your answer here..." rows="3"
+            [class.border-red-500]="exitInterviewForm.get('expectations')?.touched && exitInterviewForm.get('expectations')?.invalid"
+            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"></textarea>
+          <div *ngIf="exitInterviewForm.get('expectations')?.touched && exitInterviewForm.get('expectations')?.invalid"
+            class="text-rose-500 text-xs">
+            This field is required.
+          </div>
+        </div>
 
-  <span class="inline-flex items-center gap-2 rounded-full bg-blue-50/80 px-4 py-1.5 text-xs font-semibold text-blue-700 border border-blue-100 shadow-sm">
-    <span class="h-2 w-2 rounded-full bg-blue-500 animate-ping"></span>
-    Under Development
-  </span>
-</section>
+        <!-- Question 2 -->
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-semibold text-slate-700 leading-snug">
+            Would you say that your expectations have been fulfilled? <span class="text-rose-500">*</span>
+          </label>
+          <textarea formControlName="fulfilled" placeholder="Type your answer here..." rows="3"
+            [class.border-red-500]="exitInterviewForm.get('fulfilled')?.touched && exitInterviewForm.get('fulfilled')?.invalid"
+            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"></textarea>
+          <div *ngIf="exitInterviewForm.get('fulfilled')?.touched && exitInterviewForm.get('fulfilled')?.invalid"
+            class="text-rose-500 text-xs">
+            This field is required.
+          </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-semibold text-slate-700 leading-snug">
+            What are the three things that attract you to your new job? <span class="text-rose-500">*</span>
+          </label>
+          <textarea formControlName="attractNewJob" placeholder="Type your answer here..." rows="3"
+            [class.border-red-500]="exitInterviewForm.get('attractNewJob')?.touched && exitInterviewForm.get('attractNewJob')?.invalid"
+            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"></textarea>
+          <div
+            *ngIf="exitInterviewForm.get('attractNewJob')?.touched && exitInterviewForm.get('attractNewJob')?.invalid"
+            class="text-rose-500 text-xs">
+            This field is required.
+          </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-semibold text-slate-700 leading-snug">
+            Would you consider coming back to join us at a later date? <span class="text-rose-500">*</span>
+          </label>
+          <textarea formControlName="comeBackLater" placeholder="Type your answer here..." rows="3"
+            [class.border-red-500]="exitInterviewForm.get('comeBackLater')?.touched && exitInterviewForm.get('comeBackLater')?.invalid"
+            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"></textarea>
+          <div
+            *ngIf="exitInterviewForm.get('comeBackLater')?.touched && exitInterviewForm.get('comeBackLater')?.invalid"
+            class="text-rose-500 text-xs">
+            This field is required.
+          </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-semibold text-slate-700 leading-snug">
+            What did you like about the company? <span class="text-rose-500">*</span>
+          </label>
+          <textarea formControlName="whatLiked" placeholder="Type your answer here..." rows="3"
+            [class.border-red-500]="exitInterviewForm.get('whatLiked')?.touched && exitInterviewForm.get('whatLiked')?.invalid"
+            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"></textarea>
+          <div *ngIf="exitInterviewForm.get('whatLiked')?.touched && exitInterviewForm.get('whatLiked')?.invalid"
+            class="text-rose-500 text-xs">
+            This field is required.
+          </div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-semibold text-slate-700 leading-snug">
+            What did you dislike about the company? <span class="text-rose-500">*</span>
+          </label>
+          <textarea formControlName="whatDisliked" placeholder="Type your answer here..." rows="3"
+            [class.border-red-500]="exitInterviewForm.get('whatDisliked')?.touched && exitInterviewForm.get('whatDisliked')?.invalid"
+            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"></textarea>
+          <div *ngIf="exitInterviewForm.get('whatDisliked')?.touched && exitInterviewForm.get('whatDisliked')?.invalid"
+            class="text-rose-500 text-xs">
+            This field is required.
+          </div>
+        </div>
+
+        <!-- Suggestions (Full Width) -->
+        <div class="flex flex-col gap-2 md:col-span-2">
+          <label class="text-sm font-semibold text-slate-700 leading-snug">
+            Suggestions For Organization <span class="text-rose-500">*</span>
+          </label>
+          <textarea formControlName="suggestions"
+            placeholder="Provide any feedback or suggestions for the organization..." rows="3"
+            [class.border-red-500]="exitInterviewForm.get('suggestions')?.touched && exitInterviewForm.get('suggestions')?.invalid"
+            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"></textarea>
+          <div *ngIf="exitInterviewForm.get('suggestions')?.touched && exitInterviewForm.get('suggestions')?.invalid"
+            class="text-rose-500 text-xs">
+            This field is required.
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <div class="pt-4 flex justify-start">
+        <button pButton type="submit" label="Submit"
+          class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-sm transition font-bold"></button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,1 +1,72 @@
 /* Styles for EmployeeResignation page component */
+::ng-deep {
+  .p-select {
+    width: 100% !important;
+    border-radius: 0.75rem !important;
+    border: 1px solid #e2e8f0 !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.2s ease-in-out !important;
+
+    .p-select-label {
+      font-size: 0.875rem !important;
+      padding: 0.625rem 0.875rem !important;
+      color: #334155 !important;
+      font-weight: 500 !important;
+    }
+
+    &:focus, &.p-focus {
+      border-color: #3b82f6 !important;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+    }
+  }
+
+  .p-datepicker {
+    width: 100% !important;
+    display: inline-flex !important;
+
+    input {
+      width: 100% !important;
+      border-top-left-radius: 0.75rem !important;
+      border-bottom-left-radius: 0.75rem !important;
+      border-top-right-radius: 0px !important;
+      border-bottom-right-radius: 0px !important;
+      border: 1px solid #e2e8f0 !important;
+      padding: 0.625rem 0.875rem !important;
+      font-size: 0.875rem !important;
+      background-color: #ffffff !important;
+      color: #334155 !important;
+      font-weight: 500 !important;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+      transition: all 0.2s ease-in-out !important;
+
+      &:focus {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+        outline: none !important;
+      }
+      
+      &:disabled {
+        background-color: #f1f5f9 !important;
+        color: #94a3b8 !important;
+        cursor: not-allowed !important;
+      }
+    }
+
+    button.p-datepicker-trigger {
+      border-top-right-radius: 0.75rem !important;
+      border-bottom-right-radius: 0.75rem !important;
+      border-top-left-radius: 0px !important;
+      border-bottom-left-radius: 0px !important;
+      background-color: #f8fafc !important;
+      border: 1px solid #e2e8f0 !important;
+      border-left: none !important;
+      color: #64748b !important;
+      padding: 0 0.875rem !important;
+      
+      &:hover {
+        background-color: #e2e8f0 !important;
+      }
+    }
+  }
+}

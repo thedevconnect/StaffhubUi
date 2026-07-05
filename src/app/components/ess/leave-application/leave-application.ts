@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb';
+import { Breadcrumb } from 'primeng/breadcrumb';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { TableModule } from 'primeng/table';
@@ -23,7 +23,7 @@ import { UserService } from '../../../shared/services/user-service';
   standalone: true,
   imports: [
     CardModule,
-    AppBreadcrumb,
+    Breadcrumb,
     ButtonModule,
     TooltipModule,
     TableModule,
