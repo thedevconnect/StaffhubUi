@@ -72,10 +72,10 @@ export class AuthService {
       return '/hradmin/hradmin-dashboard';
     }
     if (roleId === 'superadmin' || roleId === 'super_admin') {
-      return '/superadmin/company-management';
+      return '/superadmin/superadmin-dashboard';
     }
     if (roleId === 'developer') {
-      return '/developer/activity-master';
+      return '/developer/developer-dashboard';
     }
     if (roleId === 'payroll' || roleId === 'payroll_admin' || roleId.includes('payroll')) {
       return '/payroll/payroll-dashboard';
