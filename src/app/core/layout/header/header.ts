@@ -10,7 +10,7 @@ import { AvatarModule } from 'primeng/avatar';
 import { TooltipModule } from 'primeng/tooltip';
 import { MenuModule } from 'primeng/menu';
 import { SelectModule } from 'primeng/select';
-import { MenuItem } from 'primeng/api';
+import { MenuItem, ConfirmationService, MessageService } from 'primeng/api';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -36,7 +36,12 @@ interface RoleOption {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppHeader {
-  constructor(private readonly router: Router, private readonly authService: AuthService) {
+  constructor(
+    private readonly router: Router,
+    private readonly authService: AuthService,
+    private readonly confirmationService: ConfirmationService,
+    private readonly messageService: MessageService
+  ) {
     effect(() => {
       const parentRoleId = this.selectedRoleId();
       if (parentRoleId) {
@@ -94,13 +99,28 @@ export class AppHeader {
   }
 
   private logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-    this.onLogout.emit();
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to logout?',
+      header: 'Confirm Logout',
+      icon: 'pi pi-exclamation-triangle',
+      acceptButtonProps: { severity: 'danger', label: 'Logout' },
+      rejectButtonProps: { severity: 'secondary', label: 'Cancel', outlined: true },
+      accept: () => {
+        this.authService.logout();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Logged Out',
+          detail: 'You have been successfully logged out.',
+          life: 4000
+        });
+        this.router.navigate(['/login']);
+        this.onLogout.emit();
+      }
+    });
   }
 
   private handleProfile(): void {
-    this.router.navigate(['/profile']);
+    this.router.navigate(['/ess/profile']);
   }
 
 }

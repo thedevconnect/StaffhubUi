@@ -5,6 +5,15 @@ import { Routes } from "@angular/router";
 
 export const payrollRoutes: Routes = [
     {
+        path: '',
+        redirectTo: 'payroll-dashboard',
+        pathMatch: 'full'
+    },
+    {
+        path: 'payroll-dashboard',
+        loadComponent: () => import('../components/payroll/payroll-dashboard/payroll-dashboard').then(m => m.PayrollDashboard)
+    },
+    {
         path: 'monthly-salary',
         loadComponent: () => import('../components/payroll/monthly-salary/monthly-salary').then(m => m.MonthlySalary)
     }

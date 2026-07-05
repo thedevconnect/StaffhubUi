@@ -103,7 +103,7 @@
     @if (userDetails(); as user) {
     <header class="flex-none sticky top-0 z-20 border-b border-slate-200 bg-white shadow-sm w-full">
       <app-app-header [user]="user" [sidebarOpen]="sidebarOpen()" [selectedRoleId]="selectedRoleId()"
-        [roleOptions]="roleOptions()" (onLogout)="logout()" (onRoleChange)="onRoleChange($event)"
+        [roleOptions]="roleOptions()" (onLogout)="onHeaderLogout()" (onRoleChange)="onRoleChange($event)"
         (onToggleSidebar)="toggleSidebar()" />
     </header>
     }
