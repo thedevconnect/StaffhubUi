@@ -8,7 +8,7 @@ import {
   TemplateRef,
   signal,
 } from '@angular/core';
-import { CommonModule, NgClass, NgIf, NgFor } from '@angular/common';
+import { CommonModule, NgClass, NgIf, NgFor, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SkeletonModule } from 'primeng/skeleton';
 import { MenuModule } from 'primeng/menu';
@@ -24,6 +24,9 @@ export interface TableColumn {
   isVisible?: boolean;
   isCustom?: boolean;
   format?: string;
+  formatter?: (value: any, row?: any) => any;
+  pipe?: string;
+  pipeArgs?: string;
 }
 
 export interface TableAction {
@@ -344,7 +347,17 @@ export class TableTemplate implements OnChanges {
         }
 
         // Format special column values
-        if (col.format === 'date' && val) {
+        if (col.formatter) {
+          val = col.formatter(val, item);
+        } else if (col.pipe === 'date' && val) {
+          try {
+            val = new DatePipe('en-US').transform(val, col.pipeArgs || 'mediumDate') || val;
+          } catch (e) { }
+        } else if (col.pipe === 'uppercase' && val) {
+          val = String(val).toUpperCase();
+        } else if (col.pipe === 'lowercase' && val) {
+          val = String(val).toLowerCase();
+        } else if (col.format === 'date' && val) {
           try {
             val = new Date(val).toLocaleDateString();
           } catch (e) { }

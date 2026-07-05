@@ -14,7 +14,7 @@ import {
   Tab,
 } from '../../../shared/ui/table-template/table-template';
 import { UserService } from '../../../shared/services/user-service';
-import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb';
+import { Breadcrumb } from 'primeng/breadcrumb';
 
 @Component({
   selector: 'app-company-management',
@@ -28,7 +28,7 @@ import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb';
     Toast,
     DrawerModule,
     TableTemplate,
-    AppBreadcrumb,
+    Breadcrumb,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './company-management.html',

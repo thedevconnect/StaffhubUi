@@ -98,7 +98,7 @@
     </nav>
   </aside>
 
-  <div class="flex h-screen flex-1 flex-col transition-all duration-300 relative w-full"
+  <div class="flex h-screen flex-1 flex-col transition-all duration-300 relative min-w-0"
     [class.md:ml-64]="sidebarOpen()" [class.md:ml-16]="!sidebarOpen()">
     @if (userDetails(); as user) {
     <header class="flex-none sticky top-0 z-20 border-b border-slate-200 bg-white shadow-sm w-full">

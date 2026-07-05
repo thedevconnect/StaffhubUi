@@ -1,8 +1,15 @@
-<app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+<!-- Page Header Inline with Breadcrumb -->
+<div
+  class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6">
+  <div class="flex-1 min-w-0">
+    <p-breadcrumb [model]="breadcrumbItems"
+      styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
+  </div>
+</div>
 
 <section class="space-y-4">
   <!-- Welcome Header Card -->
-  <!-- <header
+  <header
     class="rounded-xl border border-slate-200 bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white relative overflow-hidden shadow-sm">
     <div class="relative z-10">
       <h2 class="text-2xl font-bold tracking-tight">Welcome Back, {{ employeeName() }}!</h2>
@@ -12,7 +19,7 @@
     <div class="absolute right-6 -bottom-6 opacity-10 text-9xl">
       <i class="pi pi-home animate-spin-slow"></i>
     </div>
-  </header> -->
+  </header>
 
   <!-- Statistics Dashboard Grid -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">

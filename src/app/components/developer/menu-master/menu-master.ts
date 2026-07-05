@@ -58,9 +58,14 @@ export class MenuMaster {
   columns: TableColumn[] = [
     { key: 'actions', header: '⚙️', isVisible: true, isSortable: false, isCustom: true },
     { key: 'menuName', header: 'Menu', isVisible: true, isSortable: false },
-    { key: 'imageUrl', header: 'ImageUrl', isVisible: true, isSortable: false },
+    { key: 'routePath', header: 'URL', isVisible: true, isSortable: false },
     { key: 'icon', header: 'Icon', isVisible: true, isSortable: false },
+    { key: 'sortOrder', header: 'Order', isVisible: true, isSortable: false },
+    { key: 'isActive', header: 'Status', isVisible: true, isSortable: false, formatter: (val: any) => val === 1 ? 'Active' : 'Inactive' },
+    { key: 'createdAt', header: 'Created At', isVisible: true, isSortable: false, pipe: 'date', pipeArgs: 'dd-MM-yyyy hh:mm a' },
   ];
+
+
   pageNo = 1;
   pageSize = 5;
   searchText = '';

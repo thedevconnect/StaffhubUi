@@ -154,7 +154,7 @@ export class LoginComponent implements OnInit {
     this.authService.login({ username, password }).subscribe({
       next: (res: any) => {
         this.isProcess = false;
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Login successfully' });
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: `Welcome Back, {{employeeName}}! ` });
         this.router.navigate([this.authService.getDashboardRoute()]);
       },
       error: (err: any) => {
