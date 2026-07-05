@@ -8,8 +8,8 @@
       styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
   </div>
   <div class="flex-none">
-    <p-button (click)="showDialog()" label="Resign" icon="pi pi-plus" styleClass="p-button-sm p-button-info rounded-lg"
-      [raised]="true">
+    <p-button (click)="showDialog()" label="Resign" icon="pi pi-plus"
+      styleClass="p-button-sm rounded-lg btn-add text-xs font-semibold px-3 py-1.5 shadow-sm transition-all" [raised]="true">
     </p-button>
   </div>
 </div>
@@ -180,7 +180,7 @@
         <button pButton type="button" label="Cancel" (click)="onDrawerHide()"
           class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg shadow-sm transition"></button>
         <button pButton type="submit" label="Submit" (click)="onSubmit()"
-          class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm transition font-bold"></button>
+          class="px-5 py-2 btn-submit text-white rounded-lg shadow-sm transition font-bold"></button>
       </div>
     </ng-template>
   </p-drawer>

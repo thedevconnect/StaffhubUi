@@ -218,10 +218,6 @@ export class AppShell {
   }
 
   toggleSidebar(): void {
-    if (!this.isMobileView()) {
-      this.sidebarOpen.set(true);
-      return;
-    }
     this.sidebarOpen.update((isOpen) => !isOpen);
   }
 

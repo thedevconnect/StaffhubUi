@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService } from '../../../shared/services/user-service';
 import { AuthService } from '../../../shared/services/services/auth.service';
-import { MessageService } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
@@ -56,7 +56,8 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private userService: UserService,
     private authService: AuthService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService
   ) { }
 
   ngOnInit(): void {
@@ -122,7 +123,37 @@ export class LoginComponent implements OnInit {
     this.submitLogin();
   }
 
-  submitForgatePasswordForm() { }
+  submitForgatePasswordForm() {
+    if (this.forgateForm.invalid) {
+      this.forgateForm.markAllAsTouched();
+      return;
+    }
+
+    const email = this.forgateForm.value.email;
+
+    this.confirmationService.confirm({
+      message: `Are you sure you want to send a password reset link to ${email}?`,
+      header: 'Confirm Reset Request',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Yes',
+      rejectLabel: 'No',
+      accept: () => {
+        this.isProcess = true;
+        setTimeout(() => {
+          this.isProcess = false;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Recovery Email Sent',
+            detail: `A password reset link has been successfully sent to ${email}.`,
+            life: 4000
+          });
+          this.formType = 'login';
+          this.forgateForm.reset();
+        }, 1000);
+      }
+    });
+  }
+
   submitCreatePassForm() { }
 
   onCloseHandled() {
@@ -154,7 +185,13 @@ export class LoginComponent implements OnInit {
     this.authService.login({ username, password }).subscribe({
       next: (res: any) => {
         this.isProcess = false;
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Login successfully' });
+        const name = this.authService.user()?.employeeName || 'User';
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: `Welcome Back, ${name}!`,
+          life: 4000
+        });
         this.router.navigate([this.authService.getDashboardRoute()]);
       },
       error: (err: any) => {

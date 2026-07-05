@@ -79,3 +79,26 @@ app-table-template {
   white-space: normal !important;
   min-width: 250px !important;
 }
+
+/* Custom Button utility classes for project theme management */
+.btn-add {
+  background-color: var(--color-add, #4f46e5) !important; /* default indigo-600 */
+  border-color: var(--color-add, #4f46e5) !important;
+  color: #ffffff !important;
+  
+  &:hover {
+    background-color: var(--color-add-hover, #4338ca) !important; /* default indigo-700 */
+    border-color: var(--color-add-hover, #4338ca) !important;
+  }
+}
+
+.btn-submit {
+  background-color: var(--color-submit, #4f46e5) !important; /* default indigo-600 */
+  border-color: var(--color-submit, #4f46e5) !important;
+  color: #ffffff !important;
+  
+  &:hover {
+    background-color: var(--color-submit-hover, #4338ca) !important; /* default indigo-700 */
+    border-color: var(--color-submit-hover, #4338ca) !important;
+  }
+}

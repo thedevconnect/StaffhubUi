@@ -12,7 +12,7 @@
       styleClass="p-button-sm p-button-success p-button-outlined rounded-lg" [raised]="true">
     </p-button>
     <p-button (click)="showDialog('add', [])" label="Add Leave" icon="pi pi-plus"
-      styleClass="p-button-sm p-button-info rounded-lg" [raised]="true">
+      styleClass="p-button-sm rounded-lg btn-add text-xs font-semibold px-3 py-1.5 shadow-sm transition-all" [raised]="true">
     </p-button>
   </div>
 </div>
@@ -203,7 +203,7 @@
           <p-button label="Cancel" (click)="onDrawerHide()"
             styleClass="p-button-text p-button-secondary font-bold text-xs"></p-button>
           <p-button label="Submit Request" icon="pi pi-check" (click)="onSubmit()" [loading]="isLoading"
-            styleClass="rounded-xl px-8 py-3 bg-blue-600 border-none shadow-lg hover:bg-blue-700 transition-all text-sm font-bold">
+            styleClass="rounded-xl px-8 py-3 btn-submit border-none shadow-lg transition-all text-sm font-bold">
           </p-button>
         </div>
       </div>

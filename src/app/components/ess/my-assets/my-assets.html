@@ -10,7 +10,7 @@
     </div>
     <div class="flex-none">
       <p-button label="Add Asset" icon="pi pi-plus"
-        styleClass="orange-button p-button-warning p-button-sm w-full sm:w-auto shadow-sm" (click)="openAddDrawer()">
+        styleClass="p-button-sm rounded-lg w-full sm:w-auto shadow-sm btn-add text-xs font-semibold px-3 py-1.5 transition-all" (click)="openAddDrawer()">
       </p-button>
     </div>
   </div>
@@ -52,72 +52,70 @@
       </div>
     </ng-template>
 
-    <form [formGroup]="assetForm" class="p-4 md:p-5 space-y-4 overflow-y-auto">
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <form [formGroup]="assetForm" class="p-4 md:p-5 space-y-6 overflow-y-auto">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
         <div class="min-w-0">
-          <label class="block text-xs font-semibold text-slate-500">
-            Employee ID *
-          </label>
-          <input pInputText formControlName="EmployeeId" class="w-full mt-1" />
+          <p-floatlabel>
+            <input pInputText formControlName="EmployeeId" class="w-full bg-white" id="EmployeeId" />
+            <label for="EmployeeId"><i class="pi pi-id-card mr-2 text-slate-400"></i>Employee ID *</label>
+          </p-floatlabel>
         </div>
 
         <div class="min-w-0">
-          <label class="block text-xs font-semibold text-slate-500">
-            Department *
-          </label>
-          <input pInputText formControlName="Department" class="w-full mt-1" />
+          <p-floatlabel>
+            <input pInputText formControlName="Department" class="w-full bg-white" id="Department" />
+            <label for="Department"><i class="pi pi-sitemap mr-2 text-slate-400"></i>Department *</label>
+          </p-floatlabel>
         </div>
 
         <div class="min-w-0">
-          <label class="block text-xs font-semibold text-slate-500">
-            Asset Type *
-          </label>
-          <input pInputText formControlName="AssetType" class="w-full mt-1" />
+          <p-floatlabel>
+            <input pInputText formControlName="AssetType" class="w-full bg-white" id="AssetType" />
+            <label for="AssetType"><i class="pi pi-tags mr-2 text-slate-400"></i>Asset Type *</label>
+          </p-floatlabel>
         </div>
 
         <div class="min-w-0">
-          <label class="block text-xs font-semibold text-slate-500">
-            Asset Name *
-          </label>
-          <input pInputText formControlName="AssetName" class="w-full mt-1" />
+          <p-floatlabel>
+            <input pInputText formControlName="AssetName" class="w-full bg-white" id="AssetName" />
+            <label for="AssetName"><i class="pi pi-desktop mr-2 text-slate-400"></i>Asset Name *</label>
+          </p-floatlabel>
         </div>
 
         <div class="min-w-0">
-          <label class="block text-xs font-semibold text-slate-500">
-            Assigned Date *
-          </label>
-          <input pInputText type="date" formControlName="AssignedDate" class="w-full mt-1" />
+          <p-floatlabel>
+            <input pInputText type="date" formControlName="AssignedDate" class="w-full bg-white" id="AssignedDate" />
+            <label for="AssignedDate"><i class="pi pi-calendar mr-2 text-slate-400"></i>Assigned Date *</label>
+          </p-floatlabel>
         </div>
 
         <div class="min-w-0">
-          <label class="block text-xs font-semibold text-slate-500">
-            Office Location ID
-          </label>
-          <input pInputText formControlName="OfficeLocationId" class="w-full mt-1" />
+          <p-floatlabel>
+            <input pInputText formControlName="OfficeLocationId" class="w-full bg-white" id="OfficeLocationId" />
+            <label for="OfficeLocationId"><i class="pi pi-building mr-2 text-slate-400"></i>Office Location ID</label>
+          </p-floatlabel>
         </div>
       </div>
 
-      <div class="min-w-0">
-        <label class="block text-xs font-semibold text-slate-500">
-          Office Location
-        </label>
-        <input pInputText formControlName="OfficeLocation" class="w-full mt-1" />
+      <div class="min-w-0 pt-2">
+        <p-floatlabel>
+          <input pInputText formControlName="OfficeLocation" class="w-full bg-white" id="OfficeLocation" />
+          <label for="OfficeLocation"><i class="pi pi-map-marker mr-2 text-slate-400"></i>Office Location</label>
+        </p-floatlabel>
       </div>
 
-      <div class="min-w-0">
-        <label class="block text-xs font-semibold text-slate-500">
-          Department Remarks
-        </label>
-        <textarea pInputTextarea formControlName="DeptRemarks" rows="3" class="w-full mt-1 resize-none">
-        </textarea>
+      <div class="min-w-0 pt-2">
+        <p-floatlabel>
+          <textarea pInputTextarea formControlName="DeptRemarks" rows="3" class="w-full bg-white border border-slate-300 rounded-lg p-2.5 resize-none" id="DeptRemarks"></textarea>
+          <label for="DeptRemarks"><i class="pi pi-comment mr-2 text-slate-400"></i>Department Remarks</label>
+        </p-floatlabel>
       </div>
 
-      <div class="min-w-0">
-        <label class="block text-xs font-semibold text-slate-500">
-          Employee Remarks
-        </label>
-        <textarea pInputTextarea formControlName="EmployeeRemarks" rows="3" class="w-full mt-1 resize-none">
-        </textarea>
+      <div class="min-w-0 pt-2">
+        <p-floatlabel>
+          <textarea pInputTextarea formControlName="EmployeeRemarks" rows="3" class="w-full bg-white border border-slate-300 rounded-lg p-2.5 resize-none" id="EmployeeRemarks"></textarea>
+          <label for="EmployeeRemarks"><i class="pi pi-comments mr-2 text-slate-400"></i>Employee Remarks</label>
+        </p-floatlabel>
       </div>
     </form>
 
@@ -128,7 +126,7 @@
         </button>
 
         <button pButton type="button" icon="pi pi-save" [label]="isEditMode ? 'Update' : 'Save'"
-          class="w-full sm:w-auto" (click)="saveAsset()">
+          class="w-full sm:w-auto btn-submit rounded-lg font-bold" (click)="saveAsset()">
         </button>
       </div>
     </ng-template>

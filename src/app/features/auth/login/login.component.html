@@ -148,8 +148,7 @@
                     <div class="flex items-center justify-between my-2">
                         <div class="flex items-center gap-2">
                             <p-checkbox formControlName="rememberMe" [binary]="true" inputId="rememberMe" />
-                            <label for="rememberMe"
-                                class="text-sm font-semibold text-slate-600 cursor-pointer select-none">Remember
+                            <label class="text-sm font-semibold text-slate-600 cursor-pointer select-none">Remember
                                 Me</label>
                         </div>
                         <a (click)="redirectForm('forgotpassword', 2)"
@@ -180,6 +179,7 @@
                                 [class.ng-dirty]="f1['email'].invalid && f1['email'].touched" />
                             <label for="fpEmail"><i class="pi pi-envelope mr-2 text-slate-400"></i>Email Address</label>
                         </p-floatlabel>
+
                         <small *ngIf="f1['email'].touched && f1['email'].errors"
                             class="text-rose-500 text-xs mt-1.5 block font-medium">
                             <span *ngIf="f1['email'].errors?.['required']"><i

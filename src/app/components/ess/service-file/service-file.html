@@ -1,8 +1,22 @@
-<app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+<!-- Page Header Inline with Breadcrumb -->
+<div
+  class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6">
+  <div class="flex-1 min-w-0">
+    <p-breadcrumb [model]="breadcrumbItems"
+      styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
+  </div>
+  <div class="flex-none">
+    <p-button (click)="openUploadDrawer()" label="Upload Document" icon="pi pi-plus"
+      styleClass="p-button-sm rounded-lg btn-add text-xs font-semibold px-3 py-1.5 shadow-sm transition-all">
+    </p-button>
+  </div>
+</div>
+
 <section class="space-y-4">
-  <header class="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
-    <h2 class="text-xl font-semibold text-slate-900">Service File</h2>
-    <p class="mt-1 text-sm text-slate-500">Access and download your official company documents and records.</p>
+  <header class="rounded-xl border border-slate-200 bg-white p-4 md:p-5 shadow-sm">
+    <h2 class="text-xl font-bold text-slate-800">Service File</h2>
+    <p class="mt-1 text-xs text-slate-500">Access and download your official company documents and records, or upload
+      new files.</p>
   </header>
 
   <p-card header="Official Documents">
@@ -26,11 +40,14 @@
             </span>
           </td>
           <td>{{ doc.category }}</td>
-          <td><span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700">{{ doc.type }}</span></td>
+          <td><span
+              class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700">{{
+              doc.type }}</span></td>
           <td>{{ doc.size }}</td>
           <td>{{ doc.uploadDate | date:'mediumDate' }}</td>
           <td>
-            <button class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer">
+            <button
+              class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer">
               <i class="pi pi-download text-[10px]"></i>
               Download
             </button>
@@ -40,3 +57,102 @@
     </p-table>
   </p-card>
 </section>
+
+<!-- Upload Document Drawer -->
+<p-drawer [(visible)]="visible" position="right" [modal]="true" class="sm:w-[450px] w-full !max-w-full"
+  [style]="{ width: '450px', 'max-width': '100%' }">
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-2">
+      <span class="font-bold text-xl text-slate-800">Upload Document</span>
+      <i class="pi pi-upload text-blue-600"></i>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="content">
+    <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5 p-2">
+
+      <!-- Document Title -->
+      <div class="py-1.5">
+        <p-floatlabel>
+          <input pInputText type="text" id="title" formControlName="title" class="w-full bg-white"
+            [class.ng-invalid]="isInvalid('title')"
+            [class.ng-dirty]="isInvalid('title')" />
+          <label for="title"><i class="pi pi-file mr-2 text-slate-400"></i>Document Title *</label>
+        </p-floatlabel>
+        <p *ngIf="isInvalid('title')" class="text-red-500 text-xs mt-1.5 block font-medium">
+          Document title is required (minimum 3 characters).
+        </p>
+      </div>
+
+      <!-- Document Category -->
+      <div class="py-1.5">
+        <p-floatlabel>
+          <p-select [options]="categories" optionLabel="label" optionValue="value" formControlName="category"
+            placeholder="Select Category" appendTo="body" styleClass="w-full text-sm border border-slate-300 bg-white"
+            [class.ng-invalid]="isInvalid('category')"
+            [class.ng-dirty]="isInvalid('category')">
+          </p-select>
+          <label for="category"><i class="pi pi-tags mr-2 text-slate-400"></i>Document Category *</label>
+        </p-floatlabel>
+        <p *ngIf="isInvalid('category')" class="text-red-500 text-xs mt-1.5 block font-medium">
+          Please select a document category.
+        </p>
+      </div>
+
+      <!-- Specify Custom Category -->
+      <div *ngIf="uploadForm.get('category')?.value === 'Other'" class="py-1.5">
+        <p-floatlabel>
+          <input pInputText type="text" id="customCategory" formControlName="customCategory" class="w-full bg-white"
+            [class.ng-invalid]="isInvalid('customCategory')"
+            [class.ng-dirty]="isInvalid('customCategory')" />
+          <label for="customCategory"><i class="pi pi-pencil mr-2 text-slate-400"></i>Specify Category *</label>
+        </p-floatlabel>
+        <p *ngIf="isInvalid('customCategory')" class="text-red-500 text-xs mt-1.5 block font-medium">
+          Please specify the custom category.
+        </p>
+      </div>
+
+      <!-- File Selector -->
+      <div>
+        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Attach File *</label>
+        <div
+          class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-md hover:border-blue-400 transition cursor-pointer relative"
+          [class.border-red-500]="isInvalid('file')">
+          <div class="space-y-1 text-center">
+            <i class="pi pi-cloud-upload text-3xl text-slate-400"></i>
+            <div class="flex text-sm text-slate-600 justify-center">
+              <label for="file-upload"
+                class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                <span>Choose file</span>
+                <input id="file-upload" type="file" class="sr-only" (change)="onFileChange($event)" />
+              </label>
+            </div>
+            <p class="text-xs text-slate-500">PDF, JPG, PNG, DOCX up to 2MB</p>
+            <p *ngIf="selectedFileName"
+              class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded inline-block mt-2">
+              Selected: {{ selectedFileName }}
+            </p>
+          </div>
+        </div>
+        <p *ngIf="isInvalid('file')" class="text-red-500 text-xs mt-1">
+          <span *ngIf="uploadForm.get('file')?.errors?.['required']">Please select a file to upload.</span>
+          <span *ngIf="uploadForm.get('file')?.errors?.['maxSizeBytes']">File size must be under 2MB.</span>
+        </p>
+      </div>
+
+    </form>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2 p-3 border-t bg-white">
+      <button pButton type="button" label="Cancel" severity="secondary" [text]="true" (click)="visible = false"
+        [disabled]="isUploading">
+      </button>
+      <button pButton type="submit" icon="pi pi-check" label="Upload" class="font-bold btn-submit shadow-sm rounded-lg" (click)="onSubmit()"
+        [loading]="isUploading">
+      </button>
+    </div>
+  </ng-template>
+</p-drawer>
+
+<p-toast></p-toast>
