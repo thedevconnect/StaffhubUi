@@ -162,7 +162,12 @@ export class AppShell {
       if (routesToMap && routesToMap.length > 0) {
         routesToMap.forEach((route) => {
           if (!route.path || route.redirectTo !== undefined) return;
-          if (route.path === 'payroll-dashboard') return;
+          if (
+            route.path === 'payroll-dashboard' ||
+            route.path === 'developer-dashboard' ||
+            route.path === 'superadmin-dashboard' ||
+            route.path === 'hradmin-dashboard'
+          ) return;
 
           const label = (route.title as string) || this.formatPathToLabel(route.path);
           const icon = this.getIconForPath(route.path);

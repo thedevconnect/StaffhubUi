@@ -1,9 +1,10 @@
 import { Routes } from '@angular/router';
 
 export const developerRoutes: Routes = [
+    { path: '', redirectTo: 'developer-dashboard', pathMatch: 'full' },
+    { path: 'developer-dashboard', loadComponent: () => import('../dashboard/developer-dashboard/developer-dashboard').then(c => c.DeveloperDashboard), title: 'Developer Dashboard' },
     { path: 'activity-master', loadComponent: () => import('../components/developer/activity-master/activity-master').then(c => c.ActivityMaster), title: 'Activity Master' },
     { path: 'menu-master', loadComponent: () => import('../components/developer/menu-master/menu-master').then(c => c.MenuMaster), title: 'Menu Master' },
     { path: 'role-master', loadComponent: () => import('../components/developer/role-master/role-master').then(c => c.RoleMaster), title: 'Role Master' },
     { path: 'company-approval', loadComponent: () => import('../components/developer/company-approval/company-approval').then(c => c.CompanyApproval), title: 'Company Approval' },
-
 ];

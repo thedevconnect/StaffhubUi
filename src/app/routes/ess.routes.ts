@@ -4,7 +4,7 @@ export const essRoutes: Routes = [
   { path: '', redirectTo: 'ess-dashboard', pathMatch: 'full' },
   {
     path: 'ess-dashboard',
-    loadComponent: () => import('../components/ess/ess-dashboard/ess-dashboard').then(c => c.EssDashboard)
+    loadComponent: () => import('../dashboard/ess-dashboard/ess-dashboard').then(c => c.EssDashboard)
   },
   {
     path: 'employee-attendance',
