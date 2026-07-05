@@ -10,6 +10,8 @@ import { ButtonModule } from 'primeng/button';
 import { DrawerModule } from 'primeng/drawer';
 import { TableModule } from 'primeng/table';
 import { MessageService } from 'primeng/api';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { InputTextModule } from 'primeng/inputtext';
 
 interface DetailRow {
   type: string;
@@ -37,7 +39,9 @@ interface DetailRow {
     ToastModule,
     ButtonModule,
     DrawerModule,
-    TableModule
+    TableModule,
+    FloatLabelModule,
+    InputTextModule
   ],
   providers: [MessageService],
   templateUrl: './expense-management.html',

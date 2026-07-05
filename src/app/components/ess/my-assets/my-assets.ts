@@ -18,6 +18,7 @@ import { InputTextModule } from 'primeng/inputtext'
 import { TextareaModule } from 'primeng/textarea'
 import { DialogModule } from 'primeng/dialog'
 import { ConfirmationService, MessageService } from 'primeng/api'
+import { FloatLabelModule } from 'primeng/floatlabel'
 
 import { UserService } from '../../../shared/services/user-service'
 import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template'
@@ -38,7 +39,8 @@ import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/ta
     SelectModule,
     InputTextModule,
     TextareaModule,
-    DialogModule
+    DialogModule,
+    FloatLabelModule
   ],
   providers: [MessageService, ConfirmationService, DatePipe],
   templateUrl: './my-assets.html',

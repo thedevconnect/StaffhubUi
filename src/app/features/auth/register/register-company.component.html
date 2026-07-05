@@ -136,138 +136,158 @@
                         </h3>
 
                         <!-- Row 1: Company Name & Short Name -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 py-1.5">
                             <div>
-                                <label for="companyName"
-                                    class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Company
-                                    Name</label>
-                                <input pInputText id="companyName" formControlName="companyName" class="w-full bg-white"
-                                    [class.ng-invalid]="f2['companyName'].invalid && f2['companyName'].touched"
-                                    [class.ng-dirty]="f2['companyName'].invalid && f2['companyName'].touched" />
+                                <p-floatlabel>
+                                    <input pInputText id="companyName" formControlName="companyName"
+                                        class="w-full bg-white"
+                                        [class.ng-invalid]="f2['companyName'].invalid && f2['companyName'].touched"
+                                        [class.ng-dirty]="f2['companyName'].invalid && f2['companyName'].touched" />
+                                    <label for="companyName"><i class="pi pi-building mr-2 text-slate-400"></i>Company
+                                        Name</label>
+                                </p-floatlabel>
                                 <small *ngIf="f2['companyName'].touched && f2['companyName'].invalid"
-                                    class="text-rose-500 text-xs mt-1 block">Company name is required</small>
+                                    class="text-rose-500 text-xs mt-1.5 block font-medium">Company name is
+                                    required</small>
                             </div>
                             <div>
-                                <label for="shortName"
-                                    class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Short
-                                    Name</label>
-                                <input pInputText id="shortName" formControlName="shortName" class="w-full bg-white"
-                                    [class.ng-invalid]="f2['shortName'].invalid && f2['shortName'].touched"
-                                    [class.ng-dirty]="f2['shortName'].invalid && f2['shortName'].touched" />
+                                <p-floatlabel>
+                                    <input pInputText id="shortName" formControlName="shortName" class="w-full bg-white"
+                                        [class.ng-invalid]="f2['shortName'].invalid && f2['shortName'].touched"
+                                        [class.ng-dirty]="f2['shortName'].invalid && f2['shortName'].touched" />
+                                    <label for="shortName"><i class="pi pi-bookmark mr-2 text-slate-400"></i>Short
+                                        Name</label>
+                                </p-floatlabel>
                                 <small *ngIf="f2['shortName'].touched && f2['shortName'].invalid"
-                                    class="text-rose-500 text-xs mt-1 block">Short name is required</small>
+                                    class="text-rose-500 text-xs mt-1.5 block font-medium">Short name is
+                                    required</small>
                             </div>
                         </div>
 
                         <!-- Row 2: Company Email & Company Phone -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 py-1.5">
                             <div>
-                                <label for="companyEmail"
-                                    class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Company
-                                    Email</label>
-                                <input pInputText id="companyEmail" type="email" formControlName="companyEmail"
-                                    class="w-full bg-white"
-                                    [class.ng-invalid]="f2['companyEmail'].invalid && f2['companyEmail'].touched"
-                                    [class.ng-dirty]="f2['companyEmail'].invalid && f2['companyEmail'].touched" />
+                                <p-floatlabel>
+                                    <input pInputText id="companyEmail" type="email" formControlName="companyEmail"
+                                        class="w-full bg-white"
+                                        [class.ng-invalid]="f2['companyEmail'].invalid && f2['companyEmail'].touched"
+                                        [class.ng-dirty]="f2['companyEmail'].invalid && f2['companyEmail'].touched" />
+                                    <label for="companyEmail"><i class="pi pi-envelope mr-2 text-slate-400"></i>Company
+                                        Email</label>
+                                </p-floatlabel>
                                 <small *ngIf="f2['companyEmail'].touched && f2['companyEmail'].invalid"
-                                    class="text-rose-500 text-xs mt-1 block">Valid company email is required</small>
+                                    class="text-rose-500 text-xs mt-1.5 block font-medium">Valid company email is
+                                    required</small>
                             </div>
                             <div>
-                                <label for="companyPhone"
-                                    class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Company
-                                    Phone</label>
-                                <input pInputText id="companyPhone" type="text" formControlName="companyPhone"
-                                    class="w-full bg-white"
-                                    [class.ng-invalid]="f2['companyPhone'].invalid && f2['companyPhone'].touched"
-                                    [class.ng-dirty]="f2['companyPhone'].invalid && f2['companyPhone'].touched" />
+                                <p-floatlabel>
+                                    <input pInputText id="companyPhone" type="text" formControlName="companyPhone"
+                                        class="w-full bg-white"
+                                        [class.ng-invalid]="f2['companyPhone'].invalid && f2['companyPhone'].touched"
+                                        [class.ng-dirty]="f2['companyPhone'].invalid && f2['companyPhone'].touched" />
+                                    <label for="companyPhone"><i class="pi pi-phone mr-2 text-slate-400"></i>Company
+                                        Phone</label>
+                                </p-floatlabel>
                                 <small *ngIf="f2['companyPhone'].touched && f2['companyPhone'].invalid"
-                                    class="text-rose-500 text-xs mt-1 block">Company phone is required</small>
+                                    class="text-rose-500 text-xs mt-1.5 block font-medium">Company phone is
+                                    required</small>
                             </div>
                         </div>
 
                         <!-- Row 3: Industry & Company Address -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 py-1.5">
                             <div>
-                                <label for="industry"
-                                    class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Industry</label>
-                                <input pInputText id="industry" type="text" formControlName="industry"
-                                    class="w-full bg-white"
-                                    [class.ng-invalid]="f2['industry'].invalid && f2['industry'].touched"
-                                    [class.ng-dirty]="f2['industry'].invalid && f2['industry'].touched" />
+                                <p-floatlabel>
+                                    <input pInputText id="industry" type="text" formControlName="industry"
+                                        class="w-full bg-white"
+                                        [class.ng-invalid]="f2['industry'].invalid && f2['industry'].touched"
+                                        [class.ng-dirty]="f2['industry'].invalid && f2['industry'].touched" />
+                                    <label for="industry"><i
+                                            class="pi pi-briefcase mr-2 text-slate-400"></i>Industry</label>
+                                </p-floatlabel>
                                 <small *ngIf="f2['industry'].touched && f2['industry'].invalid"
-                                    class="text-rose-500 text-xs mt-1 block">Industry is required</small>
+                                    class="text-rose-500 text-xs mt-1.5 block font-medium">Industry is required</small>
                             </div>
                             <div>
-                                <label for="address"
-                                    class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Company
-                                    Address</label>
-                                <input pInputText id="address" formControlName="address" class="w-full bg-white"
-                                    [class.ng-invalid]="f2['address'].invalid && f2['address'].touched"
-                                    [class.ng-dirty]="f2['address'].invalid && f2['address'].touched" />
+                                <p-floatlabel>
+                                    <input pInputText id="address" formControlName="address" class="w-full bg-white"
+                                        [class.ng-invalid]="f2['address'].invalid && f2['address'].touched"
+                                        [class.ng-dirty]="f2['address'].invalid && f2['address'].touched" />
+                                    <label for="address"><i class="pi pi-map-marker mr-2 text-slate-400"></i>Company
+                                        Address</label>
+                                </p-floatlabel>
                                 <small *ngIf="f2['address'].touched && f2['address'].invalid"
-                                    class="text-rose-500 text-xs mt-1 block">Address is required</small>
+                                    class="text-rose-500 text-xs mt-1.5 block font-medium">Address is required</small>
                             </div>
                         </div>
 
                         <!-- Row 4: Full Name -->
-                        <div>
-                            <label for="fullName"
-                                class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Admin
-                                Full Name</label>
-                            <input pInputText id="fullName" formControlName="fullName" class="w-full bg-white"
-                                [class.ng-invalid]="f2['fullName'].invalid && f2['fullName'].touched"
-                                [class.ng-dirty]="f2['fullName'].invalid && f2['fullName'].touched" />
+                        <div class="py-1.5">
+                            <p-floatlabel>
+                                <input pInputText id="fullName" formControlName="fullName" class="w-full bg-white"
+                                    [class.ng-invalid]="f2['fullName'].invalid && f2['fullName'].touched"
+                                    [class.ng-dirty]="f2['fullName'].invalid && f2['fullName'].touched" />
+                                <label for="fullName"><i class="pi pi-user mr-2 text-slate-400"></i>Admin Full
+                                    Name</label>
+                            </p-floatlabel>
                             <small *ngIf="f2['fullName'].touched && f2['fullName'].invalid"
-                                class="text-rose-500 text-xs mt-1 block">Full name is required</small>
+                                class="text-rose-500 text-xs mt-1.5 block font-medium">Full name is required</small>
                         </div>
 
                         <!-- Row 5: Username & Password -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 py-1.5">
                             <div>
-                                <label for="username"
-                                    class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Username</label>
-                                <input pInputText id="username" formControlName="username" class="w-full bg-white"
-                                    [class.ng-invalid]="f2['username'].invalid && f2['username'].touched"
-                                    [class.ng-dirty]="f2['username'].invalid && f2['username'].touched" />
+                                <p-floatlabel>
+                                    <input pInputText id="username" formControlName="username" class="w-full bg-white"
+                                        [class.ng-invalid]="f2['username'].invalid && f2['username'].touched"
+                                        [class.ng-dirty]="f2['username'].invalid && f2['username'].touched" />
+                                    <label for="username"><i
+                                            class="pi pi-id-card mr-2 text-slate-400"></i>Username</label>
+                                </p-floatlabel>
                                 <small *ngIf="f2['username'].touched && f2['username'].invalid"
-                                    class="text-rose-500 text-xs mt-1 block">Username is required</small>
+                                    class="text-rose-500 text-xs mt-1.5 block font-medium">Username is required</small>
                             </div>
                             <div>
-                                <label for="password"
-                                    class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Admin
-                                    Password</label>
-                                <p-password id="password" formControlName="password" [toggleMask]="true"
-                                    styleClass="w-full" inputStyleClass="w-full bg-white" [feedback]="false"
-                                    [class.ng-invalid]="f2['password'].invalid && f2['password'].touched"
-                                    [class.ng-dirty]="f2['password'].invalid && f2['password'].touched"></p-password>
+                                <p-floatlabel>
+                                    <p-password id="password" formControlName="password" [toggleMask]="true"
+                                        styleClass="w-full" inputStyleClass="w-full bg-white" [feedback]="false"
+                                        [class.ng-invalid]="f2['password'].invalid && f2['password'].touched"
+                                        [class.ng-dirty]="f2['password'].invalid && f2['password'].touched"></p-password>
+                                    <label for="password"><i class="pi pi-lock mr-2 text-slate-400"></i>Admin
+                                        Password</label>
+                                </p-floatlabel>
                                 <small *ngIf="f2['password'].touched && f2['password'].invalid"
-                                    class="text-rose-500 text-xs mt-1 block">Password is required</small>
+                                    class="text-rose-500 text-xs mt-1.5 block font-medium">Password is required</small>
                             </div>
                         </div>
 
                         <!-- Row 6: Email & Mobile -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 py-1.5">
                             <div>
-                                <label for="email"
-                                    class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Admin
-                                    Email Address</label>
-                                <input pInputText id="email" type="email" formControlName="email"
-                                    class="w-full bg-white"
-                                    [class.ng-invalid]="f2['email'].invalid && f2['email'].touched"
-                                    [class.ng-dirty]="f2['email'].invalid && f2['email'].touched" />
+                                <p-floatlabel>
+                                    <input pInputText id="email" type="email" formControlName="email"
+                                        class="w-full bg-white"
+                                        [class.ng-invalid]="f2['email'].invalid && f2['email'].touched"
+                                        [class.ng-dirty]="f2['email'].invalid && f2['email'].touched" />
+                                    <label for="email"><i class="pi pi-envelope mr-2 text-slate-400"></i>Admin Email
+                                        Address</label>
+                                </p-floatlabel>
                                 <small *ngIf="f2['email'].touched && f2['email'].invalid"
-                                    class="text-rose-500 text-xs mt-1 block">Valid admin email is required</small>
+                                    class="text-rose-500 text-xs mt-1.5 block font-medium">Valid admin email is
+                                    required</small>
                             </div>
                             <div>
-                                <label for="mobile"
-                                    class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Mobile
-                                    Number</label>
-                                <input pInputText id="mobile" type="text" formControlName="mobile"
-                                    class="w-full bg-white"
-                                    [class.ng-invalid]="f2['mobile'].invalid && f2['mobile'].touched"
-                                    [class.ng-dirty]="f2['mobile'].invalid && f2['mobile'].touched" />
+                                <p-floatlabel>
+                                    <input pInputText id="mobile" type="text" formControlName="mobile"
+                                        class="w-full bg-white"
+                                        [class.ng-invalid]="f2['mobile'].invalid && f2['mobile'].touched"
+                                        [class.ng-dirty]="f2['mobile'].invalid && f2['mobile'].touched" />
+                                    <label for="mobile"><i class="pi pi-phone mr-2 text-slate-400"></i>Mobile
+                                        Number</label>
+                                </p-floatlabel>
                                 <small *ngIf="f2['mobile'].touched && f2['mobile'].invalid"
-                                    class="text-rose-500 text-xs mt-1 block">Valid mobile is required</small>
+                                    class="text-rose-500 text-xs mt-1.5 block font-medium">Valid mobile is
+                                    required</small>
                             </div>
                         </div>
                     </div>

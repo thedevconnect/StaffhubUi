@@ -8,7 +8,7 @@
   </div>
   <div class="flex-none">
     <p-button (click)="showDialog()" label="Add Claim" icon="pi pi-plus"
-      styleClass="p-button-sm p-button-info rounded-lg" [raised]="true">
+      styleClass="p-button-sm rounded-lg btn-add text-xs font-semibold px-3 py-1.5 shadow-sm transition-all" [raised]="true">
     </p-button>
   </div>
 </div>
@@ -138,77 +138,80 @@
             </div>
 
             <!-- Submit For -->
-            <div class="flex flex-col gap-1">
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Submit For <span class="text-rose-500">*</span>
-              </label>
-              <p-select [options]="submitForOptions" formControlName="submitFor" optionLabel="label" optionValue="value"
-                placeholder="Select Submit For" class="w-full"></p-select>
+            <div class="py-1.5">
+              <p-floatlabel>
+                <p-select [options]="submitForOptions" formControlName="submitFor" optionLabel="label" optionValue="value"
+                  placeholder="Select Submit For" class="w-full" styleClass="w-full" id="submitFor"></p-select>
+                <label for="submitFor"><i class="pi pi-user mr-2 text-slate-400"></i>Submit For *</label>
+              </p-floatlabel>
               <div *ngIf="expenseForm.get('submitFor')?.touched && expenseForm.get('submitFor')?.invalid"
-                class="text-rose-500 text-xs">
+                class="text-rose-500 text-xs mt-1 block">
                 This field is required.
               </div>
             </div>
 
             <!-- Name -->
-            <div class="flex flex-col gap-1">
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Name</label>
-              <input type="text" formControlName="name"
-                class="w-full rounded-xl border border-slate-200 p-2.5 text-sm bg-slate-50 text-slate-500 cursor-not-allowed">
+            <div class="py-1.5">
+              <p-floatlabel>
+                <input pInputText type="text" formControlName="name" id="name"
+                  class="w-full bg-slate-50 text-slate-500 cursor-not-allowed">
+                <label for="name"><i class="pi pi-user mr-2 text-slate-400"></i>Name</label>
+              </p-floatlabel>
             </div>
 
             <!-- Designation -->
-            <div class="flex flex-col gap-1">
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Designation</label>
-              <input type="text" formControlName="designation"
-                class="w-full rounded-xl border border-slate-200 p-2.5 text-sm bg-slate-50 text-slate-500 cursor-not-allowed">
+            <div class="py-1.5">
+              <p-floatlabel>
+                <input pInputText type="text" formControlName="designation" id="designation"
+                  class="w-full bg-slate-50 text-slate-500 cursor-not-allowed">
+                <label for="designation"><i class="pi pi-briefcase mr-2 text-slate-400"></i>Designation</label>
+              </p-floatlabel>
             </div>
 
             <!-- From Date -->
-            <div class="flex flex-col gap-1">
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                From Date <span class="text-rose-500">*</span>
-              </label>
-              <p-datepicker formControlName="fromDate" dateFormat="dd-mm-yy" [showIcon]="true"
-                class="w-full"></p-datepicker>
+            <div class="py-1.5">
+              <p-floatlabel>
+                <p-datepicker formControlName="fromDate" dateFormat="dd-mm-yy" [showIcon]="true"
+                  styleClass="w-full" class="w-full" id="fromDate"></p-datepicker>
+                <label for="fromDate"><i class="pi pi-calendar mr-2 text-slate-400"></i>From Date *</label>
+              </p-floatlabel>
               <div *ngIf="expenseForm.get('fromDate')?.touched && expenseForm.get('fromDate')?.invalid"
-                class="text-rose-500 text-xs">
+                class="text-rose-500 text-xs mt-1 block">
                 From date is required.
               </div>
             </div>
 
             <!-- To Date -->
-            <div class="flex flex-col gap-1">
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                To Date <span class="text-rose-500">*</span>
-              </label>
-              <p-datepicker formControlName="toDate" dateFormat="dd-mm-yy" [showIcon]="true"
-                class="w-full"></p-datepicker>
+            <div class="py-1.5">
+              <p-floatlabel>
+                <p-datepicker formControlName="toDate" dateFormat="dd-mm-yy" [showIcon]="true"
+                  styleClass="w-full" class="w-full" id="toDate"></p-datepicker>
+                <label for="toDate"><i class="pi pi-calendar mr-2 text-slate-400"></i>To Date *</label>
+              </p-floatlabel>
               <div *ngIf="expenseForm.get('toDate')?.touched && expenseForm.get('toDate')?.invalid"
-                class="text-rose-500 text-xs">
+                class="text-rose-500 text-xs mt-1 block">
                 To date is required.
               </div>
             </div>
 
             <!-- Wallet Amount -->
-            <div class="flex flex-col gap-1">
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Wallet Amount</label>
-              <div class="relative w-full">
-                <input type="text" formControlName="walletAmount"
-                  class="w-full rounded-xl border border-slate-200 p-2.5 pr-10 text-sm bg-slate-50 text-slate-500 cursor-not-allowed">
-                <i class="pi pi-credit-card absolute right-3.5 top-3.5 text-slate-400"></i>
-              </div>
+            <div class="py-1.5">
+              <p-floatlabel>
+                <input pInputText type="text" formControlName="walletAmount" id="walletAmount"
+                  class="w-full bg-slate-50 text-slate-500 cursor-not-allowed">
+                <label for="walletAmount"><i class="pi pi-credit-card mr-2 text-slate-400"></i>Wallet Amount</label>
+              </p-floatlabel>
             </div>
 
             <!-- Purpose -->
-            <div class="flex flex-col gap-1 md:col-span-2">
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Purpose <span class="text-rose-500">*</span>
-              </label>
-              <textarea formControlName="purpose" rows="2" placeholder="Describe the purpose of your tour..."
-                class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"></textarea>
+            <div class="py-1.5 md:col-span-2">
+              <p-floatlabel>
+                <textarea pInputTextarea formControlName="purpose" rows="2" id="purpose"
+                  class="w-full border border-slate-300 rounded-xl p-3 resize-none"></textarea>
+                <label for="purpose"><i class="pi pi-info-circle mr-2 text-slate-400"></i>Purpose *</label>
+              </p-floatlabel>
               <div *ngIf="expenseForm.get('purpose')?.touched && expenseForm.get('purpose')?.invalid"
-                class="text-rose-500 text-xs">
+                class="text-rose-500 text-xs mt-1 block">
                 Purpose description is required.
               </div>
             </div>
@@ -623,7 +626,7 @@
         </button>
 
         <button type="button" (click)="onSubmit()"
-          class="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition shadow-sm select-none">
+          class="flex items-center gap-2 px-5 py-2 btn-submit text-white rounded-lg text-xs font-bold transition shadow-sm select-none">
           <i class="pi pi-check-circle"></i>
           <span>Submit</span>
         </button>
