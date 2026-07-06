@@ -23,6 +23,8 @@ export interface Employee {
   role?: string;
   username?: string;
   created_at?: string;
+  employeeId?: number | string;
+  onboardingStatus?: string;
 }
 
 export interface CreateEmployeeRequest {

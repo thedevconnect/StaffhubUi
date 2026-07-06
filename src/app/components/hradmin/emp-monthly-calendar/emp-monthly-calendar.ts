@@ -4,7 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { MessageService, ConfirmationService } from 'primeng/api';
 import { EmployeeManagementService } from '../../../shared/services/employee-management.service';
 
 export interface Employee {
@@ -29,13 +31,21 @@ export interface CalendarDay {
     FormsModule,
     SelectModule,
     ButtonModule,
-    ToastModule
+    ToastModule,
+    BreadcrumbModule,
+    ConfirmDialogModule
   ],
-  providers: [MessageService],
+  providers: [MessageService, ConfirmationService],
   templateUrl: './emp-monthly-calendar.html',
   styleUrl: './emp-monthly-calendar.scss',
 })
 export class EmpMonthlyCalendar implements OnInit {
+  breadcrumbItems: any[] = [
+    { label: 'HR Administration', icon: 'pi pi-home', routerLink: '/hradmin' },
+    { label: 'Employee Attendance Calendar', icon: 'pi pi-calendar', routerLink: '/hradmin/employee-calendar' },
+  ];
+  isLoading = false;
+
   employees: Employee[] = [];
   selectedEmployee!: Employee;
   currentDate = new Date(2026, 5, 1); // June 2026 as per screenshot
@@ -82,17 +92,51 @@ export class EmpMonthlyCalendar implements OnInit {
     });
   }
 
+  onRefresh(): void {
+    this.isLoading = true;
+    this.employeeManagementService.getEmployees().subscribe({
+      next: (data) => {
+        this.isLoading = false;
+        if (data && data.length > 0) {
+          this.employees = data.map(emp => ({
+            id: String(emp.id),
+            name: emp.fullName,
+            displayName: `${emp.fullName} - ${emp.employeeCode || emp.id}`,
+            role: emp.designation || 'Staff',
+            department: emp.department || 'Operations'
+          }));
+          // Keep current selected if still exists, else pick first
+          const found = this.employees.find(e => e.id === this.selectedEmployee?.id);
+          if (found) {
+            this.selectedEmployee = found;
+          } else {
+            this.selectedEmployee = this.employees[0];
+          }
+          this.generateCalendar();
+        }
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Synchronized',
+          detail: 'Employee calendar successfully synchronized.'
+        });
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to refresh employee list.'
+        });
+      }
+    });
+  }
+
   get monthName(): string {
     return this.currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
   }
 
   onEmployeeChange(): void {
     this.generateCalendar();
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Calendar Loaded',
-      detail: `Monthly attendance loaded for ${this.selectedEmployee.name}`
-    });
   }
 
   prevMonth(): void {
@@ -109,39 +153,41 @@ export class EmpMonthlyCalendar implements OnInit {
     const year = this.currentDate.getFullYear();
     const month = this.currentDate.getMonth();
 
-    const firstDayIndex = new Date(year, month, 1).getDay(); // Sunday=0, Monday=1, ...
-    // Since our columns start on Monday:
-    const startOffset = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDayIndex = new Date(year, month, 1).getDay(); // Sunday is 0
+    const totalDays = new Date(year, month + 1, 0).getDate();
+
+    // Map Sunday=0, Monday=1, ... to Monday=0, Tuesday=1, ... Sunday=6
+    const adjustedStart = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
 
     const gridDays: CalendarDay[] = [];
 
-    // Empty slots for padding
-    for (let i = 0; i < startOffset; i++) {
+    // Empty spaces for previous month's days
+    for (let i = 0; i < adjustedStart; i++) {
       gridDays.push({ date: null, status: '', colorClass: '' });
     }
 
-    // Days in current month
-    for (let day = 1; day <= daysInMonth; day++) {
-      const dateObj = new Date(year, month, day);
-      const isSunday = dateObj.getDay() === 0;
-
-      let status = 'P';
+    // Days of current month
+    for (let day = 1; day <= totalDays; day++) {
+      let status = 'P'; // Default Present
       let colorClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
 
-      if (isSunday) {
-        status = 'WO';
-        colorClass = 'bg-blue-50 text-blue-700 border-blue-200';
-      } else {
-        // Generate pseudo-random realistic values per employee/day
-        const seed = this.selectedEmployee ? this.selectedEmployee.id : 'N005';
-        const rawHash = day * 17 + seed.charCodeAt(0) * 11 + month * 7;
-        const val = rawHash % 30;
+      const dateObj = new Date(year, month, day);
+      const isSunday = dateObj.getDay() === 0;
+      const isSaturday = dateObj.getDay() === 6;
 
-        if (val === 4) {
+      if (isSunday) {
+        status = 'WO'; // Weekly Off
+        colorClass = 'bg-slate-50 text-slate-400 border-slate-200';
+      } else if (isSaturday) {
+        status = 'WO'; // Alternating or half-day, let's say Weekly Off for simplicity
+        colorClass = 'bg-slate-50 text-slate-400 border-slate-200';
+      } else {
+        // Randomly scatter a few absences, half-days or leaves to make demo realistic
+        const val = (day * 17) % 30;
+        if (val === 5) {
           status = 'A';
           colorClass = 'bg-rose-50 text-rose-700 border-rose-200';
-        } else if (val === 9) {
+        } else if (val === 12) {
           status = 'L';
           colorClass = 'bg-amber-50 text-amber-700 border-amber-200';
         } else if (val === 18) {

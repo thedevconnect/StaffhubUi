@@ -48,22 +48,6 @@ export class CompanyManagement implements OnInit {
     },
   ];
 
-  // "id": 14,
-  //         "company_name": "advatix apac technologies",
-  //         "short_name": "advatix",
-  //         "address": "C-134,Rajendra Palce ,New Delhi",
-  //         "company_email": "thedevconnects@gmail.com",
-  //         "company_phone": "09821530215",
-  //         "industry": "software eng",
-  //         "approval_status": "APPROVED",
-  //         "status": "ACTIVE",
-  //         "created_at": "2026-06-28T06:17:37.000Z",
-  //         "admin_id": 23,
-  //         "admin_name": "dev connect",
-  //         "admin_email": "thedevconnec434ts@gmail.com",
-  //         "admin_mobile": "9821730215",
-  //         "admin_username": "advatix",
-  //         "admin_emp_id": "ADVATIX-100"
 
   columns: TableColumn[] = [
     { key: 'actions', header: 'Actions', isVisible: true, isSortable: false, isCustom: true },
@@ -120,7 +104,7 @@ export class CompanyManagement implements OnInit {
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
     private cdr: ChangeDetectorRef,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadData();
@@ -132,7 +116,7 @@ export class CompanyManagement implements OnInit {
       next: (res: any) => {
         this.data = res.data || [];
         this.totalCount = res.pagination?.totalItems || 0;
-        
+
         if (res.tabCounts) {
           this.companyTabs[0].count = res.tabCounts.ALL;
           this.companyTabs[1].count = res.tabCounts.PENDING;
@@ -339,13 +323,26 @@ export class CompanyManagement implements OnInit {
       rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
       acceptButtonProps: { label: 'Delete', severity: 'danger' },
       accept: () => {
-        this.data = this.data.filter((item) => item.id !== company.id);
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Deleted',
-          detail: `Company "${company.company_name}" request deleted successfully (Simulation).`,
+        this.isLoading = true;
+        this.userService.deleteCompany(company.id).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Deleted',
+              detail: `Company "${company.company_name}" and all associated records deleted successfully!`,
+            });
+            this.loadData();
+          },
+          error: (err: any) => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Delete Failed',
+              detail: err?.error?.message || 'Failed to delete company.',
+            });
+            this.isLoading = false;
+            this.cdr.detectChanges();
+          }
         });
-        this.cdr.detectChanges();
       },
     });
   }

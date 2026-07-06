@@ -160,7 +160,9 @@ export class EmployeeManagementService {
       status: employee?.status ?? employee?.employment_status ?? 'ACTIVE',
       role: employee?.role ?? '',
       username: employee?.username ?? '',
-      created_at: employee?.created_at ?? ''
+      created_at: employee?.created_at ?? '',
+      employeeId: employee?.employee_id ?? employee?.employeeId ?? '',
+      onboardingStatus: employee?.onboarding_status ?? employee?.onboardingStatus ?? 'PENDING'
     };
   }
 }

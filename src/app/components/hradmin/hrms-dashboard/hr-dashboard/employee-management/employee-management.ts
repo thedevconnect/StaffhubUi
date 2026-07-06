@@ -14,7 +14,7 @@ import { SelectModule } from 'primeng/select';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TableTemplate, TableColumn } from '../../../../../shared/ui/table-template/table-template';
-import { AppBreadcrumb } from '../../../../../shared/ui/breadcrumb/breadcrumb';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { DatePickerModule } from 'primeng/datepicker';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -24,6 +24,7 @@ import {
 } from '../../../../../shared/services/models/employee.model';
 import { EmployeeManagementService } from '../../../../../shared/services/employee-management.service';
 import { AuthService } from '../../../../../shared/services/services/auth.service';
+import { EmployeeOnboardingService } from '../../../../../shared/services/employee-onboarding.service';
 
 @Component({
   selector: 'app-employee-management',
@@ -44,7 +45,7 @@ import { AuthService } from '../../../../../shared/services/services/auth.servic
     SelectModule,
     ReactiveFormsModule,
     TableTemplate,
-    AppBreadcrumb
+    BreadcrumbModule
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './employee-management.html',
@@ -54,8 +55,8 @@ export class EmployeeManagement implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   breadcrumbItems: any[] = [
-    { label: 'HR Administration', url: '#' },
-    { label: 'Employee Management' },
+    { label: 'HR Administration', icon: 'pi pi-home', routerLink: '/hradmin' },
+    { label: 'Employee Management', icon: 'pi pi-users', routerLink: '/hradmin/employee-management' },
   ];
 
   employees: Employee[] = [];
@@ -84,6 +85,7 @@ export class EmployeeManagement implements OnInit {
     { label: 'View', icon: 'pi pi-eye', id: 'view' },
     { label: 'Update', icon: 'pi pi-pencil', id: 'update' },
     { label: 'Delete', icon: 'pi pi-trash', id: 'delete' },
+    { label: 'Onboarding', icon: 'pi pi-user-check', id: 'onboarding' }
   ];
 
   designationOptions = [
@@ -117,6 +119,12 @@ export class EmployeeManagement implements OnInit {
   isEditMode = false;
   selectedEmployee: Employee | null = null;
   employeeForm: FormGroup;
+
+  // Onboarding Properties
+  showOnboardingDialog = false;
+  onboardingDetails: any = null;
+  onboardingEmployee: Employee | null = null;
+  onboardingService = inject(EmployeeOnboardingService);
 
   constructor(
     private readonly fb: FormBuilder,
@@ -239,6 +247,11 @@ export class EmployeeManagement implements OnInit {
 
     if (event.actionId === 'delete') {
       this.confirmDeleteEmployee(event.row);
+      return;
+    }
+
+    if (event.actionId === 'onboarding') {
+      this.openOnboardingDialog(event.row);
     }
   }
 
@@ -462,5 +475,91 @@ export class EmployeeManagement implements OnInit {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  openOnboardingDialog(employee: Employee): void {
+    this.onboardingEmployee = employee;
+    const empId = employee.employeeId || employee.id;
+    
+    this.loading.set(true);
+    this.onboardingService.getOnboardingByEmployeeId(empId).subscribe({
+      next: (res: any) => {
+        this.loading.set(false);
+        if (res && res.data) {
+          this.onboardingDetails = res.data;
+          this.showOnboardingDialog = true;
+        } else {
+          this.messageService.add({
+            severity: 'info',
+            summary: 'Not Started',
+            detail: 'Employee has not submitted onboarding details yet.'
+          });
+        }
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.messageService.add({
+          severity: 'info',
+          summary: 'Not Started',
+          detail: 'Employee has not submitted onboarding details yet.'
+        });
+      }
+    });
+  }
+
+  approveOnboarding(): void {
+    if (!this.onboardingEmployee) return;
+    const empId = this.onboardingEmployee.employeeId || this.onboardingEmployee.id;
+
+    this.loading.set(true);
+    this.onboardingService.updateOnboarding(empId, { profile_status: 'COMPLETED' }).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Approved',
+          detail: 'Onboarding approved successfully.'
+        });
+        this.showOnboardingDialog = false;
+        this.loadAllData();
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err.error?.message || 'Failed to approve onboarding.'
+        });
+      }
+    });
+  }
+
+  rejectOnboarding(): void {
+    if (!this.onboardingEmployee) return;
+    const empId = this.onboardingEmployee.employeeId || this.onboardingEmployee.id;
+
+    this.loading.set(true);
+    this.onboardingService.updateOnboarding(empId, { profile_status: 'REJECTED' }).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Rejected',
+          detail: 'Onboarding rejected.'
+        });
+        this.showOnboardingDialog = false;
+        this.loadAllData();
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err.error?.message || 'Failed to reject onboarding.'
+        });
+      }
+    });
+  }
+
+  onRefresh(): void {
+    this.loadAllData();
   }
 }

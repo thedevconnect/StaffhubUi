@@ -1,17 +1,26 @@
 <p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
 
-<div class="p-6 space-y-6 font-sans bg-slate-50 min-h-screen">
-    <!-- Breadcrumbs & Page Header -->
-    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-slate-200 pb-5">
+<!-- Page Header Inline with Breadcrumb -->
+<div
+  class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6">
+  <div class="flex-1 min-w-0">
+    <p-breadcrumb [model]="breadcrumbItems"
+      styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
+  </div>
+  <div class="flex-none">
+    <p-button (click)="onRefresh()" label="Synchronize" icon="pi pi-sync" [loading]="isLoading"
+      styleClass="p-button-sm p-button-secondary rounded-lg" [raised]="true">
+    </p-button>
+  </div>
+</div>
+
+<div class="space-y-6">
+    <!-- Title section with Searchable Select -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <div class="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-1.5">
-                <span>HR Admin</span>
-                <i class="pi pi-chevron-right text-[10px]"></i>
-                <span class="text-indigo-600">Employee Attendance Calendar</span>
-            </div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Monthly Attendance Calendar</h1>
-            <p class="text-xs text-slate-500 mt-1">View the detailed day-wise monthly attendance calendar of your
-                employees.</p>
+            <h2 class="text-xl font-bold text-slate-800">Monthly Attendance Calendar</h2>
+            <p class="text-xs text-slate-500 mt-1">View the detailed day-wise monthly attendance calendar of your employees.</p>
         </div>
 
         <div class="flex flex-col gap-1.5 min-w-[280px]">

@@ -6,9 +6,39 @@
         <p-breadcrumb [model]="breadcrumbItems"
             styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
     </div>
-    <div class="flex-none">
-        <p-button (click)="onRequestUpdate()" label="Request Update" icon="pi pi-user-edit"
-            styleClass="p-button-sm rounded-lg btn-add text-xs font-semibold px-3 py-1.5 shadow-sm transition-all" [raised]="true">
+    <div class="flex-none flex items-center gap-3">
+        <!-- Onboarding Status Badge -->
+        <span *ngIf="onboardingStatus === 'NOT_STARTED'" class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 border border-slate-200">
+            <span class="h-1.5 w-1.5 rounded-full bg-slate-400 mr-1.5"></span>
+            Onboarding: Not Started
+        </span>
+        <span *ngIf="onboardingStatus === 'PENDING'" class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 border border-amber-100 animate-pulse">
+            <span class="h-1.5 w-1.5 rounded-full bg-amber-500 mr-1.5"></span>
+            Onboarding: Pending Approval
+        </span>
+        <span *ngIf="onboardingStatus === 'COMPLETED' || onboardingStatus === 'APPROVED'" class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 border border-emerald-100">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 mr-1.5"></span>
+            Onboarding: Approved
+        </span>
+        <span *ngIf="onboardingStatus === 'REJECTED'" class="inline-flex items-center rounded-full bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 border border-rose-100 animate-pulse">
+            <span class="h-1.5 w-1.5 rounded-full bg-rose-500 mr-1.5"></span>
+            Onboarding: Rejected
+        </span>
+
+        <!-- Edit/Complete Onboarding Button -->
+        <p-button *ngIf="onboardingStatus !== 'COMPLETED' && onboardingStatus !== 'APPROVED'"
+            (click)="openOnboardingDrawer()" 
+            [label]="onboardingStatus === 'NOT_STARTED' || onboardingStatus === 'REJECTED' ? 'Complete Onboarding' : 'Edit Onboarding'" 
+            icon="pi pi-user-edit"
+            styleClass="p-button-sm rounded-lg btn-add text-xs font-semibold px-3 py-1.5 shadow-sm transition-all" 
+            [raised]="true">
+        </p-button>
+        <p-button *ngIf="onboardingStatus === 'COMPLETED' || onboardingStatus === 'APPROVED'"
+            [disabled]="true"
+            label="Profile Locked" 
+            icon="pi pi-lock"
+            styleClass="p-button-sm rounded-lg p-button-secondary text-xs font-semibold px-3 py-1.5 shadow-sm" 
+            [raised]="true">
         </p-button>
     </div>
 </div>
@@ -132,6 +162,14 @@
                                     class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Gender</label>
                                 <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.gender }}
                                 </p>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Father's Name</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.fatherName || 'Not Added' }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mother's Name</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.motherName || 'Not Added' }}</p>
                             </div>
                             <div>
                                 <label
@@ -501,4 +539,135 @@
 
         </div>
     </div>
+
+    <!-- Onboarding Drawer -->
+    <p-drawer [(visible)]="showDrawer" position="right" [modal]="true" [style]="{ width: '45rem', maxWidth: '100vw' }">
+        <div class="flex flex-col h-full">
+            <div class="flex-none pb-4 border-b border-slate-200">
+                <h2 class="text-xl font-bold text-slate-800">Complete Employee Onboarding</h2>
+                <p class="text-xs text-slate-500 mt-1">Please fill in your onboarding details. These will be sent to the HR Admin for approval.</p>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto py-6 pr-1 space-y-6">
+                <form [formGroup]="onboardingForm" (ngSubmit)="submitOnboarding()" class="space-y-6">
+                    
+                    <!-- 1. Personal Details -->
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2">
+                            <i class="pi pi-user text-blue-600"></i> Personal Information
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <label class="block text-xs font-semibold text-slate-600">Father's Name *</label>
+                                <input type="text" pInputText formControlName="father_name" class="w-full p-inputtext-sm">
+                                <small *ngIf="onboardingForm.get('father_name')?.touched && onboardingForm.get('father_name')?.errors?.['required']" class="text-red-500 text-[10px]">Father's Name is required</small>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-xs font-semibold text-slate-600">Mother's Name</label>
+                                <input type="text" pInputText formControlName="mother_name" class="w-full p-inputtext-sm">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-xs font-semibold text-slate-600">Date of Birth *</label>
+                                <p-datepicker formControlName="dob" class="w-full custom-p-select" [showIcon]="true" dateFormat="yy-mm-dd"></p-datepicker>
+                                <small *ngIf="onboardingForm.get('dob')?.touched && onboardingForm.get('dob')?.errors?.['required']" class="text-red-500 text-[10px]">Date of Birth is required</small>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-xs font-semibold text-slate-600">Gender *</label>
+                                <p-select [options]="genderOptions" optionLabel="label" optionValue="value" formControlName="gender" placeholder="Select Gender" class="w-full custom-p-select"></p-select>
+                                <small *ngIf="onboardingForm.get('gender')?.touched && onboardingForm.get('gender')?.errors?.['required']" class="text-red-500 text-[10px]">Gender is required</small>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-xs font-semibold text-slate-600">Blood Group</label>
+                                <input type="text" pInputText formControlName="blood_group" placeholder="e.g. O+, A-" class="w-full p-inputtext-sm">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-xs font-semibold text-slate-600">Profile Photo URL</label>
+                                <input type="text" pInputText formControlName="profile_photo" placeholder="http://image.url" class="w-full p-inputtext-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Contact & Emergency -->
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2">
+                            <i class="pi pi-phone text-blue-600"></i> Contact & Emergency
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="sm:col-span-2 space-y-1">
+                                <label class="block text-xs font-semibold text-slate-600">Current Address *</label>
+                                <input type="text" pInputText formControlName="current_address" class="w-full p-inputtext-sm">
+                                <small *ngIf="onboardingForm.get('current_address')?.touched && onboardingForm.get('current_address')?.errors?.['required']" class="text-red-500 text-[10px]">Current Address is required</small>
+                            </div>
+                            <div class="sm:col-span-2 space-y-1">
+                                <label class="block text-xs font-semibold text-slate-600">Permanent Address</label>
+                                <input type="text" pInputText formControlName="permanent_address" class="w-full p-inputtext-sm">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-xs font-semibold text-slate-600">Emergency Contact Name</label>
+                                <input type="text" pInputText formControlName="emergency_contact_name" class="w-full p-inputtext-sm">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-xs font-semibold text-slate-600">Emergency Contact Phone *</label>
+                                <input type="text" pInputText formControlName="emergency_contact" maxlength="10" placeholder="10 digit mobile" class="w-full p-inputtext-sm">
+                                <small *ngIf="onboardingForm.get('emergency_contact')?.touched && onboardingForm.get('emergency_contact')?.errors?.['required']" class="text-red-500 text-[10px]">Emergency contact phone is required</small>
+                                <small *ngIf="onboardingForm.get('emergency_contact')?.touched && onboardingForm.get('emergency_contact')?.errors?.['pattern']" class="text-red-500 text-[10px]">Must be exactly 10 digits</small>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-xs font-semibold text-slate-600">Emergency Contact Relation</label>
+                                <input type="text" pInputText formControlName="emergency_contact_relation" placeholder="e.g. Mother, Father" class="w-full p-inputtext-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Financial & Identity -->
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2">
+                            <i class="pi pi-credit-card text-blue-600"></i> Financial & Identity
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <label class="block text-xs font-semibold text-slate-600">Bank Name *</label>
+                                <input type="text" pInputText formControlName="bank_name" class="w-full p-inputtext-sm">
+                                <small *ngIf="onboardingForm.get('bank_name')?.touched && onboardingForm.get('bank_name')?.errors?.['required']" class="text-red-500 text-[10px]">Bank Name is required</small>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-xs font-semibold text-slate-600">Account Holder Name *</label>
+                                <input type="text" pInputText formControlName="account_holder_name" class="w-full p-inputtext-sm">
+                                <small *ngIf="onboardingForm.get('account_holder_name')?.touched && onboardingForm.get('account_holder_name')?.errors?.['required']" class="text-red-500 text-[10px]">Account Holder Name is required</small>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-xs font-semibold text-slate-600">Account Number *</label>
+                                <input type="text" pInputText formControlName="account_number" class="w-full p-inputtext-sm">
+                                <small *ngIf="onboardingForm.get('account_number')?.touched && onboardingForm.get('account_number')?.errors?.['required']" class="text-red-500 text-[10px]">Account Number is required</small>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-xs font-semibold text-slate-600">IFSC Code *</label>
+                                <input type="text" pInputText formControlName="ifsc_code" class="w-full p-inputtext-sm">
+                                <small *ngIf="onboardingForm.get('ifsc_code')?.touched && onboardingForm.get('ifsc_code')?.errors?.['required']" class="text-red-500 text-[10px]">IFSC Code is required</small>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-xs font-semibold text-slate-600">PAN Number *</label>
+                                <input type="text" pInputText formControlName="pan_number" placeholder="ABCDE1234F" class="w-full p-inputtext-sm">
+                                <small *ngIf="onboardingForm.get('pan_number')?.touched && onboardingForm.get('pan_number')?.errors?.['required']" class="text-red-500 text-[10px]">PAN Number is required</small>
+                                <small *ngIf="onboardingForm.get('pan_number')?.touched && onboardingForm.get('pan_number')?.errors?.['pattern']" class="text-red-500 text-[10px]">Invalid PAN format (e.g. ABCDE1234F)</small>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-xs font-semibold text-slate-600">Aadhaar Number *</label>
+                                <input type="text" pInputText formControlName="aadhar_number" placeholder="12 digit Aadhaar" class="w-full p-inputtext-sm">
+                                <small *ngIf="onboardingForm.get('aadhar_number')?.touched && onboardingForm.get('aadhar_number')?.errors?.['required']" class="text-red-500 text-[10px]">Aadhaar Number is required</small>
+                                <small *ngIf="onboardingForm.get('aadhar_number')?.touched && onboardingForm.get('aadhar_number')?.errors?.['pattern']" class="text-red-500 text-[10px]">Must be exactly 12 digits</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-3 pt-4 border-t border-slate-200">
+                        <button type="button" pButton label="Cancel" class="flex-1 p-button-secondary p-button-sm" (click)="closeDrawer()"></button>
+                        <button type="submit" pButton [label]="loading ? 'Submitting...' : 'Submit for Approval'" class="flex-1 p-button-sm" [disabled]="loading || onboardingForm.invalid"></button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </p-drawer>
 </div>
