@@ -120,6 +120,10 @@ export class UserService {
     return this.http.put(`${this.apiUrl}/api/companies/reject/${id}`, {});
   }
 
+  deleteCompany(id: string | number) {
+    return this.http.delete(`${this.apiUrl}/api/companies/${id}`);
+  }
+
   login(username: string, password: string) {
     return this.http.post(`${this.apiUrl}/api/auth/login`, {
       username,

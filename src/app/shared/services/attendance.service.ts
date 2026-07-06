@@ -122,4 +122,8 @@ export class AttendanceService {
     return this.http.put<any>(`${this.apiBase}/api/attendance-regularization/${requestId}/status`, { status, hrRemarks });
   }
 
+  getHRDashboardSummary(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.apiBase}/api/attendance/hr-dashboard-summary`);
+  }
+
 }

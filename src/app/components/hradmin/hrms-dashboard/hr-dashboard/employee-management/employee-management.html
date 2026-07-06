@@ -1,24 +1,39 @@
-<app-breadcrumb class="employee-page-breadcrumb" [items]="breadcrumbItems"></app-breadcrumb>
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
 
 <div class="min-h-screen bg-slate-50/50 max-w-full overflow-x-hidden">
-    <div class="w-full sm:w-auto flex justify-end">
-        <button pButton type="button" label="Add Employee" icon="pi pi-plus"
-            class="orange-button p-button-warning p-button-sm w-full sm:w-auto shadow-sm" (click)="openAddDrawer()">
-        </button>
+    <!-- Page Header Inline with Breadcrumb -->
+    <div
+        class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6">
+        <div class="flex-1 min-w-0">
+            <p-breadcrumb [model]="breadcrumbItems"
+                styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
+        </div>
+        <div class="flex-none flex items-center gap-2">
+            <p-button (click)="onRefresh()" label="Synchronize" icon="pi pi-sync" [loading]="loading()"
+                styleClass="p-button-sm p-button-secondary rounded-lg" [raised]="true">
+            </p-button>
+            <p-button (click)="openAddDrawer()" label="Add Employee" icon="pi pi-plus"
+                styleClass="p-button-sm rounded-lg" [raised]="true">
+            </p-button>
+        </div>
     </div>
 
-    <!-- Page Content -->
-    <section class="space-y-4">
-        <!-- Table -->
-        <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-            <div class="w-full overflow-x-auto">
-                <app-table-template [data]="employees" [columns]="columns" [isLoading]="loading()"
-                    [tableActions]="rowActions" (actionClicked)="handleRowAction($event)" [showRefresh]="true"
-                    (refresh)="loadAllData()" [cellTemplates]="{ status: statusTpl }">
-                </app-table-template>
+    <!-- Rest of page content wrapped in a container that has padding -->
+    <div class="px-4 md:px-6 pb-6">
+        <!-- Page Content -->
+        <section class="space-y-4">
+            <!-- Table -->
+            <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+                <div class="w-full overflow-x-auto">
+                    <app-table-template [data]="employees" [columns]="columns" [isLoading]="loading()"
+                        [tableActions]="rowActions" (actionClicked)="handleRowAction($event)" [showRefresh]="true"
+                        (refresh)="loadAllData()" [cellTemplates]="{ status: statusTpl }">
+                    </app-table-template>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </div>
 
     <!-- Add/Edit Employee Drawer -->
     <p-drawer [(visible)]="showDrawer" position="right" [modal]="true" [style]="{ width: '48rem', maxWidth: '100vw' }">
@@ -157,4 +172,162 @@
             {{ item.status }}
         </span>
     </ng-template>
+
+    <!-- Onboarding Review Dialog -->
+    <p-dialog [(visible)]="showOnboardingDialog" header="Review Employee Onboarding" [modal]="true"
+        [style]="{ width: '48rem', maxWidth: '95vw' }">
+        <div *ngIf="onboardingDetails" class="space-y-6 pt-2">
+            <!-- Header Section -->
+            <div class="flex items-center justify-between border-b pb-3">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800">{{ onboardingEmployee?.fullName }}</h3>
+                    <p class="text-xs text-slate-500">Employee Code: {{ onboardingEmployee?.employeeCode }}</p>
+                </div>
+                <div>
+                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" [ngClass]="{
+                        'bg-amber-50 text-amber-700 border border-amber-100': onboardingDetails.profile_status === 'PENDING',
+                        'bg-emerald-50 text-emerald-700 border border-emerald-100': onboardingDetails.profile_status === 'COMPLETED' || onboardingDetails.profile_status === 'APPROVED',
+                        'bg-rose-50 text-rose-700 border border-rose-100': onboardingDetails.profile_status === 'REJECTED'
+                    }">
+                        <span class="h-1.5 w-1.5 rounded-full mr-1.5" [ngClass]="{
+                            'bg-amber-500': onboardingDetails.profile_status === 'PENDING',
+                            'bg-emerald-500': onboardingDetails.profile_status === 'COMPLETED' || onboardingDetails.profile_status === 'APPROVED',
+                            'bg-rose-500': onboardingDetails.profile_status === 'REJECTED'
+                        }"></span>
+                        Onboarding Status: {{ onboardingDetails.profile_status }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Onboarding Details Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[60vh] overflow-y-auto pr-1">
+                <!-- 1. Personal Information -->
+                <div class="space-y-3">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider border-b pb-1">
+                        Personal Information
+                    </h4>
+                    <div class="space-y-2">
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Father's
+                                Name</label>
+                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.father_name }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Mother's
+                                Name</label>
+                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.mother_name || 'N/A' }}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Date of
+                                Birth</label>
+                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.dob | date:'mediumDate'
+                                }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Gender</label>
+                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.gender }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Blood Group</label>
+                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.blood_group || 'N/A' }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Contact & Emergency Contacts -->
+                <div class="space-y-3">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider border-b pb-1">
+                        Contact & Emergency
+                    </h4>
+                    <div class="space-y-2">
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Current
+                                Address</label>
+                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.current_address }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Permanent
+                                Address</label>
+                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.permanent_address ||
+                                'Same as current' }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Emergency Contact
+                                Name</label>
+                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.emergency_contact_name
+                                || 'N/A' }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Emergency
+                                Phone</label>
+                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.emergency_contact }}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Emergency
+                                Relation</label>
+                            <p class="text-sm font-semibold text-slate-700">{{
+                                onboardingDetails.emergency_contact_relation || 'N/A' }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Financial & Identity (Full width row in dialog) -->
+                <div class="md:col-span-2 space-y-3 pt-2">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider border-b pb-1">
+                        Finance & Identity
+                    </h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Bank Name</label>
+                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.bank_name }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Account Holder
+                                Name</label>
+                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.account_holder_name }}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Account
+                                Number</label>
+                            <p class="text-sm font-semibold text-slate-700 font-mono">{{
+                                onboardingDetails.account_number }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">IFSC Code</label>
+                            <p class="text-sm font-semibold text-slate-700 font-mono">{{ onboardingDetails.ifsc_code }}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">PAN Card
+                                Number</label>
+                            <p class="text-sm font-semibold text-slate-700 font-mono">{{ onboardingDetails.pan_number }}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Aadhaar
+                                Number</label>
+                            <p class="text-sm font-semibold text-slate-700 font-mono">{{ onboardingDetails.aadhar_number
+                                }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Action Buttons -->
+            <div class="flex justify-end gap-3 pt-4 border-t">
+                <button pButton type="button" label="Close" class="p-button-secondary p-button-sm"
+                    (click)="showOnboardingDialog = false"></button>
+                <ng-container *ngIf="onboardingDetails.profile_status === 'PENDING'">
+                    <button pButton type="button" label="Reject" class="p-button-danger p-button-sm"
+                        (click)="rejectOnboarding()" [loading]="loading()"></button>
+                    <button pButton type="button" label="Approve" class="p-button-success p-button-sm"
+                        (click)="approveOnboarding()" [loading]="loading()"></button>
+                </ng-container>
+            </div>
+        </div>
+    </p-dialog>
 </div>

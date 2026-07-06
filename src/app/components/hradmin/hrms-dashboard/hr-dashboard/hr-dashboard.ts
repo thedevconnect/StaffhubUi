@@ -1,8 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
 import { Router } from '@angular/router';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { AttendanceService } from '../../../../shared/services/attendance.service';
+import { LeaveService } from '../../../../shared/services/leave.service';
+import { forkJoin } from 'rxjs';
 
 interface AttendanceCard {
   label: string;
@@ -39,7 +43,8 @@ interface PendingRequestItem {
 
 @Component({
   selector: 'app-hr-dashboard',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ToastModule],
+  providers: [MessageService],
   templateUrl: './hr-dashboard.html',
   styleUrl: './hr-dashboard.scss',
 })
@@ -151,31 +156,22 @@ export class HrDashboard implements OnInit {
   };
 
   // Detailed pending requests (for Pendency Tab)
-  pendingRequests: PendingRequestItem[] = [
-    { id: 'REG-001', employeeName: 'Mausam Tyagi', type: 'Regularization', details: 'Swipe In missing on July 02', date: '2026-07-02', status: 'Pending Approval' },
-    { id: 'REG-002', employeeName: 'Amit Kumar', type: 'Regularization', details: 'Late Entry regularization request', date: '2026-07-01', status: 'Pending Approval' },
-    { id: 'LEV-001', employeeName: 'Rohit Sharma', type: 'Leave', details: 'Casual Leave (2 days)', date: '2026-07-04 to 2026-07-05', status: 'Pending Approval' },
-    { id: 'LEV-002', employeeName: 'Priya Patel', type: 'Leave', details: 'Sick Leave (1 day)', date: '2026-07-03', status: 'Pending Approval' },
-    { id: 'LEV-003', employeeName: 'Sanjay Dutt', type: 'Leave', details: 'Earned Leave (3 days)', date: '2026-07-06 to 2026-07-08', status: 'Pending Approval' },
-    { id: 'LEV-004', employeeName: 'Nisha Gupta', type: 'Leave', details: 'Casual Leave (1 day)', date: '2026-07-03', status: 'Pending Approval' },
-    { id: 'LEV-005', employeeName: 'Rahul Verma', type: 'Leave', details: 'Sick Leave (2 days)', date: '2026-07-02 to 2026-07-03', status: 'Pending Approval' },
-    { id: 'LEV-006', employeeName: 'Divya Teja', type: 'Leave', details: 'Earned Leave (5 days)', date: '2026-07-10 to 2026-07-14', status: 'Pending Approval' },
-    { id: 'LEV-007', employeeName: 'Kunal Sen', type: 'Leave', details: 'Short Leave (2 hours)', date: '2026-07-03', status: 'Pending Approval' },
-    { id: 'LEV-008', employeeName: 'Vikram Seth', type: 'Leave', details: 'Casual Leave (1 day)', date: '2026-07-06', status: 'Pending Approval' },
-    { id: 'LEV-009', employeeName: 'Aditi Rao', type: 'Leave', details: 'Sick Leave (1 day)', date: '2026-07-02', status: 'Pending Approval' },
-    { id: 'ATT-001', employeeName: 'Rajesh Koothrapali', type: 'Attendance Approval', details: 'On-Duty (OD) request for client meet', date: '2026-07-03', status: 'Pending Approval' },
-    { id: 'ATT-002', employeeName: 'Penny Hofstadter', type: 'Attendance Approval', details: 'On-Duty (OD) outdoor sales', date: '2026-07-02', status: 'Pending Approval' },
-    { id: 'EXP-001', employeeName: 'Sheldon Cooper', type: 'Expense Claim', details: 'Travel allowance claim - $120', date: '2026-06-30', status: 'Pending Approval' },
-    { id: 'EXP-002', employeeName: 'Leonard Hofstadter', type: 'Expense Claim', details: 'Client lunch reimbursement - $45', date: '2026-07-01', status: 'Pending Approval' }
-  ];
+  pendingRequests: (PendingRequestItem & { raw?: any })[] = [];
+
+  attendanceService = inject(AttendanceService);
+  leaveService = inject(LeaveService);
+  messageService = inject(MessageService);
+  cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
     this.calculateDonutSegments();
+    this.loadPendencyData();
+    this.loadDashboardSummary();
   }
 
   // Calculate SVG stroke parameters for the Donut Chart
   calculateDonutSegments(): void {
-    const total = this.totalEmployees; // 147
+    const total = this.totalEmployees || 1;
     let currentOffset = 0;
     const circumference = 314.16; // 2 * pi * r (r=50)
 
@@ -196,18 +192,267 @@ export class HrDashboard implements OnInit {
     });
   }
 
+  loadDashboardSummary(): void {
+    this.attendanceService.getHRDashboardSummary().subscribe({
+      next: (res: any) => {
+        if (res && res.data) {
+          const s = res.data;
+          this.totalEmployees = s.totalEmployees;
+
+          // Update KPI cards
+          this.attendanceCards = [
+            {
+              label: 'Swipe In',
+              count: s.swipeInCount,
+              icon: 'pi-check-circle',
+              colorClass: 'text-emerald-600',
+              bgClass: 'bg-emerald-50',
+              borderClass: 'border-emerald-100 hover:border-emerald-300',
+            },
+            {
+              label: 'Not Swipe In',
+              count: Math.max(0, s.totalEmployees - s.swipeInCount - s.onLeaveCount),
+              icon: 'pi-exclamation-triangle',
+              colorClass: 'text-rose-600',
+              bgClass: 'bg-rose-50',
+              borderClass: 'border-rose-100 hover:border-rose-300',
+            },
+            {
+              label: 'On Leave',
+              count: s.onLeaveCount,
+              icon: 'pi-calendar',
+              colorClass: 'text-blue-600',
+              bgClass: 'bg-blue-50',
+              borderClass: 'border-blue-100 hover:border-blue-300',
+            },
+            {
+              label: 'OD',
+              count: s.odCount || 0,
+              icon: 'pi-briefcase',
+              colorClass: 'text-amber-700',
+              bgClass: 'bg-amber-50',
+              borderClass: 'border-amber-100 hover:border-amber-300',
+            },
+            {
+              label: 'Short Leave',
+              count: s.shortLeaveCount,
+              icon: 'pi-clock',
+              colorClass: 'text-purple-600',
+              bgClass: 'bg-purple-50',
+              borderClass: 'border-purple-100 hover:border-purple-300',
+            },
+            {
+              label: 'Swipe Out',
+              count: s.swipeOutCount,
+              icon: 'pi-sign-out',
+              colorClass: 'text-orange-600',
+              bgClass: 'bg-orange-50',
+              borderClass: 'border-orange-100 hover:border-orange-300',
+            },
+          ];
+
+          // Update Donut Chart
+          this.donutRawData = [
+            { label: 'Swipe In', value: s.swipeInCount, color: '#10b981' },
+            { label: 'Not Swipe In', value: Math.max(0, s.totalEmployees - s.swipeInCount - s.onLeaveCount), color: '#f43f5e' },
+            { label: 'OD', value: s.odCount || 0, color: '#b45309' },
+            { label: 'On Leave', value: s.onLeaveCount, color: '#3b82f6' },
+            { label: 'Short Leave', value: s.shortLeaveCount, color: '#a855f7' },
+            { label: 'Swipe Out', value: s.swipeOutCount, color: '#f97316' },
+          ];
+          this.calculateDonutSegments();
+
+          // Update Stacked Bar Chart
+          if (s.barChartData && s.barChartData.length > 0) {
+            this.barChartData = s.barChartData.map((d: any) => ({
+              day: d.day,
+              onTime: d.onTime || 0,
+              late: d.late || 0,
+              total: d.total || 0
+            }));
+            const maxVal = Math.max(...s.barChartData.map((d: any) => d.total || 0));
+            this.maxBarValue = maxVal > 0 ? maxVal + 20 : 120;
+          }
+
+          // Update Sources
+          const totalSwipes = s.mobileCount + s.desktopCount;
+          this.sources = [
+            { label: 'Desktop Swipe In', count: s.desktopCount, percentage: totalSwipes > 0 ? (s.desktopCount / totalSwipes) * 100 : 0, color: 'bg-slate-400' },
+            { label: 'Mobile Swipe In', count: s.mobileCount, percentage: totalSwipes > 0 ? (s.mobileCount / totalSwipes) * 100 : 100, color: 'bg-blue-600' },
+            { label: 'AI Swipe In', count: 0, percentage: 0, color: 'bg-indigo-600' },
+          ];
+
+          // Update Exceptions
+          this.exceptions = [
+            { label: 'Late Coming', count: s.lateComingCount, severity: 'danger', icon: 'pi-clock' },
+            { label: 'Early Swipe Out', count: s.earlyOutCount, severity: 'warning', icon: 'pi-sign-out' },
+          ];
+
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching dashboard summary:', err);
+      }
+    });
+  }
+
   setActiveTab(tab: 'dashboard' | 'pendency'): void {
     this.activeTab = tab;
+    if (tab === 'pendency') {
+      this.loadPendencyData();
+    }
+  }
+
+  loadPendencyData(): void {
+    forkJoin({
+      regularizations: this.attendanceService.getCompanyRegularizations(1, 100, 'Pending'),
+      leaves: this.leaveService.getLeaves()
+    }).subscribe({
+      next: (res: any) => {
+        const mappedRegs = (res.regularizations?.data || []).map((item: any) => ({
+          id: `REG-${item.id}`,
+          employeeName: item.employeeName,
+          type: 'Regularization',
+          details: `${item.correctionType}: ${item.reason}`,
+          date: item.attendanceDate,
+          status: 'Pending Approval',
+          raw: item
+        }));
+
+        const mappedLeaves = (res.leaves?.data || [])
+          .filter((item: any) => String(item.status).toUpperCase() === 'PENDING')
+          .map((item: any) => ({
+            id: `LEV-${item.id}`,
+            employeeName: item.employee_name || 'Unknown',
+            type: 'Leave',
+            details: `${item.leave_type}: ${item.reason || ''}`,
+            date: item.start_date === item.end_date ? item.start_date : `${item.start_date} to ${item.end_date}`,
+            status: 'Pending Approval',
+            raw: item
+          }));
+
+        this.pendingRequests = [...mappedRegs, ...mappedLeaves];
+
+        // Update counts
+        this.pendingCounts.regularization = mappedRegs.length;
+        this.pendingCounts.leave = mappedLeaves.length;
+        this.pendingCounts.total = this.pendingRequests.length;
+
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error fetching pendency data:', err);
+      }
+    });
   }
 
   approveRequest(requestId: string): void {
-    this.pendingRequests = this.pendingRequests.filter(req => req.id !== requestId);
-    this.pendingCounts.total--;
+    const item = this.pendingRequests.find(r => r.id === requestId);
+    if (!item) return;
+
+    if (requestId.startsWith('REG-')) {
+      const rawId = requestId.substring(4);
+      this.attendanceService.updateRegularizationStatus(rawId, 'Approved' as any, 'Approved via HR Dashboard').subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Approved',
+            detail: 'Regularization request approved successfully.'
+          });
+          this.loadPendencyData();
+          this.loadDashboardSummary();
+        },
+        error: (err) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.error?.message || 'Failed to approve regularization request.'
+          });
+        }
+      });
+    } else if (requestId.startsWith('LEV-')) {
+      const rawId = requestId.substring(4);
+      const raw = item.raw;
+      this.leaveService.updateLeave(rawId, {
+        leaveType: raw.leave_type,
+        startDate: raw.start_date,
+        endDate: raw.end_date,
+        reason: raw.reason,
+        status: 'APPROVED'
+      }).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Approved',
+            detail: 'Leave request approved successfully.'
+          });
+          this.loadPendencyData();
+          this.loadDashboardSummary();
+        },
+        error: (err) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.error?.message || 'Failed to approve leave request.'
+          });
+        }
+      });
+    }
   }
 
   rejectRequest(requestId: string): void {
-    this.pendingRequests = this.pendingRequests.filter(req => req.id !== requestId);
-    this.pendingCounts.total--;
+    const item = this.pendingRequests.find(r => r.id === requestId);
+    if (!item) return;
+
+    if (requestId.startsWith('REG-')) {
+      const rawId = requestId.substring(4);
+      this.attendanceService.updateRegularizationStatus(rawId, 'Rejected' as any, 'Rejected via HR Dashboard').subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Rejected',
+            detail: 'Regularization request rejected.'
+          });
+          this.loadPendencyData();
+          this.loadDashboardSummary();
+        },
+        error: (err) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.error?.message || 'Failed to reject regularization request.'
+          });
+        }
+      });
+    } else if (requestId.startsWith('LEV-')) {
+      const rawId = requestId.substring(4);
+      const raw = item.raw;
+      this.leaveService.updateLeave(rawId, {
+        leaveType: raw.leave_type,
+        startDate: raw.start_date,
+        endDate: raw.end_date,
+        reason: raw.reason,
+        status: 'REJECTED'
+      }).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Rejected',
+            detail: 'Leave request rejected.'
+          });
+          this.loadPendencyData();
+          this.loadDashboardSummary();
+        },
+        error: (err) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.error?.message || 'Failed to reject leave request.'
+          });
+        }
+      });
+    }
   }
 
   navigateToLeaveApproval(): void {

@@ -6,7 +6,9 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
 import { DrawerModule } from 'primeng/drawer';
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { MessageService, ConfirmationService } from 'primeng/api';
 
 export interface LeaveRequest {
   id: string;
@@ -30,13 +32,21 @@ export interface LeaveRequest {
     DialogModule,
     DatePickerModule,
     ButtonModule,
-    ToastModule
+    ToastModule,
+    BreadcrumbModule,
+    ConfirmDialogModule
   ],
-  providers: [MessageService],
+  providers: [MessageService, ConfirmationService],
   templateUrl: './leave-approval.html',
   styleUrl: './leave-approval.scss',
 })
 export class LeaveApproval implements OnInit {
+  breadcrumbItems: any[] = [
+    { label: 'HR Administration', icon: 'pi pi-home', routerLink: '/hradmin' },
+    { label: 'Leave Approval Center', icon: 'pi pi-calendar', routerLink: '/hradmin/leave-approval' },
+  ];
+  isLoading = false;
+
   leaveRequests: LeaveRequest[] = [
     { id: 'LEV-101', employeeName: 'Rohit Sharma', role: 'Frontend Engineer', department: 'Development', type: 'Casual Leave', duration: '2 days (2026-07-05 to 2026-07-06)', reason: 'Attending cousin\'s wedding in home town', status: 'Pending', appliedDate: '2026-07-02' },
     { id: 'LEV-102', employeeName: 'Priya Patel', role: 'UI Designer', department: 'Design', type: 'Sick Leave', duration: '1 day (2026-07-03)', reason: 'Severe headache and viral fever', status: 'Pending', appliedDate: '2026-07-03' },
@@ -53,6 +63,18 @@ export class LeaveApproval implements OnInit {
   constructor(private messageService: MessageService) {}
 
   ngOnInit(): void {}
+
+  onRefresh(): void {
+    this.isLoading = true;
+    setTimeout(() => {
+      this.isLoading = false;
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Synchronized',
+        detail: 'Leave applications successfully synchronized.'
+      });
+    }, 800);
+  }
 
   get pendingCount() {
     return this.leaveRequests.filter(r => r.status === 'Pending').length;
