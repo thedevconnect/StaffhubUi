@@ -1,0 +1,108 @@
+<div class="data-table-container">
+  <!-- Top Toolbar -->
+  <div class="table-toolbar">
+    <div class="toolbar-left">
+      <!-- Title or other left items can go here if needed -->
+    </div>
+    <div class="toolbar-right">
+      <button class="icon-btn btn-refresh" (click)="handleRefresh()" title="Refresh">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-repeat"
+          viewBox="0 0 16 16">
+          <path
+            d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z" />
+          <path fill-rule="evenodd"
+            d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z" />
+        </svg>
+      </button>
+
+      <button class="icon-btn btn-excel" (click)="handleExportExcel()" title="Export to Excel">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#28a745"
+          class="bi bi-file-earmark-spreadsheet" viewBox="0 0 16 16">
+          <path
+            d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V9H3V2a1 1 0 0 1 1-1h5.5v2zM3 12v-2h2v2H3zm0 1h2v2H4a1 1 0 0 1-1-1v-1zm3 2v-2h3v2H6zm4 0v-2h3v1a1 1 0 0 1-1 1h-2zm3-3h-3v-2h3v2zm-7 0v-2h3v2H6z" />
+        </svg>
+      </button>
+
+      <div class="search-box">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#888" class="bi bi-search search-icon"
+          viewBox="0 0 16 16">
+          <path
+            d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
+        </svg>
+        <input type="text" placeholder="Search" [(ngModel)]="searchText" (ngModelChange)="handleSearch()" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-responsive">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th *ngFor="let col of columns">{{ col.header }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of data">
+          <td *ngFor="let col of columns">
+            <ng-container [ngSwitch]="col.type">
+              <!-- Image Column -->
+              <ng-container *ngSwitchCase="'image'">
+                <img [src]="row[col.key]" alt="img" class="td-image" />
+              </ng-container>
+
+              <!-- Status Column -->
+              <ng-container *ngSwitchCase="'status'">
+                <span class="status-badge" [class.active]="row[col.key] === 'Active'">
+                  {{ row[col.key] }}
+                </span>
+              </ng-container>
+
+              <!-- Default Text -->
+              <ng-container *ngSwitchDefault>
+                {{ row[col.key] }}
+              </ng-container>
+            </ng-container>
+          </td>
+        </tr>
+
+        <!-- Empty State -->
+        <tr *ngIf="data.length === 0">
+          <td [attr.colspan]="columns.length" class="text-center empty-state">
+            No records found
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination Footer -->
+  <div class="table-footer" *ngIf="totalItems > 0">
+    <div class="pagination-left">
+      <select class="page-size-select" [value]="itemsPerPage" (change)="onPageSizeSelect($event)">
+        <option *ngFor="let size of itemsPerPageOptions" [value]="size">{{ size }}</option>
+      </select>
+      <span class="showing-text">Showing {{ startIndex }} - {{ endIndex }} of {{ totalItems }}</span>
+    </div>
+
+    <div class="pagination-right">
+      <ul class="pagination">
+        <li class="page-item" [class.disabled]="currentPage === 1">
+          <a class="page-link" (click)="setPage(currentPage - 1)">
+            &laquo; Previous
+          </a>
+        </li>
+
+        <li class="page-item" *ngFor="let page of pages" [class.active]="currentPage === page">
+          <a class="page-link" (click)="setPage(page)">{{ page }}</a>
+        </li>
+
+        <li class="page-item" [class.disabled]="currentPage === totalPages">
+          <a class="page-link" (click)="setPage(currentPage + 1)">
+            Next &raquo;
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

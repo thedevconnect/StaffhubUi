@@ -89,13 +89,15 @@ export class EmployeeManagement implements OnInit {
   ];
 
   designationOptions = [
-    { label: 'Software Engineer', value: 'Software Engineer' },
-    { label: 'Senior Software Engineer', value: 'Senior Software Engineer' },
-    { label: 'Team Lead', value: 'Team Lead' },
-    { label: 'HR Executive', value: 'HR Executive' },
-    { label: 'HR Manager', value: 'HR Manager' },
-    { label: 'Accounts Executive', value: 'Accounts Executive' },
-    { label: 'Operations Executive', value: 'Operations Executive' }
+    { label: 'Software Engineer', value: 'Software-Engineer' },
+    { label: 'Junior Software Engineer', value: 'Junior-Software-Engineer' },
+    { label: 'Senior Software Engineer', value: 'Senior-Software-Engineer' },
+    { label: 'Team Lead', value: 'Team-Lead' },
+    { label: 'QA Engineer', value: 'QA-Engineer' },
+    { label: 'HR Executive', value: 'HR-Executive' },
+    { label: 'Accounts Executive', value: 'Accounts-Executive' },
+    { label: 'Operations Executive', value: 'Operations-Executive' },
+
   ];
 
   employmentTypeOptions = [
@@ -109,10 +111,18 @@ export class EmployeeManagement implements OnInit {
   workLocationOptions = [
     { label: 'Office', value: 'OFFICE' },
     { label: 'Remote', value: 'REMOTE' },
-    { label: 'Hybrid', value: 'HYBRID' }
+    { label: 'Hybrid', value: 'HYBRID' },
   ];
 
-
+  departmentOptions = [
+    { label: 'HR', value: 'HR' },
+    { label: 'Business Development', value: 'Business-Development' },
+    { label: 'Finance', value: 'Finance' },
+    { label: 'IT', value: 'IT' },
+    { label: 'Sales', value: 'Sales' },
+    { label: 'Marketing', value: 'Marketing' },
+    { label: 'Operations', value: 'Operations' },
+  ];
 
   showDrawer = false;
   isViewMode = false;
@@ -166,6 +176,19 @@ export class EmployeeManagement implements OnInit {
   closeDrawer(): void {
     this.showDrawer = false;
     this.selectedEmployee = null;
+  }
+
+  onEmailInput(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    let value = inputElement.value;
+    
+    if (value.endsWith('@')) {
+      value = value + 'gmail.com';
+      const emailControl = this.employeeForm.get('officialEmail');
+      if (emailControl) {
+        emailControl.setValue(value);
+      }
+    }
   }
 
   saveEmployee(): void {
@@ -365,7 +388,7 @@ export class EmployeeManagement implements OnInit {
 
   private getPayloadFromForm(): CreateEmployeeRequest {
     const formValue = this.employeeForm.getRawValue();
-    const reportingManagerName = this.normalizeApiText(formValue.reportingManager);
+    const reportingManagerName = String(formValue.reportingManager || '').trim();
     const reportingManagerId = this.resolveReportingManagerId(reportingManagerName);
 
     return {
@@ -377,7 +400,7 @@ export class EmployeeManagement implements OnInit {
       reportingManager: reportingManagerName,
       reportingManagerName: reportingManagerName,
       reporting_manager_name: reportingManagerName,
-      reportingManagerId,
+      reportingManagerId: reportingManagerId,
       reporting_manager_id: reportingManagerId,
       joiningDate: this.toApiDate(formValue.joiningDate),
       employmentType: this.normalizeEmploymentType(formValue.employmentType),
@@ -440,10 +463,6 @@ export class EmployeeManagement implements OnInit {
     const source = err?.error;
     const rawError = source?.error;
 
-    if (typeof rawError === 'string' && rawError.toLowerCase().includes("duplicate entry") && rawError.includes("users.emp_id")) {
-      return 'Reporting manager already exists. Please enter existing reporting manager name exactly or select a different manager.';
-    }
-
     if (typeof source === 'string') {
       return source;
     }
@@ -480,7 +499,7 @@ export class EmployeeManagement implements OnInit {
   openOnboardingDialog(employee: Employee): void {
     this.onboardingEmployee = employee;
     const empId = employee.employeeId || employee.id;
-    
+
     this.loading.set(true);
     this.onboardingService.getOnboardingByEmployeeId(empId).subscribe({
       next: (res: any) => {
@@ -558,6 +577,7 @@ export class EmployeeManagement implements OnInit {
       }
     });
   }
+
 
   onRefresh(): void {
     this.loadAllData();

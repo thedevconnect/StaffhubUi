@@ -59,6 +59,17 @@ export class Profile implements OnInit {
     { label: 'Other', value: 'OTHER' }
   ];
 
+  bloodGroupOptions = [
+    { label: 'A+', value: 'A+' },
+    { label: 'A-', value: 'A-' },
+    { label: 'B+', value: 'B+' },
+    { label: 'B-', value: 'B-' },
+    { label: 'AB+', value: 'AB+' },
+    { label: 'AB-', value: 'AB-' },
+    { label: 'O+', value: 'O+' },
+    { label: 'O-', value: 'O-' }
+  ];
+
   profileData: any = {
     personal: {
       fullName: 'Avika Tyagi',
