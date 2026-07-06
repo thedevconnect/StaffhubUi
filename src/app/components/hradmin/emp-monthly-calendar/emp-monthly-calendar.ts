@@ -21,6 +21,7 @@ export interface CalendarDay {
   date: number | null;
   status: string;
   colorClass: string;
+  swipeInTime?: string;
 }
 
 @Component({
@@ -48,7 +49,7 @@ export class EmpMonthlyCalendar implements OnInit {
 
   employees: Employee[] = [];
   selectedEmployee!: Employee;
-  currentDate = new Date(2026, 5, 1); // June 2026 as per screenshot
+  currentDate = new Date();
   weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   calendarDays: CalendarDay[] = [];
 
@@ -166,40 +167,55 @@ export class EmpMonthlyCalendar implements OnInit {
       gridDays.push({ date: null, status: '', colorClass: '' });
     }
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     // Days of current month
     for (let day = 1; day <= totalDays; day++) {
-      let status = 'P'; // Default Present
-      let colorClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      let status = '';
+      let colorClass = '';
+      let swipeInTime = undefined;
 
       const dateObj = new Date(year, month, day);
-      const isSunday = dateObj.getDay() === 0;
-      const isSaturday = dateObj.getDay() === 6;
+      
+      if (dateObj <= today) {
+        status = 'P'; // Default Present
+        colorClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
 
-      if (isSunday) {
-        status = 'WO'; // Weekly Off
-        colorClass = 'bg-slate-50 text-slate-400 border-slate-200';
-      } else if (isSaturday) {
-        status = 'WO'; // Alternating or half-day, let's say Weekly Off for simplicity
-        colorClass = 'bg-slate-50 text-slate-400 border-slate-200';
-      } else {
-        // Randomly scatter a few absences, half-days or leaves to make demo realistic
-        const val = (day * 17) % 30;
-        if (val === 5) {
-          status = 'A';
-          colorClass = 'bg-rose-50 text-rose-700 border-rose-200';
-        } else if (val === 12) {
-          status = 'L';
-          colorClass = 'bg-amber-50 text-amber-700 border-amber-200';
-        } else if (val === 18) {
-          status = 'HD';
-          colorClass = 'bg-purple-50 text-purple-700 border-purple-200';
+        if (dateObj.getTime() === today.getTime()) {
+          swipeInTime = '09:30 AM';
+        }
+
+        const isSunday = dateObj.getDay() === 0;
+        const isSaturday = dateObj.getDay() === 6;
+
+        if (isSunday) {
+          status = 'WO'; // Weekly Off
+          colorClass = 'bg-slate-50 text-slate-400 border-slate-200';
+        } else if (isSaturday) {
+          status = 'WO'; // Alternating or half-day, let's say Weekly Off for simplicity
+          colorClass = 'bg-slate-50 text-slate-400 border-slate-200';
+        } else {
+          // Randomly scatter a few absences, half-days or leaves to make demo realistic
+          const val = (day * 17) % 30;
+          if (val === 5) {
+            status = 'A';
+            colorClass = 'bg-rose-50 text-rose-700 border-rose-200';
+          } else if (val === 12) {
+            status = 'L';
+            colorClass = 'bg-amber-50 text-amber-700 border-amber-200';
+          } else if (val === 18) {
+            status = 'HD';
+            colorClass = 'bg-purple-50 text-purple-700 border-purple-200';
+          }
         }
       }
 
       gridDays.push({
         date: day,
         status: status,
-        colorClass: colorClass
+        colorClass: colorClass,
+        swipeInTime: swipeInTime
       });
     }
 

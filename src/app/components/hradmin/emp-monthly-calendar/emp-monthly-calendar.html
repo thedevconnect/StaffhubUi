@@ -120,8 +120,11 @@
                     <span *ngIf="cell.date === null"></span>
 
                     <!-- Status Indicator Badge (Centered at bottom) -->
-                    <div *ngIf="cell.date !== null" class="flex justify-center mt-auto">
-                        <span
+                    <div *ngIf="cell.date !== null" class="flex flex-col items-center justify-end mt-auto gap-1">
+                        <span *ngIf="cell.swipeInTime" class="text-[9px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                            IN: {{ cell.swipeInTime }}
+                        </span>
+                        <span *ngIf="cell.status"
                             class="px-3 py-1 rounded-lg text-[10px] font-black tracking-wide border uppercase shadow-sm flex items-center justify-center min-w-[36px]"
                             [class]="cell.colorClass">
                             {{ cell.status }}

@@ -113,7 +113,7 @@ export class AppHeader {
           detail: 'You have been successfully logged out.',
           life: 4000
         });
-        this.router.navigate(['/login']);
+        this.router.navigate(['/landing']);
         this.onLogout.emit();
       }
     });
