@@ -3,7 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { MessageService, ConfirmationService, MenuItem } from 'primeng/api';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { ButtonModule } from 'primeng/button';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { AttendanceService } from '../../../../shared/services/attendance.service';
 import { LeaveService } from '../../../../shared/services/leave.service';
 import { forkJoin } from 'rxjs';
@@ -43,8 +46,8 @@ interface PendingRequestItem {
 
 @Component({
   selector: 'app-hr-dashboard',
-  imports: [CommonModule, FormsModule, ToastModule],
-  providers: [MessageService],
+  imports: [CommonModule, FormsModule, ToastModule, BreadcrumbModule, ButtonModule, ConfirmDialogModule],
+  providers: [MessageService, ConfirmationService],
   templateUrl: './hr-dashboard.html',
   styleUrl: './hr-dashboard.scss',
 })
@@ -56,6 +59,10 @@ export class HrDashboard implements OnInit {
 
   // Total headcount in statistics
   totalEmployees = 147;
+
+  breadcrumbItems: MenuItem[] = [{ label: 'HR Dashboard' }];
+  isLoading = false;
+  confirmationService = inject(ConfirmationService);
 
   // KPI cards
   attendanceCards: AttendanceCard[] = [
@@ -167,6 +174,18 @@ export class HrDashboard implements OnInit {
     this.calculateDonutSegments();
     this.loadPendencyData();
     this.loadDashboardSummary();
+  }
+
+  onRefresh(): void {
+    this.isLoading = true;
+    this.loadDashboardSummary();
+    this.loadPendencyData();
+    
+    // Simulate slight delay for visual feedback if API is too fast
+    setTimeout(() => {
+      this.isLoading = false;
+      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Dashboard synchronized successfully' });
+    }, 600);
   }
 
   // Calculate SVG stroke parameters for the Donut Chart

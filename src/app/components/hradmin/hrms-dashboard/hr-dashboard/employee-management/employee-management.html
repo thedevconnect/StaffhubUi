@@ -1,333 +1,328 @@
 <p-toast></p-toast>
 <p-confirmDialog></p-confirmDialog>
 
-<div class="min-h-screen bg-slate-50/50 max-w-full overflow-x-hidden">
-    <!-- Page Header Inline with Breadcrumb -->
-    <div
-        class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6">
-        <div class="flex-1 min-w-0">
-            <p-breadcrumb [model]="breadcrumbItems"
-                styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
-        </div>
-        <div class="flex-none flex items-center gap-2">
-            <p-button (click)="onRefresh()" label="Synchronize" icon="pi pi-sync" [loading]="loading()"
-                styleClass="p-button-sm p-button-secondary rounded-lg" [raised]="true">
-            </p-button>
-            <p-button (click)="openAddDrawer()" label="Add Employee" icon="pi pi-plus"
-                styleClass="p-button-sm rounded-lg" [raised]="true">
-            </p-button>
-        </div>
+<!-- Page Header Inline with Breadcrumb -->
+<div
+    class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6">
+    <div class="flex-1 min-w-0">
+        <p-breadcrumb [model]="breadcrumbItems"
+            styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
     </div>
+    <div class="flex-none flex items-center gap-2">
 
-    <!-- Rest of page content wrapped in a container that has padding -->
-    <div class="px-4 md:px-6 pb-6">
-        <!-- Page Content -->
-        <section class="space-y-4">
-            <!-- Table -->
-            <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-                <div class="w-full overflow-x-auto">
-                    <app-table-template [data]="employees" [columns]="columns" [isLoading]="loading()"
-                        [tableActions]="rowActions" (actionClicked)="handleRowAction($event)" [showRefresh]="true"
-                        (refresh)="loadAllData()" [cellTemplates]="{ status: statusTpl }">
-                    </app-table-template>
-                </div>
-            </div>
-        </section>
+        <p-button (click)="openAddDrawer()" label="Add Employee" icon="pi pi-plus" styleClass="p-button-sm rounded-lg"
+            [raised]="true">
+        </p-button>
     </div>
+</div>
 
-    <!-- Add/Edit Employee Drawer -->
-    <p-drawer [(visible)]="showDrawer" position="right" [modal]="true" [style]="{ width: '48rem', maxWidth: '100vw' }">
-        <h2 class="mb-4 text-xl font-semibold text-gray-800">
-            {{ isViewMode ? 'View Employee' : (isEditMode ? 'Edit Employee' : 'Add New Employee') }}
-        </h2>
-
-        <form [formGroup]="employeeForm" (ngSubmit)="saveEmployee()" class="space-y-4 pb-2">
-
-            @if (selectedEmployee?.emp_id || selectedEmployee?.employeeCode) {
-            <div class="space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
-                <label class="block text-sm font-medium text-gray-700">Employee Code</label>
-                <input type="text" pInputText [value]="selectedEmployee?.emp_id || selectedEmployee?.employeeCode"
-                    class="w-full" readonly>
+<div class="space-y-6">
+    <!-- Page Content -->
+    <section class="space-y-4">
+        <!-- Table -->
+        <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+            <div class="w-full overflow-x-auto">
+                <app-table-template [data]="employees" [columns]="columns" [isLoading]="loading()"
+                    [tableActions]="rowActions" (actionClicked)="handleRowAction($event)" [showRefresh]="true"
+                    (refresh)="loadAllData()" [cellTemplates]="{ status: statusTpl }">
+                </app-table-template>
             </div>
-            }
+        </div>
+    </section>
+</div>
 
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div class="space-y-2 md:col-span-2">
-                    <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name *</label>
-                    <input id="fullName" type="text" pInputText formControlName="fullName" class="w-full">
-                    @if (f['fullName'].touched && f['fullName'].invalid) {
-                    <small class="text-red-500">Full Name is required.</small>
-                    }
-                </div>
+<!-- Add/Edit Employee Drawer -->
+<p-drawer [(visible)]="showDrawer" position="right" [modal]="true" [style]="{ width: '48rem', maxWidth: '100vw' }">
+    <h2 class="mb-4 text-xl font-semibold text-gray-800">
+        {{ isViewMode ? 'View Employee' : (isEditMode ? 'Edit Employee' : 'Add New Employee') }}
+    </h2>
 
-                <div class="space-y-2 md:col-span-2">
-                    <label for="officialEmail" class="block text-sm font-medium text-gray-700">Official Email *</label>
-                    <input id="officialEmail" type="email" pInputText formControlName="officialEmail" class="w-full">
-                    @if (f['officialEmail'].touched && f['officialEmail'].hasError('required')) {
-                    <small class="text-red-500">Official Email is required.</small>
-                    }
-                    @if (f['officialEmail'].touched && f['officialEmail'].hasError('email')) {
-                    <small class="text-red-500">Please enter a valid email address.</small>
-                    }
-                </div>
+    <form [formGroup]="employeeForm" (ngSubmit)="saveEmployee()" class="space-y-4 pb-2">
 
-                <div class="space-y-2">
-                    <label for="mobileNumber" class="block text-sm font-medium text-gray-700">Mobile Number *</label>
-                    <input id="mobileNumber" type="tel" pInputText formControlName="mobileNumber" maxlength="10"
-                        class="w-full">
-                    @if (f['mobileNumber'].touched && f['mobileNumber'].hasError('required')) {
-                    <small class="text-red-500">Mobile Number is required.</small>
-                    }
-                    @if (f['mobileNumber'].touched && f['mobileNumber'].hasError('pattern')) {
-                    <small class="text-red-500">Mobile Number must be 10 digits.</small>
-                    }
-                </div>
+        @if (selectedEmployee?.emp_id || selectedEmployee?.employeeCode) {
+        <div class="space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <label class="block text-sm font-medium text-gray-700">Employee Code</label>
+            <input type="text" pInputText [value]="selectedEmployee?.emp_id || selectedEmployee?.employeeCode"
+                class="w-full" readonly>
+        </div>
+        }
 
-                <div class="space-y-2">
-                    <label for="designation" class="block text-sm font-medium text-gray-700">Designation *</label>
-                    <p-select id="designation" [options]="designationOptions" optionLabel="label" optionValue="value"
-                        formControlName="designation" placeholder="Select designation" [filter]="true"
-                        class="w-full custom-p-select"></p-select>
-                    @if (f['designation'].touched && f['designation'].invalid) {
-                    <small class="text-red-500">Designation is required.</small>
-                    }
-                </div>
-
-                <div class="space-y-2">
-                    <label for="department" class="block text-sm font-medium text-gray-700">Department *</label>
-                    <input id="department" type="text" pInputText formControlName="department" class="w-full">
-                    @if (f['department'].touched && f['department'].invalid) {
-                    <small class="text-red-500">Department is required.</small>
-                    }
-                </div>
-
-                <div class="space-y-2">
-                    <label for="reportingManager" class="block text-sm font-medium text-gray-700">Reporting Manager Name
-                        *</label>
-                    <input id="reportingManager" type="text" pInputText formControlName="reportingManager"
-                        class="w-full" placeholder="Enter reporting manager name">
-                    @if (f['reportingManager'].touched && f['reportingManager'].invalid) {
-                    <small class="text-red-500">Reporting Manager Name is required.</small>
-                    }
-                </div>
-
-                <div class="space-y-2">
-                    <label for="joiningDate" class="block text-sm font-medium text-gray-700">Joining Date *</label>
-                    <p-datepicker id="joiningDate" formControlName="joiningDate" class="w-full" [showIcon]="true"
-                        [showButtonBar]="true" dateFormat="yy-mm-dd"></p-datepicker>
-                    @if (f['joiningDate'].touched && f['joiningDate'].invalid) {
-                    <small class="text-red-500">Joining Date is required.</small>
-                    }
-                </div>
-
-                <div class="space-y-2">
-                    <label for="employmentType" class="block text-sm font-medium text-gray-700">Employment Type
-                        *</label>
-                    <p-select id="employmentType" [options]="employmentTypeOptions" optionLabel="label"
-                        optionValue="value" formControlName="employmentType" placeholder="Select employment type"
-                        class="w-full custom-p-select"></p-select>
-                    @if (f['employmentType'].touched && f['employmentType'].invalid) {
-                    <small class="text-red-500">Employment Type is required.</small>
-                    }
-                </div>
-
-                <div class="space-y-2">
-                    <label for="workLocation" class="block text-sm font-medium text-gray-700">Work Location *</label>
-                    <p-select id="workLocation" [options]="workLocationOptions" optionLabel="label" optionValue="value"
-                        formControlName="workLocation" placeholder="Select work location"
-                        class="w-full custom-p-select"></p-select>
-                    @if (f['workLocation'].touched && f['workLocation'].invalid) {
-                    <small class="text-red-500">Work Location is required.</small>
-                    }
-                </div>
-            </div>
-
-            <div class="flex gap-3">
-                <button type="button" pButton pRipple label="Cancel" class="flex-1 p-button-secondary"
-                    (click)="closeDrawer()"></button>
-                @if (!isViewMode) {
-                <button type="submit" pButton pRipple [label]="isEditMode ? 'Update' : 'Save'" class="flex-1"
-                    [loading]="loading()" [disabled]="loading()">
-                </button>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div class="space-y-2 md:col-span-2">
+                <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name *</label>
+                <input id="fullName" type="text" pInputText formControlName="fullName" class="w-full">
+                @if (f['fullName'].touched && f['fullName'].invalid) {
+                <small class="text-red-500">Full Name is required.</small>
                 }
             </div>
-        </form>
-    </p-drawer>
 
-    <p-toast></p-toast>
-    <p-confirmDialog [style]="{ width: '25vw' }"></p-confirmDialog>
+            <div class="space-y-2 md:col-span-2">
+                <label for="officialEmail" class="block text-sm font-medium text-gray-700">Official Email *</label>
+                <input id="officialEmail" type="email" pInputText formControlName="officialEmail" class="w-full">
+                @if (f['officialEmail'].touched && f['officialEmail'].hasError('required')) {
+                <small class="text-red-500">Official Email is required.</small>
+                }
+                @if (f['officialEmail'].touched && f['officialEmail'].hasError('email')) {
+                <small class="text-red-500">Please enter a valid email address.</small>
+                }
+            </div>
 
-    <!-- Custom Cell Templates -->
-    <ng-template #statusTpl let-item>
-        <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold" [ngClass]="{
+            <div class="space-y-2">
+                <label for="mobileNumber" class="block text-sm font-medium text-gray-700">Mobile Number *</label>
+                <input id="mobileNumber" type="tel" pInputText formControlName="mobileNumber" maxlength="10"
+                    class="w-full">
+                @if (f['mobileNumber'].touched && f['mobileNumber'].hasError('required')) {
+                <small class="text-red-500">Mobile Number is required.</small>
+                }
+                @if (f['mobileNumber'].touched && f['mobileNumber'].hasError('pattern')) {
+                <small class="text-red-500">Mobile Number must be 10 digits.</small>
+                }
+            </div>
+
+            <div class="space-y-2">
+                <label for="designation" class="block text-sm font-medium text-gray-700">Designation *</label>
+                <p-select id="designation" [options]="designationOptions" optionLabel="label" optionValue="value"
+                    formControlName="designation" placeholder="Select designation" [filter]="true"
+                    class="w-full custom-p-select"></p-select>
+                @if (f['designation'].touched && f['designation'].invalid) {
+                <small class="text-red-500">Designation is required.</small>
+                }
+            </div>
+
+            <div class="space-y-2">
+                <label for="department" class="block text-sm font-medium text-gray-700">Department *</label>
+                <input id="department" type="text" pInputText formControlName="department" class="w-full">
+                @if (f['department'].touched && f['department'].invalid) {
+                <small class="text-red-500">Department is required.</small>
+                }
+            </div>
+
+            <div class="space-y-2">
+                <label for="reportingManager" class="block text-sm font-medium text-gray-700">Reporting Manager Name
+                    *</label>
+                <input id="reportingManager" type="text" pInputText formControlName="reportingManager" class="w-full"
+                    placeholder="Enter reporting manager name">
+                @if (f['reportingManager'].touched && f['reportingManager'].invalid) {
+                <small class="text-red-500">Reporting Manager Name is required.</small>
+                }
+            </div>
+
+            <div class="space-y-2">
+                <label for="joiningDate" class="block text-sm font-medium text-gray-700">Joining Date *</label>
+                <p-datepicker id="joiningDate" formControlName="joiningDate" class="w-full" [showIcon]="true"
+                    [showButtonBar]="true" dateFormat="yy-mm-dd"></p-datepicker>
+                @if (f['joiningDate'].touched && f['joiningDate'].invalid) {
+                <small class="text-red-500">Joining Date is required.</small>
+                }
+            </div>
+
+            <div class="space-y-2">
+                <label for="employmentType" class="block text-sm font-medium text-gray-700">Employment Type
+                    *</label>
+                <p-select id="employmentType" [options]="employmentTypeOptions" optionLabel="label" optionValue="value"
+                    formControlName="employmentType" placeholder="Select employment type"
+                    class="w-full custom-p-select"></p-select>
+                @if (f['employmentType'].touched && f['employmentType'].invalid) {
+                <small class="text-red-500">Employment Type is required.</small>
+                }
+            </div>
+
+            <div class="space-y-2">
+                <label for="workLocation" class="block text-sm font-medium text-gray-700">Work Location *</label>
+                <p-select id="workLocation" [options]="workLocationOptions" optionLabel="label" optionValue="value"
+                    formControlName="workLocation" placeholder="Select work location"
+                    class="w-full custom-p-select"></p-select>
+                @if (f['workLocation'].touched && f['workLocation'].invalid) {
+                <small class="text-red-500">Work Location is required.</small>
+                }
+            </div>
+        </div>
+
+        <div class="flex gap-3">
+            <button type="button" pButton pRipple label="Cancel" class="flex-1 p-button-secondary"
+                (click)="closeDrawer()"></button>
+            @if (!isViewMode) {
+            <button type="submit" pButton pRipple [label]="isEditMode ? 'Update' : 'Save'" class="flex-1"
+                [loading]="loading()" [disabled]="loading()">
+            </button>
+            }
+        </div>
+    </form>
+</p-drawer>
+
+<p-toast></p-toast>
+<p-confirmDialog [style]="{ width: '25vw' }"></p-confirmDialog>
+
+<!-- Custom Cell Templates -->
+<ng-template #statusTpl let-item>
+    <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold" [ngClass]="{
                 'bg-emerald-50 text-emerald-700 border border-emerald-100': item.status === 'ACTIVE',
                 'bg-rose-50 text-rose-700 border border-rose-100': item.status === 'INACTIVE',
                 'bg-amber-50 text-amber-700 border border-amber-100': item.status === 'PENDING'
             }">
-            <span class="h-1.5 w-1.5 rounded-full" [ngClass]="{
+        <span class="h-1.5 w-1.5 rounded-full" [ngClass]="{
                     'bg-emerald-500': item.status === 'ACTIVE',
                     'bg-rose-500': item.status === 'INACTIVE',
                     'bg-amber-500': item.status === 'PENDING'
                 }"></span>
-            {{ item.status }}
-        </span>
-    </ng-template>
+        {{ item.status }}
+    </span>
+</ng-template>
 
-    <!-- Onboarding Review Dialog -->
-    <p-dialog [(visible)]="showOnboardingDialog" header="Review Employee Onboarding" [modal]="true"
-        [style]="{ width: '48rem', maxWidth: '95vw' }">
-        <div *ngIf="onboardingDetails" class="space-y-6 pt-2">
-            <!-- Header Section -->
-            <div class="flex items-center justify-between border-b pb-3">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-800">{{ onboardingEmployee?.fullName }}</h3>
-                    <p class="text-xs text-slate-500">Employee Code: {{ onboardingEmployee?.employeeCode }}</p>
-                </div>
-                <div>
-                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" [ngClass]="{
+<!-- Onboarding Review Dialog -->
+<p-dialog [(visible)]="showOnboardingDialog" header="Review Employee Onboarding" [modal]="true"
+    [style]="{ width: '48rem', maxWidth: '95vw' }">
+    <div *ngIf="onboardingDetails" class="space-y-6 pt-2">
+        <!-- Header Section -->
+        <div class="flex items-center justify-between border-b pb-3">
+            <div>
+                <h3 class="text-lg font-bold text-slate-800">{{ onboardingEmployee?.fullName }}</h3>
+                <p class="text-xs text-slate-500">Employee Code: {{ onboardingEmployee?.employeeCode }}</p>
+            </div>
+            <div>
+                <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" [ngClass]="{
                         'bg-amber-50 text-amber-700 border border-amber-100': onboardingDetails.profile_status === 'PENDING',
                         'bg-emerald-50 text-emerald-700 border border-emerald-100': onboardingDetails.profile_status === 'COMPLETED' || onboardingDetails.profile_status === 'APPROVED',
                         'bg-rose-50 text-rose-700 border border-rose-100': onboardingDetails.profile_status === 'REJECTED'
                     }">
-                        <span class="h-1.5 w-1.5 rounded-full mr-1.5" [ngClass]="{
+                    <span class="h-1.5 w-1.5 rounded-full mr-1.5" [ngClass]="{
                             'bg-amber-500': onboardingDetails.profile_status === 'PENDING',
                             'bg-emerald-500': onboardingDetails.profile_status === 'COMPLETED' || onboardingDetails.profile_status === 'APPROVED',
                             'bg-rose-500': onboardingDetails.profile_status === 'REJECTED'
                         }"></span>
-                        Onboarding Status: {{ onboardingDetails.profile_status }}
-                    </span>
-                </div>
-            </div>
-
-            <!-- Onboarding Details Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[60vh] overflow-y-auto pr-1">
-                <!-- 1. Personal Information -->
-                <div class="space-y-3">
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider border-b pb-1">
-                        Personal Information
-                    </h4>
-                    <div class="space-y-2">
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Father's
-                                Name</label>
-                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.father_name }}</p>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Mother's
-                                Name</label>
-                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.mother_name || 'N/A' }}
-                            </p>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Date of
-                                Birth</label>
-                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.dob | date:'mediumDate'
-                                }}</p>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Gender</label>
-                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.gender }}</p>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Blood Group</label>
-                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.blood_group || 'N/A' }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. Contact & Emergency Contacts -->
-                <div class="space-y-3">
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider border-b pb-1">
-                        Contact & Emergency
-                    </h4>
-                    <div class="space-y-2">
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Current
-                                Address</label>
-                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.current_address }}</p>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Permanent
-                                Address</label>
-                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.permanent_address ||
-                                'Same as current' }}</p>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Emergency Contact
-                                Name</label>
-                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.emergency_contact_name
-                                || 'N/A' }}</p>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Emergency
-                                Phone</label>
-                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.emergency_contact }}
-                            </p>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Emergency
-                                Relation</label>
-                            <p class="text-sm font-semibold text-slate-700">{{
-                                onboardingDetails.emergency_contact_relation || 'N/A' }}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3. Financial & Identity (Full width row in dialog) -->
-                <div class="md:col-span-2 space-y-3 pt-2">
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider border-b pb-1">
-                        Finance & Identity
-                    </h4>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Bank Name</label>
-                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.bank_name }}</p>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Account Holder
-                                Name</label>
-                            <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.account_holder_name }}
-                            </p>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Account
-                                Number</label>
-                            <p class="text-sm font-semibold text-slate-700 font-mono">{{
-                                onboardingDetails.account_number }}</p>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">IFSC Code</label>
-                            <p class="text-sm font-semibold text-slate-700 font-mono">{{ onboardingDetails.ifsc_code }}
-                            </p>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">PAN Card
-                                Number</label>
-                            <p class="text-sm font-semibold text-slate-700 font-mono">{{ onboardingDetails.pan_number }}
-                            </p>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 uppercase">Aadhaar
-                                Number</label>
-                            <p class="text-sm font-semibold text-slate-700 font-mono">{{ onboardingDetails.aadhar_number
-                                }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Footer Action Buttons -->
-            <div class="flex justify-end gap-3 pt-4 border-t">
-                <button pButton type="button" label="Close" class="p-button-secondary p-button-sm"
-                    (click)="showOnboardingDialog = false"></button>
-                <ng-container *ngIf="onboardingDetails.profile_status === 'PENDING'">
-                    <button pButton type="button" label="Reject" class="p-button-danger p-button-sm"
-                        (click)="rejectOnboarding()" [loading]="loading()"></button>
-                    <button pButton type="button" label="Approve" class="p-button-success p-button-sm"
-                        (click)="approveOnboarding()" [loading]="loading()"></button>
-                </ng-container>
+                    Onboarding Status: {{ onboardingDetails.profile_status }}
+                </span>
             </div>
         </div>
-    </p-dialog>
-</div>
+
+        <!-- Onboarding Details Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[60vh] overflow-y-auto pr-1">
+            <!-- 1. Personal Information -->
+            <div class="space-y-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider border-b pb-1">
+                    Personal Information
+                </h4>
+                <div class="space-y-2">
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase">Father's
+                            Name</label>
+                        <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.father_name }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase">Mother's
+                            Name</label>
+                        <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.mother_name || 'N/A' }}
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase">Date of
+                            Birth</label>
+                        <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.dob | date:'mediumDate'
+                            }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase">Gender</label>
+                        <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.gender }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase">Blood Group</label>
+                        <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.blood_group || 'N/A' }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Contact & Emergency Contacts -->
+            <div class="space-y-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider border-b pb-1">
+                    Contact & Emergency
+                </h4>
+                <div class="space-y-2">
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase">Current
+                            Address</label>
+                        <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.current_address }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase">Permanent
+                            Address</label>
+                        <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.permanent_address ||
+                            'Same as current' }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase">Emergency Contact
+                            Name</label>
+                        <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.emergency_contact_name
+                            || 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase">Emergency
+                            Phone</label>
+                        <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.emergency_contact }}
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase">Emergency
+                            Relation</label>
+                        <p class="text-sm font-semibold text-slate-700">{{
+                            onboardingDetails.emergency_contact_relation || 'N/A' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Financial & Identity (Full width row in dialog) -->
+            <div class="md:col-span-2 space-y-3 pt-2">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider border-b pb-1">
+                    Finance & Identity
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase">Bank Name</label>
+                        <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.bank_name }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase">Account Holder
+                            Name</label>
+                        <p class="text-sm font-semibold text-slate-700">{{ onboardingDetails.account_holder_name }}
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase">Account
+                            Number</label>
+                        <p class="text-sm font-semibold text-slate-700 font-mono">{{
+                            onboardingDetails.account_number }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase">IFSC Code</label>
+                        <p class="text-sm font-semibold text-slate-700 font-mono">{{ onboardingDetails.ifsc_code }}
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase">PAN Card
+                            Number</label>
+                        <p class="text-sm font-semibold text-slate-700 font-mono">{{ onboardingDetails.pan_number }}
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase">Aadhaar
+                            Number</label>
+                        <p class="text-sm font-semibold text-slate-700 font-mono">{{ onboardingDetails.aadhar_number
+                            }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Action Buttons -->
+        <div class="flex justify-end gap-3 pt-4 border-t">
+            <button pButton type="button" label="Close" class="p-button-secondary p-button-sm"
+                (click)="showOnboardingDialog = false"></button>
+            <ng-container *ngIf="onboardingDetails.profile_status === 'PENDING'">
+                <button pButton type="button" label="Reject" class="p-button-danger p-button-sm"
+                    (click)="rejectOnboarding()" [loading]="loading()"></button>
+                <button pButton type="button" label="Approve" class="p-button-success p-button-sm"
+                    (click)="approveOnboarding()" [loading]="loading()"></button>
+            </ng-container>
+        </div>
+    </div>
+</p-dialog>
