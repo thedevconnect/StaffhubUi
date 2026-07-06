@@ -1,16 +1,19 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
+import { DialogModule } from 'primeng/dialog';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   imports: [
     CommonModule,
     ButtonModule,
-    RippleModule
+    RippleModule,
+    DialogModule
   ],
   templateUrl: './landing.html',
   styleUrl: './landing.scss',
@@ -22,6 +25,72 @@ export class Landing {
   selectedColor = 'indigo';
   isDarkMode = false;
   isColorMenuOpen = false;
+  isRolesMenuOpen = false;
+
+  isModuleDialogVisible = false;
+  selectedModule: any = null;
+
+  moduleDetails: any = {
+    'onboarding': {
+      title: 'Employee Onboarding',
+      icon: 'pi pi-user-plus',
+      lordIcon: 'https://cdn.lordicon.com/ajkxzzom.json',
+      bgClass: 'bg-indigo-50 dark:bg-indigo-950/20',
+      textClass: 'text-indigo-600',
+      description: 'Seamlessly add new hires, assign roles, departments, and generate employee credentials instantly. Complete the digital paperwork effortlessly.',
+      features: ['Automated profile creation', 'Department assignment', 'Credential generation', 'Document management']
+    },
+    'leave': {
+      title: 'Leave Approvals',
+      icon: 'pi pi-check-square',
+      lordIcon: 'https://cdn.lordicon.com/egiwmiit.json',
+      bgClass: 'bg-rose-50 dark:bg-rose-950/20',
+      textClass: 'text-rose-600',
+      description: 'Review and approve or reject employee leave applications directly from a centralized HR dashboard queue. Ensure smooth team availability.',
+      features: ['One-click approvals', 'Leave balance tracking', 'Multi-level workflows', 'Real-time notifications']
+    },
+    'regularization': {
+      title: 'Attendance Regularization',
+      icon: 'pi pi-clock',
+      lordIcon: 'https://cdn.lordicon.com/qznlhdss.json',
+      bgClass: 'bg-amber-50 dark:bg-amber-950/20',
+      textClass: 'text-amber-600',
+      description: 'Manage missing swipes or late marks. HR Admins can verify the GPS location and approve regularization requests.',
+      features: ['GPS location verification', 'Late/early departure flagging', 'Bulk approvals', 'Audit trails']
+    },
+    'calendar': {
+      title: 'Monthly Attendance Calendar',
+      icon: 'pi pi-calendar',
+      lordIcon: 'https://cdn.lordicon.com/abfntqpl.json',
+      bgClass: 'bg-emerald-50 dark:bg-emerald-950/20',
+      textClass: 'text-emerald-600',
+      description: 'Employees can view their full month\'s attendance, including daily check-in times and present/absent statuses at a glance.',
+      features: ['Visual attendance tracking', 'Holiday markings', 'Weekly off indicators', 'Total worked hours']
+    },
+    'gps': {
+      title: 'Live GPS Swipe In/Out',
+      icon: 'pi pi-map-marker',
+      lordIcon: 'https://cdn.lordicon.com/zzcjjxew.json',
+      bgClass: 'bg-blue-50 dark:bg-blue-950/20',
+      textClass: 'text-blue-600',
+      description: 'Mark attendance securely with real-time location tracking and IP address logging to ensure authenticity and prevent proxy attendance.',
+      features: ['Geo-fencing support', 'Accurate lat/long capturing', 'Device & IP tracking', 'Offline sync support']
+    },
+    'profile': {
+      title: 'Employee Profile',
+      icon: 'pi pi-id-card',
+      lordIcon: 'https://cdn.lordicon.com/bhfjfgqz.json',
+      bgClass: 'bg-purple-50 dark:bg-purple-950/20',
+      textClass: 'text-purple-600',
+      description: 'Employees can manage their personal details, view assigned assets, and track their shift schedules all in one centralized hub.',
+      features: ['Personal details management', 'Asset tracking', 'Shift schedules', 'Emergency contacts']
+    }
+  };
+
+  openModuleDetails(moduleKey: string) {
+    this.selectedModule = this.moduleDetails[moduleKey];
+    this.isModuleDialogVisible = true;
+  }
 
   colorsList = ['indigo', 'emerald', 'violet', 'orange', 'amber', 'rose', 'blue', 'red'];
 
@@ -178,5 +247,11 @@ export class Landing {
 
   exploreFeatures(): void {
     this.scrollTo('features');
+  }
+
+  submitContactForm(event: Event) {
+    event.preventDefault();
+    alert('Thank you for reaching out! Our team will get back to you shortly.');
+    (event.target as HTMLFormElement).reset();
   }
 }

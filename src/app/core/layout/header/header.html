@@ -5,8 +5,8 @@
   </button>
 
   <div class="flex items-center gap-3 md:gap-4">
-    <p-select [options]="roleOptions()" optionLabel="rolDes" optionValue="roleId" [(ngModel)]="internalSelectedRoleId"
-      [placeholder]="currentRole() || 'Select Role'" [filter]="false" appendTo="body" styleClass="w-32 sm:w-40"
+    <p-select [options]="roleOptions()" placeholder="Select Role" optionLabel="rolDes" optionValue="roleId"
+      [(ngModel)]="internalSelectedRoleId" [filter]="true" appendTo="body" styleClass="w-32 sm:w-40"
       (onChange)="onRoleDropdownChange($event)" />
 
     <span class="hidden text-sm font-medium text-slate-700 sm:inline">{{ getUserName() }}</span>

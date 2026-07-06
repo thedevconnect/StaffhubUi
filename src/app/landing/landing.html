@@ -36,9 +36,48 @@
         <nav class="hidden md:flex items-center gap-8">
           <a (click)="scrollTo('home')"
             class="text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white transition-colors cursor-pointer">Home</a>
-          <a (click)="scrollTo('modules')"
-            class="text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white transition-colors cursor-pointer">Portal
-            Modules</a>
+
+          <div class="relative cursor-pointer py-4" (mouseenter)="isRolesMenuOpen = true"
+            (mouseleave)="isRolesMenuOpen = false">
+            <a
+              class="text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white transition-colors flex items-center gap-1">
+              Roles & Modules <i class="pi pi-chevron-down text-[10px]"></i>
+            </a>
+
+            <div
+              class="absolute top-[80%] left-0 mt-1 w-64 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-xl transition-all duration-300 flex flex-col p-2 z-50"
+              [ngClass]="isRolesMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'">
+              <span class="text-[10px] font-bold text-indigo-500 uppercase px-3 py-2">HR Admin Features</span>
+              <a (click)="openModuleDetails('onboarding'); isRolesMenuOpen = false"
+                class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors">
+                <i class="pi pi-user-plus text-indigo-500"></i> Employee Onboarding
+              </a>
+              <a (click)="openModuleDetails('leave'); isRolesMenuOpen = false"
+                class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors">
+                <i class="pi pi-check-square text-rose-500"></i> Leave Approvals
+              </a>
+              <a (click)="openModuleDetails('regularization'); isRolesMenuOpen = false"
+                class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors">
+                <i class="pi pi-clock text-amber-500"></i> Regularization
+              </a>
+
+              <div class="h-px bg-slate-100 dark:bg-slate-800 my-2 mx-2"></div>
+
+              <span class="text-[10px] font-bold text-emerald-500 uppercase px-3 py-2">Employee Self Service</span>
+              <a (click)="openModuleDetails('calendar'); isRolesMenuOpen = false"
+                class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors">
+                <i class="pi pi-calendar text-emerald-500"></i> Attendance Calendar
+              </a>
+              <a (click)="openModuleDetails('gps'); isRolesMenuOpen = false"
+                class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors">
+                <i class="pi pi-map-marker text-blue-500"></i> Live GPS Swipe
+              </a>
+              <a (click)="openModuleDetails('profile'); isRolesMenuOpen = false"
+                class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors">
+                <i class="pi pi-id-card text-purple-500"></i> Employee Profile
+              </a>
+            </div>
+          </div>
           <a (click)="scrollTo('pricing')"
             class="text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white transition-colors cursor-pointer">Pricing</a>
           <a (click)="scrollTo('mobile-app')"
@@ -47,6 +86,10 @@
           <a (click)="scrollTo('features')"
             class="text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white transition-colors cursor-pointer">Key
             Features</a>
+          <a (click)="scrollTo('contact')"
+            class="text-sm font-extrabold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors cursor-pointer flex items-center gap-1">
+            Let's Connect <i class="pi pi-arrow-right text-[10px]"></i>
+          </a>
         </nav>
 
         <div class="flex items-center gap-2.5 relative">
@@ -366,169 +409,160 @@
       </div>
     </section>
 
-    <!-- Core Portal Modules Grid -->
+    <!-- Key Features & Capabilities Grid -->
     <section id="modules"
       class="py-20 md:py-28 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 relative z-10">
       <div class="container mx-auto px-6">
 
-        <div class="max-w-2xl mx-auto text-center mb-16 md:mb-20">
-          <span class="text-xs font-extrabold uppercase tracking-widest block mb-2" [ngClass]="textColor">Architectural
-            Blueprint</span>
-          <h2 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">Core Portal Modules
-            of StaffHub</h2>
+        <div class="max-w-3xl mx-auto text-center mb-16 md:mb-20">
+          <span class="text-xs font-extrabold uppercase tracking-widest block mb-2" [ngClass]="textColor">Everything You
+            Need</span>
+          <h2 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">Powerful Features
+            Tailored by Role</h2>
           <p class="text-slate-500 dark:text-slate-400 text-sm sm:text-base mt-4 leading-relaxed">
-            StaffHub splits responsibilities into unified directories with explicit workflows for Employees, HR Admins,
-            Developers, and Super Admins.
+            StaffHub provides specific tools for HR Admins to manage the company and Employee Self-Service (ESS) tools
+            for staff to track their daily work.
           </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-          <!-- Module 1: Company Onboarding -->
-          <div
-            class="group border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-white dark:hover:bg-slate-950 rounded-3xl p-8 hover:shadow-xl transition-all duration-300 flex flex-col gap-5">
-            <div
-              class="w-12 h-12 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition-transform duration-300">
-              <i class="pi pi-building"></i>
-            </div>
-            <div>
-              <h3
-                class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                Company Registration</h3>
-              <p class="text-slate-500 dark:text-slate-400 text-sm mt-2 leading-relaxed">
-                New companies can register their profiles. Submitting onboarding requests prompts the Super Admin for
-                secure dashboard validation.
+        <!-- HR Admin Features -->
+        <div class="mb-12">
+          <h3
+            class="text-2xl font-black text-slate-800 dark:text-white mb-6 border-b border-slate-100 dark:border-slate-800 pb-2">
+            <i class="pi pi-briefcase text-indigo-500 mr-2"></i> HR Admin Capabilities
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Onboarding -->
+            <div (click)="openModuleDetails('onboarding')"
+              class="cursor-pointer group border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-white dark:hover:bg-slate-950 rounded-3xl p-6 hover:shadow-xl transition-all duration-300">
+              <div
+                class="w-16 h-16 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <lord-icon src="https://cdn.lordicon.com/ajkxzzom.json" trigger="loop" delay="2000"
+                  style="width:40px;height:40px" colors="primary:#4f46e5,secondary:#818cf8"></lord-icon>
+              </div>
+              <h4 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Employee Onboarding</h4>
+              <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                Seamlessly add new hires, assign roles, departments, and generate employee credentials instantly.
               </p>
             </div>
-            <div
-              class="mt-auto border-t border-slate-100 dark:border-slate-800 pt-4 flex items-center justify-between text-xs font-bold text-emerald-600 cursor-pointer"
-              (click)="registerCompany()">
-              <span>Onboard Your Company</span>
-              <i class="pi pi-arrow-right"></i>
-            </div>
-          </div>
-
-          <!-- Module 2: Employee Self Service (ESS) -->
-          <div
-            class="group border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-white dark:hover:bg-slate-950 rounded-3xl p-8 hover:shadow-xl transition-all duration-300 flex flex-col gap-5">
-            <div
-              class="w-12 h-12 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition-transform duration-300">
-              <i class="pi pi-user"></i>
-            </div>
-            <div>
-              <h3
-                class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                Employee Self Service (ESS)</h3>
-              <p class="text-slate-500 dark:text-slate-400 text-sm mt-2 leading-relaxed">
-                Provides login options for staff. Enables check-in/out, regularization history tracking, profile
-                management, and leave requests.
+            <!-- Leave Approvals -->
+            <div (click)="openModuleDetails('leave')"
+              class="cursor-pointer group border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-white dark:hover:bg-slate-950 rounded-3xl p-6 hover:shadow-xl transition-all duration-300">
+              <div
+                class="w-16 h-16 bg-rose-50 dark:bg-rose-950/20 text-rose-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <lord-icon src="https://cdn.lordicon.com/egiwmiit.json" trigger="loop" delay="2500"
+                  style="width:40px;height:40px" colors="primary:#e11d48,secondary:#fb7185"></lord-icon>
+              </div>
+              <h4 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Leave Approvals</h4>
+              <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                Review and approve or reject employee leave applications directly from a centralized HR dashboard queue.
               </p>
             </div>
-            <div
-              class="mt-auto border-t border-slate-100 dark:border-slate-800 pt-4 flex items-center justify-between text-xs font-bold text-indigo-600 cursor-pointer"
-              (click)="login()">
-              <span>Log In to ESS Portal</span>
-              <i class="pi pi-arrow-right"></i>
-            </div>
-          </div>
-
-          <!-- Module 3: Automated Payroll -->
-          <div
-            class="group border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-white dark:hover:bg-slate-950 rounded-3xl p-8 hover:shadow-xl transition-all duration-300 flex flex-col gap-5">
-            <div
-              class="w-12 h-12 bg-amber-50 dark:bg-amber-950/20 text-amber-600 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition-transform duration-300">
-              <i class="pi pi-wallet"></i>
-            </div>
-            <div>
-              <h3
-                class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                Payroll Automation</h3>
-              <p class="text-slate-500 dark:text-slate-400 text-sm mt-2 leading-relaxed">
-                Calculates gross salaries, deductions, taxes, and net payout based on attendance regularizations.
-                Supports custom slips.
+            <!-- Regularization Approvals -->
+            <div (click)="openModuleDetails('regularization')"
+              class="cursor-pointer group border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-white dark:hover:bg-slate-950 rounded-3xl p-6 hover:shadow-xl transition-all duration-300">
+              <div
+                class="w-16 h-16 bg-amber-50 dark:bg-amber-950/20 text-amber-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <lord-icon src="https://cdn.lordicon.com/qznlhdss.json" trigger="loop" delay="1500"
+                  style="width:40px;height:40px" colors="primary:#d97706,secondary:#fbbf24"></lord-icon>
+              </div>
+              <h4 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Attendance Regularization</h4>
+              <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                Manage missing swipes or late marks. HR Admins can verify the GPS location and approve regularization
+                requests.
               </p>
             </div>
-            <div
-              class="mt-auto border-t border-slate-100 dark:border-slate-800 pt-4 flex items-center justify-between text-xs font-bold text-amber-600 cursor-pointer">
-              <span>Explore Automated Payroll</span>
-              <i class="pi pi-lock text-[10px]"></i>
-            </div>
           </div>
+        </div>
 
-          <!-- Module 4: HR Admin Panel -->
-          <div
-            class="group border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-white dark:hover:bg-slate-950 rounded-3xl p-8 hover:shadow-xl transition-all duration-300 flex flex-col gap-5">
-            <div
-              class="w-12 h-12 bg-rose-50 dark:bg-rose-950/20 text-rose-600 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition-transform duration-300">
-              <i class="pi pi-sliders-h"></i>
-            </div>
-            <div>
-              <h3
-                class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                HR Administration</h3>
-              <p class="text-slate-500 dark:text-slate-400 text-sm mt-2 leading-relaxed">
-                Empowers HR users to view logs, monitor swipe coordinates, review leave applications, and publish
-                corporate calendars/holidays.
+        <!-- ESS Features -->
+        <div>
+          <h3
+            class="text-2xl font-black text-slate-800 dark:text-white mb-6 border-b border-slate-100 dark:border-slate-800 pb-2">
+            <i class="pi pi-user text-emerald-500 mr-2"></i> Employee Self Service (ESS)
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Monthly Calendar -->
+            <div (click)="openModuleDetails('calendar')"
+              class="cursor-pointer group border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-white dark:hover:bg-slate-950 rounded-3xl p-6 hover:shadow-xl transition-all duration-300">
+              <div
+                class="w-16 h-16 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <lord-icon src="https://cdn.lordicon.com/abfntqpl.json" trigger="loop" delay="3000"
+                  style="width:40px;height:40px" colors="primary:#059669,secondary:#34d399"></lord-icon>
+              </div>
+              <h4 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Monthly Attendance Calendar</h4>
+              <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                Employees can view their full month's attendance, including daily check-in times and present/absent
+                statuses.
               </p>
             </div>
-            <div
-              class="mt-auto border-t border-slate-100 dark:border-slate-800 pt-4 flex items-center justify-between text-xs font-bold text-rose-600 cursor-pointer">
-              <span>Authorized HR Access Only</span>
-              <i class="pi pi-lock text-[10px]"></i>
-            </div>
-          </div>
-
-          <!-- Module 5: Developer Master Config -->
-          <div
-            class="group border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-white dark:hover:bg-slate-950 rounded-3xl p-8 hover:shadow-xl transition-all duration-300 flex flex-col gap-5">
-            <div
-              class="w-12 h-12 bg-purple-50 dark:bg-purple-950/20 text-purple-600 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition-transform duration-300">
-              <i class="pi pi-cog"></i>
-            </div>
-            <div>
-              <h3
-                class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                Developer Settings</h3>
-              <p class="text-slate-500 dark:text-slate-400 text-sm mt-2 leading-relaxed">
-                Administer role masters, build custom activity logs, map specific permissions to menus, and edit
-                database-driven routing.
+            <!-- GPS Swipe In -->
+            <div (click)="openModuleDetails('gps')"
+              class="cursor-pointer group border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-white dark:hover:bg-slate-950 rounded-3xl p-6 hover:shadow-xl transition-all duration-300">
+              <div
+                class="w-16 h-16 bg-blue-50 dark:bg-blue-950/20 text-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <lord-icon src="https://cdn.lordicon.com/zzcjjxew.json" trigger="loop" delay="2200"
+                  style="width:40px;height:40px" colors="primary:#2563eb,secondary:#60a5fa"></lord-icon>
+              </div>
+              <h4 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Live GPS Swipe In/Out</h4>
+              <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                Mark attendance securely with real-time location tracking and IP address logging to ensure authenticity.
               </p>
             </div>
-            <div
-              class="mt-auto border-t border-slate-100 dark:border-slate-800 pt-4 flex items-center justify-between text-xs font-bold text-purple-600 cursor-pointer"
-              (click)="login()">
-              <span>Manage Portal Configuration</span>
-              <i class="pi pi-arrow-right"></i>
-            </div>
-          </div>
-
-          <!-- Module 6: Super Admin Approval Queue -->
-          <div
-            class="group border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-white dark:hover:bg-slate-950 rounded-3xl p-8 hover:shadow-xl transition-all duration-300 flex flex-col gap-5">
-            <div
-              class="w-12 h-12 bg-blue-50 dark:bg-blue-950/20 text-blue-600 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition-transform duration-300">
-              <i class="pi pi-check-square"></i>
-            </div>
-            <div>
-              <h3
-                class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                Super Admin Approval</h3>
-              <p class="text-slate-500 dark:text-slate-400 text-sm mt-2 leading-relaxed">
-                A dedicated queue interface where Super Admin users view company signups, review documents, and click
-                approve to activate portals.
+            <!-- Profile Management -->
+            <div (click)="openModuleDetails('profile')"
+              class="cursor-pointer group border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-white dark:hover:bg-slate-950 rounded-3xl p-6 hover:shadow-xl transition-all duration-300">
+              <div
+                class="w-16 h-16 bg-purple-50 dark:bg-purple-950/20 text-purple-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <lord-icon src="https://cdn.lordicon.com/bhfjfgqz.json" trigger="loop" delay="1800"
+                  style="width:40px;height:40px" colors="primary:#7c3aed,secondary:#a78bfa"></lord-icon>
+              </div>
+              <h4 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Employee Profile</h4>
+              <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                Employees can manage their personal details, view assigned assets, and track their shift schedules all
+                in one place.
               </p>
             </div>
-            <div
-              class="mt-auto border-t border-slate-100 dark:border-slate-800 pt-4 flex items-center justify-between text-xs font-bold text-blue-600 cursor-pointer"
-              (click)="login()">
-              <span>Review Pending Requests</span>
-              <i class="pi pi-arrow-right"></i>
-            </div>
           </div>
-
         </div>
 
       </div>
+
+      <!-- Details Dialog Modal -->
+      <p-dialog [(visible)]="isModuleDialogVisible" [modal]="true" [dismissableMask]="true" [draggable]="false"
+        [style]="{ width: '90vw', maxWidth: '450px' }" styleClass="rounded-3xl overflow-hidden shadow-2xl">
+        <ng-template pTemplate="header">
+          <div class="w-full flex justify-center pt-2 relative">
+            <!-- Lordicon Animated Graphic -->
+            <lord-icon *ngIf="selectedModule?.lordIcon" [attr.src]="selectedModule?.lordIcon" trigger="loop"
+              delay="1000" style="width:100px;height:100px" colors="primary:#121331,secondary:#6366f1"></lord-icon>
+          </div>
+        </ng-template>
+
+        <div class="px-2 pb-2 text-slate-600 dark:text-slate-400 text-center">
+          <h3 class="text-2xl font-black text-slate-900 dark:text-white mb-3">{{ selectedModule?.title }}</h3>
+          <p class="leading-relaxed mb-8 text-sm">{{ selectedModule?.description }}</p>
+
+          <div
+            class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 text-left border border-slate-100 dark:border-slate-800">
+            <h4 class="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider mb-4">Key Capabilities
+            </h4>
+            <ul class="flex flex-col gap-3">
+              <li *ngFor="let feature of selectedModule?.features" class="flex items-start gap-3 text-sm font-medium">
+                <i class="pi pi-check-circle text-emerald-500 mt-0.5 text-base"></i>
+                <span>{{ feature }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <ng-template pTemplate="footer">
+          <div class="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-800">
+            <button pButton pRipple label="Got it" icon="pi pi-check" class="p-button-text font-bold"
+              (click)="isModuleDialogVisible = false" [ngClass]="textColor"></button>
+          </div>
+        </ng-template>
+      </p-dialog>
     </section>
 
     <!-- Mobile App Showcase Section -->
@@ -620,9 +654,10 @@
         <div class="flex flex-col gap-6 text-center lg:text-left">
           <span class="text-xs font-extrabold uppercase tracking-widest block" [ngClass]="textColor">Mobile App</span>
           <h2 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">StaffHub Mobile App
-            Coming Soon!</h2>
-          <p class="text-slate-500 dark:text-slate-400 text-sm sm:text-base leading-relaxed">
-            Manage your daily workflow directly from your pocket. Soon, you will be able to access all Employee Self
+            <br /><span class="text-amber-500 text-2xl md:text-3xl">(Under Development)</span></h2>
+          <p class="text-slate-500 dark:text-slate-400 text-sm sm:text-base leading-relaxed mt-2">
+            Manage your daily workflow directly from your pocket. We are actively developing our mobile app so you will
+            soon be able to access all Employee Self
             Service (ESS) operations, swipe in/out with geolocation checks, apply for regularizations, and download
             payslips directly.
           </p>
@@ -653,121 +688,39 @@
       </div>
     </section>
 
-    <!-- Pricing Section (Coming Soon) -->
+    <!-- Pricing Section -->
     <section id="pricing"
       class="py-20 md:py-28 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-850 relative overflow-hidden z-10">
       <div class="container mx-auto px-6">
 
         <!-- Section Header -->
-        <div class="max-w-2xl mx-auto text-center mb-16 md:mb-20">
+        <div class="max-w-2xl mx-auto text-center mb-10">
           <span class="text-xs font-extrabold uppercase tracking-widest block mb-2" [ngClass]="textColor">Flexible
             Pricing</span>
-          <h2 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">Simple and
-            Transparent Plans</h2>
+          <h2 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">Tailored to Your
+            Company</h2>
           <p class="text-slate-500 dark:text-slate-400 text-sm sm:text-base mt-4 leading-relaxed">
-            Scale your human resource infrastructure with customizable subscription levels mapped precisely to company
-            sizes.
+            We believe that every organization is unique. Pricing is determined as per your company's specific
+            requirements and finalized during discussion.
           </p>
         </div>
 
-        <!-- Pricing Cards Row -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto relative">
-
-          <!-- Coming Soon Overlay Banner -->
+        <div
+          class="max-w-3xl mx-auto bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-3xl p-8 md:p-12 text-center flex flex-col items-center gap-6 shadow-xl">
           <div
-            class="absolute inset-0 bg-slate-50/40 dark:bg-slate-950/40 backdrop-blur-sm z-30 rounded-3xl border border-slate-200 dark:border-slate-800 flex flex-col justify-center items-center gap-4 text-center p-6 shadow-inner">
-            <div
-              class="w-16 h-16 bg-amber-50 dark:bg-amber-950/20 text-amber-600 rounded-3xl flex items-center justify-center text-3xl shadow-lg shadow-amber-600/5 animate-pulse">
-              <i class="pi pi-lock"></i>
-            </div>
-            <div>
-              <h3 class="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-wider">Under Development
-              </h3>
-              <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-1 max-w-sm">
-                Pricing tiers, payment integration, and plan customizers are currently undergoing final updates. Coming
-                soon!
-              </p>
-            </div>
-            <span
-              class="text-[10px] font-black uppercase text-amber-600 bg-amber-50 dark:bg-amber-950/20 px-3 py-1 rounded-full animate-bounce">
-              Coming Soon
-            </span>
+            class="w-16 h-16 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 rounded-full flex items-center justify-center text-3xl mb-2">
+            <i class="pi pi-comments"></i>
           </div>
-
-          <!-- Plan 1: Starter -->
-          <div
-            class="border border-slate-100 dark:border-slate-800 rounded-3xl p-8 bg-slate-50/50 dark:bg-slate-950/20 opacity-60 flex flex-col gap-6 select-none">
-            <div>
-              <h3 class="text-lg font-extrabold text-slate-900 dark:text-white">Basic Starter</h3>
-              <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Perfect for small teams setting up operations
-              </p>
-            </div>
-            <div class="flex items-baseline gap-1.5">
-              <span class="text-3xl font-black text-slate-900 dark:text-white">$3.00</span>
-              <span class="text-xs text-slate-400">/ employee / month</span>
-            </div>
-            <hr class="border-slate-100 dark:border-slate-800" />
-            <ul class="flex flex-col gap-3 text-xs text-slate-500 dark:text-slate-400">
-              <li class="flex items-center gap-2"><i class="pi pi-check text-emerald-500"></i> Up to 15 Active Employees
-              </li>
-              <li class="flex items-center gap-2"><i class="pi pi-check text-emerald-500"></i> GPS Location Swipe-In
-              </li>
-              <li class="flex items-center gap-2"><i class="pi pi-check text-emerald-500"></i> Shift Configuration</li>
-              <li class="flex items-center gap-2"><i class="pi pi-check text-emerald-500"></i> Automated Payslip
-                Downloads</li>
-            </ul>
-          </div>
-
-          <!-- Plan 2: Pro -->
-          <div
-            class="border border-slate-100 dark:border-slate-850 rounded-3xl p-8 bg-white dark:bg-slate-900 opacity-60 flex flex-col gap-6 relative shadow-lg shadow-indigo-600/5 select-none">
-            <span
-              class="absolute -top-3 right-8 text-[9px] font-black uppercase text-indigo-600 bg-indigo-50 dark:bg-indigo-950 dark:text-indigo-300 px-3 py-1 rounded-full tracking-wider border border-indigo-100 dark:border-slate-800">
-              Most Popular
-            </span>
-            <div>
-              <h3 class="text-lg font-extrabold text-slate-900 dark:text-white">Growth Business</h3>
-              <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Advanced management features for active systems
-              </p>
-            </div>
-            <div class="flex items-baseline gap-1.5">
-              <span class="text-3xl font-black text-slate-900 dark:text-white">$2.00</span>
-              <span class="text-xs text-slate-400">/ employee / month</span>
-            </div>
-            <hr class="border-slate-100 dark:border-slate-850" />
-            <ul class="flex flex-col gap-3 text-xs text-slate-500 dark:text-slate-400">
-              <li class="flex items-center gap-2"><i class="pi pi-check text-emerald-500"></i> Up to 100 Employees</li>
-              <li class="flex items-center gap-2"><i class="pi pi-check text-emerald-500"></i> Multiple GPS Hubs</li>
-              <li class="flex items-center gap-2"><i class="pi pi-check text-emerald-500"></i> Leave & Regularization
-                Queues</li>
-              <li class="flex items-center gap-2"><i class="pi pi-check text-emerald-500"></i> Developer Master
-                Customizers</li>
-            </ul>
-          </div>
-
-          <!-- Plan 3: Enterprise -->
-          <div
-            class="border border-slate-100 dark:border-slate-800 rounded-3xl p-8 bg-slate-50/50 dark:bg-slate-950/20 opacity-60 flex flex-col gap-6 select-none">
-            <div>
-              <h3 class="text-lg font-extrabold text-slate-900 dark:text-white">Enterprise</h3>
-              <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Unlimited operations for large corporations</p>
-            </div>
-            <div class="flex items-baseline gap-1.5">
-              <span class="text-3xl font-black text-slate-900 dark:text-white">$1.50</span>
-              <span class="text-xs text-slate-400">/ employee / month</span>
-            </div>
-            <hr class="border-slate-100 dark:border-slate-800" />
-            <ul class="flex flex-col gap-3 text-xs text-slate-500 dark:text-slate-400">
-              <li class="flex items-center gap-2"><i class="pi pi-check text-emerald-500"></i> Unlimited Users</li>
-              <li class="flex items-center gap-2"><i class="pi pi-check text-emerald-500"></i> Custom Integration API
-              </li>
-              <li class="flex items-center gap-2"><i class="pi pi-check text-emerald-500"></i> 24/7 Priority Dedicated
-                Manager</li>
-              <li class="flex items-center gap-2"><i class="pi pi-check text-emerald-500"></i> Dynamic Role & Menu
-                Configuration</li>
-            </ul>
-          </div>
-
+          <h3 class="text-2xl font-black text-slate-900 dark:text-white">Discuss With Our Team</h3>
+          <p class="text-slate-500 dark:text-slate-400 max-w-lg leading-relaxed">
+            Get a custom quote that fits your workforce size, required modules, and integration needs. Contact us to
+            schedule a demo and pricing consultation.
+          </p>
+          <button (click)="registerCompany()"
+            class="mt-4 px-8 py-3.5 text-white font-bold rounded-xl shadow-lg transition-transform hover:scale-105"
+            [ngClass]="bgClass">
+            Register Your Company
+          </button>
         </div>
 
       </div>
@@ -800,7 +753,8 @@
             </div>
             <h3 class="text-base font-bold text-slate-900 dark:text-white">Employee Self Service (ESS)</h3>
             <p class="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">
-              Empower employees to swipe in/out, monitor active hours, submit leaves, check regularization status, and download payslips independently.
+              Empower employees to swipe in/out, monitor active hours, submit leaves, check regularization status, and
+              download payslips independently.
             </p>
           </div>
 
@@ -813,7 +767,8 @@
             </div>
             <h3 class="text-base font-bold text-slate-900 dark:text-white">HR Administration</h3>
             <p class="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">
-              Maintain dynamic employee records, publish company holiday calendars, view system activity logs, and oversee portal configurations effortlessly.
+              Maintain dynamic employee records, publish company holiday calendars, view system activity logs, and
+              oversee portal configurations effortlessly.
             </p>
           </div>
 
@@ -826,7 +781,8 @@
             </div>
             <h3 class="text-base font-bold text-slate-900 dark:text-white">Approval Queue</h3>
             <p class="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">
-              Manage a real-time request workflow allowing administrators to review, approve, or reject employee leave and swipe regularization applications.
+              Manage a real-time request workflow allowing administrators to review, approve, or reject employee leave
+              and swipe regularization applications.
             </p>
           </div>
 
@@ -839,7 +795,8 @@
             </div>
             <h3 class="text-base font-bold text-slate-900 dark:text-white">Payroll Automation</h3>
             <p class="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">
-              Calculate employee net payouts based on regularized shifts, customize allowances and deductions, and issue detailed monthly salary slips.
+              Calculate employee net payouts based on regularized shifts, customize allowances and deductions, and issue
+              detailed monthly salary slips.
             </p>
           </div>
 
@@ -852,7 +809,8 @@
             </div>
             <h3 class="text-base font-bold text-slate-900 dark:text-white">GPS Geolocation</h3>
             <p class="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">
-              Require strict location coordinates when swiping in/out to prevent buddy-punching and verify staff coordinates within authorized workspace zones.
+              Require strict location coordinates when swiping in/out to prevent buddy-punching and verify staff
+              coordinates within authorized workspace zones.
             </p>
           </div>
 
@@ -865,12 +823,133 @@
             </div>
             <h3 class="text-base font-bold text-slate-900 dark:text-white">Shift Continuity</h3>
             <p class="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">
-              Automatic continuity trackers store shift intervals, enabling multiple swipe sessions to cumulate hours accurately throughout the day.
+              Automatic continuity trackers store shift intervals, enabling multiple swipe sessions to cumulate hours
+              accurately throughout the day.
             </p>
           </div>
 
         </div>
 
+      </div>
+    </section>
+
+    <!-- Contact Us Section -->
+    <section id="contact"
+      class="py-20 md:py-28 bg-slate-50/50 dark:bg-slate-950/40 border-t border-slate-100 dark:border-slate-850 relative overflow-hidden z-10">
+      <div class="container mx-auto px-6">
+        <div class="max-w-2xl mx-auto text-center mb-16 md:mb-20">
+          <span class="text-xs font-extrabold uppercase tracking-widest block mb-2" [ngClass]="textColor">Get In
+            Touch</span>
+          <h2 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">Let's Connect</h2>
+          <p class="text-slate-500 dark:text-slate-400 text-sm sm:text-base mt-4 leading-relaxed">
+            Have questions about StaffHub? Need a custom quote? Fill out the form or give us a call directly.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 max-w-5xl mx-auto">
+
+          <!-- Contact Info -->
+          <div class="lg:col-span-2 flex flex-col gap-6">
+            <div
+              class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-8 shadow-xl relative overflow-hidden group">
+              <!-- Decorative background -->
+              <div
+                class="absolute -right-10 -top-10 w-40 h-40 rounded-full blur-3xl opacity-20 transition-all duration-500 group-hover:scale-150"
+                [ngClass]="bgClass"></div>
+
+              <h3 class="text-xl font-extrabold text-slate-900 dark:text-white mb-6">Direct Contact</h3>
+
+              <div class="flex flex-col gap-6 relative z-10">
+                <div class="flex items-start gap-4">
+                  <div
+                    class="w-12 h-12 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 rounded-2xl flex items-center justify-center text-xl flex-shrink-0">
+                    <i class="pi pi-whatsapp"></i>
+                  </div>
+                  <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">WhatsApp
+                      (Preferred)</span>
+                    <a href="https://wa.me/919761431498" target="_blank"
+                      class="text-base font-black text-slate-900 dark:text-white hover:text-indigo-500 transition-colors block mt-1">Chat
+                      on WhatsApp</a>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-4">
+                  <div
+                    class="w-12 h-12 bg-rose-50 dark:bg-rose-950/20 text-rose-600 rounded-2xl flex items-center justify-center text-xl flex-shrink-0">
+                    <i class="pi pi-envelope"></i>
+                  </div>
+                  <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Email
+                      Address</span>
+                    <a href="mailto:thedevconnects@gmail.com"
+                      class="text-base font-bold text-slate-900 dark:text-white hover:text-rose-500 transition-colors block mt-1">thedevconnects&#64;gmail.com</a>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-4">
+                  <div
+                    class="w-12 h-12 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 rounded-2xl flex items-center justify-center text-xl flex-shrink-0">
+                    <i class="pi pi-phone"></i>
+                  </div>
+                  <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Call Us (Emergency
+                      Only)</span>
+                    <a href="tel:+919761431498"
+                      class="text-sm font-bold text-slate-900 dark:text-white hover:text-emerald-500 transition-colors block mt-1">Click
+                      to Call Support</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Form -->
+          <div class="lg:col-span-3">
+            <div
+              class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-8 sm:p-10 shadow-xl">
+              <h3 class="text-2xl font-black text-slate-900 dark:text-white mb-6">Send us a Message</h3>
+
+              <form class="flex flex-col gap-5" (submit)="submitContactForm($event)">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div class="flex flex-col gap-2">
+                    <label class="text-xs font-bold text-slate-700 dark:text-slate-300">Full Name</label>
+                    <input type="text" placeholder="John Doe"
+                      class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-slate-900 dark:text-white"
+                      required>
+                  </div>
+                  <div class="flex flex-col gap-2">
+                    <label class="text-xs font-bold text-slate-700 dark:text-slate-300">Phone Number</label>
+                    <input type="tel" placeholder="+91 9876543210"
+                      class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-slate-900 dark:text-white"
+                      required>
+                  </div>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                  <label class="text-xs font-bold text-slate-700 dark:text-slate-300">Email Address</label>
+                  <input type="email" placeholder="john@example.com"
+                    class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-slate-900 dark:text-white"
+                    required>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                  <label class="text-xs font-bold text-slate-700 dark:text-slate-300">Your Message</label>
+                  <textarea rows="4" placeholder="How can we help you?"
+                    class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none text-slate-900 dark:text-white"
+                    required></textarea>
+                </div>
+
+                <button type="submit"
+                  class="mt-2 w-full py-4 text-white font-extrabold text-sm rounded-xl shadow-lg transition-all duration-300 hover:scale-[1.02]"
+                  [ngClass]="bgClass">
+                  Send Message <i class="pi pi-send ml-2"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+
+        </div>
       </div>
     </section>
 
@@ -912,5 +991,20 @@
         </p>
       </div>
     </footer>
+
+    <!-- Floating WhatsApp Button -->
+    <a href="https://wa.me/919761431498" target="_blank" rel="noopener noreferrer"
+      class="fixed bottom-6 right-6 z-[100] w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-2xl shadow-emerald-500/40 hover:-translate-y-1 transition-all duration-300 group"
+      title="Chat with us on WhatsApp">
+      <!-- Pulse ring -->
+      <div class="absolute inset-0 rounded-full border-2 border-emerald-500 animate-ping opacity-75"></div>
+      <i class="pi pi-whatsapp text-3xl relative z-10"></i>
+
+      <!-- Tooltip -->
+      <div
+        class="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg shadow-black/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap pointer-events-none border border-slate-100 dark:border-slate-700">
+        Chat with us!
+      </div>
+    </a>
   </div>
 </div>

@@ -66,11 +66,24 @@ export class MonthlyAttendanceCalendar implements OnInit {
       const dd = String(date.getDate()).padStart(2, '0');
       const dateString = `${yyyy}-${mm}-${dd}`;
 
+      let type = '';
+      let colorClass = '';
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (date <= today) {
+        if (isSunday) {
+          type = 'WO';
+          colorClass = 'bg-slate-400 text-white';
+        }
+      }
+
       daysArray.push({
         dayNum: i,
         dateString: dateString,
-        type: isSunday ? 'WO' : '',
-        colorClass: isSunday ? 'bg-slate-400 text-white' : ''
+        type: type,
+        colorClass: colorClass
       });
     }
     this.calendarDays.set(daysArray);
@@ -85,15 +98,26 @@ export class MonthlyAttendanceCalendar implements OnInit {
           const updatedDays = this.calendarDays().map(day => {
             if (!day.dayNum) return day;
 
-            const record = records.find((r: any) => {
+            const dayRecords = records.filter((r: any) => {
               if (!r.attendance_date) return false;
-              return r.attendance_date.split('T')[0] === day.dateString;
+              let localDateString = r.attendance_date;
+              if (r.attendance_date.includes('T')) {
+                const d = new Date(r.attendance_date);
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                localDateString = `${yyyy}-${mm}-${dd}`;
+              }
+              return localDateString === day.dateString;
             });
 
-            if (record) {
-              const status = record.attendance_status || 'PRESENT';
-              day.swipeIn = this.formatTime(record.swipe_in);
-              day.swipeOut = this.formatTime(record.swipe_out);
+            if (dayRecords.length > 0) {
+              const firstRecord = dayRecords[dayRecords.length - 1];
+              const lastRecord = dayRecords[0];
+
+              const status = firstRecord.attendance_status || 'PRESENT';
+              day.swipeIn = this.formatTime(firstRecord.swipe_in);
+              day.swipeOut = this.formatTime(lastRecord.swipe_out);
 
               if (status === 'PRESENT') {
                 day.type = 'P';
