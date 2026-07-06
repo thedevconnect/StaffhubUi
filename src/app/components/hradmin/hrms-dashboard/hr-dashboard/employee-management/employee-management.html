@@ -32,10 +32,12 @@
 </div>
 
 <!-- Add/Edit Employee Drawer -->
-<p-drawer [(visible)]="showDrawer" position="right" [modal]="true" [style]="{ width: '48rem', maxWidth: '100vw' }">
-    <h2 class="mb-4 text-xl font-semibold text-gray-800">
-        {{ isViewMode ? 'View Employee' : (isEditMode ? 'Edit Employee' : 'Add New Employee') }}
-    </h2>
+<p-drawer [(visible)]="showDrawer" position="right" [modal]="true" [style]="{ width: '60%', maxWidth: '100vw' }">
+    <ng-template pTemplate="header">
+        <h2 class="text-xl font-semibold text-gray-800 m-0">
+            {{ isViewMode ? 'View Employee' : (isEditMode ? 'Edit Employee' : 'Add New Employee') }}
+        </h2>
+    </ng-template>
 
     <form [formGroup]="employeeForm" (ngSubmit)="saveEmployee()" class="space-y-4 pb-2">
 
@@ -50,7 +52,8 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div class="space-y-2 md:col-span-2">
                 <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name *</label>
-                <input id="fullName" type="text" pInputText formControlName="fullName" class="w-full">
+                <input id="fullName" placeholder="Enter full name" type="text" pInputText formControlName="fullName"
+                    class="w-full">
                 @if (f['fullName'].touched && f['fullName'].invalid) {
                 <small class="text-red-500">Full Name is required.</small>
                 }
@@ -58,7 +61,8 @@
 
             <div class="space-y-2 md:col-span-2">
                 <label for="officialEmail" class="block text-sm font-medium text-gray-700">Official Email *</label>
-                <input id="officialEmail" type="email" pInputText formControlName="officialEmail" class="w-full">
+                <input id="officialEmail" placeholder="Enter official email" type="email" pInputText
+                    formControlName="officialEmail" class="w-full" (input)="onEmailInput($event)">
                 @if (f['officialEmail'].touched && f['officialEmail'].hasError('required')) {
                 <small class="text-red-500">Official Email is required.</small>
                 }
@@ -69,8 +73,8 @@
 
             <div class="space-y-2">
                 <label for="mobileNumber" class="block text-sm font-medium text-gray-700">Mobile Number *</label>
-                <input id="mobileNumber" type="tel" pInputText formControlName="mobileNumber" maxlength="10"
-                    class="w-full">
+                <input id="mobileNumber" placeholder="Enter mobile number" type="tel" pInputText
+                    formControlName="mobileNumber" maxlength="10" class="w-full">
                 @if (f['mobileNumber'].touched && f['mobileNumber'].hasError('required')) {
                 <small class="text-red-500">Mobile Number is required.</small>
                 }
@@ -91,7 +95,9 @@
 
             <div class="space-y-2">
                 <label for="department" class="block text-sm font-medium text-gray-700">Department *</label>
-                <input id="department" type="text" pInputText formControlName="department" class="w-full">
+                <p-select id="department" [options]="departmentOptions" optionLabel="label" optionValue="value"
+                    formControlName="department" placeholder="Select department" [filter]="true"
+                    class="w-full custom-p-select"></p-select>
                 @if (f['department'].touched && f['department'].invalid) {
                 <small class="text-red-500">Department is required.</small>
                 }
@@ -110,7 +116,7 @@
             <div class="space-y-2">
                 <label for="joiningDate" class="block text-sm font-medium text-gray-700">Joining Date *</label>
                 <p-datepicker id="joiningDate" formControlName="joiningDate" class="w-full" [showIcon]="true"
-                    [showButtonBar]="true" dateFormat="yy-mm-dd"></p-datepicker>
+                    placeholder="Select joining date" [showButtonBar]="true" dateFormat="yy-mm-dd"></p-datepicker>
                 @if (f['joiningDate'].touched && f['joiningDate'].invalid) {
                 <small class="text-red-500">Joining Date is required.</small>
                 }

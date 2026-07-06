@@ -15,6 +15,7 @@ import { ToastModule } from 'primeng/toast';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { SelectModule } from 'primeng/select';
 
 @Component({
   selector: 'app-register-company',
@@ -32,7 +33,8 @@ import { InputIconModule } from 'primeng/inputicon';
     ToastModule,
     FloatLabelModule,
     IconFieldModule,
-    InputIconModule
+    InputIconModule,
+    SelectModule
   ],
   templateUrl: './register-company.component.html',
   styleUrls: ['./register-company.component.scss'],
@@ -42,6 +44,17 @@ export class RegisterCompanyComponent implements OnInit {
 
   signupForm!: FormGroup;
   isProcess = false;
+
+  industryOptions = [
+    { label: 'IT & Software', value: 'IT & Software' },
+    { label: 'Healthcare', value: 'Healthcare' },
+    { label: 'Finance & Banking', value: 'Finance & Banking' },
+    { label: 'Manufacturing', value: 'Manufacturing' },
+    { label: 'Education', value: 'Education' },
+    { label: 'Retail & E-Commerce', value: 'Retail & E-Commerce' },
+    { label: 'Other', value: 'Other' }
+  ];
+  showOtherIndustryInput = false;
 
   constructor(
     private fb: FormBuilder,
@@ -59,6 +72,7 @@ export class RegisterCompanyComponent implements OnInit {
       companyPhone: ['', Validators.required],
       address: ['', Validators.required],
       industry: ['', Validators.required],
+      otherIndustry: [''],
       empId: [''],
       fullName: ['', Validators.required],
       username: ['', Validators.required],
@@ -91,6 +105,10 @@ export class RegisterCompanyComponent implements OnInit {
     this.isProcess = true;
 
     const payload = { ...this.signupForm.value };
+    if (payload.industry === 'Other') {
+      payload.industry = payload.otherIndustry || 'Other';
+    }
+    delete payload.otherIndustry;
 
     this.userService.registerCompany(payload).subscribe({
       next: (res: any) => {
@@ -113,6 +131,65 @@ export class RegisterCompanyComponent implements OnInit {
         });
       }
     });
+  }
+
+  onIndustryChange(event: any) {
+    this.showOtherIndustryInput = (event.value === 'Other');
+    const otherIndustryControl = this.signupForm.get('otherIndustry');
+    if (this.showOtherIndustryInput) {
+      otherIndustryControl?.setValidators([Validators.required]);
+    } else {
+      otherIndustryControl?.clearValidators();
+    }
+    otherIndustryControl?.updateValueAndValidity();
+  }
+
+  onEmailInput(event: Event, controlName: string): void {
+    const inputElement = event.target as HTMLInputElement;
+    let value = inputElement.value;
+
+    if (value.endsWith('@')) {
+      value = value + 'gmail.com';
+      const emailControl = this.signupForm.get(controlName);
+      if (emailControl) {
+        emailControl.setValue(value);
+      }
+    }
+  }
+
+  isLocating = false;
+
+  getCurrentLocation() {
+    if (navigator.geolocation) {
+      this.isLocating = true;
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+
+          fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+            .then(response => response.json())
+            .then(data => {
+              this.isLocating = false;
+              if (data && data.display_name) {
+                this.signupForm.patchValue({ address: data.display_name });
+              } else {
+                this.messageService.add({ severity: 'warn', summary: 'Location Warning', detail: 'Could not resolve address.' });
+              }
+            })
+            .catch(err => {
+              this.isLocating = false;
+              this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch address.' });
+            });
+        },
+        (error) => {
+          this.isLocating = false;
+          this.messageService.add({ severity: 'error', summary: 'Location Error', detail: 'Permission denied or unable to retrieve location.' });
+        }
+      );
+    } else {
+      this.messageService.add({ severity: 'error', summary: 'Not Supported', detail: 'Geolocation is not supported by this browser.' });
+    }
   }
 
   redirectToLogin() {

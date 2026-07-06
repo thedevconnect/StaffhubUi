@@ -132,39 +132,42 @@ export class AuthService {
   }
 
   private normalizeRoles(data: LoginApiResponse['data']): RoleOption[] {
+    let roles: RoleOption[] = [];
     if (Array.isArray(data.roles) && data.roles.length) {
-      return data.roles.map((role) => ({
+      roles = data.roles.map((role) => ({
         rolDes: role.roleName || role.role || '',
         roleId: String(role.roleCode || role.roleId || role.role || '').toLowerCase(),
       }));
-    }
-
-    if (Array.isArray(data.role)) {
-      return data.role.map((role, index) => ({
+    } else if (Array.isArray(data.role)) {
+      roles = data.role.map((role, index) => ({
         rolDes: role,
         roleId: String(Array.isArray(data.roleId) ? data.roleId[index] ?? role : role).toLowerCase(),
       }));
-    }
-
-    if (typeof data.role === 'string') {
+    } else if (typeof data.role === 'string') {
       if (data.role.includes(',')) {
-        return data.role.split(',').map((r) => {
+        roles = data.role.split(',').map((r) => {
           const trimmed = r.trim();
           return {
             rolDes: trimmed,
             roleId: trimmed.toLowerCase(),
           };
         });
+      } else {
+        roles = [
+          {
+            rolDes: data.role,
+            roleId: String(data.roleId ?? data.role).toLowerCase(),
+          },
+        ];
       }
-      return [
-        {
-          rolDes: data.role,
-          roleId: String(data.roleId ?? data.role).toLowerCase(),
-        },
-      ];
     }
 
-    return [];
+    const essIndex = roles.findIndex(r => r.roleId === 'ess');
+    if (essIndex > -1) {
+      const essRole = roles.splice(essIndex, 1)[0];
+      roles.unshift(essRole);
+    }
+    return roles;
   }
 
   setSessionFromLogin(res: any, username: string): void {
