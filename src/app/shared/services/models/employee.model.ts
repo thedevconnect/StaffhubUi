@@ -54,6 +54,8 @@ export interface CreateEmployeeRequest {
   work_location?: string;
   password?: string;
   defaultPassword?: string;
+  role?: string;
+  status?: string;
 }
 
 export interface UpdateEmployeeRequest extends CreateEmployeeRequest { }

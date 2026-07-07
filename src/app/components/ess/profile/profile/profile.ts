@@ -52,6 +52,12 @@ export class Profile implements OnInit {
   employeeId: string | number | null = null;
   companyId: string | number | null = null;
   loading: boolean = false;
+  isFullScreen: boolean = false;
+
+  toggleFullScreen(): void {
+    this.isFullScreen = !this.isFullScreen;
+    this.cdr.markForCheck();
+  }
 
   genderOptions = [
     { label: 'Male', value: 'MALE' },
@@ -145,23 +151,23 @@ export class Profile implements OnInit {
     private cdr: ChangeDetectorRef
   ) {
     this.onboardingForm = this.fb.group({
-      father_name: ['', Validators.required],
+      father_name: [''],
       mother_name: [''],
-      dob: [null, Validators.required],
-      gender: ['MALE', Validators.required],
+      dob: [null],
+      gender: ['MALE'],
       blood_group: [''],
       profile_photo: [''],
-      current_address: ['', Validators.required],
+      current_address: [''],
       permanent_address: [''],
       emergency_contact_name: [''],
-      emergency_contact: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+      emergency_contact: [''],
       emergency_contact_relation: [''],
-      bank_name: ['', Validators.required],
-      account_holder_name: ['', Validators.required],
-      account_number: ['', Validators.required],
-      ifsc_code: ['', Validators.required],
-      pan_number: ['', [Validators.required, Validators.pattern(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i)]],
-      aadhar_number: ['', [Validators.required, Validators.pattern(/^\d{12}$/)]]
+      bank_name: [''],
+      account_holder_name: [''],
+      account_number: [''],
+      ifsc_code: [''],
+      pan_number: [''],
+      aadhar_number: ['']
     });
   }
 
@@ -315,6 +321,44 @@ export class Profile implements OnInit {
   closeDrawer(): void {
     this.showDrawer = false;
     this.cdr.markForCheck();
+  }
+
+  onProfilePhotoSelect(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    const file = inputElement.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (file.size > 1024 * 1024) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'File Too Large',
+        detail: 'Profile photo must be less than 1MB.'
+      });
+      inputElement.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64String = reader.result as string;
+      this.onboardingForm.patchValue({
+        profile_photo: base64String
+      });
+      this.profileData.personal.avatarUrl = base64String;
+      this.showDrawer = true;
+      this.cdr.markForCheck();
+      
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Photo Selected',
+        detail: 'Please save your profile to apply changes permanently.',
+        life: 4000
+      });
+    };
+    reader.readAsDataURL(file);
   }
 
   submitOnboarding(): void {

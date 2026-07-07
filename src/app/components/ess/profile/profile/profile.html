@@ -59,9 +59,22 @@
         <div
             class="p-5 sm:p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-6 -mt-16 md:-mt-20 relative z-10">
             <!-- Avatar -->
-            <div
-                class="h-28 w-28 md:h-36 md:w-36 rounded-full border-4 border-white bg-slate-100 shadow-md overflow-hidden relative group">
+            <div class="h-28 w-28 md:h-36 md:w-36 rounded-full border-4 border-white bg-slate-100 shadow-md overflow-hidden relative"
+                [class.cursor-pointer]="onboardingStatus !== 'COMPLETED' && onboardingStatus !== 'APPROVED'"
+                [class.group]="onboardingStatus !== 'COMPLETED' && onboardingStatus !== 'APPROVED'"
+                (click)="onboardingStatus !== 'COMPLETED' && onboardingStatus !== 'APPROVED' ? photoInput.click() : openOnboardingDrawer()">
+
                 <img [src]="profileData.personal.avatarUrl" alt="Avatar" class="h-full w-full object-cover">
+
+                <!-- Hover overlay -->
+                <div *ngIf="onboardingStatus !== 'COMPLETED' && onboardingStatus !== 'APPROVED'"
+                    class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <i class="pi pi-camera text-white text-xl mb-1"></i>
+                    <span class="text-white text-[10px] font-bold uppercase tracking-wider">Change</span>
+                </div>
+
+                <!-- Hidden file input -->
+                <input type="file" #photoInput accept="image/*" class="hidden" (change)="onProfilePhotoSelect($event)">
             </div>
             <!-- Info Details -->
             <div class="flex-1 space-y-2 mt-0 md:mt-6">
@@ -550,7 +563,26 @@
 
     <!-- Onboarding Drawer -->
 
-    <p-drawer [(visible)]="showDrawer" position="right" [modal]="true" [style]="{ width: '45rem', maxWidth: '100vw' }">
+    <p-drawer [(visible)]="showDrawer" position="right" [modal]="true"
+        [style]="isFullScreen ? { width: '100vw', maxWidth: '100vw' } : { width: '60%', maxWidth: '100vw' }"
+        [showCloseIcon]="false">
+
+        <ng-template pTemplate="header">
+            <div class="absolute right-4 top-4 flex items-center">
+                <button type="button"
+                    class="h-8 w-8 rounded-full inline-flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors mr-1"
+                    (click)="toggleFullScreen()" pTooltip="{{ isFullScreen ? 'Restore Down' : 'Full Screen' }}"
+                    tooltipPosition="bottom">
+                    <i class="pi" [ngClass]="isFullScreen ? 'pi-window-minimize' : 'pi-window-maximize'"></i>
+                </button>
+                <button type="button"
+                    class="h-8 w-8 rounded-full inline-flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors"
+                    (click)="closeDrawer()" pTooltip="Close" tooltipPosition="bottom">
+                    <i class="pi pi-times"></i>
+                </button>
+            </div>
+        </ng-template>
+
         <div class="flex flex-col h-full">
             <div class="flex-none pb-4 border-b border-slate-200">
                 <h2 class="text-xl font-bold text-slate-800">Complete Employee Onboarding</h2>
@@ -605,9 +637,15 @@
                                     class="w-full custom-p-select"></p-select>
                             </div>
                             <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">Profile Photo URL</label>
-                                <input type="text" pInputText formControlName="profile_photo"
-                                    placeholder="http://image.url" class="w-full p-inputtext-sm">
+                                <label class="block text-xs font-semibold text-slate-600">Profile Photo (Max
+                                    1MB)</label>
+                                <input type="file" accept="image/*" (change)="onProfilePhotoSelect($event)"
+                                    class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                <input type="hidden" formControlName="profile_photo">
+                                <div *ngIf="onboardingForm.get('profile_photo')?.value"
+                                    class="mt-2 text-xs text-green-600 font-medium">
+                                    <i class="pi pi-check-circle mr-1"></i> Photo selected
+                                </div>
                             </div>
                         </div>
                     </div>
