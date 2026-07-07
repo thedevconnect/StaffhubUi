@@ -11,8 +11,10 @@ import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { SelectModule } from 'primeng/select';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { AttendanceService } from '../../../shared/services/attendance.service';
+import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template';
 
 @Component({
   selector: 'app-attendance-regularization',
@@ -30,7 +32,9 @@ import { AttendanceService } from '../../../shared/services/attendance.service';
     TextareaModule,
     ToastModule,
     SelectModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    TooltipModule,
+    TableTemplate
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './attendance-regularization.html',
@@ -44,47 +48,7 @@ export class AttendanceRegularization implements OnInit {
   ];
 
   isFullScreen: boolean = false;
-
-  // Static mock requests list
-  requests: any[] = [
-    {
-      id: 'REQ-REG-001',
-      attendanceDate: new Date('2026-07-01'),
-      correctionType: 'Missed Punch',
-      checkIn: new Date('2026-07-01T09:00:00'),
-      checkOut: new Date('2026-07-01T18:00:00'),
-      reason: 'Card swiped failed at entrance gate due to system glitch.',
-      status: 'Approved',
-      submittedOn: new Date('2026-07-01T18:30:00'),
-      managerRemarks: 'Verified check-in from department gate log. Approved.',
-      hrRemarks: 'Attendance record updated.'
-    },
-    {
-      id: 'REQ-REG-002',
-      attendanceDate: new Date('2026-07-04'),
-      correctionType: 'Late In',
-      checkIn: new Date('2026-07-04T10:15:00'),
-      checkOut: new Date('2026-07-04T18:30:00'),
-      reason: 'Delayed due to official client meeting at Gurugram hub.',
-      status: 'Pending',
-      submittedOn: new Date('2026-07-04T19:00:00'),
-      managerRemarks: null,
-      hrRemarks: null
-    },
-    {
-      id: 'REQ-REG-003',
-      attendanceDate: new Date('2026-06-25'),
-      correctionType: 'Early Out',
-      checkIn: new Date('2026-06-25T09:00:00'),
-      checkOut: new Date('2026-06-25T15:00:00'),
-      reason: 'Approved early exit for emergency doctor appointment.',
-      status: 'Rejected',
-      submittedOn: new Date('2026-06-25T16:00:00'),
-      managerRemarks: 'Prior approval was not requested. Rejected.',
-      hrRemarks: 'No supporting document attached.'
-    }
-  ];
-
+  requests: any[] = [];
   // Filter bindings
   searchQuery: string = '';
   statusFilter: string = 'All';
@@ -93,9 +57,61 @@ export class AttendanceRegularization implements OnInit {
   // Modal / Drawer variables
   drawerVisible: boolean = false;
   viewDrawerVisible: boolean = false;
+  historyDrawerVisible: boolean = false;
   drawerType: string = 'add'; // 'add' or 'edit'
   selectedRequest: any = null;
+  historyEvents: any[] = [];
   isLoading: boolean = false;
+
+  //   {
+  //     "success": true,
+  //     "message": "My requests fetched successfully",
+  //     "data": [
+  //         {
+  //             "id": 5,
+  //             "employeeId": 54,
+  //             "attendanceDate": "2026-07-05T18:30:00.000Z",
+  //             "correctionType": "Missed Punch",
+  //             "checkIn": "2026-07-06T23:00:00.000Z",
+  //             "checkOut": "2026-07-07T08:00:00.000Z",
+  //             "reason": "test teste ttest",
+  //             "status": "Pending",
+  //             "submittedOn": "2026-07-07T06:21:43.000Z",
+  //             "createdAt": "2026-07-07T06:21:43.000Z",
+  //             "managerRemarks": null,
+  //             "hrRemarks": null,
+  //             "attachmentUrl": null,
+  //             "approvedBy": null,
+  //             "approvedByName": null
+  //         }
+  //     ]
+  // }
+
+  columns: TableColumn[] = [
+
+    { key: 'actions', header: 'Action' },
+    { key: 'attendanceDate', header: 'Attendance Date' },
+    { key: 'correctionType', header: 'Correction Type' },
+    { key: 'checkIn', header: 'Check In' },
+    { key: 'checkOut', header: 'Check Out' },
+    { key: 'reason', header: 'Reason' },
+    { key: 'status', header: 'Status' },
+    { key: 'managerRemarks', header: 'managerRemarks' },
+    { key: 'approvedBy', header: 'approvedBy' },
+
+    { key: 'submittedOn', header: 'Submitted On' },
+  ];
+
+  rowActions = [
+    { label: 'View', icon: 'pi pi-eye', id: 'view' },
+    { label: 'Edit', icon: 'pi pi-pencil', id: 'edit' },
+    { label: 'History', icon: 'pi pi-history', id: 'history' },
+    { label: 'Delete', icon: 'pi pi-trash', id: 'delete' }
+  ];
+
+  pageSize = 10;
+  totalCount = 0;
+  pageNo = 1;
 
   regForm!: FormGroup;
   selectedFileName: string = '';
@@ -118,18 +134,18 @@ export class AttendanceRegularization implements OnInit {
 
   monthOptions = [
     { label: 'All Months', value: 'All' },
-    { label: 'January', value: '0' },
-    { label: 'February', value: '1' },
-    { label: 'March', value: '2' },
-    { label: 'April', value: '3' },
-    { label: 'May', value: '4' },
-    { label: 'June', value: '5' },
-    { label: 'July', value: '6' },
-    { label: 'August', value: '7' },
-    { label: 'September', value: '8' },
-    { label: 'October', value: '9' },
-    { label: 'November', value: '10' },
-    { label: 'December', value: '11' }
+    { label: 'January', value: '1' },
+    { label: 'February', value: '2' },
+    { label: 'March', value: '3' },
+    { label: 'April', value: '4' },
+    { label: 'May', value: '5' },
+    { label: 'June', value: '6' },
+    { label: 'July', value: '7' },
+    { label: 'August', value: '8' },
+    { label: 'September', value: '9' },
+    { label: 'October', value: '10' },
+    { label: 'November', value: '11' },
+    { label: 'December', value: '12' }
   ];
 
   constructor(
@@ -158,15 +174,16 @@ export class AttendanceRegularization implements OnInit {
           this.requests = res.data.map((req: any) => ({
             ...req,
             id: req.id,
-            attendanceDate: req.attendance_date ? new Date(req.attendance_date) : null,
-            correctionType: req.correction_type,
-            checkIn: req.check_in ? new Date(req.check_in) : null,
-            checkOut: req.check_out ? new Date(req.check_out) : null,
+            attendanceDate: req.attendanceDate ? new Date(req.attendanceDate) : null,
+            correctionType: req.correctionType,
+            checkIn: req.checkIn ? new Date(req.checkIn) : null,
+            checkOut: req.checkOut ? new Date(req.checkOut) : null,
             reason: req.reason,
             status: req.status,
-            submittedOn: req.created_at ? new Date(req.created_at) : null,
-            managerRemarks: req.manager_remarks,
-            hrRemarks: req.hr_remarks
+            submittedOn: req.createdAt ? new Date(req.createdAt) : null,
+            managerRemarks: req.managerRemarks,
+            hrRemarks: req.hrRemarks,
+            approvedBy: req.approvedBy
           }));
         } else {
           this.requests = [];
@@ -215,14 +232,14 @@ export class AttendanceRegularization implements OnInit {
   // Filter Logic
   get filteredRequests(): any[] {
     return this.requests.filter(req => {
-      const matchesSearch = this.searchQuery ? 
-        (req.reason.toLowerCase().includes(this.searchQuery.toLowerCase()) || 
-         req.correctionType.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-         req.id.toLowerCase().includes(this.searchQuery.toLowerCase())) : true;
+      const matchesSearch = this.searchQuery ?
+        (req.reason.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          req.correctionType.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          req.id.toLowerCase().includes(this.searchQuery.toLowerCase())) : true;
 
       const matchesStatus = this.statusFilter !== 'All' ? req.status === this.statusFilter : true;
 
-      const matchesMonth = this.monthFilter !== 'All' ? 
+      const matchesMonth = this.monthFilter !== 'All' ?
         req.attendanceDate.getMonth().toString() === this.monthFilter : true;
 
       return matchesSearch && matchesStatus && matchesMonth;
@@ -244,7 +261,7 @@ export class AttendanceRegularization implements OnInit {
   openNewDrawer() {
     this.drawerType = 'add';
     this.drawerVisible = true;
-    
+
     const defaultCheckIn = new Date();
     defaultCheckIn.setHours(10, 0, 0, 0);
 
@@ -281,6 +298,50 @@ export class AttendanceRegularization implements OnInit {
   openViewDrawer(req: any) {
     this.selectedRequest = req;
     this.viewDrawerVisible = true;
+    this.cdr.markForCheck();
+  }
+
+  openHistoryDrawer(req: any) {
+    this.selectedRequest = req;
+    this.historyEvents = [];
+    
+    // Created Event
+    if (req.submittedOn) {
+      this.historyEvents.push({
+        status: 'Submitted',
+        date: req.submittedOn,
+        icon: 'pi pi-file-arrow-up',
+        color: 'bg-blue-500',
+        title: 'Request Submitted',
+        description: 'Regularization request was submitted successfully.'
+      });
+    }
+
+    // Pending State (usually the same as created)
+    if (req.status === 'Pending') {
+      this.historyEvents.push({
+        status: 'Pending',
+        date: req.submittedOn,
+        icon: 'pi pi-clock',
+        color: 'bg-amber-500',
+        title: 'Pending Approval',
+        description: 'Request is waiting for Manager/HR approval.'
+      });
+    }
+
+    // Processed State (Approved/Rejected)
+    if (req.status === 'Approved' || req.status === 'Rejected') {
+      this.historyEvents.push({
+        status: req.status,
+        date: req.updatedAt || req.submittedOn, // Assuming it's processed later
+        icon: req.status === 'Approved' ? 'pi pi-check' : 'pi pi-times',
+        color: req.status === 'Approved' ? 'bg-emerald-500' : 'bg-rose-500',
+        title: `Request ${req.status}`,
+        description: req.managerRemarks || req.hrRemarks || 'Request has been processed.'
+      });
+    }
+
+    this.historyDrawerVisible = true;
     this.cdr.markForCheck();
   }
 
@@ -343,10 +404,43 @@ export class AttendanceRegularization implements OnInit {
 
   onRefresh() {
     this.isLoading = true;
+    this.fetchRequests();
     setTimeout(() => {
-      this.isLoading = false;
       this.messageService.add({ severity: 'info', summary: 'Refreshed', detail: 'Regularization requests list is up to date.' });
-      this.cdr.markForCheck();
     }, 500);
+  }
+
+  disableAction = (actionId: string, row: any): boolean => {
+    if (row.status !== 'Pending' && row.status !== 'Rejected') {
+      if (actionId === 'edit') return true;
+    }
+    if (row.status !== 'Pending') {
+      if (actionId === 'delete') return true;
+    }
+    return false;
+  };
+
+  onActionClicked(event: { actionId: string; row: any }) {
+    if (event.actionId === 'edit') {
+      this.openEditDrawer(event.row);
+    } else if (event.actionId === 'view') {
+      this.openViewDrawer(event.row);
+    } else if (event.actionId === 'history') {
+      this.openHistoryDrawer(event.row);
+    } else if (event.actionId === 'delete') {
+      this.onDelete(event.row.id);
+    }
+  }
+
+  onPageChange(page: number) {
+    this.pageNo = page;
+  }
+
+  onSearchChange(text: string) {
+    this.searchQuery = text;
+  }
+
+  onPageSizeChange(size: number) {
+    this.pageSize = size;
   }
 }

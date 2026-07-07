@@ -149,7 +149,7 @@
               } @else if (col.formatter) {
               <ng-container>{{ col.formatter(getDeepValue(item, col.key), item) }}</ng-container>
               } @else if (col.pipe === 'date') {
-              <ng-container>{{ getDeepValue(item, col.key) | date: (col.pipeArgs || 'mediumDate') }}</ng-container>
+              <ng-container>{{ getDeepValue(item, col.key) | date: (col.pipeArgs || 'dd-MM-yyyy') }}</ng-container>
               } @else if (col.pipe === 'currency') {
               <ng-container>{{ getDeepValue(item, col.key) | currency: (col.pipeArgs || undefined) }}</ng-container>
               } @else if (col.pipe === 'percent') {
@@ -157,7 +157,7 @@
               } @else if (col.pipe === 'number') {
               <ng-container>{{ getDeepValue(item, col.key) | number: (col.pipeArgs || undefined) }}</ng-container>
               } @else if (col.format === 'date') {
-              <ng-container>{{ getDeepValue(item, col.key) | date: 'mediumDate' }}</ng-container>
+              <ng-container>{{ getDeepValue(item, col.key) | date: 'dd-MM-yyyy' }}</ng-container>
               } @else if (col.format === 'time') {
               <ng-container>{{ getDeepValue(item, col.key) | date: 'shortTime' }}</ng-container>
               } @else if (col.format === 'status') {
@@ -241,7 +241,7 @@
           } @else if (col.formatter) {
           <ng-container>{{ col.formatter(getDeepValue(item, col.key), item) }}</ng-container>
           } @else if (col.pipe === 'date') {
-          <ng-container>{{ getDeepValue(item, col.key) | date: (col.pipeArgs || 'mediumDate') }}</ng-container>
+          <ng-container>{{ getDeepValue(item, col.key) | date: (col.pipeArgs || 'dd-MM-yyyy') }}</ng-container>
           } @else if (col.pipe === 'currency') {
           <ng-container>{{ getDeepValue(item, col.key) | currency: (col.pipeArgs || undefined) }}</ng-container>
           } @else if (col.pipe === 'percent') {
@@ -249,7 +249,7 @@
           } @else if (col.pipe === 'number') {
           <ng-container>{{ getDeepValue(item, col.key) | number: (col.pipeArgs || undefined) }}</ng-container>
           } @else if (col.format === 'date') {
-          <ng-container>{{ getDeepValue(item, col.key) | date: 'mediumDate' }}</ng-container>
+          <ng-container>{{ getDeepValue(item, col.key) | date: 'dd-MM-yyyy' }}</ng-container>
           } @else if (col.format === 'time') {
           <ng-container>{{ getDeepValue(item, col.key) | date: 'shortTime' }}</ng-container>
           } @else if (col.format === 'status') {
