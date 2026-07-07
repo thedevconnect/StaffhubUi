@@ -206,8 +206,14 @@ export class EmployeeManagement implements OnInit {
     this.loading.set(true);
 
     if (this.isEditMode && this.selectedEmployee?.id !== undefined && this.selectedEmployee?.id !== null) {
+      const updatePayload: UpdateEmployeeRequest = {
+        ...payload,
+        role: this.selectedEmployee.role || 'ESS',
+        status: this.selectedEmployee.status || 'ACTIVE'
+      };
+
       this.employeeService
-        .updateEmployee(this.selectedEmployee.id, payload as UpdateEmployeeRequest)
+        .updateEmployee(this.selectedEmployee.id, updatePayload)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {

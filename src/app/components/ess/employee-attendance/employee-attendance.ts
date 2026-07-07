@@ -69,6 +69,23 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     this.updateClock();
     this.clockIntervalId = setInterval(() => this.updateClock(), 1000);
     this.loadAllData();
+    this.checkIncompleteAttendance();
+  }
+
+  checkIncompleteAttendance(): void {
+    this.attendanceService.checkIncompleteAttendance().subscribe({
+      next: (res) => {
+        if (res.success && res.data && res.data.length > 0) {
+          const count = res.data.length;
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Action Required',
+            detail: `You have ${count} incomplete attendance record(s) from previous days. Please go to Attendance Regularization to submit a request.`,
+            sticky: true
+          });
+        }
+      }
+    });
   }
 
   ngOnDestroy(): void {

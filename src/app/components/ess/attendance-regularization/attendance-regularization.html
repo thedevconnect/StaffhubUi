@@ -171,8 +171,10 @@
 </div>
 
 <!-- New Request Drawer form -->
-<p-drawer [(visible)]="drawerVisible" position="right" [modal]="true" [style]="{ width: '100%', maxWidth: '580px' }"
-  styleClass="modern-drawer">
+<p-drawer [(visible)]="drawerVisible" position="right" [modal]="true" 
+  [showCloseIcon]="false"
+  [style]="isFullScreen ? { width: '100%', maxWidth: '100%' } : { width: '100%', maxWidth: '580px' }"
+  styleClass="modern-drawer transition-all duration-300">
 
   <ng-template pTemplate="header">
     <div class="flex items-center gap-2.5">
@@ -183,6 +185,20 @@
         <h3 class="text-lg font-bold">{{ drawerType === 'add' ? 'New Regularization Request' : 'Edit Regularization Request' }}</h3>
         <p class="text-xs text-slate-400">{{ drawerType === 'add' ? 'Apply for time corrections or punch discrepancies' : 'Modify request details and resubmit' }}</p>
       </div>
+    </div>
+    
+    <!-- Action Icons -->
+    <div class="absolute right-4 top-4 flex items-center gap-2">
+      <!-- Fullscreen Toggle Button -->
+      <button type="button" (click)="toggleFullScreen()"
+        class="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-500 transition-colors">
+        <i class="pi" [ngClass]="isFullScreen ? 'pi-window-minimize' : 'pi-window-maximize'"></i>
+      </button>
+      <!-- Close Button -->
+      <button type="button" (click)="drawerVisible = false"
+        class="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-rose-50 text-slate-500 hover:text-rose-600 transition-colors">
+        <i class="pi pi-times"></i>
+      </button>
     </div>
   </ng-template>
 
@@ -299,8 +315,10 @@
 </p-drawer>
 
 <!-- View Request Drawer (Read-Only) -->
-<p-drawer [(visible)]="viewDrawerVisible" position="right" [modal]="true" [style]="{ width: '100%', maxWidth: '580px' }"
-  styleClass="modern-drawer">
+<p-drawer [(visible)]="viewDrawerVisible" position="right" [modal]="true"
+  [showCloseIcon]="false" 
+  [style]="isFullScreen ? { width: '100%', maxWidth: '100%' } : { width: '100%', maxWidth: '580px' }"
+  styleClass="modern-drawer transition-all duration-300">
 
   <ng-template pTemplate="header">
     <div class="flex items-center gap-2.5">
@@ -311,6 +329,20 @@
         <h3 class="text-lg font-bold">Request Details</h3>
         <p class="text-xs text-slate-400">Regularization record review</p>
       </div>
+    </div>
+    
+    <!-- Action Icons -->
+    <div class="absolute right-4 top-4 flex items-center gap-2">
+      <!-- Fullscreen Toggle Button -->
+      <button type="button" (click)="toggleFullScreen()"
+        class="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-500 transition-colors">
+        <i class="pi" [ngClass]="isFullScreen ? 'pi-window-minimize' : 'pi-window-maximize'"></i>
+      </button>
+      <!-- Close Button -->
+      <button type="button" (click)="viewDrawerVisible = false"
+        class="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-rose-50 text-slate-500 hover:text-rose-600 transition-colors">
+        <i class="pi pi-times"></i>
+      </button>
     </div>
   </ng-template>
 

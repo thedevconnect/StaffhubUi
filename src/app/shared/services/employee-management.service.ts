@@ -66,6 +66,8 @@ export class EmployeeManagementService {
     const email = officialEmail;
     const mobile = mobileNumber;
     const username = payload.username || (officialEmail.includes('@') ? officialEmail.split('@')[0] : officialEmail) || '';
+    const role = payload.role || '';
+    const status = payload.status || '';
 
     return {
       fullName,
@@ -80,6 +82,8 @@ export class EmployeeManagementService {
       joiningDate,
       employmentType,
       workLocation,
+      ...(role ? { role } : {}),
+      ...(status ? { status } : {}),
       ...(companyId ? { companyId } : {}),
       ...(reportingManagerId ? { reportingManagerId } : {})
     };

@@ -106,12 +106,16 @@ export class AttendanceService {
     return this.http.get<any>(`${this.apiBase}/api/holidays${params}`);
   }
 
-  submitRegularization(data: { attendanceDate: string; reason: string }): Observable<any> {
+  submitRegularization(data: any): Observable<any> {
     return this.http.post<any>(`${this.apiBase}/api/attendance-regularization`, data);
   }
 
   getMyRegularizations(): Observable<any> {
     return this.http.get<any>(`${this.apiBase}/api/attendance-regularization/my-requests`);
+  }
+
+  checkIncompleteAttendance(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.apiBase}/api/attendance/incomplete-status`);
   }
 
   getCompanyRegularizations(page: number = 1, limit: number = 10, status: string = 'PENDING', search: string = ''): Observable<any> {

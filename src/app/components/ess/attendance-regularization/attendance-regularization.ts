@@ -12,6 +12,7 @@ import { ToastModule } from 'primeng/toast';
 import { SelectModule } from 'primeng/select';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { AttendanceService } from '../../../shared/services/attendance.service';
 
 @Component({
   selector: 'app-attendance-regularization',
@@ -41,6 +42,8 @@ export class AttendanceRegularization implements OnInit {
     { label: 'Employee Self Service', icon: 'pi pi-home', routerLink: '/ess' },
     { label: 'Attendance Regularization', icon: 'pi pi-calendar-plus', routerLink: '/ess/attendance-regularization' }
   ];
+
+  isFullScreen: boolean = false;
 
   // Static mock requests list
   requests: any[] = [
@@ -133,11 +136,51 @@ export class AttendanceRegularization implements OnInit {
     private fb: FormBuilder,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private attendanceService: AttendanceService
   ) { }
 
   ngOnInit() {
     this.initForm();
+    this.fetchRequests();
+  }
+
+  toggleFullScreen(): void {
+    this.isFullScreen = !this.isFullScreen;
+    this.cdr.markForCheck();
+  }
+
+  fetchRequests() {
+    this.isLoading = true;
+    this.attendanceService.getMyRegularizations().subscribe({
+      next: (res) => {
+        if (res && res.data) {
+          this.requests = res.data.map((req: any) => ({
+            ...req,
+            id: req.id,
+            attendanceDate: req.attendance_date ? new Date(req.attendance_date) : null,
+            correctionType: req.correction_type,
+            checkIn: req.check_in ? new Date(req.check_in) : null,
+            checkOut: req.check_out ? new Date(req.check_out) : null,
+            reason: req.reason,
+            status: req.status,
+            submittedOn: req.created_at ? new Date(req.created_at) : null,
+            managerRemarks: req.manager_remarks,
+            hrRemarks: req.hr_remarks
+          }));
+        } else {
+          this.requests = [];
+        }
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error(err);
+        this.isLoading = false;
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch requests' });
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   initForm() {
@@ -258,48 +301,31 @@ export class AttendanceRegularization implements OnInit {
     this.isLoading = true;
     const formValue = this.regForm.getRawValue();
 
-    // Simulate submission latency
-    setTimeout(() => {
-      if (this.drawerType === 'add') {
-        const newRequest = {
-          id: 'REQ-REG-' + String(Date.now()).slice(-3),
-          attendanceDate: formValue.attendanceDate,
-          correctionType: formValue.correctionType,
-          checkIn: formValue.checkIn,
-          checkOut: formValue.checkOut,
-          reason: formValue.reason,
-          status: 'Pending',
-          submittedOn: new Date(),
-          managerRemarks: null,
-          hrRemarks: null
-        };
+    const payload = {
+      attendanceDate: formValue.attendanceDate,
+      correctionType: formValue.correctionType,
+      checkIn: formValue.checkIn,
+      checkOut: formValue.checkOut,
+      reason: formValue.reason,
+      attachmentUrl: this.selectedFileName || null
+    };
 
-        this.requests = [newRequest, ...this.requests];
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Regularization request submitted successfully!' });
-      } else {
-        // Edit mode
-        this.requests = this.requests.map(req => {
-          if (req.id === this.selectedRequest.id) {
-            return {
-              ...req,
-              attendanceDate: formValue.attendanceDate,
-              correctionType: formValue.correctionType,
-              checkIn: formValue.checkIn,
-              checkOut: formValue.checkOut,
-              reason: formValue.reason,
-              status: 'Pending', // Resets back to Pending on resubmission
-              submittedOn: new Date()
-            };
-          }
-          return req;
-        });
-        this.messageService.add({ severity: 'success', summary: 'Updated', detail: 'Regularization request updated successfully!' });
-      }
-
-      this.drawerVisible = false;
-      this.isLoading = false;
-      this.cdr.markForCheck();
-    }, 600);
+    if (this.drawerType === 'add' || this.drawerType === 'edit') {
+      this.attendanceService.submitRegularization(payload).subscribe({
+        next: (res) => {
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Regularization request submitted successfully!' });
+          this.drawerVisible = false;
+          this.fetchRequests(); // reload list
+        },
+        error: (err) => {
+          console.error(err);
+          this.isLoading = false;
+          const errorMsg = err.error?.message || 'Failed to submit regularization request';
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: errorMsg });
+          this.cdr.markForCheck();
+        }
+      });
+    }
   }
 
   onDelete(id: string) {
