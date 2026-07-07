@@ -98,21 +98,27 @@ export class EssDashboard implements OnInit {
       key: 'attendance_date',
       header: 'Attendance Date',
       isVisible: true,
-      isSortable: true
+      isSortable: true,
+      pipe: 'date',
+      pipeArgs: 'dd-MM-yyyy'
     },
 
     {
       key: 'swipe_in',
       header: 'Swipe In',
       isVisible: true,
-      isSortable: true
+      isSortable: true,
+      pipe: 'date',
+      pipeArgs: 'hh:mm a'
     },
 
     {
       key: 'swipe_out',
       header: 'Swipe Out',
       isVisible: true,
-      isSortable: true
+      isSortable: true,
+      pipe: 'date',
+      pipeArgs: 'hh:mm a'
     },
 
     {
@@ -126,14 +132,18 @@ export class EssDashboard implements OnInit {
       key: 'created_at',
       header: 'Created At',
       isVisible: true,
-      isSortable: true
+      isSortable: true,
+      pipe: 'date',
+      pipeArgs: 'dd-MM-yyyy hh:mm a'
     },
 
     {
       key: 'updated_at',
       header: 'Updated At',
       isVisible: true,
-      isSortable: true
+      isSortable: true,
+      pipe: 'date',
+      pipeArgs: 'dd-MM-yyyy hh:mm a'
     }
   ]
 

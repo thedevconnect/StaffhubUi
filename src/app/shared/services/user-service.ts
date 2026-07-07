@@ -111,6 +111,10 @@ export class UserService {
     return this.http.get(`${this.apiUrl}/api/companies/all?page=${page}&limit=${limit}&search=${search}&status=${status}`);
   }
 
+  getSuperadminDashboardStats() {
+    return this.http.get(`${this.apiUrl}/api/companies/dashboard-stats`);
+  }
+
 
   approveCompany(id: string | number) {
     return this.http.put(`${this.apiUrl}/api/companies/approve/${id}`, {});

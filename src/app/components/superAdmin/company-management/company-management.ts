@@ -42,8 +42,7 @@ export class CompanyManagement implements OnInit {
   breadcrumbItems: any[] = [
     { label: 'Super Admin', icon: 'pi pi-user', routerLink: '/superadmin' },
     {
-      label: 'Company Management',
-      icon: 'pi pi-building',
+      label: 'Company Management', icon: 'pi pi-building',
       routerLink: '/superadmin/company-management',
     },
   ];
