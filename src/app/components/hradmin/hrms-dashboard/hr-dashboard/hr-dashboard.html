@@ -136,22 +136,22 @@
             <div
               class="absolute inset-x-0 bottom-0 top-0 flex flex-col justify-between text-[9px] font-semibold text-slate-400">
               <div class="w-full border-t border-slate-100 text-right pr-1">
-                <span class="relative -top-2">120</span>
+                <span class="relative -top-2">{{ maxBarValue | number:'1.0-0' }}</span>
               </div>
               <div class="w-full border-t border-slate-100 text-right pr-1">
-                <span class="relative -top-2">100</span>
+                <span class="relative -top-2">{{ (maxBarValue * 5 / 6) | number:'1.0-0' }}</span>
               </div>
               <div class="w-full border-t border-slate-100 text-right pr-1">
-                <span class="relative -top-2">80</span>
+                <span class="relative -top-2">{{ (maxBarValue * 4 / 6) | number:'1.0-0' }}</span>
               </div>
               <div class="w-full border-t border-slate-100 text-right pr-1">
-                <span class="relative -top-2">60</span>
+                <span class="relative -top-2">{{ (maxBarValue * 3 / 6) | number:'1.0-0' }}</span>
               </div>
               <div class="w-full border-t border-slate-100 text-right pr-1">
-                <span class="relative -top-2">40</span>
+                <span class="relative -top-2">{{ (maxBarValue * 2 / 6) | number:'1.0-0' }}</span>
               </div>
               <div class="w-full border-t border-slate-100 text-right pr-1">
-                <span class="relative -top-2">20</span>
+                <span class="relative -top-2">{{ (maxBarValue * 1 / 6) | number:'1.0-0' }}</span>
               </div>
               <div class="w-full border-b border-slate-200 text-right pr-1">
                 <span class="relative -top-2">0</span>

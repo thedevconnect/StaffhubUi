@@ -55,7 +55,7 @@ export class HrDashboard implements OnInit {
   // Navigation tabs: 'dashboard' | 'pendency'
   activeTab: 'dashboard' | 'pendency' = 'dashboard';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   // Total headcount in statistics
   totalEmployees = 147;
@@ -180,7 +180,7 @@ export class HrDashboard implements OnInit {
     this.isLoading = true;
     this.loadDashboardSummary();
     this.loadPendencyData();
-    
+
     // Simulate slight delay for visual feedback if API is too fast
     setTimeout(() => {
       this.isLoading = false;
@@ -222,7 +222,7 @@ export class HrDashboard implements OnInit {
           this.attendanceCards = [
             {
               label: 'Swipe In',
-              count: s.swipeInCount,
+              count: s.todayStats?.swipeInCount || 0,
               icon: 'pi-check-circle',
               colorClass: 'text-emerald-600',
               bgClass: 'bg-emerald-50',
@@ -230,7 +230,7 @@ export class HrDashboard implements OnInit {
             },
             {
               label: 'Not Swipe In',
-              count: Math.max(0, s.totalEmployees - s.swipeInCount - s.onLeaveCount),
+              count: Math.max(0, s.totalEmployees - (s.todayStats?.swipeInCount || 0) - (s.todayStats?.onLeaveCount || 0)),
               icon: 'pi-exclamation-triangle',
               colorClass: 'text-rose-600',
               bgClass: 'bg-rose-50',
@@ -238,7 +238,7 @@ export class HrDashboard implements OnInit {
             },
             {
               label: 'On Leave',
-              count: s.onLeaveCount,
+              count: s.todayStats?.onLeaveCount || 0,
               icon: 'pi-calendar',
               colorClass: 'text-blue-600',
               bgClass: 'bg-blue-50',
@@ -262,7 +262,7 @@ export class HrDashboard implements OnInit {
             },
             {
               label: 'Swipe Out',
-              count: s.swipeOutCount,
+              count: s.todayStats?.swipeOutCount || 0,
               icon: 'pi-sign-out',
               colorClass: 'text-orange-600',
               bgClass: 'bg-orange-50',
@@ -272,12 +272,12 @@ export class HrDashboard implements OnInit {
 
           // Update Donut Chart
           this.donutRawData = [
-            { label: 'Swipe In', value: s.swipeInCount, color: '#10b981' },
-            { label: 'Not Swipe In', value: Math.max(0, s.totalEmployees - s.swipeInCount - s.onLeaveCount), color: '#f43f5e' },
+            { label: 'Swipe In', value: s.todayStats?.swipeInCount || 0, color: '#10b981' },
+            { label: 'Not Swipe In', value: Math.max(0, s.totalEmployees - (s.todayStats?.swipeInCount || 0) - (s.todayStats?.onLeaveCount || 0)), color: '#f43f5e' },
             { label: 'OD', value: s.odCount || 0, color: '#b45309' },
-            { label: 'On Leave', value: s.onLeaveCount, color: '#3b82f6' },
-            { label: 'Short Leave', value: s.shortLeaveCount, color: '#a855f7' },
-            { label: 'Swipe Out', value: s.swipeOutCount, color: '#f97316' },
+            { label: 'On Leave', value: s.todayStats?.onLeaveCount || 0, color: '#3b82f6' },
+            { label: 'Short Leave', value: s.shortLeaveCount || 0, color: '#a855f7' },
+            { label: 'Swipe Out', value: s.todayStats?.swipeOutCount || 0, color: '#f97316' },
           ];
           this.calculateDonutSegments();
 
