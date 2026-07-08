@@ -134,4 +134,8 @@ export class AttendanceService {
     return this.http.get<ApiResponse<any[]>>(`${this.apiBase}/api/attendance/hr-dashboard-details?category=${category}`);
   }
 
+  getEmployeeHistory(employeeId: string): Observable<ApiResponse<AttendanceRecord[]>> {
+    return this.http.get<ApiResponse<AttendanceRecord[]>>(`${this.apiBase}/api/attendance/employee-history/${employeeId}`);
+  }
+
 }

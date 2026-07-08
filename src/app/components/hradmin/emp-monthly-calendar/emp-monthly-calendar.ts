@@ -8,6 +8,7 @@ import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { EmployeeManagementService } from '../../../shared/services/employee-management.service';
+import { AttendanceService, AttendanceRecord } from '../../../shared/services/attendance.service';
 
 export interface Employee {
   id: string;
@@ -21,7 +22,8 @@ export interface CalendarDay {
   date: number | null;
   status: string;
   colorClass: string;
-  swipeInTime?: string;
+  swipeInTime?: string | null;
+  swipeOutTime?: string | null;
 }
 
 @Component({
@@ -55,7 +57,8 @@ export class EmpMonthlyCalendar implements OnInit {
 
   constructor(
     private messageService: MessageService,
-    private employeeManagementService: EmployeeManagementService
+    private employeeManagementService: EmployeeManagementService,
+    private attendanceService: AttendanceService
   ) { }
 
   ngOnInit(): void {
@@ -151,6 +154,32 @@ export class EmpMonthlyCalendar implements OnInit {
   }
 
   generateCalendar(): void {
+    if (!this.selectedEmployee) return;
+
+    this.isLoading = true;
+    this.attendanceService.getEmployeeHistory(this.selectedEmployee.id).subscribe({
+      next: (res) => {
+        const history = res.data || [];
+        const historyMap = new Map<string, any>();
+        history.forEach(record => {
+          if (record.attendance_date) {
+            const dStr = new Date(record.attendance_date).toISOString().split('T')[0];
+            historyMap.set(dStr, record);
+          }
+        });
+
+        this.buildCalendarGrid(historyMap);
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch attendance history.' });
+        this.buildCalendarGrid(new Map());
+      }
+    });
+  }
+
+  buildCalendarGrid(historyMap: Map<string, any>): void {
     const year = this.currentDate.getFullYear();
     const month = this.currentDate.getMonth();
 
@@ -174,40 +203,34 @@ export class EmpMonthlyCalendar implements OnInit {
     for (let day = 1; day <= totalDays; day++) {
       let status = '';
       let colorClass = '';
-      let swipeInTime = undefined;
+      let swipeInTime: string | null = null;
+      let swipeOutTime: string | null = null;
 
       const dateObj = new Date(year, month, day);
-      
+      const yyyy = dateObj.getFullYear();
+      const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const dd = String(dateObj.getDate()).padStart(2, '0');
+      const dateStr = `${yyyy}-${mm}-${dd}`;
+
+      const record = historyMap.get(dateStr);
+
       if (dateObj <= today) {
-        status = 'P'; // Default Present
-        colorClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-
-        if (dateObj.getTime() === today.getTime()) {
-          swipeInTime = '09:30 AM';
-        }
-
         const isSunday = dateObj.getDay() === 0;
         const isSaturday = dateObj.getDay() === 6;
 
-        if (isSunday) {
+        if (record) {
+          status = record.attendance_status === 'PRESENT' ? 'P' : (record.attendance_status === 'ON_LEAVE' ? 'L' : 'P');
+          if (status === 'P') colorClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+          if (status === 'L') colorClass = 'bg-amber-50 text-amber-700 border-amber-200';
+
+          swipeInTime = record.swipe_in || null;
+          swipeOutTime = record.swipe_out || null;
+        } else if (isSunday || isSaturday) {
           status = 'WO'; // Weekly Off
           colorClass = 'bg-slate-50 text-slate-400 border-slate-200';
-        } else if (isSaturday) {
-          status = 'WO'; // Alternating or half-day, let's say Weekly Off for simplicity
-          colorClass = 'bg-slate-50 text-slate-400 border-slate-200';
         } else {
-          // Randomly scatter a few absences, half-days or leaves to make demo realistic
-          const val = (day * 17) % 30;
-          if (val === 5) {
-            status = 'A';
-            colorClass = 'bg-rose-50 text-rose-700 border-rose-200';
-          } else if (val === 12) {
-            status = 'L';
-            colorClass = 'bg-amber-50 text-amber-700 border-amber-200';
-          } else if (val === 18) {
-            status = 'HD';
-            colorClass = 'bg-purple-50 text-purple-700 border-purple-200';
-          }
+          status = 'A'; // Absent
+          colorClass = 'bg-rose-50 text-rose-700 border-rose-200';
         }
       }
 
@@ -215,7 +238,8 @@ export class EmpMonthlyCalendar implements OnInit {
         date: day,
         status: status,
         colorClass: colorClass,
-        swipeInTime: swipeInTime
+        swipeInTime: swipeInTime,
+        swipeOutTime: swipeOutTime
       });
     }
 
