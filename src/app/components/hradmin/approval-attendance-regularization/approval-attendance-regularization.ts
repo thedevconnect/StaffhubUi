@@ -13,6 +13,7 @@ import { SelectModule } from 'primeng/select';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { AttendanceService } from '../../../shared/services/attendance.service';
+import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template';
 
 @Component({
   selector: 'app-approval-attendance-regularization',
@@ -30,7 +31,8 @@ import { AttendanceService } from '../../../shared/services/attendance.service';
     TextareaModule,
     ToastModule,
     SelectModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    TableTemplate
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './approval-attendance-regularization.html',
@@ -43,51 +45,20 @@ export class ApprovalAttendanceRegularization implements OnInit {
     { label: 'Regularization Approvals', icon: 'pi pi-check-square', routerLink: '/hradmin/approval-attendance-regularization' }
   ];
 
-  // Static mock requests list with employee metadata
-  requests: any[] = [
-    {
-      id: 'REQ-REG-001',
-      employeeName: 'Aarav Sharma',
-      department: 'Technology',
-      attendanceDate: new Date('2026-07-05'),
-      correctionType: 'Missed Punch',
-      checkIn: new Date('2026-07-05T10:00:00'),
-      checkOut: new Date('2026-07-05T19:00:00'),
-      reason: 'Biometric device at Hub-3 failed to scan fingerprint.',
-      status: 'Pending',
-      submittedOn: new Date('2026-07-05T19:30:00'),
-      managerRemarks: null,
-      hrRemarks: null
-    },
-    {
-      id: 'REQ-REG-002',
-      employeeName: 'Priya Patel',
-      department: 'Marketing',
-      attendanceDate: new Date('2026-07-04'),
-      correctionType: 'Late In',
-      checkIn: new Date('2026-07-04T10:30:00'),
-      checkOut: new Date('2026-07-04T19:00:00'),
-      reason: 'Delayed due to official external vendor coordination visit.',
-      status: 'Approved',
-      submittedOn: new Date('2026-07-04T19:15:00'),
-      managerRemarks: 'Approved. Priya had updated me in advance.',
-      hrRemarks: 'Log entries adjusted.'
-    },
-    {
-      id: 'REQ-REG-003',
-      employeeName: 'Rohan Gupta',
-      department: 'Human Resources',
-      attendanceDate: new Date('2026-07-03'),
-      correctionType: 'Early Out',
-      checkIn: new Date('2026-07-03T09:00:00'),
-      checkOut: new Date('2026-07-03T14:30:00'),
-      reason: 'Urgent family emergency, had to leave early with approval.',
-      status: 'Rejected',
-      submittedOn: new Date('2026-07-03T15:00:00'),
-      managerRemarks: 'No emergency leave approved. Rejected.',
-      hrRemarks: 'No supporting document attached.'
-    }
+  columns: TableColumn[] = [
+    { key: 'action', header: 'Action' },
+    { key: 'employee', header: 'Employee' },
+    { key: 'attendanceDate', header: 'Attendance Date', pipe: 'date', pipeArgs: 'dd-MM-yyyy' },
+    { key: 'correctionType', header: 'Type' },
+    { key: 'checkIn', header: 'Check In', pipe: 'date', pipeArgs: 'hh:mm a' },
+    { key: 'checkOut', header: 'Check Out', pipe: 'date', pipeArgs: 'hh:mm a' },
+    { key: 'reason', header: 'Reason' },
+    { key: 'status', header: 'Status' },
+    { key: 'submittedOn', header: 'Submitted On', pipe: 'date' },
   ];
+
+  // Requests array
+  requests: any[] = [];
 
   // Filter bindings
   searchQuery: string = '';
@@ -97,7 +68,7 @@ export class ApprovalAttendanceRegularization implements OnInit {
   // Drawer states
   detailDrawerVisible: boolean = false;
   selectedRequest: any = null;
-  hrRemarksInput: string = '';
+  processForm: FormGroup;
   isLoading: boolean = false;
 
   correctionTypes = [
@@ -120,8 +91,13 @@ export class ApprovalAttendanceRegularization implements OnInit {
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private attendanceService: AttendanceService,
-    private cdr: ChangeDetectorRef
-  ) { }
+    private cdr: ChangeDetectorRef,
+    private fb: FormBuilder
+  ) {
+    this.processForm = this.fb.group({
+      hrRemarks: ['', Validators.required]
+    });
+  }
 
   ngOnInit() {
     this.loadCompanyRequests();
@@ -169,26 +145,26 @@ export class ApprovalAttendanceRegularization implements OnInit {
 
   // Summary Metrics Counts
   get pendingCount(): number {
-    return this.requests.filter(r => r.status === 'Pending' || r.status === 'PENDING').length;
+    return this.requests.filter((r: any) => r.status === 'Pending' || r.status === 'PENDING').length;
   }
 
   get approvedCount(): number {
-    return this.requests.filter(r => r.status === 'Approved' || r.status === 'APPROVED').length;
+    return this.requests.filter((r: any) => r.status === 'Approved' || r.status === 'APPROVED').length;
   }
 
   get rejectedCount(): number {
-    return this.requests.filter(r => r.status === 'Rejected' || r.status === 'REJECTED').length;
+    return this.requests.filter((r: any) => r.status === 'Rejected' || r.status === 'REJECTED').length;
   }
 
   // Filters computed requests
   get filteredRequests(): any[] {
-    return this.requests.filter(req => {
-      const matchesSearch = this.searchQuery ? 
-        (req.employeeName.toLowerCase().includes(this.searchQuery.toLowerCase()) || 
-         req.reason.toLowerCase().includes(this.searchQuery.toLowerCase()) || 
-         req.id.toLowerCase().includes(this.searchQuery.toLowerCase())) : true;
+    return this.requests.filter((req: any) => {
+      const matchesSearch = this.searchQuery ?
+        (req.employeeName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          req.reason.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          req.id.toLowerCase().includes(this.searchQuery.toLowerCase())) : true;
 
-      const matchesStatus = this.statusFilter !== 'All' ? 
+      const matchesStatus = this.statusFilter !== 'All' ?
         (req.status.toLowerCase() === this.statusFilter.toLowerCase()) : true;
 
       const matchesType = this.typeFilter !== 'All' ? req.correctionType === this.typeFilter : true;
@@ -206,27 +182,50 @@ export class ApprovalAttendanceRegularization implements OnInit {
 
   openDetailDrawer(req: any) {
     this.selectedRequest = req;
-    this.hrRemarksInput = req.hrRemarks || '';
+    this.processForm.patchValue({
+      hrRemarks: req.hrRemarks || ''
+    });
     this.detailDrawerVisible = true;
     this.cdr.markForCheck();
   }
 
+  quickApprove(req: any) {
+    this.confirmationService.confirm({
+      message: `Are you sure you want to approve regularization for ${req.employeeName}?`,
+      header: 'Approve Request',
+      icon: 'pi pi-check-circle',
+      acceptIcon: "none",
+      rejectIcon: "none",
+      rejectButtonStyleClass: "p-button-text",
+      accept: () => {
+        this.selectedRequest = req;
+        this.processForm.patchValue({ hrRemarks: 'Approved automatically from quick action.' });
+        this.processRequest('Approved');
+      }
+    });
+  }
+
   processRequest(status: 'Approved' | 'Rejected') {
     if (!this.selectedRequest) return;
+    if (this.processForm.invalid) {
+      this.processForm.markAllAsTouched();
+      return;
+    }
 
     this.isLoading = true;
     const finalStatus = status === 'Approved' ? 'APPROVED' : 'REJECTED';
+    const currentRemarks = this.processForm.value.hrRemarks;
 
     // Submit status update to database API
-    this.attendanceService.updateRegularizationStatus(this.selectedRequest.id, finalStatus, this.hrRemarksInput).subscribe({
+    this.attendanceService.updateRegularizationStatus(this.selectedRequest.id, finalStatus, currentRemarks).subscribe({
       next: () => {
         // Update local array object state
-        this.requests = this.requests.map(req => {
+        this.requests = this.requests.map((req: any) => {
           if (req.id === this.selectedRequest.id) {
             return {
               ...req,
               status: status,
-              hrRemarks: this.hrRemarksInput
+              hrRemarks: currentRemarks
             };
           }
           return req;
@@ -239,12 +238,12 @@ export class ApprovalAttendanceRegularization implements OnInit {
       },
       error: (err: any) => {
         // Fallback simulation if backend fails/unimplemented
-        this.requests = this.requests.map(req => {
+        this.requests = this.requests.map((req: any) => {
           if (req.id === this.selectedRequest.id) {
             return {
               ...req,
               status: status,
-              hrRemarks: this.hrRemarksInput
+              hrRemarks: currentRemarks
             };
           }
           return req;

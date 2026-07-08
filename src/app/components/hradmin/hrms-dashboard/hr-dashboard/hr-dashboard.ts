@@ -7,6 +7,8 @@ import { MessageService, ConfirmationService, MenuItem } from 'primeng/api';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { DialogModule } from 'primeng/dialog';
+import { TableColumn, TableTemplate } from '../../../../shared/ui/table-template/table-template';
 import { AttendanceService } from '../../../../shared/services/attendance.service';
 import { LeaveService } from '../../../../shared/services/leave.service';
 import { forkJoin } from 'rxjs';
@@ -18,6 +20,7 @@ interface AttendanceCard {
   colorClass: string;
   bgClass: string;
   borderClass: string;
+  category: string;
 }
 
 interface DonutSegment {
@@ -46,7 +49,7 @@ interface PendingRequestItem {
 
 @Component({
   selector: 'app-hr-dashboard',
-  imports: [CommonModule, FormsModule, ToastModule, BreadcrumbModule, ButtonModule, ConfirmDialogModule],
+  imports: [CommonModule, FormsModule, ToastModule, BreadcrumbModule, ButtonModule, ConfirmDialogModule, DialogModule, TableTemplate],
   providers: [MessageService, ConfirmationService],
   templateUrl: './hr-dashboard.html',
   styleUrl: './hr-dashboard.scss',
@@ -55,7 +58,7 @@ export class HrDashboard implements OnInit {
   // Navigation tabs: 'dashboard' | 'pendency'
   activeTab: 'dashboard' | 'pendency' = 'dashboard';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   // Total headcount in statistics
   totalEmployees = 147;
@@ -68,51 +71,57 @@ export class HrDashboard implements OnInit {
   attendanceCards: AttendanceCard[] = [
     {
       label: 'Swipe In',
-      count: 83,
+      count: 0,
       icon: 'pi-check-circle',
       colorClass: 'text-emerald-600',
       bgClass: 'bg-emerald-50',
       borderClass: 'border-emerald-100 hover:border-emerald-300',
+      category: 'swipe_in'
     },
     {
       label: 'Not Swipe In',
-      count: 38,
+      count: 0,
       icon: 'pi-exclamation-triangle',
       colorClass: 'text-rose-600',
       bgClass: 'bg-rose-50',
       borderClass: 'border-rose-100 hover:border-rose-300',
+      category: 'not_swipe_in'
     },
     {
       label: 'On Leave',
-      count: 7,
+      count: 0,
       icon: 'pi-calendar',
       colorClass: 'text-blue-600',
       bgClass: 'bg-blue-50',
       borderClass: 'border-blue-100 hover:border-blue-300',
+      category: 'on_leave'
     },
     {
       label: 'OD',
-      count: 15,
+      count: 0,
       icon: 'pi-briefcase',
       colorClass: 'text-amber-700',
       bgClass: 'bg-amber-50',
       borderClass: 'border-amber-100 hover:border-amber-300',
+      category: 'od'
     },
     {
       label: 'Short Leave',
-      count: 2,
+      count: 0,
       icon: 'pi-clock',
       colorClass: 'text-purple-600',
       bgClass: 'bg-purple-50',
       borderClass: 'border-purple-100 hover:border-purple-300',
+      category: 'short_leave'
     },
     {
       label: 'Swipe Out',
-      count: 2,
+      count: 0,
       icon: 'pi-sign-out',
       colorClass: 'text-orange-600',
       bgClass: 'bg-orange-50',
       borderClass: 'border-orange-100 hover:border-orange-300',
+      category: 'swipe_out'
     },
   ];
 
@@ -170,8 +179,22 @@ export class HrDashboard implements OnInit {
   messageService = inject(MessageService);
   cdr = inject(ChangeDetectorRef);
 
+  isDetailsModalVisible = false;
+  detailsCategoryLabel = '';
+  detailsTableData: any[] = [];
+  isLoadingDetails = false;
+
+  detailsColumns: TableColumn[] = [
+    { key: 'employee_code', header: 'Employee Code' },
+    { key: 'employee_name', header: 'Employee Name' },
+    { key: 'department', header: 'Department' },
+    { key: 'designation', header: 'Designation' },
+    { key: 'location_address', header: 'Location / Status' },
+    { key: 'swipe_in', header: 'Swipe In' },
+    { key: 'swipe_out', header: 'Swipe Out' },
+  ];
+
   ngOnInit(): void {
-    this.calculateDonutSegments();
     this.loadPendencyData();
     this.loadDashboardSummary();
   }
@@ -180,12 +203,38 @@ export class HrDashboard implements OnInit {
     this.isLoading = true;
     this.loadDashboardSummary();
     this.loadPendencyData();
-    
+
     // Simulate slight delay for visual feedback if API is too fast
     setTimeout(() => {
       this.isLoading = false;
       this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Dashboard synchronized successfully' });
     }, 600);
+  }
+
+  onCardClick(card: AttendanceCard): void {
+    if (card.count === 0) {
+      this.messageService.add({ severity: 'info', summary: 'Info', detail: `No records found for ${card.label} today.` });
+      return;
+    }
+
+    this.detailsCategoryLabel = card.label;
+    this.isDetailsModalVisible = true;
+    this.isLoadingDetails = true;
+    this.detailsTableData = [];
+
+    this.attendanceService.getHRDashboardDetails(card.category).subscribe({
+      next: (res) => {
+        this.detailsTableData = res.data || [];
+        this.isLoadingDetails = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error fetching details:', err);
+        this.isLoadingDetails = false;
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch details.' });
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   // Calculate SVG stroke parameters for the Donut Chart
@@ -222,27 +271,30 @@ export class HrDashboard implements OnInit {
           this.attendanceCards = [
             {
               label: 'Swipe In',
-              count: s.swipeInCount,
+              count: s.swipeInCount || 0,
               icon: 'pi-check-circle',
               colorClass: 'text-emerald-600',
               bgClass: 'bg-emerald-50',
               borderClass: 'border-emerald-100 hover:border-emerald-300',
+              category: 'swipe_in'
             },
             {
               label: 'Not Swipe In',
-              count: Math.max(0, s.totalEmployees - s.swipeInCount - s.onLeaveCount),
+              count: Math.max(0, s.totalEmployees - (s.swipeInCount || 0) - (s.onLeaveCount || 0)),
               icon: 'pi-exclamation-triangle',
               colorClass: 'text-rose-600',
               bgClass: 'bg-rose-50',
               borderClass: 'border-rose-100 hover:border-rose-300',
+              category: 'not_swipe_in'
             },
             {
               label: 'On Leave',
-              count: s.onLeaveCount,
+              count: s.onLeaveCount || 0,
               icon: 'pi-calendar',
               colorClass: 'text-blue-600',
               bgClass: 'bg-blue-50',
               borderClass: 'border-blue-100 hover:border-blue-300',
+              category: 'on_leave'
             },
             {
               label: 'OD',
@@ -251,33 +303,36 @@ export class HrDashboard implements OnInit {
               colorClass: 'text-amber-700',
               bgClass: 'bg-amber-50',
               borderClass: 'border-amber-100 hover:border-amber-300',
+              category: 'od'
             },
             {
               label: 'Short Leave',
-              count: s.shortLeaveCount,
+              count: s.shortLeaveCount || 0,
               icon: 'pi-clock',
               colorClass: 'text-purple-600',
               bgClass: 'bg-purple-50',
               borderClass: 'border-purple-100 hover:border-purple-300',
+              category: 'short_leave'
             },
             {
               label: 'Swipe Out',
-              count: s.swipeOutCount,
+              count: s.swipeOutCount || 0,
               icon: 'pi-sign-out',
               colorClass: 'text-orange-600',
               bgClass: 'bg-orange-50',
               borderClass: 'border-orange-100 hover:border-orange-300',
+              category: 'swipe_out'
             },
           ];
 
           // Update Donut Chart
           this.donutRawData = [
-            { label: 'Swipe In', value: s.swipeInCount, color: '#10b981' },
-            { label: 'Not Swipe In', value: Math.max(0, s.totalEmployees - s.swipeInCount - s.onLeaveCount), color: '#f43f5e' },
+            { label: 'Swipe In', value: s.swipeInCount || 0, color: '#10b981' },
+            { label: 'Not Swipe In', value: Math.max(0, s.totalEmployees - (s.swipeInCount || 0) - (s.onLeaveCount || 0)), color: '#f43f5e' },
             { label: 'OD', value: s.odCount || 0, color: '#b45309' },
-            { label: 'On Leave', value: s.onLeaveCount, color: '#3b82f6' },
-            { label: 'Short Leave', value: s.shortLeaveCount, color: '#a855f7' },
-            { label: 'Swipe Out', value: s.swipeOutCount, color: '#f97316' },
+            { label: 'On Leave', value: s.onLeaveCount || 0, color: '#3b82f6' },
+            { label: 'Short Leave', value: s.shortLeaveCount || 0, color: '#a855f7' },
+            { label: 'Swipe Out', value: s.swipeOutCount || 0, color: '#f97316' },
           ];
           this.calculateDonutSegments();
 

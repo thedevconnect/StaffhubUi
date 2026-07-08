@@ -130,4 +130,8 @@ export class AttendanceService {
     return this.http.get<ApiResponse<any>>(`${this.apiBase}/api/attendance/hr-dashboard-summary`);
   }
 
+  getHRDashboardDetails(category: string): Observable<ApiResponse<any[]>> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiBase}/api/attendance/hr-dashboard-details?category=${category}`);
+  }
+
 }
