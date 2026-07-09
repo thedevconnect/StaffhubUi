@@ -18,6 +18,8 @@ import { CardModule } from 'primeng/card';
 import { LoadingService } from '../../../shared/services/loading.service';
 import { UserService } from '../../../shared/services/user-service';
 import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template';
+import { EmployeeManagementService } from '../../../shared/services/employee-management.service';
+import { LeaveService, LeaveRequest } from '../../../shared/services/leave.service';
 
 @Component({
   selector: 'app-leave-application',
@@ -63,6 +65,9 @@ export class LeaveApplication {
   sessionTo: any;
   leaveTypedata: any;
   selectedCc: any;
+  
+  isHistoryDrawerVisible: boolean = false;
+  leaveHistoryData: any[] = [];
 
   constructor(
     private loadingService: LoadingService,
@@ -70,7 +75,9 @@ export class LeaveApplication {
     private userService: UserService,
     private fb: FormBuilder,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private employeeService: EmployeeManagementService,
+    private leaveService: LeaveService
   ) {
     this.initForm();
   }
@@ -130,15 +137,25 @@ export class LeaveApplication {
       { drpOption: 'Second Half', drpValue: 'Second Half' },
       { drpOption: 'Full Day', drpValue: 'Full Day' }
     ];
-    this.ccDrp = [
-      { drpOption: 'John Doe/Manager' },
-      { drpOption: 'Jane Smith/HR' },
-      { drpOption: 'Mike Johnson/Lead' }
-    ];
+    this.employeeService.getEmployees().subscribe({
+      next: (res: any) => {
+        if (Array.isArray(res)) {
+          this.ccDrp = res.map((emp: any) => ({
+            drpOption: `${emp.full_name}/${emp.designation || emp.role || 'Employee'}`
+          }));
+        } else {
+          this.ccDrp = [];
+        }
+      },
+      error: () => {
+        this.ccDrp = [];
+      }
+    });
     this.leaveTypeDrp = [
       { drpOption: 'Casual Leave', drpValue: 'Casual Leave' },
       { drpOption: 'Sick Leave', drpValue: 'Sick Leave' },
-      { drpOption: 'Earned Leave', drpValue: 'Earned Leave' }
+      { drpOption: 'Earned Leave', drpValue: 'Earned Leave' },
+      { drpOption: 'Loss of Pay (LOP)', drpValue: 'LOP' }
     ];
     this.leaveStatus = 'Apply';
 
@@ -223,76 +240,101 @@ export class LeaveApplication {
       this.loadingService.startLoading();
     }
 
-    // Mocked Static Table Data instead of API Call
-    setTimeout(() => {
-      this.tblData = [
-        {
-          id: 1,
-          'date From': '2026-06-01',
-          'date To': '2026-06-02',
-          'from Session': 'First Half',
-          'to Session': 'Second Half',
-          'leave Type': 'Casual Leave',
-          'reason': 'Personal work',
-          'cc To': 'John Doe/Manager',
-          'leave Status': 'Apply'
-        },
-        {
-          id: 2,
-          'date From': '2026-05-15',
-          'date To': '2026-05-15',
-          'from Session': 'Full Day',
-          'to Session': 'Full Day',
-          'leave Type': 'Sick Leave',
-          'reason': 'Medical Checkup',
-          'cc To': 'Jane Smith/HR',
-          'leave Status': 'Approved'
+    this.leaveService.getLeaves().subscribe({
+      next: (res) => {
+        if (showLoader) {
+          this.isLoading = false;
+          this.loadingService.stopLoading();
         }
-      ];
+        if (res.success && Array.isArray(res.data)) {
+          this.tblData = res.data.map((l: any) => {
+            const startDate = l.start_date ? new Date(l.start_date) : null;
+            const endDate = l.end_date ? new Date(l.end_date) : null;
 
-      if (this.tblData.length > 0) {
-        const dynamicCols = Object.keys(this.tblData[0])
-          .filter(key => key.toLowerCase() !== 'id')
-          .map(key => {
-            const header = key.split(/(?=[A-Z])|_/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
             return {
-              key: key,
-              header: header,
-              isVisible: true,
-              isSortable: true,
-              isCustom: false
+              id: l.id,
+              'date From': startDate ? `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}` : '',
+              'date To': endDate ? `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}` : '',
+              'leave Type': l.leave_type,
+              'reason': l.reason || '-',
+              'leave Status': l.status || 'PENDING'
             };
           });
 
-        this.columns = [
-          { key: 'rowNo', header: 'S.no', isVisible: true, isSortable: false },
-          ...dynamicCols,
-          { key: 'actions', header: 'Action', isVisible: true, isSortable: false }
-        ];
-        this.tableHeaders = this.columns;
+          if (this.tblData.length > 0) {
+            const dynamicCols = Object.keys(this.tblData[0])
+              .filter(key => key.toLowerCase() !== 'id')
+              .map(key => {
+                const header = key.split(/(?=[A-Z])|_/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                return {
+                  key: key,
+                  header: header,
+                  isVisible: true,
+                  isSortable: true,
+                  isCustom: false
+                };
+              });
 
-        // Add row numbers and expansion state to data
-        this.tblData = this.tblData.map((item, index) => ({
-          ...item,
-          rowNo: index + 1,
-          isExpanded: false
-        }));
+            this.columns = [
+              { key: 'rowNo', header: 'S.no', isVisible: true, isSortable: false },
+              ...dynamicCols,
+              { key: 'actions', header: 'Action', isVisible: true, isSortable: false }
+            ];
+            this.tableHeaders = this.columns;
+
+            this.tblData = this.tblData.map((item, index) => ({
+              ...item,
+              rowNo: index + 1,
+              isExpanded: false
+            }));
+          } else {
+            this.columns = [];
+            this.tableHeaders = [];
+            this.tblData = [];
+          }
+        }
+      },
+      error: () => {
+        if (showLoader) {
+          this.isLoading = false;
+          this.loadingService.stopLoading();
+        }
+        this.tblData = [];
       }
-      this.noDatafoundCard = this.tblData.length <= 0;
-      this.isLoading = false;
-      this.loadingService.stopLoading();
-    }, 800);
+    });
   }
 
   onDrawerHide() {
     this.visible = false;
+    this.leaveForm.reset();
     this.leaveForm.enable();
   }
+
+  viewHistory(id: number) {
+    this.isHistoryDrawerVisible = true;
+    this.loadingService.startLoading();
+    this.leaveService.getLeaveHistory(id).subscribe({
+      next: (res) => {
+        this.loadingService.stopLoading();
+        if (res.success) {
+          this.leaveHistoryData = res.data;
+        } else {
+          this.leaveHistoryData = [];
+        }
+      },
+      error: () => {
+        this.loadingService.stopLoading();
+        this.leaveHistoryData = [];
+      }
+    });
+  }
+
+  editingId: number | null = null;
 
   showDialog(type: string, data: any) {
     this.visible = true;
     this.postType = type;
-    
+
     if (type === 'add') {
       this.header = 'Add Leave Application';
       this.headerIcon = 'pi pi-plus';
@@ -308,6 +350,7 @@ export class LeaveApplication {
     }
 
     if (type === 'edit' || type === 'view') {
+      this.editingId = data.id;
       this.leaveForm.patchValue({
         dateFrom: data['date From'] ? new Date(data['date From']) : null,
         dateTo: data['date To'] ? new Date(data['date To']) : null,
@@ -321,6 +364,7 @@ export class LeaveApplication {
       this.sessionTo = data['to Session'];
       this.leaveTypedata = data['leave Type'];
     } else {
+      this.editingId = null;
       this.leaveForm.reset({
         dateFrom: new Date(),
         dateTo: new Date(),
@@ -344,31 +388,49 @@ export class LeaveApplication {
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         this.loadingService.startLoading();
+        
+        const val = this.leaveForm.value;
+        const payload = {
+          leaveType: val.leaveType,
+          startDate: val.dateFrom.toISOString().split('T')[0],
+          endDate: val.dateTo.toISOString().split('T')[0],
+          reason: val.reason,
+          status: 'PENDING'
+        };
 
-        // Mocked Static Submission Response
-        setTimeout(() => {
-          this.loadingService.stopLoading();
-          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Data saved successfully!' });
-          this.visible = false;
+        const req = (this.postType === 'edit' && this.editingId) 
+           ? this.leaveService.updateLeave(this.editingId, payload)
+           : this.leaveService.createLeave(payload);
 
-          const sFrom = this.sessionDrp?.[0]?.drpValue;
-          const sTo = this.sessionDrp?.[0]?.drpValue;
-          const lType = this.leaveTypeDrp?.[0]?.drpValue;
+        req.subscribe({
+          next: (res) => {
+            this.loadingService.stopLoading();
+            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Data saved successfully!' });
+            this.visible = false;
 
-          this.leaveForm.reset({
-            dateFrom: new Date(),
-            dateTo: new Date(),
-            sessionFrom: sFrom,
-            sessionTo: sTo,
-            leaveType: lType
-          });
+            const sFrom = this.sessionDrp?.[0]?.drpValue;
+            const sTo = this.sessionDrp?.[0]?.drpValue;
+            const lType = this.leaveTypeDrp?.[0]?.drpValue;
 
-          this.sessionFrom = sFrom;
-          this.sessionTo = sTo;
-          this.leaveTypedata = lType;
+            this.leaveForm.reset({
+              dateFrom: new Date(),
+              dateTo: new Date(),
+              sessionFrom: sFrom,
+              sessionTo: sTo,
+              leaveType: lType
+            });
 
-          this.getViewData();
-        }, 1000);
+            this.sessionFrom = sFrom;
+            this.sessionTo = sTo;
+            this.leaveTypedata = lType;
+
+            this.getViewData();
+          },
+          error: (err) => {
+            this.loadingService.stopLoading();
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to submit leave application' });
+          }
+        });
       }
     });
   }
@@ -381,16 +443,21 @@ export class LeaveApplication {
       accept: () => {
         this.loadingService.startLoading();
 
-        // Mocked Static Withdraw Response
-        setTimeout(() => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Your leave application has been withdrawn successfully!'
-          });
-          this.getViewData();
-          this.loadingService.stopLoading();
-        }, 1000);
+        this.leaveService.deleteLeave(id).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Success',
+              detail: 'Your leave application has been withdrawn successfully!'
+            });
+            this.getViewData();
+            this.loadingService.stopLoading();
+          },
+          error: () => {
+            this.loadingService.stopLoading();
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to withdraw leave application' });
+          }
+        });
       },
       reject: () => {
         this.messageService.add({

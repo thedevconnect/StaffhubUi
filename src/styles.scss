@@ -1,4 +1,3 @@
-
 @import "primeicons/primeicons.css";
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
@@ -23,7 +22,8 @@ body {
 }
 
 html.dark body {
-  background: #020617; /* slate-950 */
+  background: #020617;
+  /* slate-950 */
 }
 
 img,
@@ -84,23 +84,27 @@ app-table-template {
 
 /* Custom Button utility classes for project theme management */
 .btn-add {
-  background-color: var(--color-add, #4f46e5) !important; /* default indigo-600 */
+  background-color: var(--color-add, #4f46e5) !important;
+  /* default indigo-600 */
   border-color: var(--color-add, #4f46e5) !important;
   color: #ffffff !important;
-  
+
   &:hover {
-    background-color: var(--color-add-hover, #4338ca) !important; /* default indigo-700 */
+    background-color: var(--color-add-hover, #4338ca) !important;
+    /* default indigo-700 */
     border-color: var(--color-add-hover, #4338ca) !important;
   }
 }
 
 .btn-submit {
-  background-color: var(--color-submit, #4f46e5) !important; /* default indigo-600 */
+  background-color: var(--color-submit, #4f46e5) !important;
+  /* default indigo-600 */
   border-color: var(--color-submit, #4f46e5) !important;
   color: #ffffff !important;
-  
+
   &:hover {
-    background-color: var(--color-submit-hover, #4338ca) !important; /* default indigo-700 */
+    background-color: var(--color-submit-hover, #4338ca) !important;
+    /* default indigo-700 */
     border-color: var(--color-submit-hover, #4338ca) !important;
   }
 }

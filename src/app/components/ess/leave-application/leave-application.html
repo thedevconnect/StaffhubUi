@@ -8,15 +8,50 @@
       styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
   </div>
   <div class="flex-none flex items-center space-x-2">
-    @if (tblData.length > 0) {
-      <p-button label="Export" icon="pi pi-file-excel"
-        styleClass="p-button-sm p-button-success p-button-outlined rounded-lg" [raised]="true">
-      </p-button>
-    }
+
     <p-button (click)="showDialog('add', [])" label="Add Leave" icon="pi pi-plus"
       styleClass="p-button-sm rounded-lg btn-add text-xs font-semibold px-3 py-1.5 shadow-sm transition-all"
       [raised]="true">
     </p-button>
+    <!-- Approval History Drawer -->
+    <p-drawer [(visible)]="isHistoryDrawerVisible" position="right" [style]="{width: '100%', maxWidth: '28rem'}"
+      styleClass="border-none shadow-2xl h-screen bg-slate-50/50">
+
+      <ng-template pTemplate="header">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 shadow-inner">
+            <i class="pi pi-history text-xl"></i>
+          </div>
+          <h3 class="text-xl font-black text-gray-800 m-0 tracking-tight">Approval History</h3>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="content">
+        <div class="flex flex-col h-full bg-slate-50/50 gap-4 p-4 pb-24">
+          
+          <div *ngIf="!leaveHistoryData || leaveHistoryData.length === 0" class="flex flex-col items-center justify-center py-10 opacity-50">
+             <i class="pi pi-info-circle text-4xl mb-3 text-gray-400"></i>
+             <p class="font-bold text-gray-500 text-sm">No history found</p>
+          </div>
+
+          <div *ngFor="let h of leaveHistoryData" class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-3 transition-all">
+             <div class="flex flex-col">
+               <span class="text-[13px] text-gray-700"><span class="font-black text-gray-900">By:</span> {{h.action_by_name}} ({{h.action_by_designation || h.action_by_role || 'Employee'}})</span>
+             </div>
+             <div class="flex flex-col">
+               <span class="text-[13px] text-gray-700"><span class="font-black text-gray-900">Status:</span> {{h.status}}</span>
+             </div>
+             <div class="flex flex-col">
+               <span class="text-[13px] text-gray-700"><span class="font-black text-gray-900">Remarks:</span> {{h.remarks || '-'}}</span>
+             </div>
+             <div class="flex flex-col">
+               <span class="text-[13px] text-gray-700"><span class="font-black text-gray-900">Date:</span> {{h.created_at | date:'dd-MM-yyyy HH:mm'}}</span>
+             </div>
+          </div>
+          
+        </div>
+      </ng-template>
+    </p-drawer>
   </div>
 </div>
 
@@ -31,20 +66,10 @@
     </div>
 
     <div class="w-full overflow-x-auto">
-      <app-table-template 
-        [data]="tblData" 
-        [columns]="columns" 
-        [pageSize]="pageSize"
-        [totalCount]="totalCount" 
-        [isLoading]="isLoading" 
-        [currentPage]="pageNo" 
-        [searchText]="searchText"
-        [showRefresh]="true" 
-        (refresh)="getViewData(true)" 
-        (pageChange)="onPageChange($event)"
-        (searchChange)="onSearchChange($event)" 
-        (pageSizeChange)="onPageSizeChange($event)"
-        [disableActionCondition]="disableAction"
+      <app-table-template [data]="tblData" [columns]="columns" [pageSize]="pageSize" [totalCount]="totalCount"
+        [isLoading]="isLoading" [currentPage]="pageNo" [searchText]="searchText" [showRefresh]="true"
+        (refresh)="getViewData(true)" (pageChange)="onPageChange($event)" (searchChange)="onSearchChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)" [disableActionCondition]="disableAction"
         (actionClicked)="onActionClicked($event)">
       </app-table-template>
     </div>
@@ -52,8 +77,10 @@
     <!-- Template for Table Actions -->
     <ng-template #actionTpl let-item>
       <div class="flex items-center justify-center">
-        <p-button *ngIf="item['leave Status'] === 'Apply'" label="Withdraw" icon="pi pi-times"
+        <p-button *ngIf="item['leave Status'] === 'PENDING'" label="Withdraw" icon="pi pi-times"
           (click)="onWithdraw(item.id)" styleClass="p-button-danger p-button-sm p-button-text font-bold"></p-button>
+        <p-button icon="pi pi-history" pTooltip="Approval History" tooltipPosition="left" (click)="viewHistory(item.id)"
+          styleClass="p-button-info p-button-sm p-button-text font-bold ml-2"></p-button>
       </div>
     </ng-template>
   </div>
@@ -82,9 +109,8 @@
               <div class="flex flex-col gap-2">
                 <label class="text-[10px] uppercase font-black text-gray-400 tracking-widest px-1">From Date <span
                     class="text-red-500">*</span></label>
-                <p-datepicker formControlName="dateFrom" [maxDate]="currentDate" dateFormat="dd/mm/yy"
-                  [minDate]="minDate" (onSelect)="onDateFromChange()" appendTo="body" styleClass="w-full"
-                  placeholder="Select start date"
+                <p-datepicker formControlName="dateFrom" dateFormat="dd/mm/yy" (onSelect)="onDateFromChange()"
+                  appendTo="body" styleClass="w-full" placeholder="Select start date"
                   [inputStyleClass]="isInvalid('dateFrom') ? 'border-red-500 rounded-xl py-3' : 'rounded-xl py-3 border-gray-100 bg-gray-50/50'"
                   [showIcon]="true" class="w-full">
                 </p-datepicker>
@@ -202,7 +228,8 @@
           class="absolute bottom-0 left-0 right-0 p-4 sm:p-6 bg-white/80 backdrop-blur-md border-t border-gray-100 flex justify-end gap-3 z-20">
           <p-button [label]="postType === 'view' ? 'Close' : 'Cancel'" (click)="onDrawerHide()"
             styleClass="p-button-text p-button-secondary font-bold text-xs"></p-button>
-          <p-button *ngIf="postType !== 'view'" label="Submit Request" icon="pi pi-check" (click)="onSubmit()" [loading]="isLoading"
+          <p-button *ngIf="postType !== 'view'" label="Submit Request" icon="pi pi-check" (click)="onSubmit()"
+            [loading]="isLoading"
             styleClass="rounded-xl px-8 py-3 btn-submit border-none shadow-lg transition-all text-sm font-bold">
           </p-button>
         </div>
