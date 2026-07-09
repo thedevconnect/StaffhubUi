@@ -21,27 +21,30 @@
     </ng-template>
 
     <!-- Grid Calendar -->
-    <div
-      class="grid grid-cols-7 gap-2 text-center font-semibold text-sm text-slate-600 border-b border-slate-100 pb-2 mb-2">
-      <div *ngFor="let day of daysOfWeek" class="py-1">{{ day }}</div>
-    </div>
+    <div class="overflow-x-auto pb-4">
+      <div class="min-w-[600px]">
+        <div class="grid grid-cols-7 gap-2 text-center font-semibold text-sm text-slate-600 border-b border-slate-100 pb-2 mb-2">
+          <div *ngFor="let day of daysOfWeek" class="py-1">{{ day }}</div>
+        </div>
 
-    <div class="grid grid-cols-7 gap-2">
-      <div *ngFor="let item of calendarDays()"
-        (click)="selectDay($event, item, op)"
-        class="border rounded-lg p-3 min-h-[80px] flex flex-col justify-between transition cursor-pointer"
-        [ngClass]="item.dayNum ? 'border-slate-100 hover:bg-slate-50 bg-white' : 'bg-transparent border-transparent'">
-        <ng-container *ngIf="item.dayNum">
-          <span class="text-slate-500 text-sm font-semibold">{{ item.dayNum }}</span>
-          <div class="flex flex-col items-end justify-end mt-auto gap-1">
-            <span *ngIf="item.swipeIn" class="text-[9px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
-              IN: {{ item.swipeIn }}
-            </span>
-            <span *ngIf="item.type" class="text-[10px] font-bold px-1.5 py-0.5 rounded uppercase" [ngClass]="item.colorClass">
-              {{ item.type }}
-            </span>
+        <div class="grid grid-cols-7 gap-2">
+          <div *ngFor="let item of calendarDays()"
+            (click)="selectDay($event, item, op)"
+            class="border rounded-lg p-3 min-h-[80px] flex flex-col justify-between transition cursor-pointer"
+            [ngClass]="item.dayNum ? 'border-slate-100 hover:bg-slate-50 bg-white' : 'bg-transparent border-transparent'">
+            <ng-container *ngIf="item.dayNum">
+              <span class="text-slate-500 text-sm font-semibold">{{ item.dayNum }}</span>
+              <div class="flex flex-col items-end justify-end mt-auto gap-1">
+                <span *ngIf="item.swipeIn" class="text-[9px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                  IN: {{ item.swipeIn }}
+                </span>
+                <span *ngIf="item.type" class="text-[10px] font-bold px-1.5 py-0.5 rounded uppercase" [ngClass]="item.colorClass">
+                  {{ item.type }}
+                </span>
+              </div>
+            </ng-container>
           </div>
-        </ng-container>
+        </div>
       </div>
     </div>
 

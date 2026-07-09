@@ -17,6 +17,7 @@ export interface AttendanceRecord {
   longitude: number | null;
   location_address: string | null;
   device_name: string | null;
+  device_id?: string | null;
   browser_name: string | null;
   os_name: string | null;
   notes: string | null;

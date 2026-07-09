@@ -30,6 +30,10 @@ export const hradminRoutes: Routes = [
     {
         path: 'office-location-settings',
         loadComponent: () => import('../components/hradmin/office-location-settings/office-location-settings').then(c => c.OfficeLocationSettings)
+    },
+    {
+        path: 'device-management',
+        loadComponent: () => import('../components/hradmin/device-management/device-management').then(c => c.DeviceManagement)
     }
 
 ];
