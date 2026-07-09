@@ -1,0 +1,100 @@
+<div class="card bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col h-[calc(100vh-100px)]">
+  <!-- Header Section -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+    <div>
+      <h2 class="text-2xl font-bold text-slate-800 mb-1">All Employees</h2>
+      <p class="text-sm text-slate-500">Global overview of all employees across all companies</p>
+    </div>
+  </div>
+
+  <!-- Table Section -->
+  <div class="flex-1 overflow-hidden relative">
+    <div *ngIf="isLoading" class="absolute inset-0 bg-white/50 z-10 flex items-center justify-center">
+      <i class="pi pi-spin pi-spinner text-3xl text-blue-500"></i>
+    </div>
+
+    <app-data-table [columns]="columns" [data]="filteredEmployees" [totalItems]="filteredEmployees.length"
+      (onSearch)="handleSearch($event)" (onRefresh)="onRefresh()" (onView)="handleView($event)"
+      (onExportExcel)="exportExcel()">
+    </app-data-table>
+  </div>
+</div>
+
+<p-drawer [(visible)]="isDrawerVisible" position="right" [style]="{width: '30vw'}">
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-2">
+      <i class="pi pi-user text-xl"></i>
+      <span class="font-bold text-lg">Employee Details</span>
+    </div>
+  </ng-template>
+
+  <div class="flex flex-col gap-6 p-4" *ngIf="selectedEmployee">
+    <div class="flex items-center gap-4 border-b border-slate-100 pb-6">
+      <div
+        class="h-16 w-16 rounded-full bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center text-blue-600 text-2xl font-bold shadow-sm">
+        {{ selectedEmployee.fullName.charAt(0) || selectedEmployee.full_name?.charAt(0) || 'U' }}
+      </div>
+      <div>
+        <h3 class="text-xl font-bold text-slate-800">{{ selectedEmployee.fullName || selectedEmployee.full_name }}</h3>
+        <p class="text-sm text-slate-500">{{ selectedEmployee.designation || 'No Designation' }}</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-y-6 gap-x-4">
+      <div>
+        <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Employee Code</label>
+        <p class="font-medium text-slate-700 mt-1">{{ selectedEmployee.employeeCode || selectedEmployee.emp_id || '-' }}
+        </p>
+      </div>
+      <div>
+        <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Company</label>
+        <p class="font-medium text-slate-700 mt-1">{{ selectedEmployee.companyName || selectedEmployee.company_name ||
+          '-' }}</p>
+      </div>
+      <div>
+        <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Department</label>
+        <p class="font-medium text-slate-700 mt-1">{{ selectedEmployee.department || '-' }}</p>
+      </div>
+      <div>
+        <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Role</label>
+        <p class="font-medium text-slate-700 mt-1">
+          <span class="px-2 py-1 bg-slate-100 rounded text-xs"
+            *ngFor="let role of (selectedEmployee.role?.split(',') || [])">
+            {{ role.trim() }}
+          </span>
+          <span *ngIf="!selectedEmployee.role">-</span>
+        </p>
+      </div>
+      <div class="col-span-2">
+        <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Email</label>
+        <p class="font-medium text-slate-700 mt-1 flex items-center gap-2">
+          <i class="pi pi-envelope text-slate-400"></i>
+          {{ selectedEmployee.officialEmail || selectedEmployee.email || '-' }}
+        </p>
+      </div>
+      <div class="col-span-2">
+        <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Mobile</label>
+        <p class="font-medium text-slate-700 mt-1 flex items-center gap-2">
+          <i class="pi pi-phone text-slate-400"></i>
+          {{ selectedEmployee.mobileNumber || selectedEmployee.mobile || '-' }}
+        </p>
+      </div>
+      <div>
+        <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Manager</label>
+        <p class="font-medium text-slate-700 mt-1 flex items-center gap-2">
+          <i class="pi pi-sitemap text-slate-400"></i>
+          {{ selectedEmployee.reportingManagerName || selectedEmployee.reporting_manager_name ||
+          selectedEmployee.reportingManager || '-' }}
+        </p>
+      </div>
+      <div>
+        <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Joining Date</label>
+        <p class="font-medium text-slate-700 mt-1 flex items-center gap-2">
+          <i class="pi pi-calendar text-slate-400"></i>
+          {{ (selectedEmployee.joiningDate || selectedEmployee.joining_date) ? (selectedEmployee.joiningDate ||
+          selectedEmployee.joining_date | date:'mediumDate') : '-' }}
+        </p>
+      </div>
+    </div>
+  </div>
+</p-drawer>

@@ -114,6 +114,14 @@ export class AttendanceService {
     return this.http.get<any>(`${this.apiBase}/api/attendance-regularization/my-requests`);
   }
 
+  updateRegularization(id: string | number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.apiBase}/api/attendance-regularization/${id}`, data);
+  }
+
+  deleteRegularization(id: string | number): Observable<any> {
+    return this.http.delete<any>(`${this.apiBase}/api/attendance-regularization/${id}`);
+  }
+
   checkIncompleteAttendance(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(`${this.apiBase}/api/attendance/incomplete-status`);
   }
