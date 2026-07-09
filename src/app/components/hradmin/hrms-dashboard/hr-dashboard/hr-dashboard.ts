@@ -190,9 +190,9 @@ export class HrDashboard implements OnInit {
     { key: 'department', header: 'Department' },
     { key: 'designation', header: 'Designation' },
     { key: 'location_address', header: 'Location / Status' },
-    { key: 'swipe_in', header: 'Swipe In' },
-    { key: 'swipe_out', header: 'Swipe Out' },
-    { key: 'total_time', header: 'Total Time' },
+    { key: 'swipe_in', header: 'Swipe In', pipe: 'date', pipeArgs: 'mediumTime' },
+    { key: 'swipe_out', header: 'Swipe Out', pipe: 'date', pipeArgs: 'mediumTime' },
+    { key: 'total_time', header: 'Total Time', formatter: (val: any) => (val !== null && val !== undefined) ? (Number(val) >= 60 ? Math.floor(Number(val) / 60) + 'h ' + (Number(val) % 60) + 'm' : Number(val) + 'm') : '-' },
   ];
 
   ngOnInit(): void {

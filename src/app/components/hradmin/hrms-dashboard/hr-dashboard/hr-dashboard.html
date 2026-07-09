@@ -383,6 +383,7 @@
       [data]="detailsTableData" 
       [columns]="detailsColumns" 
       [isLoading]="isLoadingDetails"
+      [exportFileName]="detailsCategoryLabel ? detailsCategoryLabel.replace(' ', '_') + '_Report' : 'Dashboard_Report'"
       [cellTemplates]="{
         employee_code: empCodeTpl,
         employee_name: empNameTpl,
@@ -419,6 +420,6 @@
 
 <ng-template #totalTimeTpl let-item>
   <span class="text-xs font-semibold text-slate-700">
-    {{ item.total_time ? (item.total_time >= 60 ? (item.total_time / 60 | number:'1.0-0') + 'h ' + (item.total_time % 60) + 'm' : item.total_time + 'm') : '-' }}
+    {{ item.total_time != null ? (item.total_time >= 60 ? ((item.total_time - (item.total_time % 60)) / 60) + 'h ' + (item.total_time % 60) + 'm' : item.total_time + 'm') : '-' }}
   </span>
 </ng-template>

@@ -56,6 +56,7 @@ export class CompanyManagement implements OnInit {
     { key: 'company_phone', header: 'Company Phone', isVisible: true, isSortable: true },
     { key: 'industry', header: 'Industry', isVisible: true, isSortable: true },
     { key: 'address', header: 'Address', isVisible: true, isSortable: false },
+    { key: 'allowed_radius', header: 'Allowed Radius (m)', isVisible: true, isSortable: true },
     { key: 'status', header: 'Status', isVisible: true, isSortable: true, format: 'uppercase' },
 
     {
@@ -346,7 +347,7 @@ export class CompanyManagement implements OnInit {
     });
   }
 
-  saveSimulatedEdit() {
+  saveEdit() {
     if (!this.selectedCompany.company_name || !this.selectedCompany.short_name) {
       this.messageService.add({
         severity: 'error',
@@ -356,21 +357,27 @@ export class CompanyManagement implements OnInit {
       return;
     }
 
-    // Update the local list
-    this.data = this.data.map((item) => {
-      if (item.id === this.selectedCompany.id) {
-        return { ...this.selectedCompany };
+    this.isLoading = true;
+    this.userService.updateCompany(this.selectedCompany.id, this.selectedCompany).subscribe({
+      next: (res: any) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Company details updated successfully.',
+        });
+        this.showDrawer = false;
+        this.loadData();
+      },
+      error: (err: any) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Update Failed',
+          detail: err?.error?.message || 'Failed to update company details.',
+        });
+        this.isLoading = false;
+        this.cdr.detectChanges();
       }
-      return item;
     });
-
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: 'Company details updated successfully (Simulation).',
-    });
-    this.showDrawer = false;
-    this.cdr.detectChanges();
   }
 
   onDrawerHide() {

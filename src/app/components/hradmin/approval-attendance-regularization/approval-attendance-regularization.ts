@@ -213,7 +213,7 @@ export class ApprovalAttendanceRegularization implements OnInit {
     }
 
     this.isLoading = true;
-    const finalStatus = status === 'Approved' ? 'APPROVED' : 'REJECTED';
+    const finalStatus = status; // Keep it as 'Approved' or 'Rejected' to match backend expectation
     const currentRemarks = this.processForm.value.hrRemarks;
 
     // Submit status update to database API

@@ -1,5 +1,7 @@
-@use 'tailwindcss';
-@import 'primeicons/primeicons.css';
+
+@import "primeicons/primeicons.css";
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 /* Force class-based dark mode in Tailwind v4 instead of system media queries */
 @variant dark (&:where(.dark, .dark *));

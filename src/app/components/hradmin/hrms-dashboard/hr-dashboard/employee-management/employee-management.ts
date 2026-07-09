@@ -93,10 +93,11 @@ export class EmployeeManagement implements OnInit {
     { label: 'Junior Software Engineer', value: 'Junior-Software-Engineer' },
     { label: 'Senior Software Engineer', value: 'Senior-Software-Engineer' },
     { label: 'Team Lead', value: 'Team-Lead' },
+    { label: 'Solution Architect', value: 'Solution-Architect' },
     { label: 'QA Engineer', value: 'QA-Engineer' },
     { label: 'HR Executive', value: 'HR-Executive' },
-    { label: 'Accounts Executive', value: 'Accounts-Executive' },
-    { label: 'Operations Executive', value: 'Operations-Executive' },
+    { label: 'Manager', value: 'Manager' },
+    { label: 'Other', value: 'Other' },
 
   ];
 
@@ -105,23 +106,32 @@ export class EmployeeManagement implements OnInit {
     { label: 'Part Time', value: 'PART_TIME' },
     { label: 'Contract', value: 'CONTRACT' },
     { label: 'Intern', value: 'INTERN' },
-    { label: 'Consultant', value: 'CONSULTANT' }
+    { label: 'Consultant', value: 'CONSULTANT' },
+    { label: 'Other', value: 'Other' },
+
+
+
   ];
 
   workLocationOptions = [
     { label: 'Office', value: 'OFFICE' },
     { label: 'Remote', value: 'REMOTE' },
     { label: 'Hybrid', value: 'HYBRID' },
+    { label: 'On Site', value: 'ON_SITE' },
+    { label: 'Other', value: 'Other' },
+
   ];
 
   departmentOptions = [
+    { label: 'IT-Development', value: 'IT-Development' },
     { label: 'HR', value: 'HR' },
     { label: 'Business Development', value: 'Business-Development' },
     { label: 'Finance', value: 'Finance' },
-    { label: 'IT', value: 'IT' },
     { label: 'Sales', value: 'Sales' },
     { label: 'Marketing', value: 'Marketing' },
     { label: 'Operations', value: 'Operations' },
+    { label: 'Other', value: 'Other' },
+
   ];
 
   showDrawer = false;
@@ -181,7 +191,7 @@ export class EmployeeManagement implements OnInit {
   onEmailInput(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     let value = inputElement.value;
-    
+
     if (value.endsWith('@')) {
       value = value + 'gmail.com';
       const emailControl = this.employeeForm.get('officialEmail');
