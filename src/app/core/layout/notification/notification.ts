@@ -31,7 +31,7 @@ interface NotificationCategory {
       <p-popover #op>
         <div class="flex w-[350px] flex-col overflow-hidden rounded-lg bg-white shadow-xl">
           <!-- Header -->
-          <div class="bg-[#1e5b8c] p-4 text-white flex justify-between items-start">
+          <div class="bg-blue-600 p-4 text-white flex justify-between items-start">
             <div>
               <div class="flex items-center gap-2 font-semibold">
                 <i class="pi pi-bell"></i>
@@ -39,7 +39,7 @@ interface NotificationCategory {
               </div>
               <div class="mt-1 text-xs text-blue-100">{{ totalPending() }} pending</div>
             </div>
-            <button class="flex h-6 w-6 items-center justify-center rounded-full bg-blue-700/50 hover:bg-blue-700 transition" (click)="op.hide()">
+            <button class="flex h-6 w-6 items-center justify-center rounded-full bg-blue-700 hover:bg-blue-800 transition" (click)="op.hide()">
               <i class="pi pi-times text-xs"></i>
             </button>
           </div>
@@ -50,7 +50,7 @@ interface NotificationCategory {
               <p-accordion-panel *ngFor="let cat of categories(); let i = index" [value]="i.toString()">
                 <p-accordion-header>
                   <div class="flex w-full items-center gap-3 py-1">
-                    <div class="flex h-8 w-8 items-center justify-center rounded bg-[#1e5b8c] text-white">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-md bg-blue-100 text-blue-600">
                       <i class="pi pi-list"></i>
                     </div>
                     <div class="flex flex-col">
@@ -72,8 +72,8 @@ interface NotificationCategory {
           </div>
 
           <!-- Footer -->
-          <div class="border-t border-slate-200 p-3">
-            <button class="w-full rounded-md bg-[#1e5b8c] py-2 text-sm font-medium text-white transition hover:bg-blue-800 flex justify-center items-center gap-2">
+          <div class="border-t border-slate-100 p-3 bg-slate-50">
+            <button class="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-bold text-white transition hover:bg-blue-700 flex justify-center items-center gap-2 shadow-sm">
               View All Notifications
               <i class="pi pi-arrow-right text-xs"></i>
             </button>
@@ -94,9 +94,9 @@ interface NotificationCategory {
     :host ::ng-deep .p-accordion-header-link {
       background: white !important;
       border-radius: 0.5rem !important;
-      border: 1px solid #e2e8f0 !important;
-      padding: 0.5rem 1rem !important;
-      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      border: 1px solid #f1f5f9 !important;
+      padding: 0.75rem 1rem !important;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
     }
     :host ::ng-deep .p-accordion-tab {
       margin-bottom: 0.5rem;

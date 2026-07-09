@@ -25,7 +25,7 @@ export interface NotificationResponse {
 })
 export class NotificationService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiBaseUrl}/notifications`;
+  private apiUrl = `${environment.apiBaseUrl}/api/notifications`;
 
   getNotifications(): Observable<NotificationResponse> {
     return this.http.get<NotificationResponse>(this.apiUrl);
