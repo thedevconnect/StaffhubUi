@@ -1,0 +1,97 @@
+<p-toast></p-toast>
+
+<!-- Page Header Inline with Breadcrumb -->
+<div
+    class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6">
+    <div class="flex-1 min-w-0">
+        <p-breadcrumb [model]="breadcrumbItems"
+            styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
+    </div>
+    <div class="flex-none flex items-center gap-2">
+        <p-button (click)="openDrawer()" label="Offboarding" icon="pi pi-plus" styleClass="p-button-sm rounded-lg"
+            [raised]="true">
+        </p-button>
+    </div>
+</div>
+
+<div class="space-y-6">
+    <!-- Page Content -->
+    <section class="space-y-4">
+        <!-- Table -->
+        <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+            <div class="w-full overflow-x-auto">
+                <app-table-template 
+                    [data]="offboardings" 
+                    [columns]="columns" 
+                    [isLoading]="isLoading"
+                    [showRefresh]="true"
+                    (refresh)="refreshTable()">
+                </app-table-template>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Add/Edit Drawer -->
+<p-drawer [(visible)]="showDrawer" position="right" [modal]="true" [style]="{ width: '60%', maxWidth: '100vw' }">
+    <ng-template pTemplate="header">
+        <h2 class="text-xl font-semibold text-gray-800 m-0">
+            Offboarding Details
+        </h2>
+    </ng-template>
+
+    <form [formGroup]="offboardingForm" (ngSubmit)="onSubmit()" class="space-y-4 pb-2">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+            <!-- Employee -->
+            <div class="space-y-2 md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700">Employee *</label>
+                <p-select [options]="employees" formControlName="employeeId" placeholder="Select Employee"
+                    [filter]="true" filterBy="label" class="w-full custom-p-select" styleClass="w-full">
+                </p-select>
+            </div>
+
+            <!-- Employment Status -->
+            <div class="space-y-2 md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700">Employment Status *</label>
+                <p-select [options]="statusOptions" formControlName="employmentStatus"
+                    placeholder="Select Employee Status" class="w-full custom-p-select" styleClass="w-full">
+                </p-select>
+            </div>
+
+            <!-- Resignation Date -->
+            <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Resignation Date *</label>
+                <p-datepicker formControlName="resignationDate" placeholder="Select resignation date"
+                    dateFormat="yy-mm-dd" [showIcon]="true" class="w-full" styleClass="w-full">
+                </p-datepicker>
+            </div>
+
+            <!-- Last Working Date -->
+            <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Last Working Date *</label>
+                <p-datepicker formControlName="lastWorkingDate" placeholder="Select last working date"
+                    dateFormat="yy-mm-dd" [showIcon]="true" class="w-full" styleClass="w-full">
+                </p-datepicker>
+            </div>
+
+            <!-- Reason -->
+            <div class="space-y-2 md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700">Reason *</label>
+                <textarea 
+                    pInputTextarea 
+                    formControlName="reason" 
+                    placeholder="Enter reason for offboarding" 
+                    class="w-full min-h-[80px] p-2 border border-slate-300 rounded-md focus:border-[#337ab7] focus:ring-1 focus:ring-[#337ab7] outline-none transition-colors bg-white text-sm"
+                    rows="3">
+                </textarea>
+            </div>
+        </div>
+
+        <div class="flex gap-3 pt-4">
+            <button type="button" pButton pRipple label="Cancel" class="flex-1 p-button-secondary"
+                (click)="closeDrawer()"></button>
+            <button type="submit" pButton pRipple label="Submit" class="flex-1 p-button-primary"></button>
+        </div>
+    </form>
+</p-drawer>

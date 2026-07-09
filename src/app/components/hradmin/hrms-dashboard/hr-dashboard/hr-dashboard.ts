@@ -192,6 +192,7 @@ export class HrDashboard implements OnInit {
     { key: 'location_address', header: 'Location / Status' },
     { key: 'swipe_in', header: 'Swipe In' },
     { key: 'swipe_out', header: 'Swipe Out' },
+    { key: 'total_time', header: 'Total Time' },
   ];
 
   ngOnInit(): void {
