@@ -115,6 +115,25 @@ export class MonthlyAttendanceCalendar implements OnInit {
               const firstRecord = dayRecords[dayRecords.length - 1];
               const lastRecord = dayRecords[0];
 
+              day.records = dayRecords.reverse().map((r: any) => ({
+                ...r,
+                formattedSwipeIn: this.formatTime(r.swipe_in),
+                formattedSwipeOut: this.formatTime(r.swipe_out)
+              }));
+
+              let totalMins = 0;
+              day.records.forEach((r: any) => {
+                totalMins += r.total_work_minutes || 0;
+              });
+
+              if (totalMins > 0) {
+                const hrs = Math.floor(totalMins / 60);
+                const mins = totalMins % 60;
+                day.totalTime = `${hrs}h ${mins}m`;
+              } else {
+                day.totalTime = '-';
+              }
+
               const status = firstRecord.attendance_status || 'PRESENT';
               day.swipeIn = this.formatTime(firstRecord.swipe_in);
               day.swipeOut = this.formatTime(lastRecord.swipe_out);
@@ -148,7 +167,7 @@ export class MonthlyAttendanceCalendar implements OnInit {
   }
 
   selectDay(event: Event, item: any, op: any) {
-    if (!item.dayNum || (!item.swipeIn && !item.swipeOut)) return;
+    if (!item.dayNum || !item.records || item.records.length === 0) return;
     this.selectedDay.set(item);
     op.toggle(event);
   }

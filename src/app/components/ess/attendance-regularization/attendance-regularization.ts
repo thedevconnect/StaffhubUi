@@ -371,7 +371,7 @@ export class AttendanceRegularization implements OnInit {
       attachmentUrl: this.selectedFileName || null
     };
 
-    if (this.drawerType === 'add' || this.drawerType === 'edit') {
+    if (this.drawerType === 'add') {
       this.attendanceService.submitRegularization(payload).subscribe({
         next: (res) => {
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Regularization request submitted successfully!' });
@@ -386,6 +386,21 @@ export class AttendanceRegularization implements OnInit {
           this.cdr.markForCheck();
         }
       });
+    } else if (this.drawerType === 'edit') {
+      this.attendanceService.updateRegularization(this.selectedRequest.id, payload).subscribe({
+        next: (res) => {
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Regularization request updated successfully!' });
+          this.drawerVisible = false;
+          this.fetchRequests(); // reload list
+        },
+        error: (err) => {
+          console.error(err);
+          this.isLoading = false;
+          const errorMsg = err.error?.message || 'Failed to update regularization request';
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: errorMsg });
+          this.cdr.markForCheck();
+        }
+      });
     }
   }
 
@@ -395,9 +410,21 @@ export class AttendanceRegularization implements OnInit {
       header: 'Confirm Deletion',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        this.requests = this.requests.filter(req => req.id !== id);
-        this.messageService.add({ severity: 'success', summary: 'Deleted', detail: 'Regularization request deleted successfully!' });
+        this.isLoading = true;
         this.cdr.markForCheck();
+        this.attendanceService.deleteRegularization(id).subscribe({
+          next: () => {
+            this.messageService.add({ severity: 'success', summary: 'Deleted', detail: 'Regularization request deleted successfully!' });
+            this.fetchRequests();
+          },
+          error: (err) => {
+            console.error(err);
+            this.isLoading = false;
+            const errorMsg = err.error?.message || 'Failed to delete regularization request';
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: errorMsg });
+            this.cdr.markForCheck();
+          }
+        });
       }
     });
   }

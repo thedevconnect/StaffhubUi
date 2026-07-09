@@ -15,6 +15,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../shared/services/services/auth.service';
+import { NotificationComponent } from '../notification/notification';
 
 interface UserDetails {
   name: string;
@@ -29,7 +30,9 @@ interface RoleOption {
 
 @Component({
   selector: 'app-app-header',
-  imports: [CommonModule, FormsModule, AvatarModule, TooltipModule, MenuModule, SelectModule],
+  imports: [CommonModule, FormsModule, AvatarModule,
+    TooltipModule, MenuModule, SelectModule,
+    NotificationComponent],
   standalone: true,
   templateUrl: './header.html',
   styleUrl: './header.scss',
