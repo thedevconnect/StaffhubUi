@@ -266,6 +266,40 @@
               class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500 resize-none"
               [(ngModel)]="selectedCompany.address"></textarea>
           </div>
+
+          <!-- Location Fields -->
+          <div *ngIf="!isEditMode">
+            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Latitude</span>
+            <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.office_latitude || '-' }}</span>
+          </div>
+          <div *ngIf="isEditMode">
+            <label class="block text-xs font-bold text-slate-500 uppercase">Latitude</label>
+            <input type="number" step="any"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.office_latitude" />
+          </div>
+
+          <div *ngIf="!isEditMode">
+            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Longitude</span>
+            <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.office_longitude || '-' }}</span>
+          </div>
+          <div *ngIf="isEditMode">
+            <label class="block text-xs font-bold text-slate-500 uppercase">Longitude</label>
+            <input type="number" step="any"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.office_longitude" />
+          </div>
+
+          <div *ngIf="!isEditMode">
+            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Allowed Radius (m)</span>
+            <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.allowed_radius || '-' }}</span>
+          </div>
+          <div *ngIf="isEditMode">
+            <label class="block text-xs font-bold text-slate-500 uppercase">Allowed Radius (m)</label>
+            <input type="number"
+              class="w-full mt-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+              [(ngModel)]="selectedCompany.allowed_radius" />
+          </div>
         </div>
       </div>
 
@@ -333,7 +367,7 @@
         class="w-full sm:w-auto font-bold animate-pulse" (click)="registerNewCompany()">
       </button>
       <button pButton *ngIf="isEditMode" type="button" icon="pi pi-save" label="Save Changes" class="w-full sm:w-auto"
-        (click)="saveSimulatedEdit()">
+        (click)="saveEdit()">
       </button>
     </div>
   </ng-template>

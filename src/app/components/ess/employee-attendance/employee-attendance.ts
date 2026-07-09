@@ -11,6 +11,7 @@ import {
   AttendanceRecord,
   DashboardSummary
 } from '../../../shared/services/attendance.service';
+import * as L from 'leaflet';
 
 @Component({
   selector: 'app-employee-attendance',
@@ -55,6 +56,12 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   isActionLoading = false;
   swipeOutDialogVisible = false;
   swipeOutNote = '';
+  isRefreshingLocation = false;
+  officeLocation: { latitude: number, longitude: number, radius: number } | null = null;
+  map: any = null;
+  officeCircle: any = null;
+  employeeMarker: any = null;
+
   private allTodayRecords: AttendanceRecord[] = [];
 
   private clockIntervalId: any;
@@ -70,6 +77,19 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     this.clockIntervalId = setInterval(() => this.updateClock(), 1000);
     this.loadAllData();
     this.checkIncompleteAttendance();
+
+    this.attendanceService.getOfficeLocation().subscribe({
+      next: (res) => {
+        if (res.success && res.data && res.data.office_latitude) {
+          this.officeLocation = {
+            latitude: parseFloat(res.data.office_latitude),
+            longitude: parseFloat(res.data.office_longitude),
+            radius: res.data.allowed_radius
+          };
+          this.initMap();
+        }
+      }
+    });
   }
 
   checkIncompleteAttendance(): void {
@@ -600,4 +620,86 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
       return `Lat: ${lat.toFixed(4)}, Long: ${lon.toFixed(4)}`;
     }
   }
+
+  private initMap(): void {
+    if (!this.officeLocation) return;
+    
+    // Check if we run on browser
+    if (typeof document !== 'undefined') {
+      setTimeout(() => {
+        const mapElement = document.getElementById('attendance-map');
+        if (!mapElement) return;
+
+        // Leaflet setup
+        this.map = L.map(mapElement).setView([this.officeLocation!.latitude, this.officeLocation!.longitude], 18);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '© OpenStreetMap'
+        }).addTo(this.map);
+
+        this.officeCircle = L.circle([this.officeLocation!.latitude, this.officeLocation!.longitude], {
+          color: '#3b82f6',
+          fillColor: '#3b82f6',
+          fillOpacity: 0.2,
+          radius: this.officeLocation!.radius
+        }).addTo(this.map);
+        
+        this.refreshMapLocation();
+      }, 100);
+    }
+  }
+
+  async refreshMapLocation(): Promise<void> {
+    if (!this.map || !this.officeLocation) return;
+    
+    this.isRefreshingLocation = true;
+    try {
+      const coords = await this.getGeolocation();
+      if (coords.latitude && coords.longitude) {
+        const R = 6371e3; // Radius of the earth in m
+        const lat1 = this.officeLocation.latitude * (Math.PI / 180);
+        const lon1 = this.officeLocation.longitude * (Math.PI / 180);
+        const lat2 = coords.latitude * (Math.PI / 180);
+        const lon2 = coords.longitude * (Math.PI / 180);
+        const dLat = lat2 - lat1;
+        const dLon = lon2 - lon1;
+        const a = 
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(lat1) * Math.cos(lat2) * 
+          Math.sin(dLon / 2) * Math.sin(dLon / 2); 
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+        const distance = R * c; 
+        
+        const isInside = distance <= this.officeLocation.radius;
+        const markerColor = isInside ? '#10b981' : '#f43f5e'; // Emerald or Rose
+        
+        const icon = L.divIcon({
+          className: 'custom-div-icon',
+          html: `<div style='background-color:${markerColor}; width:16px; height:16px; border-radius:50%; border:2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5);'></div>`,
+          iconSize: [16, 16],
+          iconAnchor: [8, 8]
+        });
+
+        if (this.employeeMarker) {
+          this.employeeMarker.setLatLng([coords.latitude, coords.longitude]);
+          this.employeeMarker.setIcon(icon);
+        } else {
+          this.employeeMarker = L.marker([coords.latitude, coords.longitude], { icon }).addTo(this.map);
+        }
+        
+        if (isInside) {
+          this.employeeMarker.bindPopup('You are within the allowed radius.').openPopup();
+        } else {
+          this.employeeMarker.bindPopup(`You are outside the allowed radius (${Math.round(distance)}m).`).openPopup();
+        }
+
+        const group = L.featureGroup([this.employeeMarker, this.officeCircle]);
+        this.map.fitBounds(group.getBounds().pad(0.1));
+      }
+    } finally {
+      this.isRefreshingLocation = false;
+    }
+  }
+
 }

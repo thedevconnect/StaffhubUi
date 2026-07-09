@@ -146,4 +146,7 @@ export class AttendanceService {
     return this.http.get<ApiResponse<AttendanceRecord[]>>(`${this.apiBase}/api/attendance/employee-history/${employeeId}`);
   }
 
+  getOfficeLocation(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.apiBase}/api/attendance/office-location`);
+  }
 }

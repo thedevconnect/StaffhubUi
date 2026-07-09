@@ -1,0 +1,102 @@
+<p-toast></p-toast>
+<div class="card p-3 mb-3">
+  <p-breadcrumb [model]="breadcrumbItems"></p-breadcrumb>
+</div>
+
+<div class="card p-4">
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h2 class="text-xl font-bold text-gray-800">Office Location Settings</h2>
+      <p class="text-sm text-gray-500 mt-1">Configure company location for Geo Attendance</p>
+    </div>
+  </div>
+
+  <form [formGroup]="locationForm" (ngSubmit)="saveLocation()">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <!-- Company Name Display -->
+      <div class="col-span-1 md:col-span-2">
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium text-gray-700">Company Name</label>
+          <div
+            class="p-2 border rounded-md bg-gray-50 text-gray-600 flex items-center justify-between cursor-not-allowed">
+            <span>{{ companyName || 'Loading...' }}</span>
+            <i class="pi pi-chevron-down text-gray-400"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Address -->
+      <div class="col-span-1 md:col-span-2">
+        <div class="flex flex-col gap-2">
+          <label for="address" class="text-sm font-medium text-gray-700">
+            Office Address <span class="text-red-500">*</span>
+          </label>
+          <input pInputText id="address" formControlName="address" class="w-full p-2 border rounded-md"
+            [ngClass]="{'border-red-500': f['address'].invalid && (f['address'].dirty || f['address'].touched)}"
+            placeholder="Enter complete office address" />
+          <small class="text-red-500" *ngIf="f['address'].invalid && (f['address'].dirty || f['address'].touched)">
+            Office Address is required
+          </small>
+        </div>
+      </div>
+
+      <!-- Latitude -->
+      <div>
+        <div class="flex flex-col gap-2">
+          <label for="officeLatitude" class="text-sm font-medium text-gray-700">
+            Latitude <span class="text-red-500">*</span>
+          </label>
+          <input pInputText id="officeLatitude" formControlName="officeLatitude" type="number" step="any"
+            class="w-full p-2 border rounded-md"
+            [ngClass]="{'border-red-500': f['officeLatitude'].invalid && (f['officeLatitude'].dirty || f['officeLatitude'].touched)}"
+            placeholder="e.g. 19.0760" />
+          <small class="text-red-500"
+            *ngIf="f['officeLatitude'].invalid && (f['officeLatitude'].dirty || f['officeLatitude'].touched)">
+            Latitude is required
+          </small>
+        </div>
+      </div>
+
+      <!-- Longitude -->
+      <div>
+        <div class="flex flex-col gap-2">
+          <label for="officeLongitude" class="text-sm font-medium text-gray-700">
+            Longitude <span class="text-red-500">*</span>
+          </label>
+          <input pInputText id="officeLongitude" formControlName="officeLongitude" type="number" step="any"
+            class="w-full p-2 border rounded-md"
+            [ngClass]="{'border-red-500': f['officeLongitude'].invalid && (f['officeLongitude'].dirty || f['officeLongitude'].touched)}"
+            placeholder="e.g. 72.8777" />
+          <small class="text-red-500"
+            *ngIf="f['officeLongitude'].invalid && (f['officeLongitude'].dirty || f['officeLongitude'].touched)">
+            Longitude is required
+          </small>
+        </div>
+      </div>
+
+      <!-- Allowed Radius -->
+      <div>
+        <div class="flex flex-col gap-2">
+          <label for="allowedRadius" class="text-sm font-medium text-gray-700">
+            Allowed Radius (Meters) <span class="text-red-500">*</span>
+          </label>
+          <input pInputText id="allowedRadius" formControlName="allowedRadius" type="number" min="1"
+            class="w-full p-2 border rounded-md"
+            [ngClass]="{'border-red-500': f['allowedRadius'].invalid && (f['allowedRadius'].dirty || f['allowedRadius'].touched)}"
+            placeholder="e.g. 50" />
+          <small class="text-red-500"
+            *ngIf="f['allowedRadius'].invalid && (f['allowedRadius'].dirty || f['allowedRadius'].touched)">
+            <span *ngIf="f['allowedRadius'].errors?.['required']">Radius is required</span>
+            <span *ngIf="f['allowedRadius'].errors?.['min']">Radius must be greater than 0</span>
+          </small>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="flex justify-end gap-3 mt-6">
+      <p-button label="Save Settings" type="submit" [loading]="loading()" icon="pi pi-check"></p-button>
+    </div>
+  </form>
+</div>

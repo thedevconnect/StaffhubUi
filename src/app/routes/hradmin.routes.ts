@@ -26,6 +26,10 @@ export const hradminRoutes: Routes = [
         path: 'offboarding',
         loadComponent: () => import('../components/hradmin/offboarding/offboarding').then(c => c.OffboardingComponent)
     },
-    { path: 'approval-attendance-regularization', loadComponent: () => import('../components/hradmin/approval-attendance-regularization/approval-attendance-regularization').then(c => c.ApprovalAttendanceRegularization) }
+    { path: 'approval-attendance-regularization', loadComponent: () => import('../components/hradmin/approval-attendance-regularization/approval-attendance-regularization').then(c => c.ApprovalAttendanceRegularization) },
+    {
+        path: 'office-location-settings',
+        loadComponent: () => import('../components/hradmin/office-location-settings/office-location-settings').then(c => c.OfficeLocationSettings)
+    }
 
 ];

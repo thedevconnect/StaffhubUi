@@ -128,6 +128,18 @@ export class UserService {
     return this.http.delete(`${this.apiUrl}/api/companies/${id}`);
   }
 
+  updateCompany(id: string | number, data: any) {
+    return this.http.put(`${this.apiUrl}/api/companies/${id}`, data);
+  }
+
+  getOfficeLocation() {
+    return this.http.get(`${this.apiUrl}/api/companies/office-location`);
+  }
+
+  updateOfficeLocation(data: any) {
+    return this.http.put(`${this.apiUrl}/api/companies/office-location`, data);
+  }
+
   login(username: string, password: string) {
     return this.http.post(`${this.apiUrl}/api/auth/login`, {
       username,
