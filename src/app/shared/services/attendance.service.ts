@@ -130,7 +130,7 @@ export class AttendanceService {
     return this.http.get<any>(`${this.apiBase}/api/attendance-regularization?page=${page}&limit=${limit}&status=${status}&search=${search}`);
   }
 
-  updateRegularizationStatus(requestId: number | string, status: 'APPROVED' | 'REJECTED', hrRemarks?: string): Observable<any> {
+  updateRegularizationStatus(requestId: number | string, status: 'Approved' | 'Rejected', hrRemarks?: string): Observable<any> {
     return this.http.put<any>(`${this.apiBase}/api/attendance-regularization/${requestId}/status`, { status, hrRemarks });
   }
 
