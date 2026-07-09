@@ -1,0 +1,56 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="card p-3 mb-3">
+  <p-breadcrumb [model]="breadcrumbItems"></p-breadcrumb>
+</div>
+
+<div class="card p-4">
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h2 class="text-xl font-bold text-gray-800">Employee Device Management</h2>
+      <p class="text-sm text-gray-500 mt-1">Manage and reset registered attendance devices for employees.</p>
+    </div>
+  </div>
+
+  <app-table-template 
+    [columns]="columns" 
+    [data]="filteredDevices" 
+    [pageSize]="pageSize" 
+    [totalCount]="totalCount"
+    [currentPage]="pageNo" 
+    (pageChange)="handlePageChange($event)" 
+    (pageSizeChange)="handlePageSizeChange($event)"
+    [actionTemplate]="actionsTemplate"
+  >
+  </app-table-template>
+
+  <ng-template #actionsTemplate let-device>
+      <div class="flex gap-2 justify-center">
+        <p-button 
+          icon="pi pi-laptop" 
+          (click)="confirmReset(device, 'Laptop')" 
+          [disabled]="device.laptop_status === 'Not Registered'"
+          pTooltip="Reset Laptop Registration" 
+          tooltipPosition="top"
+          styleClass="p-button-rounded p-button-secondary p-button-text">
+        </p-button>
+        <p-button 
+          icon="pi pi-mobile" 
+          (click)="confirmReset(device, 'Mobile')" 
+          [disabled]="device.mobile_status === 'Not Registered'"
+          pTooltip="Reset Mobile Registration" 
+          tooltipPosition="top"
+          styleClass="p-button-rounded p-button-secondary p-button-text">
+        </p-button>
+        <p-button 
+          icon="pi pi-trash" 
+          (click)="confirmReset(device, 'Both')" 
+          [disabled]="device.laptop_status === 'Not Registered' && device.mobile_status === 'Not Registered'"
+          pTooltip="Reset Both Devices" 
+          tooltipPosition="top"
+          styleClass="p-button-rounded p-button-danger p-button-text">
+        </p-button>
+      </div>
+  </ng-template>
+</div>

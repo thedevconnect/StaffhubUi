@@ -21,27 +21,32 @@
     </ng-template>
 
     <!-- Grid Calendar -->
-    <div
-      class="grid grid-cols-7 gap-2 text-center font-semibold text-sm text-slate-600 border-b border-slate-100 pb-2 mb-2">
-      <div *ngFor="let day of daysOfWeek" class="py-1">{{ day }}</div>
-    </div>
+    <div class="overflow-x-auto pb-4">
+      <div class="min-w-[600px]">
+        <div
+          class="grid grid-cols-7 gap-2 text-center font-semibold text-sm text-slate-600 border-b border-slate-100 pb-2 mb-2">
+          <div *ngFor="let day of daysOfWeek" class="py-1">{{ day }}</div>
+        </div>
 
-    <div class="grid grid-cols-7 gap-2">
-      <div *ngFor="let item of calendarDays()"
-        (click)="selectDay($event, item, op)"
-        class="border rounded-lg p-3 min-h-[80px] flex flex-col justify-between transition cursor-pointer"
-        [ngClass]="item.dayNum ? 'border-slate-100 hover:bg-slate-50 bg-white' : 'bg-transparent border-transparent'">
-        <ng-container *ngIf="item.dayNum">
-          <span class="text-slate-500 text-sm font-semibold">{{ item.dayNum }}</span>
-          <div class="flex flex-col items-end justify-end mt-auto gap-1">
-            <span *ngIf="item.swipeIn" class="text-[9px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
-              IN: {{ item.swipeIn }}
-            </span>
-            <span *ngIf="item.type" class="text-[10px] font-bold px-1.5 py-0.5 rounded uppercase" [ngClass]="item.colorClass">
-              {{ item.type }}
-            </span>
+        <div class="grid grid-cols-7 gap-2">
+          <div *ngFor="let item of calendarDays()" (click)="selectDay($event, item, op)"
+            class="border rounded-lg p-3 min-h-[80px] flex flex-col justify-between transition cursor-pointer"
+            [ngClass]="item.dayNum ? 'border-slate-100 hover:bg-slate-50 bg-white' : 'bg-transparent border-transparent'">
+            <ng-container *ngIf="item.dayNum">
+              <span class="text-slate-500 text-sm font-semibold">{{ item.dayNum }}</span>
+              <div class="flex flex-col items-end justify-end mt-auto gap-1">
+                <span *ngIf="item.swipeIn"
+                  class="text-[9px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                  IN: {{ item.swipeIn }}
+                </span>
+                <span *ngIf="item.type" class="text-[10px] font-bold px-1.5 py-0.5 rounded uppercase"
+                  [ngClass]="item.colorClass">
+                  {{ item.type }}
+                </span>
+              </div>
+            </ng-container>
           </div>
-        </ng-container>
+        </div>
       </div>
     </div>
 
@@ -65,6 +70,11 @@
           class="h-3.5 w-3.5 rounded bg-slate-400 flex items-center justify-center text-[8px] text-white font-bold">WO</span>
         <span class="text-slate-600">Weekly Off</span>
       </div>
+      <div class="flex items-center gap-1.5">
+        <span
+          class="h-3.5 w-3.5 rounded bg-indigo-500 flex items-center justify-center text-[8px] text-white font-bold">L</span>
+        <span class="text-slate-600">Leave (CL, EL, SL, LOP)</span>
+      </div>
     </div>
   </p-card>
 </section>
@@ -78,11 +88,13 @@
         <span class="text-slate-500 uppercase tracking-wider text-[10px]">Total Working Time</span>
         <span class="block text-sm font-bold text-blue-600 mt-1">{{ selectedDay().totalTime }}</span>
       </div>
-      
+
       <!-- List of Records -->
       <div class="max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
-        <div *ngFor="let record of selectedDay().records; let i = index" class="border-b border-slate-100 last:border-0 py-2">
-          <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+        <div *ngFor="let record of selectedDay().records; let i = index"
+          class="border-b border-slate-100 last:border-0 py-2">
+          <div
+            class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center justify-between">
             <span>Session {{ i + 1 }}</span>
             <span *ngIf="record.total_work_minutes" class="text-emerald-500">{{ record.total_work_minutes }} mins</span>
           </div>

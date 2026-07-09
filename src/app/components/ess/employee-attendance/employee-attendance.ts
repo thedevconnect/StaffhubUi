@@ -251,10 +251,10 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
       os_name,
       browser_name,
       device_name,
-      latitude: coords.latitude,
       longitude: coords.longitude,
       location_address: location_address,
-      ip_address: ip_address
+      ip_address: ip_address,
+      device_id: this.getDeviceId()
     };
 
     this.attendanceService.swipeIn(payload).subscribe({
@@ -380,10 +380,10 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
       os_name,
       browser_name,
       device_name,
-      latitude: coords.latitude,
       longitude: coords.longitude,
       location_address: location_address,
-      ip_address: ip_address
+      ip_address: ip_address,
+      device_id: this.getDeviceId()
     };
 
     this.attendanceService.swipeOut(payload).subscribe({
@@ -559,7 +559,17 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   private getDeviceName(): string {
     const userAgent = navigator.userAgent;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-    return isMobile ? 'Mobile' : 'Desktop';
+    return isMobile ? 'Mobile' : 'Laptop';
+  }
+
+  private getDeviceId(): string {
+    if (typeof localStorage === 'undefined') return 'unknown-device';
+    let deviceId = localStorage.getItem('staffhub_device_id');
+    if (!deviceId) {
+      deviceId = 'device-' + Date.now() + '-' + Math.random().toString(36).substring(2, 9);
+      localStorage.setItem('staffhub_device_id', deviceId);
+    }
+    return deviceId;
   }
 
   private getGeolocation(): Promise<{ latitude: number | null; longitude: number | null }> {

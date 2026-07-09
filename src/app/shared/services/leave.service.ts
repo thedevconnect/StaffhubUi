@@ -35,4 +35,16 @@ export class LeaveService {
   updateLeave(id: number | string, data: { leaveType: string; startDate: string; endDate: string; reason: string; status: string }): Observable<any> {
     return this.http.put<any>(`${this.apiBase}/api/leaves/${id}`, data);
   }
+
+  createLeave(data: { leaveType: string; startDate: string; endDate: string; reason: string; }): Observable<any> {
+    return this.http.post<any>(`${this.apiBase}/api/leaves`, data);
+  }
+
+  deleteLeave(id: number | string): Observable<any> {
+    return this.http.delete<any>(`${this.apiBase}/api/leaves/${id}`);
+  }
+
+  getLeaveHistory(id: number | string): Observable<any> {
+    return this.http.get<any>(`${this.apiBase}/api/leaves/${id}/history`);
+  }
 }
