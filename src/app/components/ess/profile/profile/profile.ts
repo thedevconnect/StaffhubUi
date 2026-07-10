@@ -46,7 +46,8 @@ export class Profile implements OnInit {
   ];
 
   activeTab: string = 'details';
-  onboardingStatus: string = 'NOT_STARTED'; // NOT_STARTED, PENDING, COMPLETED, REJECTED
+  onboardingStatus: string = 'NOT_STARTED'; // NOT_STARTED, PENDING, COMPLETED, APPROVED, REJECTED
+  rejectionRemarks: string = '';
   showDrawer: boolean = false;
   onboardingForm: FormGroup;
   employeeId: string | number | null = null;
@@ -151,11 +152,15 @@ export class Profile implements OnInit {
     private cdr: ChangeDetectorRef
   ) {
     this.onboardingForm = this.fb.group({
+      employee_name: [{ value: '', disabled: true }],
       father_name: [''],
       mother_name: [''],
       dob: [null],
       gender: ['MALE'],
       blood_group: [''],
+      marital_status: [''],
+      personal_email: ['', Validators.email],
+      alternate_mobile: [''],
       profile_photo: [''],
       current_address: [''],
       permanent_address: [''],
@@ -176,11 +181,11 @@ export class Profile implements OnInit {
     if (currentUser) {
       this.profileData.personal.fullName = currentUser.employeeName || currentUser.username || this.profileData.personal.fullName;
       this.profileData.personal.username = currentUser.username || this.profileData.personal.username;
-      
+
       if (currentUser.roles && currentUser.roles.length) {
         this.profileData.employment.role = currentUser.roles.map(r => r.rolDes).join(', ');
       }
-      
+
       this.loadUserDetails(currentUser.id);
     }
   }
@@ -191,7 +196,7 @@ export class Profile implements OnInit {
         if (emp) {
           this.employeeId = emp.employeeId || emp.id;
           this.companyId = emp.companyId || emp.company_id || 15;
-          
+
           this.profileData.personal.fullName = emp.fullName || emp.full_name || this.profileData.personal.fullName;
           this.profileData.personal.username = emp.username || this.profileData.personal.username;
           this.profileData.contact.officialEmail = emp.officialEmail || emp.email || this.profileData.contact.officialEmail;
@@ -203,7 +208,7 @@ export class Profile implements OnInit {
           this.profileData.employment.employmentType = emp.employmentType || emp.employment_type || this.profileData.employment.employmentType;
           this.profileData.employment.workLocation = emp.workLocation || emp.work_location || this.profileData.employment.workLocation;
           this.profileData.employment.employeeCode = emp.employeeCode || emp.emp_id || this.profileData.employment.employeeCode;
-          
+
           if (this.employeeId) {
             this.loadOnboardingRecord(this.employeeId);
           } else {
@@ -236,14 +241,27 @@ export class Profile implements OnInit {
       next: (res: any) => {
         if (res && res.data) {
           const rec = res.data;
-          this.onboardingStatus = rec.profile_status || 'PENDING';
-          
+
+          if (rec.verification_status === 'APPROVED') {
+            this.onboardingStatus = 'APPROVED';
+          } else if (rec.verification_status === 'REJECTED') {
+            this.onboardingStatus = 'REJECTED';
+            this.rejectionRemarks = rec.remarks || 'No remarks provided.';
+          } else if (rec.profile_status === 'COMPLETED') {
+            this.onboardingStatus = 'PENDING';
+          } else {
+            this.onboardingStatus = 'NOT_STARTED';
+          }
+
           // Map to profileData
           this.profileData.personal.fatherName = rec.father_name;
           this.profileData.personal.motherName = rec.mother_name;
           this.profileData.personal.dob = rec.dob;
           this.profileData.personal.gender = rec.gender;
           this.profileData.personal.bloodGroup = rec.blood_group;
+          this.profileData.personal.maritalStatus = rec.marital_status || this.profileData.personal.maritalStatus;
+          this.profileData.contact.personalEmail = rec.personal_email || this.profileData.contact.personalEmail;
+          this.profileData.contact.altPhone = rec.alternate_mobile || this.profileData.contact.altPhone;
           this.profileData.contact.currentAddress = rec.current_address;
           this.profileData.contact.permanentAddress = rec.permanent_address;
           this.profileData.emergency.contactName = rec.emergency_contact_name;
@@ -261,11 +279,15 @@ export class Profile implements OnInit {
 
           // Populate Form
           const formVal = {
+            employee_name: rec.employee_name || this.profileData.personal.fullName,
             father_name: rec.father_name || '',
             mother_name: rec.mother_name || '',
             dob: rec.dob ? new Date(rec.dob) : null,
             gender: rec.gender || 'MALE',
             blood_group: rec.blood_group || '',
+            marital_status: rec.marital_status || '',
+            personal_email: rec.personal_email || '',
+            alternate_mobile: rec.alternate_mobile || '',
             profile_photo: rec.profile_photo || '',
             current_address: rec.current_address || '',
             permanent_address: rec.permanent_address || '',
@@ -350,7 +372,7 @@ export class Profile implements OnInit {
       this.profileData.personal.avatarUrl = base64String;
       this.showDrawer = true;
       this.cdr.markForCheck();
-      
+
       this.messageService.add({
         severity: 'info',
         summary: 'Photo Selected',
@@ -375,7 +397,7 @@ export class Profile implements OnInit {
     this.loading = true;
     this.cdr.markForCheck();
 
-    const formRaw = this.onboardingForm.value;
+    const formRaw = this.onboardingForm.getRawValue();
     // Format Date to string
     let formattedDob = formRaw.dob;
     if (formattedDob instanceof Date) {
@@ -387,7 +409,8 @@ export class Profile implements OnInit {
       dob: formattedDob,
       employee_id: this.employeeId,
       company_id: this.companyId || 15,
-      profile_status: 'PENDING'
+      profile_status: 'COMPLETED',
+      verification_status: 'PENDING'
     };
 
     if (this.onboardingStatus === 'NOT_STARTED') {

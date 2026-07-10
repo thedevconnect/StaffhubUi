@@ -93,19 +93,9 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   }
 
   checkIncompleteAttendance(): void {
-    this.attendanceService.checkIncompleteAttendance().subscribe({
-      next: (res) => {
-        if (res.success && res.data && res.data.length > 0) {
-          const count = res.data.length;
-          this.messageService.add({
-            severity: 'warn',
-            summary: 'Action Required',
-            detail: `You have ${count} incomplete attendance record(s) from previous days. Please go to Attendance Regularization to submit a request.`,
-            sticky: true
-          });
-        }
-      }
-    });
+    // We no longer show a toast here. 
+    // The backend handles showing the missing attendance count in the Notifications dropdown automatically.
+    this.attendanceService.checkIncompleteAttendance().subscribe();
   }
 
   ngOnDestroy(): void {
@@ -133,7 +123,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
           if (record.swipe_in && !record.swipe_out) {
             this.isSwipedIn.set(true);
             this.buildTodayTimeline(allTodayRecords);
-            
+
             const previousCompletedMs = allTodayRecords
               .filter((r: any) => r.id !== record.id && r.swipe_in && r.swipe_out)
               .reduce((sum: number, r: any) => {
@@ -633,7 +623,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
 
   private initMap(): void {
     if (!this.officeLocation) return;
-    
+
     // Check if we run on browser
     if (typeof document !== 'undefined') {
       setTimeout(() => {
@@ -654,7 +644,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
           fillOpacity: 0.2,
           radius: this.officeLocation!.radius
         }).addTo(this.map);
-        
+
         this.refreshMapLocation();
       }, 100);
     }
@@ -662,7 +652,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
 
   async refreshMapLocation(): Promise<void> {
     if (!this.map || !this.officeLocation) return;
-    
+
     this.isRefreshingLocation = true;
     try {
       const coords = await this.getGeolocation();
@@ -674,16 +664,16 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
         const lon2 = coords.longitude * (Math.PI / 180);
         const dLat = lat2 - lat1;
         const dLon = lon2 - lon1;
-        const a = 
+        const a =
           Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-          Math.cos(lat1) * Math.cos(lat2) * 
-          Math.sin(dLon / 2) * Math.sin(dLon / 2); 
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
-        const distance = R * c; 
-        
+          Math.cos(lat1) * Math.cos(lat2) *
+          Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = R * c;
+
         const isInside = distance <= this.officeLocation.radius;
         const markerColor = isInside ? '#10b981' : '#f43f5e'; // Emerald or Rose
-        
+
         const icon = L.divIcon({
           className: 'custom-div-icon',
           html: `<div style='background-color:${markerColor}; width:16px; height:16px; border-radius:50%; border:2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5);'></div>`,
@@ -697,7 +687,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
         } else {
           this.employeeMarker = L.marker([coords.latitude, coords.longitude], { icon }).addTo(this.map);
         }
-        
+
         if (isInside) {
           this.employeeMarker.bindPopup('You are within the allowed radius.').openPopup();
         } else {

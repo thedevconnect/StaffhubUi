@@ -11,7 +11,8 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DrawerModule } from 'primeng/drawer';
 import { TooltipModule } from 'primeng/tooltip';
 import { SelectModule } from 'primeng/select';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TextareaModule } from 'primeng/textarea';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TableTemplate, TableColumn } from '../../../../../shared/ui/table-template/table-template';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
@@ -43,7 +44,9 @@ import { EmployeeOnboardingService } from '../../../../../shared/services/employ
     DrawerModule,
     TooltipModule,
     SelectModule,
+    TextareaModule,
     ReactiveFormsModule,
+    FormsModule,
     TableTemplate,
     BreadcrumbModule
   ],
@@ -144,6 +147,9 @@ export class EmployeeManagement implements OnInit {
   showOnboardingDialog = false;
   onboardingDetails: any = null;
   onboardingEmployee: Employee | null = null;
+
+  showRejectDialog = false;
+  rejectRemarks = '';
   onboardingService = inject(EmployeeOnboardingService);
 
   constructor(
@@ -547,7 +553,7 @@ export class EmployeeManagement implements OnInit {
     const empId = this.onboardingEmployee.employeeId || this.onboardingEmployee.id;
 
     this.loading.set(true);
-    this.onboardingService.updateOnboarding(empId, { profile_status: 'COMPLETED' }).subscribe({
+    this.onboardingService.updateOnboarding(empId, { verification_status: 'APPROVED' }).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',
@@ -568,18 +574,27 @@ export class EmployeeManagement implements OnInit {
     });
   }
 
-  rejectOnboarding(): void {
-    if (!this.onboardingEmployee) return;
+  openRejectDialog(): void {
+    this.rejectRemarks = '';
+    this.showRejectDialog = true;
+  }
+
+  confirmReject(): void {
+    if (!this.onboardingEmployee || !this.rejectRemarks.trim()) return;
     const empId = this.onboardingEmployee.employeeId || this.onboardingEmployee.id;
 
     this.loading.set(true);
-    this.onboardingService.updateOnboarding(empId, { profile_status: 'REJECTED' }).subscribe({
+    this.onboardingService.updateOnboarding(empId, {
+      verification_status: 'REJECTED',
+      remarks: this.rejectRemarks.trim()
+    }).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',
           summary: 'Rejected',
           detail: 'Onboarding rejected.'
         });
+        this.showRejectDialog = false;
         this.showOnboardingDialog = false;
         this.loadAllData();
       },

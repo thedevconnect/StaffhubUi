@@ -60,7 +60,7 @@
           class="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 border border-blue-100">Live
           Status</span>
       </div>
-      <button (click)="calculateDonutSegments()"
+      <button (click)="onRefresh()"
         class="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-blue-700 hover:border-blue-300 shadow-sm transition duration-150 cursor-pointer"
         title="Refresh stats">
         <i class="pi pi-refresh text-xs"></i>
@@ -309,57 +309,50 @@
     <!-- Approvals List -->
     <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
       <div *ngIf="pendingRequests.length > 0; else emptyRequests" class="table-responsive">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
-              <th class="px-6 py-4">Request ID</th>
-              <th class="px-6 py-4">Employee Name</th>
-              <th class="px-6 py-4">Request Type</th>
-              <th class="px-6 py-4">Description / Details</th>
-              <th class="px-6 py-4">Requested Date</th>
-              <th class="px-6 py-4">Status</th>
-              <th class="px-6 py-4 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100 text-sm">
-            <tr *ngFor="let req of pendingRequests" class="hover:bg-slate-50/50 transition">
-              <td class="px-6 py-4 font-mono text-xs text-slate-500 font-bold">{{ req.id }}</td>
-              <td class="px-6 py-4 font-bold text-slate-700">{{ req.employeeName }}</td>
-              <td class="px-6 py-4">
-                <span class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold"
-                  [class.bg-blue-50]="req.type === 'Leave'" [class.text-blue-700]="req.type === 'Leave'"
-                  [class.bg-purple-50]="req.type === 'Regularization'"
-                  [class.text-purple-700]="req.type === 'Regularization'"
-                  [class.bg-orange-50]="req.type === 'Attendance Approval'"
-                  [class.text-orange-700]="req.type === 'Attendance Approval'"
-                  [class.bg-amber-50]="req.type === 'Expense Claim'"
-                  [class.text-amber-700]="req.type === 'Expense Claim'">
-                  {{ req.type }}
-                </span>
-              </td>
-              <td class="px-6 py-4 text-slate-600 text-xs">{{ req.details }}</td>
-              <td class="px-6 py-4 text-slate-500 text-xs">{{ req.date }}</td>
-              <td class="px-6 py-4">
-                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-600">
-                  <span class="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                  {{ req.status }}
-                </span>
-              </td>
-              <td class="px-6 py-4 text-right">
-                <div class="flex items-center justify-end gap-2">
-                  <button (click)="approveRequest(req.id)"
-                    class="rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-600 hover:text-white transition cursor-pointer">
-                    Approve
-                  </button>
-                  <button (click)="rejectRequest(req.id)"
-                    class="rounded-lg bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700 hover:bg-rose-600 hover:text-white transition cursor-pointer">
-                    Reject
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <app-table-template [data]="pendingRequests" [columns]="pendingRequestColumns" [isLoading]="isLoading"
+          exportFileName="Pending_Approvals" [cellTemplates]="{
+            id: requestIdTpl,
+            type: requestTypeTpl,
+            status: statusTpl,
+            actions: actionsTpl
+          }">
+        </app-table-template>
+
+        <ng-template #requestIdTpl let-item>
+          <span class="font-mono text-xs text-slate-500 font-bold">{{ item.id }}</span>
+        </ng-template>
+
+        <ng-template #requestTypeTpl let-item>
+          <span class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold"
+            [class.bg-blue-50]="item.type === 'Leave'" [class.text-blue-700]="item.type === 'Leave'"
+            [class.bg-purple-50]="item.type === 'Regularization'"
+            [class.text-purple-700]="item.type === 'Regularization'"
+            [class.bg-orange-50]="item.type === 'Attendance Approval'"
+            [class.text-orange-700]="item.type === 'Attendance Approval'"
+            [class.bg-amber-50]="item.type === 'Expense Claim'" [class.text-amber-700]="item.type === 'Expense Claim'">
+            {{ item.type }}
+          </span>
+        </ng-template>
+
+        <ng-template #statusTpl let-item>
+          <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-600">
+            <span class="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+            {{ item.status }}
+          </span>
+        </ng-template>
+
+        <ng-template #actionsTpl let-item>
+          <div class="flex items-center justify-end gap-2">
+            <button (click)="approveRequest(item.id)"
+              class="rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-600 hover:text-white transition cursor-pointer">
+              Approve
+            </button>
+            <button (click)="rejectRequest(item.id)"
+              class="rounded-lg bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700 hover:bg-rose-600 hover:text-white transition cursor-pointer">
+              Reject
+            </button>
+          </div>
+        </ng-template>
       </div>
 
       <ng-template #emptyRequests>
@@ -377,12 +370,10 @@
 </div>
 
 <!-- Details Modal for Clickable KPIs -->
-<p-dialog [(visible)]="isDetailsModalVisible" [modal]="true" [header]="detailsCategoryLabel + ' Details'" [style]="{width: '70vw'}" [draggable]="false" [resizable]="false">
+<p-dialog [(visible)]="isDetailsModalVisible" [modal]="true" [header]="detailsCategoryLabel + ' Details'"
+  [style]="{width: '70vw'}" [draggable]="false" [resizable]="false">
   <div class="p-4">
-    <app-table-template 
-      [data]="detailsTableData" 
-      [columns]="detailsColumns" 
-      [isLoading]="isLoadingDetails"
+    <app-table-template [data]="detailsTableData" [columns]="detailsColumns" [isLoading]="isLoadingDetails"
       [exportFileName]="detailsCategoryLabel ? detailsCategoryLabel.replace(' ', '_') + '_Report' : 'Dashboard_Report'"
       [cellTemplates]="{
         employee_code: empCodeTpl,
@@ -420,6 +411,7 @@
 
 <ng-template #totalTimeTpl let-item>
   <span class="text-xs font-semibold text-slate-700">
-    {{ item.total_time != null ? (item.total_time >= 60 ? ((item.total_time - (item.total_time % 60)) / 60) + 'h ' + (item.total_time % 60) + 'm' : item.total_time + 'm') : '-' }}
+    {{ item.total_time != null ? (item.total_time >= 60 ? ((item.total_time - (item.total_time % 60)) / 60) + 'h ' +
+    (item.total_time % 60) + 'm' : item.total_time + 'm') : '-' }}
   </span>
 </ng-template>
