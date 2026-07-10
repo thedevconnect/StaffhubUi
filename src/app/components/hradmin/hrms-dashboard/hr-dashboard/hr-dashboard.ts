@@ -195,6 +195,16 @@ export class HrDashboard implements OnInit {
     { key: 'total_time', header: 'Total Time', formatter: (val: any) => (val !== null && val !== undefined) ? (Number(val) >= 60 ? Math.floor(Number(val) / 60) + 'h ' + (Number(val) % 60) + 'm' : Number(val) + 'm') : '-' },
   ];
 
+  pendingRequestColumns: TableColumn[] = [
+    { key: 'actions', header: 'Actions' },
+    { key: 'id', header: 'Request ID', isSortable: true },
+    { key: 'employeeName', header: 'Employee Name', isSortable: true },
+    { key: 'type', header: 'Request Type' },
+    { key: 'details', header: 'Description / Details' },
+    { key: 'date', header: 'Requested Date', isSortable: true },
+    { key: 'status', header: 'Status' },
+  ];
+
   ngOnInit(): void {
     this.loadPendencyData();
     this.loadDashboardSummary();

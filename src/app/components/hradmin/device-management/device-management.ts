@@ -38,12 +38,12 @@ export class DeviceManagement implements OnInit {
   ];
 
   columns: TableColumn[] = [
+    { key: 'actions', header: 'Actions', isSortable: false },
     { key: 'employee_code', header: 'Emp Code', isSortable: true },
     { key: 'full_name', header: 'Employee Name', isSortable: true },
     { key: 'laptop_status', header: 'Laptop', format: 'status' },
     { key: 'mobile_status', header: 'Mobile', format: 'status' },
     { key: 'last_used_at', header: 'Last Used', isSortable: true, pipe: 'date', pipeArgs: 'medium' },
-    { key: 'actions', header: 'Actions', isSortable: false }
   ];
 
   devices: any[] = [];
@@ -65,9 +65,8 @@ export class DeviceManagement implements OnInit {
         next: (res) => {
           this.loading.set(false);
           if (res.success) {
-            this.devices = res.data.map(d => ({
+            this.devices = res.data.map((d: any) => ({
               ...d,
-              full_name: `${d.first_name || ''} ${d.last_name || ''}`.trim(),
               _badges: {
                 laptop_status: d.laptop_status === 'Active' ? 'success' : (d.laptop_status === 'Inactive' ? 'danger' : 'warning'),
                 mobile_status: d.mobile_status === 'Active' ? 'success' : (d.mobile_status === 'Inactive' ? 'danger' : 'warning')
