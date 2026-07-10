@@ -4,10 +4,10 @@ import { TableTemplate, TableColumn } from '../../../shared/ui/table-template/ta
 import { DeviceService, DeviceStatus } from '../../../shared/services/device.service';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ToastModule } from 'primeng/toast';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ToastModule } from 'primeng/toast';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 
 @Component({
@@ -18,9 +18,9 @@ import { BreadcrumbModule } from 'primeng/breadcrumb';
     TableTemplate,
     ToastModule,
     ConfirmDialogModule,
+    BreadcrumbModule,
     ButtonModule,
-    TooltipModule,
-    BreadcrumbModule
+    TooltipModule
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './device-management.html',
