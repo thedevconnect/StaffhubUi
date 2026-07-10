@@ -34,7 +34,7 @@ export class Landing {
     'onboarding': {
       title: 'Employee Onboarding',
       icon: 'pi pi-user-plus',
-      lordIcon: 'https://cdn.lordicon.com/ajkxzzom.json',
+      lordIcon: 'https://cdn.lordicon.com/ljvjsnvh.json',
       bgClass: 'bg-indigo-50 dark:bg-indigo-950/20',
       textClass: 'text-indigo-600',
       description: 'Seamlessly add new hires, assign roles, departments, and generate employee credentials instantly. Complete the digital paperwork effortlessly.',
@@ -61,7 +61,7 @@ export class Landing {
     'calendar': {
       title: 'Monthly Attendance Calendar',
       icon: 'pi pi-calendar',
-      lordIcon: 'https://cdn.lordicon.com/abfntqpl.json',
+      lordIcon: 'https://cdn.lordicon.com/bgebyztw.json',
       bgClass: 'bg-emerald-50 dark:bg-emerald-950/20',
       textClass: 'text-emerald-600',
       description: 'Employees can view their full month\'s attendance, including daily check-in times and present/absent statuses at a glance.',

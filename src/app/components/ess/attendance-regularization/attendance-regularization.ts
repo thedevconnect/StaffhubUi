@@ -63,29 +63,7 @@ export class AttendanceRegularization implements OnInit {
   historyEvents: any[] = [];
   isLoading: boolean = false;
 
-  //   {
-  //     "success": true,
-  //     "message": "My requests fetched successfully",
-  //     "data": [
-  //         {
-  //             "id": 5,
-  //             "employeeId": 54,
-  //             "attendanceDate": "2026-07-05T18:30:00.000Z",
-  //             "correctionType": "Missed Punch",
-  //             "checkIn": "2026-07-06T23:00:00.000Z",
-  //             "checkOut": "2026-07-07T08:00:00.000Z",
-  //             "reason": "test teste ttest",
-  //             "status": "Pending",
-  //             "submittedOn": "2026-07-07T06:21:43.000Z",
-  //             "createdAt": "2026-07-07T06:21:43.000Z",
-  //             "managerRemarks": null,
-  //             "hrRemarks": null,
-  //             "attachmentUrl": null,
-  //             "approvedBy": null,
-  //             "approvedByName": null
-  //         }
-  //     ]
-  // }
+
 
   columns: TableColumn[] = [
 
@@ -97,7 +75,7 @@ export class AttendanceRegularization implements OnInit {
     { key: 'reason', header: 'Reason' },
     { key: 'status', header: 'Status' },
     { key: 'managerRemarks', header: 'managerRemarks' },
-    { key: 'approvedBy', header: 'approvedBy' },
+    { key: 'approvedByName', header: 'Approved By' },
 
     { key: 'submittedOn', header: 'Submitted On' },
   ];
@@ -171,22 +149,30 @@ export class AttendanceRegularization implements OnInit {
     this.attendanceService.getMyRegularizations().subscribe({
       next: (res) => {
         if (res && res.data) {
-          this.requests = res.data.map((req: any) => ({
-            ...req,
-            id: req.id,
-            attendanceDate: req.attendanceDate ? new Date(req.attendanceDate) : null,
-            correctionType: req.correctionType,
-            checkIn: req.checkIn ? new Date(req.checkIn) : null,
-            checkOut: req.checkOut ? new Date(req.checkOut) : null,
-            reason: req.reason,
-            status: req.status,
-            submittedOn: req.createdAt ? new Date(req.createdAt) : null,
-            managerRemarks: req.managerRemarks,
-            hrRemarks: req.hrRemarks,
-            approvedBy: req.approvedBy,
-            approvedByName: req.approvedByName,
-            employeeName: req.employeeName
-          }));
+          const currentMonth = new Date().getMonth();
+          const currentYear = new Date().getFullYear();
+
+          this.requests = res.data
+            .map((req: any) => ({
+              ...req,
+              id: req.id,
+              attendanceDate: req.attendanceDate ? new Date(req.attendanceDate) : null,
+              correctionType: req.correctionType,
+              checkIn: req.checkIn ? new Date(req.checkIn) : null,
+              checkOut: req.checkOut ? new Date(req.checkOut) : null,
+              reason: req.reason,
+              status: req.status,
+              submittedOn: req.createdAt ? new Date(req.createdAt) : null,
+              managerRemarks: req.managerRemarks,
+              hrRemarks: req.hrRemarks,
+              approvedBy: req.approvedBy,
+              approvedByName: req.approvedByName,
+              employeeName: req.employeeName
+            }))
+            .filter((req: any) => {
+              if (!req.attendanceDate) return false;
+              return req.attendanceDate.getMonth() === currentMonth && req.attendanceDate.getFullYear() === currentYear;
+            });
         } else {
           this.requests = [];
         }
@@ -306,7 +292,7 @@ export class AttendanceRegularization implements OnInit {
   openHistoryDrawer(req: any) {
     this.selectedRequest = req;
     this.historyEvents = [];
-    
+
     // Created Event
     if (req.submittedOn) {
       this.historyEvents.push({
@@ -317,7 +303,7 @@ export class AttendanceRegularization implements OnInit {
         title: 'Request Submitted',
         description: `A regularization request for the date of ${new Date(req.attendanceDate).toLocaleDateString()} was submitted by ${req.employeeName || 'You'}.`
       });
-      
+
       this.historyEvents.push({
         status: 'Forwarded',
         date: req.submittedOn,
@@ -344,7 +330,7 @@ export class AttendanceRegularization implements OnInit {
     if (req.status === 'Approved' || req.status === 'Rejected') {
       const processedBy = req.approvedByName || (req.hrRemarks ? 'HR Admin' : (req.managerRemarks ? 'Manager' : 'HR Admin/Manager'));
       const remarks = req.hrRemarks || req.managerRemarks || 'No remarks provided.';
-      
+
       this.historyEvents.push({
         status: req.status,
         date: req.updatedAt || req.submittedOn,
@@ -376,8 +362,14 @@ export class AttendanceRegularization implements OnInit {
     this.isLoading = true;
     const formValue = this.regForm.getRawValue();
 
+    const formatDateStr = (d: any) => {
+      if (!d) return null;
+      const dt = new Date(d);
+      return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+    };
+
     const payload = {
-      attendanceDate: formValue.attendanceDate,
+      attendanceDate: formatDateStr(formValue.attendanceDate),
       correctionType: formValue.correctionType,
       checkIn: formValue.checkIn,
       checkOut: formValue.checkOut,

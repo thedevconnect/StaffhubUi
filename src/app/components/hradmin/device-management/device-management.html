@@ -1,56 +1,55 @@
 <p-toast></p-toast>
 <p-confirmDialog></p-confirmDialog>
 
-<div class="card p-3 mb-3">
-  <p-breadcrumb [model]="breadcrumbItems"></p-breadcrumb>
+<!-- Page Header Inline with Breadcrumb -->
+<div class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6">
+  <div class="flex-1 min-w-0">
+    <p-breadcrumb [model]="breadcrumbItems"
+      styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
+  </div>
 </div>
 
-<div class="card p-4">
-  <div class="flex justify-between items-center mb-6">
-    <div>
-      <h2 class="text-xl font-bold text-gray-800">Employee Device Management</h2>
-      <p class="text-sm text-gray-500 mt-1">Manage and reset registered attendance devices for employees.</p>
-    </div>
-  </div>
+<div class="space-y-6">
+  <!-- Page Content -->
+  <section class="space-y-4">
+    <!-- Table -->
+    <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+      <div class="w-full overflow-x-auto">
 
-  <app-table-template 
-    [columns]="columns" 
-    [data]="filteredDevices" 
-    [pageSize]="pageSize" 
-    [totalCount]="totalCount"
-    [currentPage]="pageNo" 
-    (pageChange)="handlePageChange($event)" 
-    (pageSizeChange)="handlePageSizeChange($event)"
-    [actionTemplate]="actionsTemplate"
-  >
-  </app-table-template>
+        <app-table-template [columns]="columns" [data]="devices" [isLoading]="loading()" [showRefresh]="true" (refresh)="loadDevices()"
+          [tableActions]="tableActions" [disableActionCondition]="disableAction" (actionClicked)="handleAction($event)"
+          [cellTemplates]="{
+      'laptop_device_info': laptopDeviceTpl,
+      'mobile_device_info': mobileDeviceTpl
+    }">
+        </app-table-template>
 
-  <ng-template #actionsTemplate let-device>
-      <div class="flex gap-2 justify-center">
-        <p-button 
-          icon="pi pi-laptop" 
-          (click)="confirmReset(device, 'Laptop')" 
-          [disabled]="device.laptop_status === 'Not Registered'"
-          pTooltip="Reset Laptop Registration" 
-          tooltipPosition="top"
-          styleClass="p-button-rounded p-button-secondary p-button-text">
-        </p-button>
-        <p-button 
-          icon="pi pi-mobile" 
-          (click)="confirmReset(device, 'Mobile')" 
-          [disabled]="device.mobile_status === 'Not Registered'"
-          pTooltip="Reset Mobile Registration" 
-          tooltipPosition="top"
-          styleClass="p-button-rounded p-button-secondary p-button-text">
-        </p-button>
-        <p-button 
-          icon="pi pi-trash" 
-          (click)="confirmReset(device, 'Both')" 
-          [disabled]="device.laptop_status === 'Not Registered' && device.mobile_status === 'Not Registered'"
-          pTooltip="Reset Both Devices" 
-          tooltipPosition="top"
-          styleClass="p-button-rounded p-button-danger p-button-text">
-        </p-button>
+
+
+        <ng-template #laptopDeviceTpl let-item>
+          <div *ngIf="item.laptop_device_id; else noLaptopTpl"
+            class="text-xs text-slate-600 flex flex-col items-start max-w-[200px]">
+            <span class="font-semibold text-slate-800" [title]="item.laptop_device_name">{{ item.laptop_device_name ||
+              'Unknown Device' }}</span>
+            <span class="text-[10px] text-slate-400 font-mono break-all mt-0.5">{{ item.laptop_device_id }}</span>
+          </div>
+          <ng-template #noLaptopTpl>
+            <span class="text-xs text-slate-400 italic">Not available</span>
+          </ng-template>
+        </ng-template>
+
+        <ng-template #mobileDeviceTpl let-item>
+          <div *ngIf="item.mobile_device_id; else noMobileTpl"
+            class="text-xs text-slate-600 flex flex-col items-start max-w-[200px]">
+            <span class="font-semibold text-slate-800" [title]="item.mobile_device_name">{{ item.mobile_device_name ||
+              'Unknown Device' }}</span>
+            <span class="text-[10px] text-slate-400 font-mono break-all mt-0.5">{{ item.mobile_device_id }}</span>
+          </div>
+          <ng-template #noMobileTpl>
+            <span class="text-xs text-slate-400 italic">Not available</span>
+          </ng-template>
+        </ng-template>
       </div>
-  </ng-template>
+    </div>
+  </section>
 </div>
