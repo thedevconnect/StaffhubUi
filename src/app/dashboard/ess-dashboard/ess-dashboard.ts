@@ -81,11 +81,11 @@ export class EssDashboard implements OnInit {
   // Table Columns
 
   columns: TableColumn[] = [
-    {
-      key: 'actions',
-      header: 'Actions',
-      isVisible: true
-    },
+    // {
+    //   key: 'actions',
+    //   header: 'Actions',
+    //   isVisible: true
+    // },
 
     {
       key: 'employee_id',

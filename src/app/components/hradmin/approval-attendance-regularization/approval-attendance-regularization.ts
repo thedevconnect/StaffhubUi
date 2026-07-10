@@ -122,7 +122,8 @@ export class ApprovalAttendanceRegularization implements OnInit {
             status: item.status || 'Pending',
             submittedOn: item.submittedOn || item.createdAt || new Date(),
             managerRemarks: item.managerRemarks || item.remarks || '',
-            hrRemarks: item.hrRemarks || ''
+            hrRemarks: item.hrRemarks || '',
+            approvedByName: item.approved_by_name || item.approvedByName || ''
           }));
         } else {
           // If the backend returns no records, we clear the array so that local table updates correctly
