@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableTemplate, TableColumn } from '../../../shared/ui/table-template/table-template';
 import { DeviceService, DeviceStatus } from '../../../shared/services/device.service';
@@ -24,13 +24,15 @@ import { BreadcrumbModule } from 'primeng/breadcrumb';
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './device-management.html',
-  styleUrl: './device-management.scss'
+  styleUrl: './device-management.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DeviceManagement implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly deviceService = inject(DeviceService);
   private readonly messageService = inject(MessageService);
   private readonly confirmationService = inject(ConfirmationService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   breadcrumbItems = [
     { label: 'HR Administration', icon: 'pi pi-home', routerLink: '/hradmin' },
@@ -41,16 +43,20 @@ export class DeviceManagement implements OnInit {
     { key: 'actions', header: 'Actions', isSortable: false },
     { key: 'employee_code', header: 'Emp Code', isSortable: true },
     { key: 'full_name', header: 'Employee Name', isSortable: true },
-    { key: 'laptop_status', header: 'Laptop', format: 'status' },
-    { key: 'mobile_status', header: 'Mobile', format: 'status' },
+    { key: 'laptop_status', header: 'Laptop Status', format: 'status' },
+    { key: 'laptop_device_info', header: 'Laptop Device', isSortable: false },
+    { key: 'mobile_status', header: 'Mobile Status', format: 'status' },
+    { key: 'mobile_device_info', header: 'Mobile Device', isSortable: false },
     { key: 'last_used_at', header: 'Last Used', isSortable: true, pipe: 'date', pipeArgs: 'medium' },
   ];
 
+  tableActions = [
+    { label: 'Reset Laptop', icon: 'pi pi-laptop', id: 'reset_laptop' },
+    { label: 'Reset Mobile', icon: 'pi pi-mobile', id: 'reset_mobile' },
+    { label: 'Reset Both', icon: 'pi pi-trash', id: 'reset_both' }
+  ];
+
   devices: any[] = [];
-  filteredDevices: any[] = [];
-  pageNo = 1;
-  pageSize = 10;
-  totalCount = 0;
   loading = signal(false);
 
   ngOnInit(): void {
@@ -72,31 +78,40 @@ export class DeviceManagement implements OnInit {
                 mobile_status: String(d.mobile_status).toUpperCase() === 'ACTIVE' ? 'success' : (String(d.mobile_status).toUpperCase() === 'INACTIVE' ? 'danger' : 'warning')
               }
             }));
-            this.updatePagination();
           }
         },
         error: (err) => {
           this.loading.set(false);
           this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load devices' });
+          this.cdr.markForCheck();
         }
       });
   }
 
-  updatePagination(): void {
-    this.totalCount = this.devices.length;
-    const startIndex = (this.pageNo - 1) * this.pageSize;
-    this.filteredDevices = this.devices.slice(startIndex, startIndex + this.pageSize);
-  }
 
-  handlePageChange(page: number): void {
-    this.pageNo = page;
-    this.updatePagination();
-  }
 
-  handlePageSizeChange(size: number): void {
-    this.pageSize = size;
-    this.pageNo = 1;
-    this.updatePagination();
+  disableAction = (actionId: string, device: any): boolean => {
+    if (actionId === 'reset_laptop') {
+      return device.laptop_status === 'Not Registered';
+    }
+    if (actionId === 'reset_mobile') {
+      return device.mobile_status === 'Not Registered';
+    }
+    if (actionId === 'reset_both') {
+      return device.laptop_status === 'Not Registered' && device.mobile_status === 'Not Registered';
+    }
+    return false;
+  };
+
+  handleAction(event: { actionId: string; row: any }): void {
+    const { actionId, row } = event;
+    if (actionId === 'reset_laptop') {
+      this.confirmReset(row, 'Laptop');
+    } else if (actionId === 'reset_mobile') {
+      this.confirmReset(row, 'Mobile');
+    } else if (actionId === 'reset_both') {
+      this.confirmReset(row, 'Both');
+    }
   }
 
   confirmReset(device: any, type: 'Laptop' | 'Mobile' | 'Both'): void {
@@ -105,7 +120,7 @@ export class DeviceManagement implements OnInit {
       header: 'Confirm Reset',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        this.resetDevice(device.employee_id, type);
+        this.resetDevice(device.user_id, type);
       }
     });
   }
@@ -119,9 +134,11 @@ export class DeviceManagement implements OnInit {
             this.messageService.add({ severity: 'success', summary: 'Success', detail: res.message });
             this.loadDevices();
           }
+          this.cdr.markForCheck();
         },
         error: (err) => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to reset device' });
+          this.cdr.markForCheck();
         }
       });
   }
