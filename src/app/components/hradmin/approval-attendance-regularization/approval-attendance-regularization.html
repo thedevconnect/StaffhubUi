@@ -252,10 +252,10 @@
       <!-- Read-Only HR Remarks (for already processed states) -->
       <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-2"
         *ngIf="selectedRequest.status !== 'Pending' && selectedRequest.status !== 'PENDING'">
-        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">HR Admin Processing
-          Remarks</label>
-        <div class="bg-slate-50 border border-slate-100 rounded-xl p-3.5 text-slate-600 text-sm">
-          {{ selectedRequest.hrRemarks || 'No processing remarks entered by HR.' }}
+        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Processed By</label>
+        <p class="text-sm font-bold text-slate-700">{{ selectedRequest.approvedByName || 'HR Admin' }}</p>
+        <div class="bg-slate-50 border border-slate-100 rounded-xl p-3.5 text-slate-600 text-sm mt-3">
+          {{ selectedRequest.hrRemarks || 'No processing remarks entered.' }}
         </div>
       </div>
     </div>

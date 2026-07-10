@@ -693,7 +693,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
         if (isInside) {
           this.employeeMarker.bindPopup('You are within the allowed radius.').openPopup();
         } else {
-          this.employeeMarker.bindPopup(`You are outside the allowed radius (${Math.round(distance)}m).`).openPopup();
+          this.employeeMarker.bindPopup(`You Are Outside The Allowed Radius (${Math.round(distance)}m).`).openPopup();
         }
 
         const group = L.featureGroup([this.employeeMarker, this.officeCircle]);

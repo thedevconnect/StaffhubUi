@@ -183,7 +183,9 @@ export class AttendanceRegularization implements OnInit {
             submittedOn: req.createdAt ? new Date(req.createdAt) : null,
             managerRemarks: req.managerRemarks,
             hrRemarks: req.hrRemarks,
-            approvedBy: req.approvedBy
+            approvedBy: req.approvedBy,
+            approvedByName: req.approvedByName,
+            employeeName: req.employeeName
           }));
         } else {
           this.requests = [];
@@ -313,11 +315,20 @@ export class AttendanceRegularization implements OnInit {
         icon: 'pi pi-file-arrow-up',
         color: 'bg-blue-500',
         title: 'Request Submitted',
-        description: 'Regularization request was submitted successfully.'
+        description: `A regularization request for the date of ${new Date(req.attendanceDate).toLocaleDateString()} was submitted by ${req.employeeName || 'You'}.`
+      });
+      
+      this.historyEvents.push({
+        status: 'Forwarded',
+        date: req.submittedOn,
+        icon: 'pi pi-send',
+        color: 'bg-purple-500',
+        title: 'Request Forwarded',
+        description: 'Your request has been automatically forwarded to your Reporting Manager and HR Admin for review.'
       });
     }
 
-    // Pending State (usually the same as created)
+    // Pending State
     if (req.status === 'Pending') {
       this.historyEvents.push({
         status: 'Pending',
@@ -325,19 +336,22 @@ export class AttendanceRegularization implements OnInit {
         icon: 'pi pi-clock',
         color: 'bg-amber-500',
         title: 'Pending Approval',
-        description: 'Request is waiting for Manager/HR approval.'
+        description: 'Request is currently waiting for HR Admin or Manager approval.'
       });
     }
 
     // Processed State (Approved/Rejected)
     if (req.status === 'Approved' || req.status === 'Rejected') {
+      const processedBy = req.approvedByName || (req.hrRemarks ? 'HR Admin' : (req.managerRemarks ? 'Manager' : 'HR Admin/Manager'));
+      const remarks = req.hrRemarks || req.managerRemarks || 'No remarks provided.';
+      
       this.historyEvents.push({
         status: req.status,
-        date: req.updatedAt || req.submittedOn, // Assuming it's processed later
+        date: req.updatedAt || req.submittedOn,
         icon: req.status === 'Approved' ? 'pi pi-check' : 'pi pi-times',
         color: req.status === 'Approved' ? 'bg-emerald-500' : 'bg-rose-500',
         title: `Request ${req.status}`,
-        description: req.managerRemarks || req.hrRemarks || 'Request has been processed.'
+        description: `Your request was ${req.status.toLowerCase()} by ${processedBy}. Remarks: ${remarks}`
       });
     }
 

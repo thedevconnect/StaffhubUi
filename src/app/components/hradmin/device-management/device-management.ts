@@ -68,8 +68,8 @@ export class DeviceManagement implements OnInit {
             this.devices = res.data.map((d: any) => ({
               ...d,
               _badges: {
-                laptop_status: d.laptop_status === 'Active' ? 'success' : (d.laptop_status === 'Inactive' ? 'danger' : 'warning'),
-                mobile_status: d.mobile_status === 'Active' ? 'success' : (d.mobile_status === 'Inactive' ? 'danger' : 'warning')
+                laptop_status: String(d.laptop_status).toUpperCase() === 'ACTIVE' ? 'success' : (String(d.laptop_status).toUpperCase() === 'INACTIVE' ? 'danger' : 'warning'),
+                mobile_status: String(d.mobile_status).toUpperCase() === 'ACTIVE' ? 'success' : (String(d.mobile_status).toUpperCase() === 'INACTIVE' ? 'danger' : 'warning')
               }
             }));
             this.updatePagination();
