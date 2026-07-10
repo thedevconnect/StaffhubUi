@@ -198,7 +198,7 @@ export class LeaveApplication {
   columns: TableColumn[] = [];
 
   disableAction = (actionId: string, row: any): boolean => {
-    if (row['leave Status'] !== 'Apply') {
+    if (row['leave Status'] !== 'PENDING') {
       return actionId === 'edit' || actionId === 'delete';
     }
     return false;
@@ -390,10 +390,16 @@ export class LeaveApplication {
         this.loadingService.startLoading();
         
         const val = this.leaveForm.value;
+        const formatDateStr = (d: any): string => {
+          if (!d) return '';
+          const dt = new Date(d);
+          return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+        };
+
         const payload = {
           leaveType: val.leaveType,
-          startDate: val.dateFrom.toISOString().split('T')[0],
-          endDate: val.dateTo.toISOString().split('T')[0],
+          startDate: formatDateStr(val.dateFrom),
+          endDate: formatDateStr(val.dateTo),
           reason: val.reason,
           status: 'PENDING'
         };
