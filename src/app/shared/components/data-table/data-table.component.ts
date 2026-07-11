@@ -1,5 +1,5 @@
 
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, ContentChild, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -21,6 +21,9 @@ export class DataTableComponent implements OnChanges {
   @Input() data: any[] = [];
   @Input() totalItems: number = 0;
   @Input() itemsPerPageOptions: number[] = [10, 20, 50, 100];
+
+  @ContentChild('customCell', { static: false }) customCellTemplate?: TemplateRef<any>;
+  @ContentChild('actionCell', { static: false }) actionCellTemplate?: TemplateRef<any>;
 
   @Output() onSearch = new EventEmitter<string>();
   @Output() onRefresh = new EventEmitter<void>();

@@ -1,0 +1,159 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<!-- Page Header Inline with Breadcrumb -->
+<div
+  class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6">
+  <div class="flex-1 min-w-0">
+    <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+  </div>
+</div>
+
+<div class="space-y-6">
+  <!-- Title section -->
+  <div>
+    <h2 class="text-xl font-bold text-slate-800">Pending Monthly Attendance</h2>
+    <p class="text-xs text-slate-500 mt-1">Review and approve employee monthly attendance submissions.</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-end gap-4">
+    <form [formGroup]="filterForm" class="flex gap-4 flex-1">
+      <div class="flex flex-col gap-1 w-48">
+        <label class="text-xs font-semibold text-slate-700">Month</label>
+        <p-select [options]="months" formControlName="month" placeholder="All Months" styleClass="w-full"></p-select>
+      </div>
+      <div class="flex flex-col gap-1 w-48">
+        <label class="text-xs font-semibold text-slate-700">Status</label>
+        <p-select [options]="statusOptions" formControlName="status" placeholder="All Status"
+          styleClass="w-full"></p-select>
+      </div>
+    </form>
+  </div>
+
+  <!-- Table -->
+  <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+    <app-table-template [columns]="columns" [data]="records()" [isLoading]="loading()" [showRefresh]="true"
+      (refresh)="loadData()" [tableActions]="tableActions" (actionClicked)="handleAction($event)">
+
+      <!-- Custom Templates for TableTemplate -->
+      <ng-template #customTpl let-item let-col="col">
+        <span *ngIf="col.key === 'month_year'" class="font-bold text-slate-700">
+          {{ item.month_year }}
+        </span>
+        <span *ngIf="col.key === 'updated_at'" class="text-slate-500">
+          {{ item.updated_at | date:'medium' }}
+        </span>
+      </ng-template>
+    </app-table-template>
+  </div>
+</div>
+
+<!-- View Drawer -->
+<p-drawer [(visible)]="viewVisible" position="right" [style]="{width: '100%', maxWidth: '900px'}" [modal]="true"
+  styleClass="p-0">
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-3" *ngIf="selectedRecord">
+      <div
+        class="h-10 w-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-lg shadow-sm">
+        {{ selectedRecord.header.employee_name.charAt(0) }}
+      </div>
+      <div>
+        <h2 class="text-lg font-bold text-slate-800 m-0">{{ selectedRecord.header.employee_name }}</h2>
+        <p class="text-xs text-slate-500 m-0">{{ selectedRecord.header.department_name }} | {{
+          months[selectedRecord.header.month]?.label }} {{ selectedRecord.header.year }}</p>
+      </div>
+    </div>
+  </ng-template>
+
+  <div class="p-6 h-full flex flex-col bg-slate-50" *ngIf="selectedRecord">
+
+    <!-- Summary -->
+    <div *ngIf="selectedSummary" class="grid grid-cols-4 md:grid-cols-8 gap-2 mb-6">
+      <div class="bg-white border border-slate-200 p-2 rounded-lg text-center">
+        <p class="text-[9px] font-bold text-slate-500 uppercase">Present</p>
+        <h4 class="text-sm font-black text-green-600">{{ selectedSummary['Present'] || 0 }}</h4>
+      </div>
+      <div class="bg-white border border-slate-200 p-2 rounded-lg text-center">
+        <p class="text-[9px] font-bold text-slate-500 uppercase">Absent</p>
+        <h4 class="text-sm font-black text-red-600">{{ selectedSummary['Absent'] || 0 }}</h4>
+      </div>
+      <div class="bg-white border border-slate-200 p-2 rounded-lg text-center">
+        <p class="text-[9px] font-bold text-slate-500 uppercase">Paid Days</p>
+        <h4 class="text-sm font-black text-blue-600">{{ selectedSummary['Paid Days'] || 0 }}</h4>
+      </div>
+      <div class="bg-white border border-slate-200 p-2 rounded-lg text-center">
+        <p class="text-[9px] font-bold text-slate-500 uppercase">W.O</p>
+        <h4 class="text-sm font-black text-slate-600">{{ selectedSummary['Weekly Off'] || 0 }}</h4>
+      </div>
+      <div class="bg-white border border-slate-200 p-2 rounded-lg text-center">
+        <p class="text-[9px] font-bold text-slate-500 uppercase">Holiday</p>
+        <h4 class="text-sm font-black text-purple-600">{{ selectedSummary['Holiday'] || 0 }}</h4>
+      </div>
+      <div class="bg-white border border-slate-200 p-2 rounded-lg text-center">
+        <p class="text-[9px] font-bold text-slate-500 uppercase">CL</p>
+        <h4 class="text-sm font-black text-teal-600">{{ selectedSummary['CL'] || 0 }}</h4>
+      </div>
+      <div class="bg-white border border-slate-200 p-2 rounded-lg text-center">
+        <p class="text-[9px] font-bold text-slate-500 uppercase">EL/SL</p>
+        <h4 class="text-sm font-black text-indigo-600">{{ selectedSummary['EL'] || 0 }} / {{ selectedSummary['SL'] || 0
+          }}</h4>
+      </div>
+      <div class="bg-white border border-slate-200 p-2 rounded-lg text-center">
+        <p class="text-[9px] font-bold text-slate-500 uppercase">Status</p>
+        <h4 class="text-xs font-black mt-1"
+          [ngClass]="{'text-orange-500': selectedRecord.header.status==='Pending', 'text-green-500': selectedRecord.header.status==='Approved', 'text-red-500': selectedRecord.header.status==='Rejected'}">
+          {{ selectedRecord.header.status }}</h4>
+      </div>
+    </div>
+
+    <!-- Details Table -->
+    <div class="flex-1 overflow-auto bg-white border border-slate-200 rounded-xl shadow-sm">
+      <table class="w-full text-left text-sm text-slate-600 border-collapse relative">
+        <thead class="text-xs text-slate-700 bg-slate-100 uppercase sticky top-0 z-10 shadow-sm">
+          <tr>
+            <th class="px-4 py-3 font-semibold border-b w-32">Date</th>
+            <th class="px-4 py-3 font-semibold border-b w-32">Day</th>
+            <th class="px-4 py-3 font-semibold border-b w-40">Status</th>
+            <th class="px-4 py-3 font-semibold border-b">Remarks</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr *ngFor="let row of selectedRecord.details" class="hover:bg-slate-50 transition-colors"
+            [ngClass]="{'bg-slate-50': isWeekend(row.day)}">
+            <td class="px-4 py-3 font-medium text-slate-700">{{ row.date | date:'mediumDate' }}</td>
+            <td class="px-4 py-3" [ngClass]="{'text-red-500 font-bold': isWeekend(row.day)}">{{ row.day }}</td>
+            <td class="px-4 py-3 font-bold"
+              [ngClass]="{'text-green-600': row.attendance_status === 'Present', 'text-red-600': row.attendance_status === 'Absent'}">
+              {{ row.attendance_status }}</td>
+            <td class="px-4 py-3">{{ row.remarks || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Approval Actions -->
+    <div class="mt-6 flex justify-end gap-3" *ngIf="selectedRecord.header.status === 'Pending'">
+      <p-button label="Reject" icon="pi pi-times" (onClick)="openRejectDialog()" [loading]="actionLoading"
+        styleClass="p-button-danger p-button-outlined"></p-button>
+      <p-button label="Approve" icon="pi pi-check" (onClick)="approve()" [loading]="actionLoading"
+        styleClass="p-button-success"></p-button>
+    </div>
+  </div>
+</p-drawer>
+
+<!-- Reject Dialog -->
+<p-dialog [(visible)]="rejectVisible" header="Reject Attendance" [modal]="true" [style]="{width: '450px'}"
+  [draggable]="false" [resizable]="false">
+  <div class="flex flex-col gap-3 py-4">
+    <label class="text-sm font-semibold text-slate-700">Rejection Remarks <span class="text-red-500">*</span></label>
+    <textarea pTextarea [(ngModel)]="hrRemarks" rows="4" placeholder="Enter reason for rejection..."
+      class="w-full"></textarea>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" icon="pi pi-times" (onClick)="rejectVisible = false"
+      styleClass="p-button-text p-button-secondary"></p-button>
+    <p-button label="Confirm Reject" icon="pi pi-check" (onClick)="confirmReject()" [loading]="actionLoading"
+      styleClass="p-button-danger"></p-button>
+  </ng-template>
+</p-dialog>

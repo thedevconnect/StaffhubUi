@@ -150,4 +150,8 @@ export class AttendanceService {
   getOfficeLocation(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(`${this.apiBase}/api/attendance/office-location`);
   }
+
+  updateDailyAttendance(data: any): Observable<ApiResponse<any>> {
+    return this.http.put<ApiResponse<any>>(`${this.apiBase}/api/attendance/update-daily`, data);
+  }
 }
