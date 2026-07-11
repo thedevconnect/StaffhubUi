@@ -23,6 +23,10 @@ export const essRoutes: Routes = [
     loadComponent: () => import('../components/ess/leave-application/leave-application').then(c => c.LeaveApplication)
   },
   {
+    path: 'monthly-attendance',
+    loadComponent: () => import('../components/ess/monthly-attendance/monthly-attendance').then(c => c.MonthlyAttendance)
+  },
+  {
     path: 'apply-short-leave',
     loadComponent: () => import('../components/ess/apply-short-leave/apply-short-leave').then(c => c.ApplyShortLeave)
   },

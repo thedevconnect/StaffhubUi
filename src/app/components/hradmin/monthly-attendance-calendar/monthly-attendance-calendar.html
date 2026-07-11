@@ -1,0 +1,142 @@
+<app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+<section class="space-y-4">
+  <header class="rounded-xl border border-slate-200 bg-white p-4 md:p-5 flex flex-col md:flex-row justify-between items-center">
+    <div>
+      <h2 class="text-xl font-semibold text-slate-900">Monthly Attendance Calendar</h2>
+      <p class="mt-1 text-sm text-slate-500">Manage employee attendance on a day-by-day basis.</p>
+    </div>
+    <div class="mt-4 md:mt-0 w-full md:w-auto flex items-center gap-2">
+      <span class="text-sm font-semibold text-slate-600">Employee:</span>
+      <p-select 
+        [options]="employees()" 
+        [(ngModel)]="selectedEmployeeId" 
+        (onChange)="onEmployeeChange()"
+        optionLabel="fullName" 
+        optionValue="id" 
+        [filter]="true" 
+        filterBy="fullName,employeeCode"
+        placeholder="Select an Employee"
+        styleClass="w-full md:w-72">
+      </p-select>
+    </div>
+  </header>
+
+  <p-card *ngIf="selectedEmployeeId()">
+    <ng-template pTemplate="header">
+      <div class="flex items-center justify-between p-4 border-b border-slate-100">
+        <div class="flex gap-2">
+          <button (click)="prevMonth()"
+            class="px-3 py-1.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded transition cursor-pointer">Previous</button>
+          <button (click)="today()"
+            class="px-3 py-1.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded transition cursor-pointer">Today</button>
+          <button (click)="nextMonth()"
+            class="px-3 py-1.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded transition cursor-pointer">Next</button>
+        </div>
+        <h3 class="text-lg font-bold text-slate-800">{{ monthYearString() }}</h3>
+      </div>
+    </ng-template>
+
+    <!-- Grid Calendar -->
+    <div class="overflow-x-auto pb-4">
+      <div class="min-w-[600px]">
+        <div
+          class="grid grid-cols-7 gap-2 text-center font-semibold text-sm text-slate-600 border-b border-slate-100 pb-2 mb-2">
+          <div *ngFor="let day of daysOfWeek" class="py-1">{{ day }}</div>
+        </div>
+
+        <div class="grid grid-cols-7 gap-2">
+          <div *ngFor="let item of calendarDays()" (click)="openEditDialog(item)"
+            class="border rounded-lg p-3 min-h-[80px] flex flex-col justify-between transition cursor-pointer relative"
+            [ngClass]="item.dayNum ? 'border-slate-100 hover:bg-slate-50 bg-white hover:border-indigo-300' : 'bg-transparent border-transparent'">
+            <ng-container *ngIf="item.dayNum">
+              <span class="text-slate-500 text-sm font-semibold">{{ item.dayNum }}</span>
+              <div class="flex flex-col items-end justify-end mt-auto gap-1">
+                <span *ngIf="item.totalTime && item.totalTime !== '-'"
+                  class="text-[9px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                  {{ item.totalTime }}
+                </span>
+                <span *ngIf="item.type" class="text-[10px] font-bold px-1.5 py-0.5 rounded uppercase"
+                  [ngClass]="item.colorClass">
+                  {{ item.type }}
+                </span>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="flex flex-wrap gap-4 mt-6 border-t border-slate-100 pt-4 text-xs font-semibold">
+      <div class="flex items-center gap-1.5">
+        <span class="h-3.5 w-3.5 rounded bg-emerald-500 flex items-center justify-center text-[8px] text-white">P</span>
+        <span class="text-slate-600">Present</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="h-3.5 w-3.5 rounded bg-rose-500 flex items-center justify-center text-[8px] text-white">A</span>
+        <span class="text-slate-600">Absent</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span
+          class="h-3.5 w-3.5 rounded bg-amber-500 flex items-center justify-center text-[8px] text-white font-bold">HD</span>
+        <span class="text-slate-600">Half Day</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span
+          class="h-3.5 w-3.5 rounded bg-slate-400 flex items-center justify-center text-[8px] text-white font-bold">WO</span>
+        <span class="text-slate-600">Weekly Off</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span
+          class="h-3.5 w-3.5 rounded bg-indigo-500 flex items-center justify-center text-[8px] text-white font-bold">L</span>
+        <span class="text-slate-600">Leave (CL, EL, SL, LOP)</span>
+      </div>
+    </div>
+  </p-card>
+
+  <!-- Prompt to select employee if not selected -->
+  <div *ngIf="!selectedEmployeeId()" class="p-12 text-center bg-white rounded-xl border border-slate-200">
+    <i class="pi pi-users text-4xl text-slate-300 mb-4 block"></i>
+    <h3 class="text-lg font-bold text-slate-800">No Employee Selected</h3>
+    <p class="text-slate-500 mt-2 text-sm">Please select an employee from the dropdown above to view and manage their monthly attendance calendar.</p>
+  </div>
+</section>
+
+<!-- Edit Dialog -->
+<p-dialog [(visible)]="editDialogVisible" [modal]="true" [style]="{width: '450px'}" 
+  [header]="'Edit Attendance - ' + (selectedDay()?.dateString | date:'mediumDate')" 
+  [draggable]="false" [resizable]="false">
+  
+  <div class="flex flex-col gap-4 mt-2" *ngIf="selectedDay()">
+    <!-- Status -->
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-semibold text-slate-700">Attendance Status</label>
+      <p-select [options]="statusOptions" [(ngModel)]="editForm.attendance_status" optionLabel="label" optionValue="value" styleClass="w-full"></p-select>
+    </div>
+
+    <!-- Swipe In -->
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-semibold text-slate-700">Swipe In</label>
+      <input type="datetime-local" pInputText [(ngModel)]="editForm.swipe_in" class="w-full" />
+    </div>
+
+    <!-- Swipe Out -->
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-semibold text-slate-700">Swipe Out</label>
+      <input type="datetime-local" pInputText [(ngModel)]="editForm.swipe_out" class="w-full" />
+    </div>
+
+    <!-- HR Notes -->
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-semibold text-slate-700">HR Notes / Reason for Modification</label>
+      <textarea pTextarea [(ngModel)]="editForm.notes" rows="3" class="w-full" placeholder="Optional notes for this modification..."></textarea>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button label="Cancel" icon="pi pi-times" [outlined]="true" severity="secondary" (click)="editDialogVisible = false"></p-button>
+      <p-button label="Save Changes" icon="pi pi-check" (click)="saveAttendance()"></p-button>
+    </div>
+  </ng-template>
+</p-dialog>
