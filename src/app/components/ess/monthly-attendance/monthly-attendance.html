@@ -22,14 +22,14 @@
         <p-select [options]="years" formControlName="year" placeholder="Select Year" styleClass="w-full"></p-select>
       </div>
       <div class="flex items-end">
-        <p-button label="Load" icon="pi pi-search" (onClick)="loadAttendance()" [loading]="loading()" styleClass="p-button-primary"></p-button>
+        <p-button label="Search" icon="pi pi-search" (onClick)="loadAttendance()" [loading]="loading()"
+          styleClass="p-button-primary"></p-button>
       </div>
     </form>
 
     <div *ngIf="currentRecord" class="flex flex-col items-end justify-center">
       <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Status</span>
-      <span class="px-3 py-1 rounded-full text-xs font-bold mt-1 shadow-sm"
-        [ngClass]="{
+      <span class="px-3 py-1 rounded-full text-xs font-bold mt-1 shadow-sm" [ngClass]="{
           'bg-slate-100 text-slate-700': currentRecord.status === 'Draft',
           'bg-orange-100 text-orange-700': currentRecord.status === 'Pending',
           'bg-green-100 text-green-700': currentRecord.status === 'Approved',
@@ -41,7 +41,8 @@
   </div>
 
   <!-- HR Remarks Alert -->
-  <div *ngIf="currentRecord?.status === 'Rejected' && currentRecord?.hr_remarks" class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg shadow-sm">
+  <div *ngIf="currentRecord?.status === 'Rejected' && currentRecord?.hr_remarks"
+    class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg shadow-sm">
     <div class="flex items-start">
       <i class="pi pi-exclamation-circle text-red-500 mt-0.5 mr-3"></i>
       <div>
@@ -88,7 +89,8 @@
   </div>
 
   <!-- Attendance Table -->
-  <div *ngIf="currentRecord" class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+  <div *ngIf="currentRecord"
+    class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
     <div class="overflow-x-auto max-h-[500px]">
       <form [formGroup]="attendanceForm">
         <table class="w-full text-left text-sm text-slate-600 border-collapse relative">
@@ -102,8 +104,8 @@
           </thead>
           <tbody formArrayName="details" class="divide-y divide-slate-100">
             <tr *ngFor="let ctrl of detailsArray.controls; let i = index" [formGroupName]="i"
-                class="hover:bg-slate-50 transition-colors"
-                [ngClass]="{'bg-slate-50': isWeekend(ctrl.get('day')?.value)}">
+              class="hover:bg-slate-50 transition-colors"
+              [ngClass]="{'bg-slate-50': isWeekend(ctrl.get('day')?.value)}">
               <td class="px-4 py-3 font-medium text-slate-700">
                 {{ ctrl.get('date')?.value | date:'mediumDate' }}
               </td>
@@ -113,10 +115,12 @@
                 </span>
               </td>
               <td class="px-4 py-2">
-                <p-select [options]="statusOptions" formControlName="attendance_status" appendTo="body" styleClass="w-full text-sm"></p-select>
+                <p-select [options]="statusOptions" formControlName="attendance_status" appendTo="body"
+                  styleClass="w-full text-sm" placeholder="Select"></p-select>
               </td>
               <td class="px-4 py-2">
-                <input pInputText type="text" formControlName="remarks" class="w-full text-sm p-2 border rounded" placeholder="Optional remarks..." />
+                <input pInputText type="text" formControlName="remarks" class="w-full text-sm p-2 border rounded"
+                  placeholder="Optional remarks..." />
               </td>
             </tr>
           </tbody>
@@ -126,12 +130,15 @@
 
     <!-- Actions -->
     <div *ngIf="isEditable()" class="p-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
-      <p-button label="Save Draft" icon="pi pi-save" (onClick)="saveDraft()" [loading]="saving()" styleClass="p-button-outlined p-button-secondary"></p-button>
-      <p-button label="Submit Attendance" icon="pi pi-check" (onClick)="submitAttendance()" [loading]="submitting()" styleClass="p-button-primary"></p-button>
+      <p-button label="Save Draft" icon="pi pi-save" (onClick)="saveDraft()" [loading]="saving()"
+        styleClass="p-button-outlined p-button-secondary"></p-button>
+      <p-button label="Submit Attendance" icon="pi pi-check" (onClick)="submitAttendance()" [loading]="submitting()"
+        styleClass="p-button-primary"></p-button>
     </div>
   </div>
 
-  <div *ngIf="!currentRecord && !loading()" class="text-center p-12 bg-slate-50 rounded-xl border border-slate-200 border-dashed">
+  <div *ngIf="!currentRecord && !loading()"
+    class="text-center p-12 bg-slate-50 rounded-xl border border-slate-200 border-dashed">
     <i class="pi pi-calendar text-4xl text-slate-300 mb-3"></i>
     <p class="text-slate-500">Select a month and year to view or create attendance.</p>
   </div>

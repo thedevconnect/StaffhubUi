@@ -11,7 +11,7 @@ export class MonthlyAttendanceService {
   private apiUrl = `${environment.apiBaseUrl}/api/attendance-monthly`;
 
   createMonthlyAttendance(month: number, year: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/create`, { month, year });
+    return this.http.post(`${this.apiUrl}/generate`, { month, year });
   }
 
   getMonthlyAttendance(employeeId: number, month: number, year: number): Observable<any> {

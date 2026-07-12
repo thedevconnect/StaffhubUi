@@ -53,6 +53,10 @@ export class EmployeeManagementService {
     return this.http.delete<void>(`${this.apiBase}/api/employees/${id}`);
   }
 
+  updateCustomLocation(id: number | string, payload: { customLocationAllowed: boolean; customLatitude?: string; customLongitude?: string; customRadius?: number }): Observable<any> {
+    return this.http.put(`${this.apiBase}/api/employees/${id}/custom-location`, payload);
+  }
+
   private toApiPayload(payload: CreateEmployeeRequest | UpdateEmployeeRequest): any {
     const companyId = this.toNumberOrUndefined(payload.companyId ?? payload.company_id);
     const reportingManagerId = this.toNumberOrNull(payload.reportingManagerId ?? payload.reporting_manager_id);
@@ -174,7 +178,11 @@ export class EmployeeManagementService {
       username: employee?.username ?? '',
       created_at: employee?.created_at ?? '',
       employeeId: employee?.employee_id ?? employee?.employeeId ?? '',
-      onboardingStatus: employee?.onboarding_status ?? employee?.onboardingStatus ?? 'PENDING'
+      onboardingStatus: employee?.onboarding_status ?? employee?.onboardingStatus ?? 'PENDING',
+      custom_location_allowed: employee?.custom_location_allowed,
+      custom_latitude: employee?.custom_latitude,
+      custom_longitude: employee?.custom_longitude,
+      custom_radius: employee?.custom_radius
     };
   }
 }
