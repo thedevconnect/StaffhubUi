@@ -64,7 +64,7 @@ export class AppShell {
     private readonly confirmationService: ConfirmationService,
     private readonly router: Router,
     private readonly userService: UserService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.fetchUserSidebar();
@@ -162,6 +162,7 @@ export class AppShell {
       const empMgmtSubmenus: SidebarMenuItem[] = [];
       const attendanceSubmenus: SidebarMenuItem[] = [];
       const assetSubmenus: SidebarMenuItem[] = [];
+      const approvalSubmenus: SidebarMenuItem[] = [];
 
       routesToMap.forEach((route) => {
         if (!route.path || route.redirectTo !== undefined) return;
@@ -178,7 +179,9 @@ export class AppShell {
 
         const pathLower = route.path.toLowerCase();
 
-        if (pathLower.includes('employee-management') || pathLower.includes('offboarding') || pathLower.includes('office-location') || pathLower.includes('device-management')) {
+        if (pathLower.includes('approval')) {
+          approvalSubmenus.push(item);
+        } else if (pathLower.includes('employee-management') || pathLower.includes('offboarding') || pathLower.includes('office-location') || pathLower.includes('device-management')) {
           empMgmtSubmenus.push(item);
         } else if (pathLower.includes('attendance') || pathLower.includes('leave') || pathLower.includes('calendar')) {
           attendanceSubmenus.push(item);
@@ -211,6 +214,14 @@ export class AppShell {
           icon: 'pi-briefcase',
           isOpen: false,
           children: assetSubmenus,
+        });
+      }
+      if (approvalSubmenus.length > 0) {
+        menus.push({
+          label: 'Approvals',
+          icon: 'pi-check-square',
+          isOpen: false,
+          children: approvalSubmenus,
         });
       }
     } else {
