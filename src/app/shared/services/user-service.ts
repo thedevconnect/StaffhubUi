@@ -156,7 +156,23 @@ export class UserService {
   }
 
   getAllAssets() {
-    return this.http.get(`${this.apiUrl}/api/myassets`);
+    return this.http.get(`${this.apiUrl}/api/employee-assets`);
+  }
+
+  createAsset(data: any) {
+    return this.http.post(`${this.apiUrl}/api/employee-assets`, data);
+  }
+
+  updateAsset(id: string | number, data: any) {
+    return this.http.put(`${this.apiUrl}/api/employee-assets/${id}`, data);
+  }
+
+  deleteAsset(id: string | number) {
+    return this.http.delete(`${this.apiUrl}/api/employee-assets/${id}`);
+  }
+
+  approveAsset(id: string | number, data: any = {}) {
+    return this.http.put(`${this.apiUrl}/api/employee-assets/approve/${id}`, data);
   }
 
   getUserById(id: string | number) {

@@ -22,6 +22,7 @@ import { FloatLabelModule } from 'primeng/floatlabel'
 
 import { UserService } from '../../../shared/services/user-service'
 import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template'
+import { Router } from '@angular/router'
 
 @Component({
   selector: 'app-my-assets',
@@ -63,51 +64,76 @@ export class MyAssets implements OnInit {
   assetForm!: FormGroup
 
   columns: TableColumn[] = [
-
     { key: 'actions', header: 'Actions', isVisible: true },
-    { key: 'AssetTransactionId', header: 'Asset ID', isVisible: true, isSortable: true },
-    { key: 'Department', header: 'Department', isVisible: true, isSortable: true },
-    { key: 'AssetType', header: 'Asset Type', isVisible: true, isSortable: true },
-    { key: 'AssetName', header: 'Asset Name', isVisible: true, isSortable: true },
-    { key: 'AssignedDate', header: 'Assigned Date', isVisible: true, format: 'date', isSortable: true },
-    { key: 'OfficeLocation', header: 'Location', isVisible: true },
-    { key: 'Status', header: 'Status', isVisible: true, format: 'status' },
-    { key: 'DeptRemarks', header: 'Dept Remarks', isVisible: true },
-    { key: 'EmployeeRemarks', header: 'Employee Remarks', isVisible: true },
+    { key: 'EmployeeName', header: 'Employee', isVisible: true, isSortable: true },
+    { key: 'asset_name', header: 'Asset Name', isVisible: true, isSortable: true },
+    { key: 'asset_type', header: 'Asset Type', isVisible: true, isSortable: true },
+    { key: 'asset_code', header: 'Asset Code', isVisible: true, isSortable: true },
+    { key: 'serial_number', header: 'Serial Number', isVisible: true, isSortable: true },
+    { key: 'assigned_date', header: 'Assigned Date', isVisible: true, format: 'date', isSortable: true },
+    { key: 'approval_status', header: 'Status', isVisible: true, isSortable: true }
   ]
 
-  rowActions = [
-    { label: 'View', icon: 'pi pi-eye', id: 'view' },
-    { label: 'Edit', icon: 'pi pi-pencil', id: 'edit' },
-    { label: 'Delete', icon: 'pi pi-trash', id: 'delete' }
-  ]
+  get rowActions() {
+    const actions = [
+      { label: 'View', icon: 'pi pi-eye', id: 'view' },
+      { label: 'Edit', icon: 'pi pi-pencil', id: 'edit' },
+      { label: 'Delete', icon: 'pi pi-trash', id: 'delete' }
+    ];
+    if (this.isHRAdmin) {
+      actions.push({ label: 'Approve', icon: 'pi pi-check', id: 'approve' });
+    }
+    return actions;
+  }
+
+  disableActionCondition = (actionId: string, row: any): boolean => {
+    if (row.approval_status === 'APPROVED' && (actionId === 'edit' || actionId === 'delete' || actionId === 'approve')) {
+      return true;
+    }
+    return false;
+  }
 
   constructor(
     private assetsService: UserService,
     private fb: FormBuilder,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) { }
+
+  employees: any[] = []
+
+  get isHRAdmin(): boolean {
+    return this.router.url.includes('hradmin');
+  }
+
+  categories: any[] = []
 
   ngOnInit(): void {
     this.initForm()
+    this.loadEmployees()
     this.getAllData(true)
+  }
+
+  loadEmployees(): void {
+    this.assetsService.getAllUsers().subscribe({
+      next: (res: any) => {
+        this.employees = res?.data || []
+        this.cdr.markForCheck()
+      }
+    })
   }
 
   initForm(): void {
     this.assetForm = this.fb.group({
-      EmployeeId: ['', Validators.required],
-      Department: ['', Validators.required],
-      AssetType: ['', Validators.required],
-      AssetName: ['', Validators.required],
-      AssignedDate: ['', Validators.required],
-      DeptRemarks: [''],
-      EmployeeRemarks: [''],
-      OfficeLocation: [''],
-      OfficeLocationId: [''],
-      Status: ['Pending'],
-      IsAccessory: [false]
+      employee_id: ['', Validators.required],
+      asset_name: ['', Validators.required],
+      asset_type: ['', Validators.required],
+      asset_code: [''],
+      serial_number: [''],
+      assigned_date: ['', Validators.required],
+      employee_remarks: ['']
     })
   }
 
@@ -116,7 +142,8 @@ export class MyAssets implements OnInit {
 
     this.assetsService.getAllAssets().subscribe({
       next: (res: any) => {
-        this.assets = (res?.data || []).map((item: any) => this.mapAsset(item))
+        const dataArray = res?.table || res?.data || []
+        this.assets = dataArray.map((item: any) => this.mapAsset(item))
         this.isLoading = false
         this.cdr.markForCheck()
       },
@@ -132,26 +159,14 @@ export class MyAssets implements OnInit {
   mapAsset(item: any): any {
     return {
       ...item,
-      IsAccessory: this.bitToBoolean(item.IsAccessory),
-      IsActive: this.bitToBoolean(item.IsActive),
-      IsDeleted: this.bitToBoolean(item.IsDeleted),
-      AssignedDate: item.AssignedDate ? item.AssignedDate.split('T')[0] : null
+      assigned_date: item.assigned_date ? item.assigned_date.split('T')[0] : null
     }
-  }
-
-  bitToBoolean(value: any): boolean {
-    if (typeof value === 'boolean') return value
-    if (value?.data?.length) return value.data[0] === 1
-    return value === 1 || value === '1'
   }
 
   openAddDrawer(): void {
     this.isEditMode = false
     this.selectedAsset = null
-    this.assetForm.reset({
-      Status: 'Pending',
-      IsAccessory: false
-    })
+    this.assetForm.reset()
     this.showAssetDrawer = true
   }
 
@@ -160,17 +175,13 @@ export class MyAssets implements OnInit {
     this.selectedAsset = row
 
     this.assetForm.patchValue({
-      EmployeeId: row.EmployeeId,
-      Department: row.Department,
-      AssetType: row.AssetType,
-      AssetName: row.AssetName,
-      AssignedDate: row.AssignedDate,
-      DeptRemarks: row.DeptRemarks,
-      EmployeeRemarks: row.EmployeeRemarks,
-      OfficeLocation: row.OfficeLocation,
-      OfficeLocationId: row.OfficeLocationId,
-      Status: row.Status,
-      IsAccessory: row.IsAccessory
+      employee_id: row.employee_id,
+      asset_name: row.asset_name,
+      asset_type: row.asset_type,
+      asset_code: row.asset_code || '',
+      serial_number: row.serial_number || '',
+      assigned_date: row.assigned_date || '',
+      employee_remarks: row.employee_remarks || ''
     })
 
     this.showAssetDrawer = true
@@ -184,8 +195,8 @@ export class MyAssets implements OnInit {
 
     const payload = this.assetForm.value
 
-    if (this.isEditMode && this.selectedAsset?.AssetTransactionId) {
-      this.assetsService.getAllAssets().subscribe({
+    if (this.isEditMode && this.selectedAsset?.id) {
+      this.assetsService.updateAsset(this.selectedAsset.id, payload).subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',
@@ -195,18 +206,18 @@ export class MyAssets implements OnInit {
           this.showAssetDrawer = false
           this.getAllData(false)
         },
-        // error: err => {
-        //   this.messageService.add({
-        //     severity: 'error',
-        //     summary: 'Update Failed',
-        //     detail: err.error?.message || 'Unable to update asset'
-        //   })
-        // }
+        error: err => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Update Failed',
+            detail: err.error?.message || 'Unable to update asset'
+          })
+        }
       })
       return
     }
 
-    this.assetsService.getAllAssets().subscribe({
+    this.assetsService.createAsset(payload).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',
@@ -228,7 +239,7 @@ export class MyAssets implements OnInit {
 
   confirmDelete(row: any): void {
     this.confirmationService.confirm({
-      message: `Are you sure you want to delete ${row.AssetName}?`,
+      message: `Are you sure you want to delete ${row.asset_name}?`,
       header: 'Delete Asset',
       icon: 'pi pi-exclamation-triangle',
       acceptButtonStyleClass: 'p-button-danger',
@@ -237,7 +248,7 @@ export class MyAssets implements OnInit {
   }
 
   deleteAsset(row: any): void {
-    this.assetsService.getAllAssets().subscribe({
+    this.assetsService.deleteAsset(row.id).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',
@@ -263,12 +274,44 @@ export class MyAssets implements OnInit {
     }
 
     if (event.actionId === 'edit') {
+      if (event.row.approval_status === 'APPROVED') {
+        this.messageService.add({ severity: 'error', summary: 'Restricted', detail: 'Approved assets cannot be modified.' });
+        return;
+      }
       this.openEditDrawer(event.row)
     }
 
     if (event.actionId === 'delete') {
+      if (event.row.approval_status === 'APPROVED') {
+        this.messageService.add({ severity: 'error', summary: 'Restricted', detail: 'Approved assets cannot be deleted.' });
+        return;
+      }
       this.confirmDelete(event.row)
     }
+
+    if (event.actionId === 'approve') {
+      this.approveAsset(event.row)
+    }
+  }
+
+  approveAsset(row: any): void {
+    this.confirmationService.confirm({
+      message: `Are you sure you want to approve ${row.asset_name}?`,
+      header: 'Approve Asset',
+      icon: 'pi pi-check-circle',
+      acceptButtonStyleClass: 'p-button-success',
+      accept: () => {
+        this.assetsService.approveAsset(row.id, { hr_remarks: 'Approved by HR' }).subscribe({
+          next: () => {
+            this.messageService.add({ severity: 'success', summary: 'Approved', detail: 'Asset approved successfully' })
+            this.getAllData(false)
+          },
+          error: err => {
+            this.messageService.add({ severity: 'error', summary: 'Failed', detail: err.error?.message || 'Unable to approve asset' })
+          }
+        })
+      }
+    })
   }
 
 }

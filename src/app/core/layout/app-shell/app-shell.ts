@@ -158,6 +158,61 @@ export class AppShell {
       }
 
       menus.push(...standaloneMenus);
+    } else if (rawRoleId === 'hr_admin' || rawRoleId === 'hradmin') {
+      const empMgmtSubmenus: SidebarMenuItem[] = [];
+      const attendanceSubmenus: SidebarMenuItem[] = [];
+      const assetSubmenus: SidebarMenuItem[] = [];
+
+      routesToMap.forEach((route) => {
+        if (!route.path || route.redirectTo !== undefined) return;
+        if (route.path === 'hradmin-dashboard') return;
+
+        const label = (route.title as string) || this.formatPathToLabel(route.path);
+        const icon = this.getIconForPath(route.path);
+        const item: SidebarMenuItem = {
+          label: label,
+          icon: icon,
+          route: `/${rolePrefix}/${route.path}`,
+          isOpen: false,
+        };
+
+        const pathLower = route.path.toLowerCase();
+
+        if (pathLower.includes('employee-management') || pathLower.includes('offboarding') || pathLower.includes('office-location') || pathLower.includes('device-management')) {
+          empMgmtSubmenus.push(item);
+        } else if (pathLower.includes('attendance') || pathLower.includes('leave') || pathLower.includes('calendar')) {
+          attendanceSubmenus.push(item);
+        } else if (pathLower.includes('asset')) {
+          assetSubmenus.push(item);
+        } else {
+          menus.push(item);
+        }
+      });
+
+      if (empMgmtSubmenus.length > 0) {
+        menus.push({
+          label: 'Employee Management',
+          icon: 'pi-users',
+          isOpen: false,
+          children: empMgmtSubmenus,
+        });
+      }
+      if (attendanceSubmenus.length > 0) {
+        menus.push({
+          label: 'Attendance & Leave',
+          icon: 'pi-calendar-times',
+          isOpen: false,
+          children: attendanceSubmenus,
+        });
+      }
+      if (assetSubmenus.length > 0) {
+        menus.push({
+          label: 'Asset Management',
+          icon: 'pi-briefcase',
+          isOpen: false,
+          children: assetSubmenus,
+        });
+      }
     } else {
       if (routesToMap && routesToMap.length > 0) {
         routesToMap.forEach((route) => {
