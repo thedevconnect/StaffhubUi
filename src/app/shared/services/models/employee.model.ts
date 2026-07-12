@@ -27,6 +27,10 @@ export interface Employee {
   companyName?: string;
   employeeId?: number | string;
   onboardingStatus?: string;
+  custom_location_allowed?: number;
+  custom_latitude?: string;
+  custom_longitude?: string;
+  custom_radius?: number;
 }
 
 export interface CreateEmployeeRequest {

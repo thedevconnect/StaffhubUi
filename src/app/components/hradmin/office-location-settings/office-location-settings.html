@@ -14,6 +14,14 @@
     <p class="text-xs text-slate-500 mt-1">Configure company location for Geo Attendance</p>
   </div>
 
+  <p-tabs value="0">
+    <p-tablist>
+      <p-tab value="0">Company Location</p-tab>
+      <p-tab value="1">Employee Specific Locations</p-tab>
+    </p-tablist>
+    <p-tabpanels>
+      <p-tabpanel value="0">
+
   <form [formGroup]="locationForm" (ngSubmit)="saveLocation()">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -78,6 +86,10 @@
         </div>
       </div>
 
+      <div class="col-span-1 md:col-span-2 flex justify-end -mt-2">
+        <p-button label="Get Current Location" icon="pi pi-map-marker" styleClass="p-button-text p-button-sm px-0" (onClick)="getCurrentLocation(false)" type="button"></p-button>
+      </div>
+
       <!-- Allowed Radius -->
       <div>
         <div class="flex flex-col gap-2">
@@ -98,8 +110,121 @@
 
     </div>
 
-    <div class="flex justify-end gap-3 mt-6">
-      <p-button label="Save Settings" type="submit" [loading]="loading()" icon="pi pi-check"></p-button>
-    </div>
-  </form>
+      <div class="flex justify-end gap-3 mt-6">
+        <p-button label="Save Settings" type="submit" [loading]="loading()" icon="pi pi-check"></p-button>
+      </div>
+    </form>
+      </p-tabpanel>
+
+      <!-- Tab 2: Employee Specific Locations -->
+      <p-tabpanel value="1">
+        <div class="mb-4">
+        <p-table [value]="employees" [paginator]="true" [rows]="10" responsiveLayout="scroll"
+          [globalFilterFields]="['fullName', 'emp_id']" #dt [rowHover]="true">
+          <ng-template pTemplate="caption">
+            <div class="flex justify-between items-center">
+              <h5 class="m-0 text-lg font-semibold">Employee Location Mapping</h5>
+              <span class="p-input-icon-left">
+                <i class="pi pi-search"></i>
+                <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" placeholder="Search Employee..." class="p-2 border rounded-md" />
+              </span>
+            </div>
+          </ng-template>
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Employee ID</th>
+              <th>Name</th>
+              <th>Location Type</th>
+              <th>Latitude</th>
+              <th>Longitude</th>
+              <th>Radius (m)</th>
+              <th class="text-center">Action</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-emp>
+            <tr>
+              <td>{{ emp.emp_id }}</td>
+              <td>
+                <div class="font-medium">{{ emp.fullName }}</div>
+                <div class="text-xs text-gray-500">{{ emp.department }}</div>
+              </td>
+              <td>
+                <p-tag [severity]="emp.custom_location_allowed ? 'info' : 'success'" 
+                  [value]="emp.custom_location_allowed ? 'Custom Location' : 'Company Location'"></p-tag>
+              </td>
+              <td>{{ emp.custom_location_allowed ? emp.custom_latitude : '-' }}</td>
+              <td>{{ emp.custom_location_allowed ? emp.custom_longitude : '-' }}</td>
+              <td>{{ emp.custom_location_allowed ? emp.custom_radius : '-' }}</td>
+              <td class="text-center">
+                <p-button icon="pi pi-pencil" styleClass="p-button-rounded p-button-text p-button-sm"
+                  (onClick)="openDrawer(emp)" pTooltip="Edit Location"></p-button>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="7" class="text-center p-4">No employees found.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+
+      <!-- Drawer for Editing Employee Location -->
+      <p-drawer [(visible)]="isDrawerVisible" position="right" [style]="{width: '400px'}" [baseZIndex]="10000" (onHide)="closeDrawer()">
+        <ng-template pTemplate="header">
+          <div class="font-semibold text-lg">Update Location Settings</div>
+        </ng-template>
+        <ng-template pTemplate="content">
+          <div *ngIf="selectedEmployee" class="mt-2">
+            <div class="mb-4 p-3 bg-gray-50 rounded-lg border">
+              <div class="font-medium text-gray-800">{{ selectedEmployee.fullName }}</div>
+              <div class="text-sm text-gray-500">ID: {{ selectedEmployee.emp_id }}</div>
+            </div>
+
+            <form [formGroup]="employeeLocationForm" (ngSubmit)="saveEmployeeLocation()">
+              <div class="flex items-center gap-3 mb-6">
+                <p-checkbox formControlName="customLocationAllowed" [binary]="true" inputId="customAllowed"></p-checkbox>
+                <label for="customAllowed" class="text-sm font-medium text-gray-800 cursor-pointer">
+                  Enable Custom Location
+                </label>
+              </div>
+
+              <div class="flex flex-col gap-4" [ngClass]="{'opacity-50': !employeeLocationForm.get('customLocationAllowed')?.value}">
+                <!-- Latitude -->
+                <div class="flex flex-col gap-2">
+                  <label for="customLatitude" class="text-sm font-medium text-gray-700">Latitude <span class="text-red-500">*</span></label>
+                  <input pInputText id="customLatitude" formControlName="customLatitude" type="number" step="any"
+                    class="w-full p-2 border rounded-md" placeholder="e.g. 19.0760" />
+                </div>
+
+                <!-- Longitude -->
+                <div class="flex flex-col gap-2">
+                  <label for="customLongitude" class="text-sm font-medium text-gray-700">Longitude <span class="text-red-500">*</span></label>
+                  <input pInputText id="customLongitude" formControlName="customLongitude" type="number" step="any"
+                    class="w-full p-2 border rounded-md" placeholder="e.g. 72.8777" />
+                </div>
+
+                <div class="flex justify-end -mt-1">
+                  <p-button label="Get Current Location" icon="pi pi-map-marker" styleClass="p-button-text p-button-sm px-0" (onClick)="getCurrentLocation(true)" [disabled]="!employeeLocationForm.get('customLocationAllowed')?.value" type="button"></p-button>
+                </div>
+
+                <!-- Allowed Radius -->
+                <div class="flex flex-col gap-2">
+                  <label for="customRadius" class="text-sm font-medium text-gray-700">Allowed Radius (Meters) <span class="text-red-500">*</span></label>
+                  <input pInputText id="customRadius" formControlName="customRadius" type="number" min="1"
+                    class="w-full p-2 border rounded-md" placeholder="e.g. 50" />
+                </div>
+              </div>
+
+              <div class="flex justify-end gap-3 mt-8">
+                <p-button label="Cancel" styleClass="p-button-outlined" (onClick)="closeDrawer()"></p-button>
+                <p-button label="Save" type="submit" [loading]="employeeLoading()" icon="pi pi-check"></p-button>
+              </div>
+            </form>
+          </div>
+        </ng-template>
+      </p-drawer>
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
 </div>
