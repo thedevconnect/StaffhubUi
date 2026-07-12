@@ -43,6 +43,11 @@ export const hradminRoutes: Routes = [
     {
         path: 'device-management',
         loadComponent: () => import('../components/hradmin/device-management/device-management').then(c => c.DeviceManagement)
+    },
+    {
+        path: 'asset-approval',
+        title: 'Asset Approval',
+        loadComponent: () => import('../components/ess/my-assets/my-assets').then(c => c.MyAssets)
     }
 
 ];
