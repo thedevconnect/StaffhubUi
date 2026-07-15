@@ -555,10 +555,9 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     // iPadOS 13+ presents as MacIntel, so we check touch points
     const isIpadOS = navigator.maxTouchPoints && navigator.maxTouchPoints > 2 && /MacIntel/.test(navigator.platform);
     
-    const isSmallScreen = typeof window !== 'undefined' && window.innerWidth <= 768;
-    
-    // Treat small screens as Mobile (helpful for responsive testing)
-    const isMobile = isMobileRegex || isIpadOS || isSmallScreen;
+    // We remove the innerWidth check because rotating a device or resizing a window 
+    // shouldn't change the device identity from Mobile to Laptop.
+    const isMobile = isMobileRegex || isIpadOS;
     
     return isMobile ? 'Mobile' : 'Laptop';
   }

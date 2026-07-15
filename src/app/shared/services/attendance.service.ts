@@ -86,6 +86,10 @@ export class AttendanceService {
     return this.http.get<ApiResponse<AttendanceRecord[]>>(`${this.apiBase}/api/attendance/history`);
   }
 
+  getEmployeeHistory(employeeId: number | string): Observable<ApiResponse<AttendanceRecord[]>> {
+    return this.http.get<ApiResponse<AttendanceRecord[]>>(`${this.apiBase}/api/attendance/employee-history/${employeeId}`);
+  }
+
   getDashboardSummary(): Observable<ApiResponse<DashboardSummary>> {
     return this.http.get<ApiResponse<DashboardSummary>>(`${this.apiBase}/api/attendance/dashboard-summary`);
   }
@@ -142,10 +146,9 @@ export class AttendanceService {
   getHRDashboardDetails(category: string): Observable<ApiResponse<any[]>> {
     return this.http.get<ApiResponse<any[]>>(`${this.apiBase}/api/attendance/hr-dashboard-details?category=${category}`);
   }
-
-  getEmployeeHistory(employeeId: string): Observable<ApiResponse<AttendanceRecord[]>> {
-    return this.http.get<ApiResponse<AttendanceRecord[]>>(`${this.apiBase}/api/attendance/employee-history/${employeeId}`);
-  }
+  // getEmployeeHistory(employeeId: number | string): Observable<ApiResponse<AttendanceRecord[]>> {
+  //   return this.http.get<ApiResponse<AttendanceRecord[]>>(`${this.apiBase}/api/attendance/employee-history/${employeeId}`);
+  // }
 
   getOfficeLocation(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(`${this.apiBase}/api/attendance/office-location`);

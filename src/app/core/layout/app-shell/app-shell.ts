@@ -163,6 +163,7 @@ export class AppShell {
       const attendanceSubmenus: SidebarMenuItem[] = [];
       const assetSubmenus: SidebarMenuItem[] = [];
       const approvalSubmenus: SidebarMenuItem[] = [];
+      const standaloneBottomMenus: SidebarMenuItem[] = [];
 
       routesToMap.forEach((route) => {
         if (!route.path || route.redirectTo !== undefined) return;
@@ -187,6 +188,8 @@ export class AppShell {
           attendanceSubmenus.push(item);
         } else if (pathLower.includes('asset')) {
           assetSubmenus.push(item);
+        } else if (pathLower === 'reports') {
+          standaloneBottomMenus.push(item);
         } else {
           menus.push(item);
         }
@@ -224,6 +227,8 @@ export class AppShell {
           children: approvalSubmenus,
         });
       }
+
+      menus.push(...standaloneBottomMenus);
     } else {
       if (routesToMap && routesToMap.length > 0) {
         routesToMap.forEach((route) => {
