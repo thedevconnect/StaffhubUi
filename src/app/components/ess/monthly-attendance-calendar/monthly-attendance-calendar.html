@@ -34,15 +34,30 @@
             [ngClass]="item.dayNum ? 'border-slate-100 hover:bg-slate-50 bg-white' : 'bg-transparent border-transparent'">
             <ng-container *ngIf="item.dayNum">
               <span class="text-slate-500 text-sm font-semibold">{{ item.dayNum }}</span>
-              <div class="flex flex-col items-end justify-end mt-auto gap-1">
-                <span *ngIf="item.swipeIn"
-                  class="text-[9px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
-                  IN: {{ item.swipeIn }}
-                </span>
+              <div class="flex flex-col items-end justify-end mt-auto gap-1.5 w-full">
+                <!-- Status Badge -->
                 <span *ngIf="item.type" class="text-[10px] font-bold px-1.5 py-0.5 rounded uppercase"
                   [ngClass]="item.colorClass">
                   {{ item.type }}
                 </span>
+
+                <!-- IN / OUT / TOTAL Details -->
+                <div *ngIf="item.swipeIn"
+                  class="w-full flex flex-col gap-1 text-[9px] font-semibold text-slate-600 bg-slate-50 p-1.5 rounded border border-slate-200 mt-1">
+                  <div class="flex justify-between items-center w-full">
+                    <span class="text-emerald-600"><i class="pi pi-sign-in text-[8px] mr-1"></i>IN:</span>
+                    <span>{{ item.swipeIn }}</span>
+                  </div>
+                  <div class="flex justify-between items-center w-full" *ngIf="item.swipeOut !== '-'">
+                    <span class="text-rose-600"><i class="pi pi-sign-out text-[8px] mr-1"></i>OUT:</span>
+                    <span>{{ item.swipeOut }}</span>
+                  </div>
+                  <div class="flex justify-between items-center w-full pt-1 border-t border-slate-200 mt-0.5"
+                    *ngIf="item.totalTime && item.totalTime !== '-'">
+                    <span class="text-blue-600"><i class="pi pi-clock text-[8px] mr-1"></i>TOTAL Hours:</span>
+                    <span>{{ item.totalTime }}</span>
+                  </div>
+                </div>
               </div>
             </ng-container>
           </div>

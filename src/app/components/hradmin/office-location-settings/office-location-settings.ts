@@ -59,6 +59,10 @@ export class OfficeLocationSettings implements OnInit {
   employeeLoading = signal(false);
   isDrawerVisible = false;
 
+  // Company Location Table State
+  isCompanyLocationEditing = signal(false);
+  companyLocationData = signal<any[]>([]);
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly userService: UserService,
@@ -137,12 +141,16 @@ export class OfficeLocationSettings implements OnInit {
           this.loading.set(false);
           if (response?.data) {
             this.companyName = response.data.company_name || '';
-            this.locationForm.patchValue({
+            const locData = {
+              companyName: this.companyName,
               address: response.data.address || '',
               officeLatitude: response.data.office_latitude || '',
               officeLongitude: response.data.office_longitude || '',
               allowedRadius: response.data.allowed_radius || 50
-            });
+            };
+            this.companyLocationData.set([locData]);
+
+            this.locationForm.patchValue(locData);
           }
         },
         error: (err: any) => {
@@ -154,6 +162,17 @@ export class OfficeLocationSettings implements OnInit {
           });
         }
       });
+  }
+
+  editCompanyLocation(): void {
+    this.isCompanyLocationEditing.set(true);
+  }
+
+  cancelEditCompanyLocation(): void {
+    this.isCompanyLocationEditing.set(false);
+    if (this.companyLocationData().length > 0) {
+      this.locationForm.patchValue(this.companyLocationData()[0]);
+    }
   }
 
   saveLocation(): void {
@@ -180,6 +199,7 @@ export class OfficeLocationSettings implements OnInit {
             summary: 'Success',
             detail: 'Office location updated successfully.'
           });
+          this.isCompanyLocationEditing.set(false);
           this.loadLocationSettings();
         },
         error: (err: any) => {
