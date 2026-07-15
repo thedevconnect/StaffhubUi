@@ -255,6 +255,17 @@ export class HrDashboard implements OnInit, OnDestroy {
         // Silently reload dashboard data on socket event
         this.loadDashboardSummary();
         this.loadPendencyData();
+
+        // If modal is open, reload modal data live
+        if (this.isDetailsModalVisible && this.detailsCategoryLabel) {
+          const matchingCard = this.attendanceCards.find(c => c.label === this.detailsCategoryLabel);
+          if (matchingCard) {
+            this.attendanceService.getHRDashboardDetails(matchingCard.category).subscribe(res => {
+              this.detailsTableData = res.data || [];
+              this.cdr.detectChanges();
+            });
+          }
+        }
       });
     }
   }

@@ -1,3 +1,4 @@
+<div [ngClass]="{'fixed inset-0 z-[100] bg-white w-screen h-screen overflow-auto flex flex-col': isFullscreen, 'relative w-full h-full flex flex-col': !isFullscreen}">
 @if (isLoading) {
 <div class="p-4 sm:p-6">
   <div class="flex flex-col space-y-4">
@@ -55,6 +56,14 @@
 
   <!-- Search and Refresh Container -->
   <div class="flex items-center gap-2 w-full md:w-auto md:ml-auto md:pr-2">
+
+    <!-- Full Screen Button -->
+    @if (enableFullScreen) {
+    <button type="button" (click)="toggleFullScreen()" title="Toggle Full Screen"
+      class="group flex items-center justify-center p-2 text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors focus:outline-none shrink-0">
+      <i class="pi text-lg" [ngClass]="isFullscreen ? 'pi-window-minimize' : 'pi-window-maximize'"></i>
+    </button>
+    }
 
     <!-- Refresh Button -->
     @if (shouldShowRefresh) {

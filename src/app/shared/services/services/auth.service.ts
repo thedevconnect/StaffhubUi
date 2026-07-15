@@ -121,12 +121,13 @@ export class AuthService {
 
   private toAuthUser(data: LoginApiResponse['data'], decoded: JwtPayload | null): AuthUser {
     let normalizedRoles = this.normalizeRoles(data);
+    const companyId = decoded?.companyId || (data as any)?.companyId || localStorage.getItem('companyId') || null;
 
     return {
       id: decoded?.userId || data.userId || data.id || 0,
       username: data.username || data.userName || '',
       employeeName: data.employeeName || data.userName || data.username || 'User',
-      companyId: decoded?.companyId,
+      companyId: companyId ? Number(companyId) : undefined,
       roles: normalizedRoles.length ? normalizedRoles : [{ rolDes: 'HR Admin', roleId: 'hradmin' }],
     };
   }

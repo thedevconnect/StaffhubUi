@@ -9,19 +9,29 @@ import { Observable } from 'rxjs';
 export class SocketService {
   private socket: Socket;
 
+  private companyId: number | string | null = null;
+
   constructor() {
     this.socket = io(environment.apiBaseUrl, {
-      autoConnect: false // Connect manually when authenticated
+      autoConnect: false, // Connect manually when authenticated
+      transports: ['websocket', 'polling'] // Prefer websocket
+    });
+
+    this.socket.on('connect', () => {
+      console.log('Connected to WebSocket server');
+      if (this.companyId) {
+        this.socket.emit('join_company', this.companyId);
+      }
     });
   }
 
   connect(companyId: number | string) {
+    this.companyId = companyId;
     if (!this.socket.connected) {
       this.socket.connect();
-      this.socket.on('connect', () => {
-        console.log('Connected to WebSocket server');
-        this.socket.emit('join_company', companyId);
-      });
+    } else {
+      // If already connected, join room directly
+      this.socket.emit('join_company', companyId);
     }
   }
 
@@ -34,6 +44,7 @@ export class SocketService {
   onAttendanceUpdated(): Observable<any> {
     return new Observable(observer => {
       this.socket.on('attendance_updated', (data) => {
+        console.log('SOCKET EVENT RECEIVED: attendance_updated', data);
         observer.next(data);
       });
 

@@ -76,6 +76,9 @@ export class TableTemplate implements OnChanges {
   @Input() showExport: boolean = false;
   @Input() exportFileName: string = 'Exported_Data';
   @Input() serverSide: boolean = false;
+  @Input() enableFullScreen: boolean = true;
+
+  isFullscreen: boolean = false;
 
   @Output() pageChange = new EventEmitter<number>();
   @Output() sortChange = new EventEmitter<{ column: string; direction: 'asc' | 'desc' }>();
@@ -103,6 +106,15 @@ export class TableTemplate implements OnChanges {
       command: () => this.actionClicked.emit({ actionId: action.id, row })
     }));
     menu.toggle(event);
+  }
+
+  toggleFullScreen() {
+    this.isFullscreen = !this.isFullscreen;
+    if (this.isFullscreen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
   }
 
   // Tab Inputs/Outputs
