@@ -63,6 +63,18 @@ export class AttendanceRegularization implements OnInit {
   historyEvents: any[] = [];
   isLoading: boolean = false;
 
+  activeTab: string = 'All';
+  
+  tabs = [
+    { label: 'Pending', value: 'Pending', icon: 'pi pi-clock' },
+    { label: 'Processed', value: 'Processed', icon: 'pi pi-check-circle' },
+    { label: 'All', value: 'All', icon: 'pi pi-list' }
+  ];
+
+  onTabChange(tab: string) {
+    this.activeTab = tab;
+  }
+
 
 
   columns: TableColumn[] = [
@@ -204,39 +216,25 @@ export class AttendanceRegularization implements OnInit {
     });
   }
 
-  // Summary Metrics Counts
-  get pendingCount(): number {
-    return this.requests.filter(r => r.status === 'Pending').length;
-  }
-
-  get approvedCount(): number {
-    return this.requests.filter(r => r.status === 'Approved').length;
-  }
-
-  get rejectedCount(): number {
-    return this.requests.filter(r => r.status === 'Rejected').length;
-  }
-
   // Filter Logic
   get filteredRequests(): any[] {
     return this.requests.filter(req => {
-      const matchesSearch = this.searchQuery ?
-        (req.reason.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          req.correctionType.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          req.id.toLowerCase().includes(this.searchQuery.toLowerCase())) : true;
-
-      const matchesStatus = this.statusFilter !== 'All' ? req.status === this.statusFilter : true;
+      let matchesTab = true;
+      if (this.activeTab !== 'All') {
+        matchesTab = this.activeTab === 'Pending' 
+          ? (req.status === 'Pending' || req.status === 'PENDING')
+          : (req.status !== 'Pending' && req.status !== 'PENDING');
+      }
 
       const matchesMonth = this.monthFilter !== 'All' ?
         req.attendanceDate.getMonth().toString() === this.monthFilter : true;
 
-      return matchesSearch && matchesStatus && matchesMonth;
+      return matchesTab && matchesMonth;
     });
   }
 
   clearFilters() {
-    this.searchQuery = '';
-    this.statusFilter = 'All';
+    this.activeTab = 'All';
     this.monthFilter = 'All';
     this.cdr.markForCheck();
   }

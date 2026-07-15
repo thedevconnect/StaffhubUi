@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -11,7 +11,9 @@ import { DialogModule } from 'primeng/dialog';
 import { TableColumn, TableTemplate } from '../../../../shared/ui/table-template/table-template';
 import { AttendanceService } from '../../../../shared/services/attendance.service';
 import { LeaveService } from '../../../../shared/services/leave.service';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
+import { SocketService } from '../../../../shared/services/socket.service';
+import { AuthService } from '../../../../shared/services/services/auth.service';
 
 interface AttendanceCard {
   label: string;
@@ -54,7 +56,7 @@ interface PendingRequestItem {
   templateUrl: './hr-dashboard.html',
   styleUrl: './hr-dashboard.scss',
 })
-export class HrDashboard implements OnInit {
+export class HrDashboard implements OnInit, OnDestroy {
   // Navigation tabs: 'dashboard' | 'pendency'
   activeTab: 'dashboard' | 'pendency' = 'dashboard';
 
@@ -171,13 +173,41 @@ export class HrDashboard implements OnInit {
     total: 27
   };
 
-  // Detailed pending requests (for Pendency Tab)
-  pendingRequests: (PendingRequestItem & { raw?: any })[] = [];
+  activePendencyTab: string = 'All';
+  pendencyTabs = [
+    { label: 'Pending', value: 'Pending', icon: 'pi pi-clock' },
+    { label: 'Processed', value: 'Processed', icon: 'pi pi-check-circle' },
+    { label: 'All', value: 'All', icon: 'pi pi-list' }
+  ];
+
+  // Detailed requests (for Pendency Tab)
+  allPendencyRequests: (PendingRequestItem & { raw?: any })[] = [];
+
+  get filteredPendencyRequests() {
+    return this.allPendencyRequests.filter(req => {
+      if (this.activePendencyTab === 'All') return true;
+      const isPending = req.status === 'Pending Approval' || req.status === 'PENDING' || req.status === 'Pending';
+      if (this.activePendencyTab === 'Pending') {
+        return isPending;
+      } else {
+        return !isPending;
+      }
+    });
+  }
+
+  onPendencyTabChange(tab: string) {
+    this.activePendencyTab = tab;
+    this.cdr.markForCheck();
+  }
 
   attendanceService = inject(AttendanceService);
   leaveService = inject(LeaveService);
   messageService = inject(MessageService);
   cdr = inject(ChangeDetectorRef);
+  socketService = inject(SocketService);
+  authService = inject(AuthService);
+  
+  socketSubscription?: Subscription;
 
   isDetailsModalVisible = false;
   detailsCategoryLabel = '';
@@ -217,6 +247,23 @@ export class HrDashboard implements OnInit {
 
     this.loadPendencyData();
     this.loadDashboardSummary();
+
+    const user = this.authService.user();
+    if (user?.companyId) {
+      this.socketService.connect(user.companyId);
+      this.socketSubscription = this.socketService.onAttendanceUpdated().subscribe(() => {
+        // Silently reload dashboard data on socket event
+        this.loadDashboardSummary();
+        this.loadPendencyData();
+      });
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.socketSubscription) {
+      this.socketSubscription.unsubscribe();
+    }
+    this.socketService.disconnect();
   }
 
   onRefresh(): void {
@@ -399,7 +446,7 @@ export class HrDashboard implements OnInit {
 
   loadPendencyData(): void {
     forkJoin({
-      regularizations: this.attendanceService.getCompanyRegularizations(1, 100, 'Pending'),
+      regularizations: this.attendanceService.getCompanyRegularizations(1, 100, 'All'),
       leaves: this.leaveService.getLeaves()
     }).subscribe({
       next: (res: any) => {
@@ -409,28 +456,30 @@ export class HrDashboard implements OnInit {
           type: 'Regularization',
           details: `${item.correctionType}: ${item.reason}`,
           date: item.attendanceDate,
-          status: 'Pending Approval',
+          status: item.status === 'Pending' ? 'Pending Approval' : item.status,
           raw: item
         }));
 
         const mappedLeaves = (res.leaves?.data || [])
-          .filter((item: any) => String(item.status).toUpperCase() === 'PENDING')
           .map((item: any) => ({
             id: `LEV-${item.id}`,
             employeeName: item.employee_name || 'Unknown',
             type: 'Leave',
             details: `${item.leave_type}: ${item.reason || ''}`,
             date: item.start_date === item.end_date ? item.start_date : `${item.start_date} to ${item.end_date}`,
-            status: 'Pending Approval',
+            status: item.status === 'PENDING' ? 'Pending Approval' : item.status,
             raw: item
           }));
 
-        this.pendingRequests = [...mappedRegs, ...mappedLeaves];
+        this.allPendencyRequests = [...mappedRegs, ...mappedLeaves];
 
-        // Update counts
-        this.pendingCounts.regularization = mappedRegs.length;
-        this.pendingCounts.leave = mappedLeaves.length;
-        this.pendingCounts.total = this.pendingRequests.length;
+        // Update counts (only pending)
+        const pendingRegs = mappedRegs.filter((r: any) => r.status === 'Pending Approval');
+        const pendingLeaves = mappedLeaves.filter((r: any) => r.status === 'Pending Approval');
+        
+        this.pendingCounts.regularization = pendingRegs.length;
+        this.pendingCounts.leave = pendingLeaves.length;
+        this.pendingCounts.total = pendingRegs.length + pendingLeaves.length;
 
         this.cdr.detectChanges();
       },
@@ -441,7 +490,7 @@ export class HrDashboard implements OnInit {
   }
 
   approveRequest(requestId: string): void {
-    const item = this.pendingRequests.find(r => r.id === requestId);
+    const item = this.allPendencyRequests.find(r => r.id === requestId);
     if (!item) return;
 
     if (requestId.startsWith('REG-')) {
@@ -495,7 +544,7 @@ export class HrDashboard implements OnInit {
   }
 
   rejectRequest(requestId: string): void {
-    const item = this.pendingRequests.find(r => r.id === requestId);
+    const item = this.allPendencyRequests.find(r => r.id === requestId);
     if (!item) return;
 
     if (requestId.startsWith('REG-')) {

@@ -61,6 +61,29 @@ export class MyAssets implements OnInit {
   isEditMode = false
   selectedAsset: any = null
 
+  activeTab: string = 'All';
+  tabs: any[] = [
+    { label: 'Pending', value: 'Pending', icon: 'pi pi-clock' },
+    { label: 'Processed', value: 'Processed', icon: 'pi pi-check-circle' },
+    { label: 'All', value: 'All', icon: 'pi pi-list' }
+  ];
+
+  onTabChange(tab: string) {
+    this.activeTab = tab;
+    this.cdr.markForCheck();
+  }
+
+  get filteredAssets(): any[] {
+    return this.assets.filter(asset => {
+      if (this.activeTab === 'All') return true;
+      if (this.activeTab === 'Pending') {
+        return asset.approval_status === 'Pending' || asset.approval_status === 'PENDING';
+      } else {
+        return asset.approval_status !== 'Pending' && asset.approval_status !== 'PENDING';
+      }
+    });
+  }
+
   assetForm!: FormGroup
 
   columns: TableColumn[] = [

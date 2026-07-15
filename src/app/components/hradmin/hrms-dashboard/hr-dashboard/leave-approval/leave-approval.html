@@ -23,71 +23,7 @@
     <p class="text-xs text-slate-500 mt-1">Review, approve, or reject employee leave applications in real time.</p>
   </div>
 
-  <!-- KPI Cards Grid -->
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-    <!-- Card 1: Total -->
-    <div
-      class="bg-white rounded-xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition duration-200">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Requests</span>
-        <div class="h-8 w-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-bold">
-          <i class="pi pi-folder-open"></i>
-        </div>
-      </div>
-      <div class="mt-4">
-        <h3 class="text-2xl font-black text-slate-900">{{ totalCount }}</h3>
-        <p class="text-[10px] text-slate-400 mt-1">Submitted in this period</p>
-      </div>
-    </div>
 
-    <!-- Card 2: Pending -->
-    <div
-      class="bg-white rounded-xl border border-amber-200 p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition duration-200">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Pending Action</span>
-        <div class="h-8 w-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-sm font-bold">
-          <i class="pi pi-clock"></i>
-        </div>
-      </div>
-      <div class="mt-4">
-        <h3 class="text-2xl font-black text-amber-700">{{ pendingCount }}</h3>
-        <p class="text-[10px] text-amber-500 mt-1">Require immediate review</p>
-      </div>
-    </div>
-
-    <!-- Card 3: Approved -->
-    <div
-      class="bg-white rounded-xl border border-emerald-200 p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition duration-200">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Approved Leaves</span>
-        <div
-          class="h-8 w-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm font-bold">
-          <i class="pi pi-check-circle"></i>
-        </div>
-      </div>
-      <div class="mt-4">
-        <h3 class="text-2xl font-black text-emerald-700">{{ approvedCount }}</h3>
-        <p class="text-[10px] text-emerald-500 mt-1">Processed successfully</p>
-      </div>
-    </div>
-
-    <!-- Card 4: Rejected -->
-    <div
-      class="bg-white rounded-xl border border-rose-200 p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition duration-200">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-bold text-rose-600 uppercase tracking-wider">Rejected Leaves</span>
-        <div class="h-8 w-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-sm font-bold">
-          <i class="pi pi-times-circle"></i>
-        </div>
-      </div>
-      <div class="mt-4">
-        <h3 class="text-2xl font-black text-rose-700">{{ rejectedCount }}</h3>
-        <p class="text-[10px] text-rose-500 mt-1">Declined applications</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main Request List Container -->
   <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
     <!-- Section Header -->
     <div
@@ -100,21 +36,30 @@
       <!-- Filter Badge -->
       <span
         class="self-start sm:self-auto text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100/80 px-3 py-1.5 rounded-full select-none">
-        Showing all {{ leaveRequests.length }} requests
+        Showing {{ filteredLeaveRequests.length }} requests
       </span>
     </div>
 
-    <!-- Table content using shared data-table component -->
-    <app-data-table 
+    <!-- Table content using TableTemplate -->
+    <app-table-template 
       [columns]="tableColumns" 
-      [data]="leaveRequests" 
-      [totalItems]="leaveRequests.length"
-      (onRefresh)="onRefresh()">
+      [data]="filteredLeaveRequests" 
+      [tabs]="tabs"
+      [activeTab]="activeTab"
+      (tabChange)="onTabChange($event)"
+      [showExport]="true" exportFileName="Leave_Approvals"
+      (refresh)="onRefresh()"
+      [cellTemplates]="{
+        'employeeName': customCellEmployeeTpl,
+        'type': customCellTypeTpl,
+        'duration': customCellDurationTpl,
+        'reason': customCellReasonTpl,
+        'status': customCellStatusTpl,
+        'actions': actionCellTpl
+      }">
       
       <!-- Custom Cell Template for Rich Formatting -->
-      <ng-template #customCell let-row let-col="col">
-        
-        <ng-container *ngIf="col.key === 'employeeName'">
+      <ng-template #customCellEmployeeTpl let-row>
           <div class="flex items-center gap-3">
             <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-100 to-indigo-50 text-indigo-700 flex items-center justify-center font-black border border-indigo-100 shadow-sm">
               {{ row.employeeName.charAt(0) }}
@@ -124,9 +69,9 @@
               <div class="text-[10px] text-slate-400 mt-0.5 font-medium">{{ row.employeeCode }}</div>
             </div>
           </div>
-        </ng-container>
+        </ng-template>
 
-        <ng-container *ngIf="col.key === 'type'">
+        <ng-template #customCellTypeTpl let-row>
           <span class="inline-flex items-center gap-1.5 font-bold text-slate-700">
             <span class="h-1.5 w-1.5 rounded-full" 
               [class.bg-indigo-500]="row.type.includes('Casual')"
@@ -136,22 +81,22 @@
             </span>
             {{ row.type }}
           </span>
-        </ng-container>
+        </ng-template>
 
-        <ng-container *ngIf="col.key === 'duration'">
+        <ng-template #customCellDurationTpl let-row>
           <div class="flex flex-col gap-0.5 font-medium text-slate-600">
             <span>{{ row.duration }}</span>
             <span class="text-[10px] text-slate-400 font-medium">Applied: {{ row.appliedDate }}</span>
           </div>
-        </ng-container>
+        </ng-template>
 
-        <ng-container *ngIf="col.key === 'reason'">
+        <ng-template #customCellReasonTpl let-row>
           <div class="text-slate-500 font-medium max-w-xs truncate" [title]="row.reason">
             {{ row.reason }}
           </div>
-        </ng-container>
+        </ng-template>
 
-        <ng-container *ngIf="col.key === 'status'">
+        <ng-template #customCellStatusTpl let-row>
           <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black border uppercase tracking-wider"
             [class.bg-amber-50]="row.status === 'Pending'" [class.text-amber-700]="row.status === 'Pending'"
             [class.border-amber-100]="row.status === 'Pending'" [class.bg-emerald-50]="row.status === 'Approved'"
@@ -160,12 +105,10 @@
             [class.text-rose-700]="row.status === 'Rejected'" [class.border-rose-100]="row.status === 'Rejected'">
             {{ row.status }}
           </span>
-        </ng-container>
-
-      </ng-template>
+        </ng-template>
 
       <!-- Action Cell Template for multiple action buttons -->
-      <ng-template #actionCell let-row>
+      <ng-template #actionCellTpl let-row>
         <div class="flex items-center justify-end gap-2">
           <!-- View Details Button -->
           <button (click)="viewDetails(row)" type="button"
@@ -190,7 +133,7 @@
         </div>
       </ng-template>
 
-    </app-data-table>
+    </app-table-template>
   </div>
 </div>
 

@@ -219,7 +219,7 @@ export class TableTemplate implements OnChanges {
 
   get shouldShowRefresh(): boolean {
     // Show refresh button if showRefresh is explicitly true OR if refresh event has subscribers
-    return this.showRefresh || (this.refresh.observers && this.refresh.observers.length > 0);
+    return this.showRefresh || this.refresh.observed;
   }
 
   onRefreshClick(): void {

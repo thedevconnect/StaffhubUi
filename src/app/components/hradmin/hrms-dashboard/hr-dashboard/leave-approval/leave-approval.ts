@@ -10,7 +10,7 @@ import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { LeaveService } from '../../../../../shared/services/leave.service';
-import { DataTableComponent, ColumnDefinition } from '../../../../../shared/components/data-table/data-table.component';
+import { TableTemplate, TableColumn } from '../../../../../shared/ui/table-template/table-template';
 
 export interface LeaveRequestUI {
   id: string | number;
@@ -40,7 +40,7 @@ export interface LeaveRequestUI {
     ToastModule,
     BreadcrumbModule,
     ConfirmDialogModule,
-    DataTableComponent
+    TableTemplate
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './leave-approval.html',
@@ -53,13 +53,13 @@ export class LeaveApproval implements OnInit {
   ];
   isLoading = false;
 
-  tableColumns: ColumnDefinition[] = [
-    { key: 'employeeName', header: 'Employee Details', type: 'custom' },
-    { key: 'type', header: 'Leave Category', type: 'custom' },
-    { key: 'duration', header: 'Duration & Dates', type: 'custom' },
-    { key: 'reason', header: 'Reason', type: 'custom' },
-    { key: 'status', header: 'Status', type: 'custom' },
-    { key: 'actions', header: 'Actions', type: 'action' }
+  tableColumns: TableColumn[] = [
+    { key: 'employeeName', header: 'Employee Details' },
+    { key: 'type', header: 'Leave Category' },
+    { key: 'duration', header: 'Duration & Dates' },
+    { key: 'reason', header: 'Reason' },
+    { key: 'status', header: 'Status' },
+    { key: 'actions', header: 'Actions' }
   ];
 
   leaveRequests: LeaveRequestUI[] = [];
@@ -68,6 +68,29 @@ export class LeaveApproval implements OnInit {
   actionType: 'Approve' | 'Reject' | null = null;
   showConfirmModal = false;
   showDetailsDrawer = false;
+  
+  activeTab: string = 'All';
+  
+  tabs = [
+    { label: 'Pending', value: 'Pending', icon: 'pi pi-clock' },
+    { label: 'Processed', value: 'Processed', icon: 'pi pi-check-circle' },
+    { label: 'All', value: 'All', icon: 'pi pi-list' }
+  ];
+
+  onTabChange(tab: string) {
+    this.activeTab = tab;
+  }
+  
+  get filteredLeaveRequests(): LeaveRequestUI[] {
+    return this.leaveRequests.filter(req => {
+      if (this.activeTab === 'All') return true;
+      if (this.activeTab === 'Pending') {
+        return req.status === 'Pending' || req.status === 'PENDING';
+      } else {
+        return req.status !== 'Pending' && req.status !== 'PENDING';
+      }
+    });
+  }
 
   constructor(
     private messageService: MessageService,
