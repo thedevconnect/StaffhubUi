@@ -97,9 +97,10 @@ export class MonthlyAttendanceCalendar implements OnInit {
   loadData() {
     forkJoin({
       attendance: this.attendanceService.getHistory(),
-      leaves: this.leaveService.getLeaves()
+      leaves: this.leaveService.getLeaves(),
+      regularizations: this.attendanceService.getMyRegularizations()
     }).subscribe({
-      next: ({ attendance, leaves }) => {
+      next: ({ attendance, leaves, regularizations }) => {
         let records: any[] = [];
         if (attendance.success && Array.isArray(attendance.data)) {
           records = attendance.data;
@@ -110,8 +111,28 @@ export class MonthlyAttendanceCalendar implements OnInit {
           leaveRecords = leaves.data;
         }
 
+        let regRecords: any[] = [];
+        if (regularizations.success && Array.isArray(regularizations.data)) {
+          regRecords = regularizations.data;
+        }
+
         const updatedDays = this.calendarDays().map(day => {
           if (!day.dayNum) return day;
+
+          // Check if there is a pending or approved regularization for this date
+          let dayReg: any = null;
+          for (const reg of regRecords) {
+            if (reg.status === 'Pending' || reg.status === 'Approved') {
+              const regDate = new Date(reg.attendance_date);
+              const yyyy = regDate.getFullYear();
+              const mm = String(regDate.getMonth() + 1).padStart(2, '0');
+              const dd = String(regDate.getDate()).padStart(2, '0');
+              if (`${yyyy}-${mm}-${dd}` === day.dateString) {
+                dayReg = reg;
+                break;
+              }
+            }
+          }
 
           // Check if there is an approved leave for this date
           let dayLeave: LeaveRequest | null = null;
@@ -208,12 +229,18 @@ export class MonthlyAttendanceCalendar implements OnInit {
                 else day.type = 'L'; // Generic Leave
 
                 day.colorClass = 'bg-indigo-500 text-white';
+              } else if (dayReg) {
+                day.type = 'REG';
+                day.colorClass = 'bg-orange-500 text-white';
               } else {
                 day.type = 'A';
                 day.colorClass = 'bg-rose-500 text-white';
               }
             }
           }
+
+          day.hasLeave = !!dayLeave;
+          day.hasReg = !!dayReg;
           return day;
         });
 
