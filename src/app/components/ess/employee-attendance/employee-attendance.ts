@@ -550,7 +550,9 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
 
   private getDeviceName(): string {
     const userAgent = navigator.userAgent;
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+    const isMobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(userAgent);
+    const isSmallScreen = typeof window !== 'undefined' && window.innerWidth <= 768;
+    const isMobile = isMobileRegex || isSmallScreen;
     return isMobile ? 'Mobile' : 'Laptop';
   }
 
