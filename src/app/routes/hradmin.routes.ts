@@ -23,8 +23,8 @@ export const hradminRoutes: Routes = [
         loadComponent: () => import('../components/hradmin/emp-monthly-calendar/emp-monthly-calendar').then(c => c.EmpMonthlyCalendar)
     },
     {
-        path: 'attendance-report',
-        title: 'Attendance Report',
+        path: 'reports',
+        title: 'Report',
         loadComponent: () => import('../components/hradmin/hr-attendance-report/hr-attendance-report').then(c => c.HrAttendanceReport)
     },
     // {

@@ -7,135 +7,117 @@
         <h1 class="text-2xl font-bold text-slate-800">Attendance Report</h1>
         <p class="text-sm text-slate-500 mt-1">View detailed attendance history for any employee.</p>
       </div>
+      <div>
+        <!-- Filter Card -->
+        <p-card styleClass="shadow-sm rounded-xl">
+          <div class="flex flex-col md:flex-row gap-4 items-end">
+            <div class="flex flex-col gap-2 w-full md:w-96">
+              <label class="text-sm font-semibold text-slate-700">Select Employee</label>
+              <p-select [options]="employees()" [(ngModel)]="selectedEmployee" optionLabel="fullName" optionValue="id"
+                [filter]="true" filterBy="fullName,emp_id" placeholder="Search and select an employee"
+                styleClass="w-full" (onChange)="onEmployeeSelect($event)">
+                <ng-template let-emp #item>
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium">{{emp.fullName}}</span>
+                    <span class="text-xs text-slate-500">({{emp.emp_id || emp.id}})</span>
+                  </div>
+                </ng-template>
+              </p-select>
+            </div>
+          </div>
+        </p-card>
+
+      </div>
     </div>
   </div>
 
   <p-toast></p-toast>
 
-  <!-- Filter Card -->
-  <p-card styleClass="shadow-sm rounded-xl">
-    <div class="flex flex-col md:flex-row gap-4 items-end">
-      <div class="flex flex-col gap-2 w-full md:w-96">
-        <label class="text-sm font-semibold text-slate-700">Select Employee</label>
-        <p-select
-          [options]="employees()"
-          [(ngModel)]="selectedEmployee"
-          optionLabel="fullName"
-          optionValue="id"
-          [filter]="true"
-          filterBy="fullName,emp_id"
-          placeholder="Search and select an employee"
-          styleClass="w-full"
-          (onChange)="onEmployeeSelect($event)">
-          <ng-template let-emp #item>
-            <div class="flex items-center gap-2">
-              <span class="font-medium">{{emp.fullName}}</span>
-              <span class="text-xs text-slate-500">({{emp.emp_id || emp.id}})</span>
-            </div>
-          </ng-template>
-        </p-select>
-      </div>
-    </div>
-  </p-card>
+
 
   <!-- Data Display -->
   <p-card *ngIf="selectedEmployee()" styleClass="shadow-sm rounded-xl">
-    <p-tabs value="0">
-      <p-tablist>
-        <p-tab value="0">
-          <i class="pi pi-calendar mr-2"></i> Monthly (This Month)
-        </p-tab>
-        <p-tab value="1">
-          <i class="pi pi-calendar-plus mr-2"></i> Weekly (This Week)
-        </p-tab>
-        <p-tab value="2">
-          <i class="pi pi-list mr-2"></i> All Time
-        </p-tab>
-      </p-tablist>
-
-      <p-tabpanels>
-        <!-- Monthly Tab -->
-        <p-tabpanel value="0">
-          <p-table [value]="monthlyRecords()" [loading]="loading()" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowHover]="true">
-            <ng-container *ngTemplateOutlet="tableCols"></ng-container>
-            <ng-container *ngTemplateOutlet="tableBody"></ng-container>
-            <ng-template #emptymessage>
-              <tr><td colspan="5" class="text-center p-4 text-slate-500">No attendance records found for this month.</td></tr>
-            </ng-template>
-          </p-table>
-        </p-tabpanel>
-
-        <!-- Weekly Tab -->
-        <p-tabpanel value="1">
-          <p-table [value]="weeklyRecords()" [loading]="loading()" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowHover]="true">
-            <ng-container *ngTemplateOutlet="tableCols"></ng-container>
-            <ng-container *ngTemplateOutlet="tableBody"></ng-container>
-            <ng-template #emptymessage>
-              <tr><td colspan="5" class="text-center p-4 text-slate-500">No attendance records found for this week.</td></tr>
-            </ng-template>
-          </p-table>
-        </p-tabpanel>
-
-        <!-- All Time Tab -->
-        <p-tabpanel value="2">
-          <p-table [value]="allRecords()" [loading]="loading()" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowHover]="true">
-            <ng-container *ngTemplateOutlet="tableCols"></ng-container>
-            <ng-container *ngTemplateOutlet="tableBody"></ng-container>
-            <ng-template #emptymessage>
-              <tr><td colspan="5" class="text-center p-4 text-slate-500">No attendance records found.</td></tr>
-            </ng-template>
-          </p-table>
-        </p-tabpanel>
-      </p-tabpanels>
-    </p-tabs>
+    <app-table-template [data]="currentRecords()" [columns]="columns" [isLoading]="loading()" [tabs]="tabs"
+      [activeTab]="activeTab()" (tabChange)="onTabChange($event)" [showExport]="true" exportFileName="attendance_report"
+      [cellTemplates]="{
+        'attendance_status': statusTpl,
+        'swipe_in': swipeInTpl,
+        'swipe_out': swipeOutTpl,
+        'work_hours': workHoursTpl,
+        'device_info': deviceTpl,
+        'ip_address': ipTpl,
+        'location': locationTpl
+      }">
+    </app-table-template>
   </p-card>
 
-  <!-- Reusable Table Templates -->
-  <ng-template #tableCols>
-    <ng-template #header>
-      <tr>
-        <th pSortableColumn="attendance_date">Date <p-sortIcon field="attendance_date"></p-sortIcon></th>
-        <th>Status</th>
-        <th>Swipe In</th>
-        <th>Swipe Out</th>
-        <th>Work Hours</th>
-      </tr>
-    </ng-template>
+  <!-- Cell Templates -->
+  <ng-template #statusTpl let-item>
+    <span class="px-2 py-1 rounded-full text-xs font-bold shadow-sm" [ngClass]="{
+      'bg-green-100 text-green-700': item.attendance_status === 'PRESENT' || item.attendance_status === 'Present',
+      'bg-red-100 text-red-700': item.attendance_status === 'ABSENT' || item.attendance_status === 'Absent',
+      'bg-blue-100 text-blue-700': item.attendance_status === 'ON_LEAVE' || item.attendance_status === 'Leave'
+    }">
+      {{ item.attendance_status }}
+    </span>
   </ng-template>
 
-  <ng-template #tableBody>
-    <ng-template #body let-record>
-      <tr>
-        <td class="font-medium text-slate-700">{{ record.attendance_date | date:'mediumDate' }}</td>
-        <td>
-          <span class="px-2 py-1 rounded-full text-xs font-bold shadow-sm" [ngClass]="{
-            'bg-green-100 text-green-700': record.attendance_status === 'PRESENT' || record.attendance_status === 'Present',
-            'bg-red-100 text-red-700': record.attendance_status === 'ABSENT' || record.attendance_status === 'Absent',
-            'bg-blue-100 text-blue-700': record.attendance_status === 'ON_LEAVE' || record.attendance_status === 'Leave'
-          }">
-            {{ record.attendance_status }}
-          </span>
-        </td>
-        <td>
-          <div *ngIf="record.swipe_in" class="flex items-center gap-1">
-            <i class="pi pi-sign-in text-green-500 text-xs"></i>
-            <span>{{ record.swipe_in | date:'shortTime' }}</span>
-          </div>
-          <span *ngIf="!record.swipe_in" class="text-slate-400">-</span>
-        </td>
-        <td>
-          <div *ngIf="record.swipe_out" class="flex items-center gap-1">
-            <i class="pi pi-sign-out text-orange-500 text-xs"></i>
-            <span>{{ record.swipe_out | date:'shortTime' }}</span>
-          </div>
-          <span *ngIf="!record.swipe_out" class="text-slate-400">-</span>
-        </td>
-        <td>
-          <span class="font-medium text-slate-700" *ngIf="record.total_work_minutes">{{ formatDuration(record.total_work_minutes) }}</span>
-          <span *ngIf="!record.total_work_minutes" class="text-slate-400">-</span>
-        </td>
-      </tr>
-    </ng-template>
+  <ng-template #swipeInTpl let-item>
+    <div *ngIf="item.swipe_in" class="flex items-center gap-1">
+      <i class="pi pi-sign-in text-green-500 text-xs"></i>
+      <span>{{ item.swipe_in | date:'shortTime' }}</span>
+    </div>
+    <span *ngIf="!item.swipe_in" class="text-slate-400">-</span>
+  </ng-template>
+
+  <ng-template #swipeOutTpl let-item>
+    <div *ngIf="item.swipe_out" class="flex items-center gap-1">
+      <i class="pi pi-sign-out text-orange-500 text-xs"></i>
+      <span>{{ item.swipe_out | date:'shortTime' }}</span>
+    </div>
+    <span *ngIf="!item.swipe_out" class="text-slate-400">-</span>
+  </ng-template>
+
+  <ng-template #workHoursTpl let-item>
+    <span class="font-medium text-slate-700" *ngIf="item.total_work_minutes">{{ formatDuration(item.total_work_minutes)
+      }}</span>
+    <span *ngIf="!item.total_work_minutes" class="text-slate-400">-</span>
+  </ng-template>
+
+  <ng-template #deviceTpl let-item>
+    <div class="flex flex-col text-sm" *ngIf="item.device_name || item.browser_name || item.os_name">
+      <span class="font-medium text-slate-700">{{ item.device_name || 'Unknown' }}</span>
+      <span class="text-xs text-slate-500">{{ item.browser_name }} {{ item.os_name ? '(' + item.os_name + ')' : ''
+        }}</span>
+    </div>
+    <span *ngIf="!item.device_name && !item.browser_name && !item.os_name" class="text-slate-400">-</span>
+  </ng-template>
+
+  <ng-template #ipTpl let-item>
+    <span class="text-sm text-slate-600 font-mono" *ngIf="item.ip_address">{{ item.ip_address }}</span>
+    <span *ngIf="!item.ip_address" class="text-slate-400">-</span>
+  </ng-template>
+
+  <ng-template #locationTpl let-item>
+    <div class="flex flex-col gap-1 text-sm">
+      <div *ngIf="item.swipe_in_address" class="flex items-center gap-1 text-slate-600"
+        [pTooltip]="item.swipe_in_address" tooltipPosition="left">
+        <i class="pi pi-map-marker text-green-500 text-xs"></i>
+        <span class="truncate w-32 cursor-help">{{ item.swipe_in_address }}</span>
+      </div>
+      <div *ngIf="item.swipe_out_address" class="flex items-center gap-1 text-slate-600"
+        [pTooltip]="item.swipe_out_address" tooltipPosition="left">
+        <i class="pi pi-map-marker text-orange-500 text-xs"></i>
+        <span class="truncate w-32 cursor-help">{{ item.swipe_out_address }}</span>
+      </div>
+      <span *ngIf="!item.swipe_in_address && !item.swipe_out_address && item.location_address"
+        class="flex items-center gap-1 text-slate-600" [pTooltip]="item.location_address" tooltipPosition="left">
+        <i class="pi pi-map-marker text-blue-500 text-xs"></i>
+        <span class="truncate w-32 cursor-help">{{ item.location_address }}</span>
+      </span>
+      <span *ngIf="!item.swipe_in_address && !item.swipe_out_address && !item.location_address"
+        class="text-slate-400">-</span>
+    </div>
   </ng-template>
 
 </div>
