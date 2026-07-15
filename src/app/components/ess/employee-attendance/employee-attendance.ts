@@ -549,10 +549,17 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   }
 
   private getDeviceName(): string {
-    const userAgent = navigator.userAgent;
-    const isMobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(userAgent);
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+    const isMobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile/i.test(userAgent);
+    
+    // iPadOS 13+ presents as MacIntel, so we check touch points
+    const isIpadOS = navigator.maxTouchPoints && navigator.maxTouchPoints > 2 && /MacIntel/.test(navigator.platform);
+    
     const isSmallScreen = typeof window !== 'undefined' && window.innerWidth <= 768;
-    const isMobile = isMobileRegex || isSmallScreen;
+    
+    // Treat small screens as Mobile (helpful for responsive testing)
+    const isMobile = isMobileRegex || isIpadOS || isSmallScreen;
+    
     return isMobile ? 'Mobile' : 'Laptop';
   }
 
