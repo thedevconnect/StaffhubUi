@@ -308,9 +308,11 @@
 
     <!-- Approvals List -->
     <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-      <div *ngIf="pendingRequests.length > 0; else emptyRequests" class="table-responsive">
-        <app-table-template [data]="pendingRequests" [columns]="pendingRequestColumns" [isLoading]="isLoading"
-          exportFileName="Pending_Approvals" [cellTemplates]="{
+      <div *ngIf="filteredPendencyRequests.length > 0 || allPendencyRequests.length > 0; else emptyRequests"
+        class="table-responsive">
+        <app-table-template [data]="filteredPendencyRequests" [columns]="pendingRequestColumns" [tabs]="pendencyTabs"
+          [activeTab]="activePendencyTab" (tabChange)="onPendencyTabChange($event)" [isLoading]="isLoading"
+          exportFileName="Pending_Approvals" (refresh)="loadPendencyData()" [cellTemplates]="{
             id: requestIdTpl,
             type: requestTypeTpl,
             status: statusTpl,

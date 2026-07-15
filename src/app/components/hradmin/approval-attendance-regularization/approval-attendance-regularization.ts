@@ -13,7 +13,7 @@ import { SelectModule } from 'primeng/select';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { AttendanceService } from '../../../shared/services/attendance.service';
-import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template';
+import { TableColumn, TableTemplate, Tab } from '../../../shared/ui/table-template/table-template';
 
 @Component({
   selector: 'app-approval-attendance-regularization',
@@ -61,9 +61,19 @@ export class ApprovalAttendanceRegularization implements OnInit {
   requests: any[] = [];
 
   // Filter bindings
-  searchQuery: string = '';
-  statusFilter: string = 'Pending'; // Default to Pending for HR focus
+  activeTab: string = 'All';
   typeFilter: string = 'All';
+
+  tabs: Tab[] = [
+    { label: 'Pending', value: 'Pending', icon: 'pi pi-clock' },
+    { label: 'Processed', value: 'Processed', icon: 'pi pi-check-circle' },
+    { label: 'All', value: 'All', icon: 'pi pi-list' }
+  ];
+
+  onTabChange(tab: string) {
+    this.activeTab = tab;
+    this.cdr.markForCheck();
+  }
 
   // Drawer states
   detailDrawerVisible: boolean = false;
@@ -144,39 +154,24 @@ export class ApprovalAttendanceRegularization implements OnInit {
     this.cdr.markForCheck();
   }
 
-  // Summary Metrics Counts
-  get pendingCount(): number {
-    return this.requests.filter((r: any) => r.status === 'Pending' || r.status === 'PENDING').length;
-  }
-
-  get approvedCount(): number {
-    return this.requests.filter((r: any) => r.status === 'Approved' || r.status === 'APPROVED').length;
-  }
-
-  get rejectedCount(): number {
-    return this.requests.filter((r: any) => r.status === 'Rejected' || r.status === 'REJECTED').length;
-  }
-
   // Filters computed requests
   get filteredRequests(): any[] {
     return this.requests.filter((req: any) => {
-      const matchesSearch = this.searchQuery ?
-        (req.employeeName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          req.reason.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          req.id.toLowerCase().includes(this.searchQuery.toLowerCase())) : true;
-
-      const matchesStatus = this.statusFilter !== 'All' ?
-        (req.status.toLowerCase() === this.statusFilter.toLowerCase()) : true;
+      let matchesTab = true;
+      if (this.activeTab !== 'All') {
+        matchesTab = this.activeTab === 'Pending' 
+          ? req.status.toLowerCase() === 'pending'
+          : req.status.toLowerCase() !== 'pending';
+      }
 
       const matchesType = this.typeFilter !== 'All' ? req.correctionType === this.typeFilter : true;
 
-      return matchesSearch && matchesStatus && matchesType;
+      return matchesTab && matchesType;
     });
   }
 
   clearFilters() {
-    this.searchQuery = '';
-    this.statusFilter = 'Pending';
+    this.activeTab = 'All';
     this.typeFilter = 'All';
     this.loadCompanyRequests();
   }

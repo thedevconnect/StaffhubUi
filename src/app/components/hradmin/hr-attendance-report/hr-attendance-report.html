@@ -39,6 +39,7 @@
   <p-card *ngIf="selectedEmployee()" styleClass="shadow-sm rounded-xl">
     <app-table-template [data]="currentRecords()" [columns]="columns" [isLoading]="loading()" [tabs]="tabs"
       [activeTab]="activeTab()" (tabChange)="onTabChange($event)" [showExport]="true" exportFileName="attendance_report"
+      (refresh)="onRefresh()"
       [cellTemplates]="{
         'attendance_status': statusTpl,
         'swipe_in': swipeInTpl,

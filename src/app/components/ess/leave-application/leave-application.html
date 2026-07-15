@@ -66,10 +66,23 @@
     </div>
 
     <div class="w-full overflow-x-auto">
-      <app-table-template [data]="tblData" [columns]="columns" [pageSize]="pageSize" [totalCount]="totalCount"
-        [isLoading]="isLoading" [currentPage]="pageNo" [searchText]="searchText" [showRefresh]="true"
-        (refresh)="getViewData(true)" (pageChange)="onPageChange($event)" (searchChange)="onSearchChange($event)"
-        (pageSizeChange)="onPageSizeChange($event)" [disableActionCondition]="disableAction"
+      <app-table-template 
+        [data]="paginatedData" 
+        [columns]="columns" 
+        [tabs]="tabs"
+        [activeTab]="activeTab"
+        (tabChange)="onTabChange($event)"
+        [pageSize]="pageSize" 
+        [totalCount]="totalCount"
+        [isLoading]="isLoading" 
+        [currentPage]="pageNo" 
+        [searchText]="searchText" 
+        [showExport]="true" exportFileName="Leave_Applications"
+        (refresh)="getViewData(true)" 
+        (pageChange)="onPageChange($event)" 
+        (searchChange)="onSearchChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)" 
+        [disableActionCondition]="disableAction"
         (actionClicked)="onActionClicked($event)">
       </app-table-template>
     </div>

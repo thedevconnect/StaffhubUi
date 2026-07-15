@@ -30,8 +30,17 @@
     <!-- Table -->
     <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
       <div class="w-full overflow-x-auto">
-        <app-table-template [data]="assets" [columns]="columns" [isLoading]="isLoading" [showRefresh]="true"
-          [tableActions]="rowActions" (actionClicked)="onActionClicked($event)" (refresh)="getAllData(true)">
+        <app-table-template 
+          [data]="filteredAssets" 
+          [columns]="columns" 
+          [tabs]="tabs"
+          [activeTab]="activeTab"
+          (tabChange)="onTabChange($event)"
+          [isLoading]="isLoading" 
+          [showExport]="true" exportFileName="My_Assets"
+          [tableActions]="rowActions" 
+          (actionClicked)="onActionClicked($event)" 
+          (refresh)="getAllData(true)">
         </app-table-template>
       </div>
     </div>

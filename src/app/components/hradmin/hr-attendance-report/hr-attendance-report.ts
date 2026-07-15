@@ -113,6 +113,12 @@ export class HrAttendanceReport implements OnInit {
     this.loadAttendanceReport(this.selectedEmployee()!);
   }
 
+  onRefresh() {
+    if (this.selectedEmployee()) {
+      this.loadAttendanceReport(this.selectedEmployee()!);
+    }
+  }
+
   onTabChange(tabValue: number) {
     this.activeTab.set(tabValue);
   }

@@ -214,14 +214,41 @@ export class LeaveApplication {
     }
   }
 
+  activeTab: string = 'All';
+  tabs: any[] = [
+    { label: 'Pending', value: 'Pending', icon: 'pi pi-clock' },
+    { label: 'Processed', value: 'Processed', icon: 'pi pi-check-circle' },
+    { label: 'All', value: 'All', icon: 'pi pi-list' }
+  ];
+
+  onTabChange(tab: string) {
+    this.activeTab = tab;
+    this.pageNo = 1;
+  }
+
   get filteredData() {
-    if (!this.searchText) return this.tblData;
-    const search = this.searchText.toLowerCase();
-    return this.tblData.filter(item =>
-      Object.values(item).some(val =>
-        String(val).toLowerCase().includes(search)
-      )
-    );
+    let data = this.tblData;
+    
+    // Filter by Tab
+    if (this.activeTab !== 'All') {
+      if (this.activeTab === 'Pending') {
+        data = data.filter(item => item['leave Status'] === 'Pending' || item['leave Status'] === 'PENDING');
+      } else {
+        data = data.filter(item => item['leave Status'] !== 'Pending' && item['leave Status'] !== 'PENDING');
+      }
+    }
+
+    // Filter by Search
+    if (this.searchText) {
+      const search = this.searchText.toLowerCase();
+      data = data.filter(item =>
+        Object.values(item).some(val =>
+          String(val).toLowerCase().includes(search)
+        )
+      );
+    }
+    
+    return data;
   }
 
   get paginatedData() {
