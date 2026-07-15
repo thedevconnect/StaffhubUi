@@ -78,6 +78,7 @@ export class DeviceManagement implements OnInit {
                 mobile_status: String(d.mobile_status).toUpperCase() === 'ACTIVE' ? 'success' : (String(d.mobile_status).toUpperCase() === 'INACTIVE' ? 'danger' : 'warning')
               }
             }));
+            this.cdr.markForCheck();
           }
         },
         error: (err) => {

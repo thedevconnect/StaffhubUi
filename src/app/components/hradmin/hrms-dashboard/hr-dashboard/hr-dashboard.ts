@@ -70,7 +70,7 @@ export class HrDashboard implements OnInit {
   // KPI cards
   attendanceCards: AttendanceCard[] = [
     {
-      label: 'Swipe In',
+      label: '(On Time / Late) Swipe In',
       count: 0,
       icon: 'pi-check-circle',
       colorClass: 'text-emerald-600',
@@ -206,6 +206,13 @@ export class HrDashboard implements OnInit {
   ];
 
   ngOnInit(): void {
+    const currentDay = new Date().getDay();
+    if (currentDay >= 1 && currentDay <= 5) {
+      this.barChartData = this.barChartData.slice(0, currentDay);
+    } else if (currentDay === 0 || currentDay === 6) {
+      this.barChartData = this.barChartData.slice(0, 5);
+    }
+
     this.loadPendencyData();
     this.loadDashboardSummary();
   }
@@ -278,10 +285,9 @@ export class HrDashboard implements OnInit {
           const s = res.data;
           this.totalEmployees = s.totalEmployees;
 
-          // Update KPI cards
           this.attendanceCards = [
             {
-              label: 'Swipe In',
+              label: '(On Time / Late) Swipe In',
               count: s.swipeInCount || 0,
               icon: 'pi-check-circle',
               colorClass: 'text-emerald-600',
