@@ -50,7 +50,7 @@ export class ResignationService {
     return this.http.get<ApiResponse<Resignation[]>>(`${this.apiBase}/api/resignations/company-requests`);
   }
 
-  updateStatus(id: number | string, status: 'APPROVED' | 'REJECTED', hr_remarks?: string): Observable<ApiResponse<any>> {
+  updateStatus(id: number | string, status: 'APPROVED' | 'REJECTED' | 'IN_PROCESS', hr_remarks?: string): Observable<ApiResponse<any>> {
     return this.http.put<ApiResponse<any>>(`${this.apiBase}/api/resignations/${id}/status`, { status, hr_remarks });
   }
 }
