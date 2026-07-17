@@ -62,6 +62,9 @@ export class ResignationApprovals implements OnInit {
   resignationForm: FormGroup;
   isSubmitting = false;
 
+  // History Drawer State
+  displayHistoryDrawer = false;
+
   yesNoOptions = [
     { label: 'Yes', value: 'Yes' },
     { label: 'No', value: 'No' }
@@ -151,6 +154,22 @@ export class ResignationApprovals implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update status' });
       }
     });
+  }
+
+  openHistoryDrawer(req: Resignation): void {
+    this.selectedResignation = req;
+    this.hrRemarks = '';
+    this.displayHistoryDrawer = true;
+  }
+
+  submitHistoryAction(type: 'APPROVED' | 'REJECTED'): void {
+    if (!this.hrRemarks || !this.hrRemarks.trim()) {
+      this.messageService.add({ severity: 'warn', summary: 'Validation Error', detail: 'HR Reason/Remarks is required before submitting.' });
+      return;
+    }
+    this.actionType = type;
+    this.confirmAction();
+    this.displayHistoryDrawer = false;
   }
 
   openAddDrawer(): void {

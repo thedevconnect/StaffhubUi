@@ -63,7 +63,7 @@ export class HrDashboard implements OnInit, OnDestroy {
   constructor(private router: Router) { }
 
   // Total headcount in statistics
-  totalEmployees = 147;
+  totalEmployees = 0;
 
   breadcrumbItems: MenuItem[] = [{ label: 'HR Dashboard' }];
   isLoading = false;
@@ -129,12 +129,12 @@ export class HrDashboard implements OnInit, OnDestroy {
 
   // Raw statistics for the donut chart
   donutRawData = [
-    { label: 'Swipe In', value: 83, color: '#10b981' }, // emerald-500
-    { label: 'Not Swipe In', value: 38, color: '#f43f5e' }, // rose-500
-    { label: 'OD', value: 15, color: '#b45309' }, // amber-700
-    { label: 'On Leave', value: 7, color: '#3b82f6' }, // blue-500
-    { label: 'Short Leave', value: 2, color: '#a855f7' }, // purple-500
-    { label: 'Swipe Out', value: 2, color: '#f97316' }, // orange-500
+    { label: 'Swipe In', value: 0, color: '#10b981' },
+    { label: 'Not Swipe In', value: 0, color: '#f43f5e' },
+    { label: 'OD', value: 0, color: '#b45309' },
+    { label: 'On Leave', value: 0, color: '#3b82f6' },
+    { label: 'Short Leave', value: 0, color: '#a855f7' },
+    { label: 'Swipe Out', value: 0, color: '#f97316' },
   ];
 
   donutSegments: DonutSegment[] = [];
@@ -146,9 +146,9 @@ export class HrDashboard implements OnInit, OnDestroy {
 
   // Source distribution
   sources = [
-    { label: 'Desktop Swipe In', count: 0, percentage: 0, color: 'bg-slate-400' },
-    { label: 'Mobile Swipe In', count: 83, percentage: 100, color: 'bg-blue-600' },
-    { label: 'AI Swipe In', count: 0, percentage: 0, color: 'bg-indigo-600' },
+    { label: 'Desktop Swipe In', count: 0, percentage: 0, color: 'bg-slate-400', category: 'desktop_swipe_in' },
+    { label: 'Mobile Swipe In', count: 0, percentage: 0, color: 'bg-blue-600', category: 'mobile_swipe_in' },
+    { label: 'AI Swipe In', count: 0, percentage: 0, color: 'bg-indigo-600', category: 'ai_swipe_in' },
   ];
 
   // Exceptions list
@@ -200,7 +200,7 @@ export class HrDashboard implements OnInit, OnDestroy {
   cdr = inject(ChangeDetectorRef);
   socketService = inject(SocketService);
   authService = inject(AuthService);
-  
+
   socketSubscription?: Subscription;
 
   isDetailsModalVisible = false;
@@ -215,6 +215,10 @@ export class HrDashboard implements OnInit, OnDestroy {
     { key: 'swipe_out', header: 'Swipe Out', pipe: 'date', pipeArgs: 'mediumTime' },
     { key: 'total_time', header: 'Total Time', formatter: (val: any) => (val !== null && val !== undefined) ? (Number(val) >= 60 ? Math.floor(Number(val) / 60) + 'h ' + (Number(val) % 60) + 'm' : Number(val) + 'm') : '-' },
 
+    { key: 'late_coming', header: 'Late Coming' },
+    { key: 'early_going', header: 'Early Going' },
+    { key: 'swipe_in_device', header: 'Swipe In Device' },
+    { key: 'swipe_out_device', header: 'Swipe Out Device' },
     { key: 'department', header: 'Department' },
     { key: 'designation', header: 'Designation' },
     { key: 'location_address', header: 'Location / Status' },
@@ -306,6 +310,32 @@ export class HrDashboard implements OnInit, OnDestroy {
     });
   }
 
+  onSourceClick(source: any): void {
+    if (source.count === 0) {
+      this.messageService.add({ severity: 'info', summary: 'Info', detail: `No records found for ${source.label} today.` });
+      return;
+    }
+
+    this.detailsCategoryLabel = source.label;
+    this.isDetailsModalVisible = true;
+    this.isLoadingDetails = true;
+    this.detailsTableData = [];
+
+    this.attendanceService.getHRDashboardDetails(source.category).subscribe({
+      next: (res) => {
+        this.detailsTableData = res.data || [];
+        this.isLoadingDetails = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error fetching details:', err);
+        this.isLoadingDetails = false;
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch details.' });
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   // Calculate SVG stroke parameters for the Donut Chart
   calculateDonutSegments(): void {
     const total = this.totalEmployees || 1;
@@ -339,7 +369,7 @@ export class HrDashboard implements OnInit, OnDestroy {
             late: item.swipeOutCount,
             total: item.total
           }));
-          
+
           // Calculate max bar value dynamically based on highest total
           const maxTotal = Math.max(...this.barChartData.map(d => Math.max(d.onTime, d.late)), 10);
           this.maxBarValue = Math.ceil(maxTotal * 1.2); // Add 20% headroom
@@ -440,11 +470,12 @@ export class HrDashboard implements OnInit, OnDestroy {
           }
 
           // Update Sources
-          const totalSwipes = s.mobileCount + s.desktopCount;
+          const aiCount = s.aiCount || 0;
+          const totalSwipes = s.mobileCount + s.desktopCount + aiCount;
           this.sources = [
-            { label: 'Desktop Swipe In', count: s.desktopCount, percentage: totalSwipes > 0 ? (s.desktopCount / totalSwipes) * 100 : 0, color: 'bg-slate-400' },
-            { label: 'Mobile Swipe In', count: s.mobileCount, percentage: totalSwipes > 0 ? (s.mobileCount / totalSwipes) * 100 : 100, color: 'bg-blue-600' },
-            { label: 'AI Swipe In', count: 0, percentage: 0, color: 'bg-indigo-600' },
+            { label: 'Desktop Swipe In', count: s.desktopCount, percentage: totalSwipes > 0 ? Math.round((s.desktopCount / totalSwipes) * 100) : 0, color: 'bg-slate-400', category: 'desktop_swipe_in' },
+            { label: 'Mobile Swipe In', count: s.mobileCount, percentage: totalSwipes > 0 ? Math.round((s.mobileCount / totalSwipes) * 100) : 0, color: 'bg-blue-600', category: 'mobile_swipe_in' },
+            { label: 'AI Swipe In', count: aiCount, percentage: totalSwipes > 0 ? Math.round((aiCount / totalSwipes) * 100) : 0, color: 'bg-indigo-600', category: 'ai_swipe_in' },
           ];
 
           // Update Exceptions
@@ -501,7 +532,7 @@ export class HrDashboard implements OnInit, OnDestroy {
         // Update counts (only pending)
         const pendingRegs = mappedRegs.filter((r: any) => r.status === 'Pending Approval');
         const pendingLeaves = mappedLeaves.filter((r: any) => r.status === 'Pending Approval');
-        
+
         this.pendingCounts.regularization = pendingRegs.length;
         this.pendingCounts.leave = pendingLeaves.length;
         this.pendingCounts.total = pendingRegs.length + pendingLeaves.length;

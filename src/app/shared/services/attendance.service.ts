@@ -139,6 +139,10 @@ export class AttendanceService {
     return this.http.put<any>(`${this.apiBase}/api/attendance-regularization/${requestId}/status`, { status, hrRemarks });
   }
 
+  getRegularizationHistory(id: number | string): Observable<any> {
+    return this.http.get<any>(`${this.apiBase}/api/attendance-regularization/${id}/history`);
+  }
+
   getHRDashboardSummary(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(`${this.apiBase}/api/attendance/hr-dashboard-summary`);
   }

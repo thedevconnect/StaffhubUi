@@ -58,15 +58,29 @@ export class MyAssets implements OnInit {
   isLoading = false
   showAssetDrawer = false
   showViewDrawer = false
+  showHistoryDrawer = false
   isEditMode = false
   selectedAsset: any = null
+  assetHistory: any[] = []
 
   activeTab: string = 'All';
-  tabs: any[] = [
-    { label: 'Pending', value: 'Pending', icon: 'pi pi-clock' },
-    { label: 'Processed', value: 'Processed', icon: 'pi pi-check-circle' },
-    { label: 'All', value: 'All', icon: 'pi pi-list' }
-  ];
+
+  get tabs(): any[] {
+    if (this.isHRAdmin) {
+      return [
+        { label: 'Company Inventory', value: 'Inventory', icon: 'pi pi-box' },
+        { label: 'Assigned Assets', value: 'Assigned', icon: 'pi pi-users' },
+        { label: 'Pending Requests', value: 'Pending', icon: 'pi pi-clock' },
+        { label: 'All', value: 'All', icon: 'pi pi-list' }
+      ];
+    } else {
+      return [
+        { label: 'My Assigned Assets', value: 'Assigned', icon: 'pi pi-briefcase' },
+        { label: 'My Requests', value: 'Pending', icon: 'pi pi-clock' },
+        { label: 'All', value: 'All', icon: 'pi pi-list' }
+      ];
+    }
+  }
 
   onTabChange(tab: string) {
     this.activeTab = tab;
@@ -76,11 +90,17 @@ export class MyAssets implements OnInit {
   get filteredAssets(): any[] {
     return this.assets.filter(asset => {
       if (this.activeTab === 'All') return true;
-      if (this.activeTab === 'Pending') {
-        return asset.approval_status === 'Pending' || asset.approval_status === 'PENDING';
+      const status = (asset.approval_status || '').toUpperCase();
+      
+      if (this.isHRAdmin) {
+        if (this.activeTab === 'Inventory') return !asset.employee_id;
+        if (this.activeTab === 'Assigned') return asset.employee_id && status === 'APPROVED';
+        if (this.activeTab === 'Pending') return status === 'PENDING';
       } else {
-        return asset.approval_status !== 'Pending' && asset.approval_status !== 'PENDING';
+        if (this.activeTab === 'Assigned') return status === 'APPROVED';
+        if (this.activeTab === 'Pending') return status === 'PENDING';
       }
+      return true;
     });
   }
 
@@ -88,7 +108,7 @@ export class MyAssets implements OnInit {
 
   columns: TableColumn[] = [
     { key: 'actions', header: 'Actions', isVisible: true },
-    { key: 'EmployeeName', header: 'Employee', isVisible: true, isSortable: true },
+    { key: 'employee_name', header: 'Employee', isVisible: true, isSortable: true },
     { key: 'asset_name', header: 'Asset Name', isVisible: true, isSortable: true },
     { key: 'asset_type', header: 'Asset Type', isVisible: true, isSortable: true },
     { key: 'asset_code', header: 'Asset Code', isVisible: true, isSortable: true },
@@ -100,18 +120,26 @@ export class MyAssets implements OnInit {
   get rowActions() {
     const actions = [
       { label: 'View', icon: 'pi pi-eye', id: 'view' },
-      { label: 'Edit', icon: 'pi pi-pencil', id: 'edit' },
-      { label: 'Delete', icon: 'pi pi-trash', id: 'delete' }
+      { label: 'History', icon: 'pi pi-history', id: 'history' }
     ];
     if (this.isHRAdmin) {
+      actions.push({ label: 'Edit', icon: 'pi pi-pencil', id: 'edit' });
+      actions.push({ label: 'Delete', icon: 'pi pi-trash', id: 'delete' });
       actions.push({ label: 'Approve', icon: 'pi pi-check', id: 'approve' });
+    } else {
+      actions.push({ label: 'Withdraw', icon: 'pi pi-times-circle', id: 'withdraw' });
+      actions.push({ label: 'Return', icon: 'pi pi-undo', id: 'return' });
     }
     return actions;
   }
 
   disableActionCondition = (actionId: string, row: any): boolean => {
-    if (row.approval_status === 'APPROVED' && (actionId === 'edit' || actionId === 'delete' || actionId === 'approve')) {
-      return true;
+    const status = (row.approval_status || '').toUpperCase();
+    if (this.isHRAdmin) {
+      if (status === 'APPROVED' && actionId === 'approve') return true;
+    } else {
+      if (actionId === 'withdraw' && status !== 'PENDING') return true;
+      if (actionId === 'return' && status !== 'APPROVED') return true;
     }
     return false;
   }
@@ -150,7 +178,7 @@ export class MyAssets implements OnInit {
 
   initForm(): void {
     this.assetForm = this.fb.group({
-      employee_id: ['', Validators.required],
+      employee_id: [''],
       asset_name: ['', Validators.required],
       asset_type: ['', Validators.required],
       asset_code: [''],
@@ -315,6 +343,33 @@ export class MyAssets implements OnInit {
     if (event.actionId === 'approve') {
       this.approveAsset(event.row)
     }
+
+    if (event.actionId === 'withdraw') {
+      this.withdrawAsset(event.row)
+    }
+
+    if (event.actionId === 'return') {
+      this.returnAsset(event.row)
+    }
+
+    if (event.actionId === 'history') {
+      this.viewHistory(event.row)
+    }
+  }
+
+  viewHistory(row: any): void {
+    this.selectedAsset = row;
+    this.showHistoryDrawer = true;
+    this.assetHistory = [];
+    this.assetsService.getAssetHistory(row.id).subscribe({
+      next: (res: any) => {
+        this.assetHistory = res.data || [];
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Failed', detail: 'Unable to fetch history' });
+      }
+    });
   }
 
   approveAsset(row: any): void {
@@ -337,4 +392,43 @@ export class MyAssets implements OnInit {
     })
   }
 
+  withdrawAsset(row: any): void {
+    this.confirmationService.confirm({
+      message: `Are you sure you want to withdraw the request for ${row.asset_name}?`,
+      header: 'Withdraw Request',
+      icon: 'pi pi-times-circle',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => {
+        this.assetsService.withdrawAsset(row.id).subscribe({
+          next: () => {
+            this.messageService.add({ severity: 'success', summary: 'Withdrawn', detail: 'Asset request withdrawn successfully' })
+            this.getAllData(false)
+          },
+          error: err => {
+            this.messageService.add({ severity: 'error', summary: 'Failed', detail: err.error?.message || 'Unable to withdraw request' })
+          }
+        })
+      }
+    })
+  }
+
+  returnAsset(row: any): void {
+    this.confirmationService.confirm({
+      message: `Are you sure you want to return ${row.asset_name}?`,
+      header: 'Return Asset',
+      icon: 'pi pi-undo',
+      acceptButtonStyleClass: 'p-button-warning',
+      accept: () => {
+        this.assetsService.returnAsset(row.id).subscribe({
+          next: () => {
+            this.messageService.add({ severity: 'success', summary: 'Returned', detail: 'Asset returned successfully' })
+            this.getAllData(false)
+          },
+          error: err => {
+            this.messageService.add({ severity: 'error', summary: 'Failed', detail: err.error?.message || 'Unable to return asset' })
+          }
+        })
+      }
+    })
+  }
 }

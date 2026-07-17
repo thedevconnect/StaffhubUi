@@ -1,6 +1,7 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -173,6 +174,18 @@ export class UserService {
 
   approveAsset(id: string | number, data: any = {}) {
     return this.http.put(`${this.apiUrl}/api/employee-assets/approve/${id}`, data);
+  }
+
+  withdrawAsset(id: string | number) {
+    return this.http.put(`${this.apiUrl}/api/employee-assets/withdraw/${id}`, {});
+  }
+
+  returnAsset(id: string | number) {
+    return this.http.put(`${this.apiUrl}/api/employee-assets/return/${id}`, {});
+  }
+
+  getAssetHistory(id: string | number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/api/employee-assets/${id}/history`);
   }
 
   getUserById(id: string | number) {

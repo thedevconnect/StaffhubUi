@@ -32,7 +32,7 @@ export class LeaveService {
     return this.http.get<{ success: boolean; data: LeaveRequest }>(`${this.apiBase}/api/leaves/${id}`);
   }
 
-  updateLeave(id: number | string, data: { leaveType: string; startDate: string; endDate: string; reason: string; status: string }): Observable<any> {
+  updateLeave(id: number | string, data: { leaveType: string; startDate: string; endDate: string; reason: string; status: string; remarks?: string }): Observable<any> {
     return this.http.put<any>(`${this.apiBase}/api/leaves/${id}`, data);
   }
 

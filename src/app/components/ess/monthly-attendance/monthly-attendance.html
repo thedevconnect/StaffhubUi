@@ -13,7 +13,11 @@
   <!-- Filters -->
   <div
     class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-end justify-between gap-4">
-    <form [formGroup]="filterForm" class="flex flex-col sm:flex-row gap-4 flex-1 w-full">
+    <form [formGroup]="filterForm" class="flex flex-col sm:flex-row flex-wrap gap-4 flex-1 w-full">
+      <div class="flex flex-col gap-1 w-full sm:w-48" *ngIf="isPrivileged">
+        <label class="text-xs font-semibold text-slate-700">Employee</label>
+        <p-select [options]="employees" formControlName="employee_id" optionLabel="fullName" optionValue="id" placeholder="Select Employee" styleClass="w-full" [filter]="true"></p-select>
+      </div>
       <div class="flex flex-col gap-1 w-full sm:w-48">
         <label class="text-xs font-semibold text-slate-700">Month</label>
         <p-select [options]="months" formControlName="month" placeholder="Select Month" styleClass="w-full"></p-select>
@@ -93,6 +97,18 @@
   <!-- Attendance Table -->
   <div *ngIf="currentRecord"
     class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+    
+    <!-- Bulk Apply Action -->
+    <div *ngIf="isEditable()" class="p-3 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <i class="pi pi-bolt text-amber-500 text-xl"></i>
+        <span class="text-sm font-bold text-slate-700">Quick Fill All Days:</span>
+        <p-select [options]="statusOptions" (onChange)="applyBulkStatus($event.value)" 
+          placeholder="Select Status" styleClass="w-48 text-sm" appendTo="body"></p-select>
+      </div>
+      <span class="text-xs text-slate-500 font-medium"><i class="pi pi-info-circle mr-1"></i>Sundays automatically default to Weekly Off</span>
+    </div>
+
     <div class="overflow-x-auto max-h-[500px]">
       <form [formGroup]="attendanceForm">
         <table class="w-full min-w-[700px] text-left text-sm text-slate-600 border-collapse relative">

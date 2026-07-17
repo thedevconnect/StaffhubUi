@@ -10,7 +10,8 @@
     </div>
     <div class="flex-none">
       <p-button label="Add Asset" icon="pi pi-plus"
-        styleClass="p-button-sm rounded-lg w-full sm:w-auto shadow-sm btn-add text-xs font-semibold px-3 py-1.5 transition-all" (click)="openAddDrawer()">
+        styleClass="p-button-sm rounded-lg w-full sm:w-auto shadow-sm btn-add text-xs font-semibold px-3 py-1.5 transition-all"
+        (click)="openAddDrawer()">
       </p-button>
     </div>
   </div>
@@ -30,17 +31,9 @@
     <!-- Table -->
     <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
       <div class="w-full overflow-x-auto">
-        <app-table-template 
-          [data]="filteredAssets" 
-          [columns]="columns" 
-          [tabs]="tabs"
-          [activeTab]="activeTab"
-          (tabChange)="onTabChange($event)"
-          [isLoading]="isLoading" 
-          [showExport]="true" exportFileName="My_Assets"
-          [tableActions]="rowActions" 
-          (actionClicked)="onActionClicked($event)" 
-          (refresh)="getAllData(true)">
+        <app-table-template [data]="filteredAssets" [columns]="columns" [tabs]="tabs" [activeTab]="activeTab"
+          (tabChange)="onTabChange($event)" [isLoading]="isLoading" [showExport]="true" exportFileName="My_Assets"
+          [tableActions]="rowActions" (actionClicked)="onActionClicked($event)" (refresh)="getAllData(true)">
         </app-table-template>
       </div>
     </div>
@@ -63,10 +56,10 @@
 
     <form [formGroup]="assetForm" class="p-4 md:p-5 space-y-6 overflow-y-auto">
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
-        <div class="min-w-0">
-          <label class="block text-sm font-medium text-slate-700 mb-1">Employee *</label>
+        <div class="min-w-0" *ngIf="isHRAdmin">
+          <label class="block text-sm font-medium text-slate-700 mb-1">Employee (Optional)</label>
           <p-select [options]="employees" formControlName="employee_id" optionLabel="full_name" optionValue="id"
-            placeholder="Select Employee" class="w-full" styleClass="w-full bg-white"></p-select>
+            placeholder="Select Employee (Leave blank for Inventory)" class="w-full" styleClass="w-full bg-white"></p-select>
         </div>
 
         <div class="min-w-0">
@@ -79,11 +72,11 @@
           <input pInputText formControlName="asset_type" class="w-full bg-white" placeholder="e.g. Laptop" />
         </div>
 
-        <div class="min-w-0">
+        <div class="min-w-0" *ngIf="isEditMode">
           <label class="block text-sm font-medium text-slate-700 mb-1">Asset Code</label>
-          <input pInputText formControlName="asset_code" class="w-full bg-white" placeholder="e.g. LAP-001" />
+          <input pInputText formControlName="asset_code" class="w-full bg-slate-100 text-slate-500" [readonly]="true" placeholder="Auto Generated" />
         </div>
-        
+
         <div class="min-w-0">
           <label class="block text-sm font-medium text-slate-700 mb-1">Serial Number</label>
           <input pInputText formControlName="serial_number" class="w-full bg-white" placeholder="e.g. C02X..." />
@@ -96,7 +89,9 @@
 
         <div class="min-w-0 sm:col-span-2">
           <label class="block text-sm font-medium text-slate-700 mb-1">Employee Remarks</label>
-          <textarea pInputTextarea formControlName="employee_remarks" rows="3" class="w-full bg-white border border-slate-300 rounded-lg p-2.5 resize-none" placeholder="Any additional notes..."></textarea>
+          <textarea pInputTextarea formControlName="employee_remarks" rows="3"
+            class="w-full bg-white border border-slate-300 rounded-lg p-2.5 resize-none"
+            placeholder="Any additional notes..."></textarea>
         </div>
       </div>
     </form>
@@ -161,6 +156,55 @@
       <div class="flex justify-end p-4 border-t bg-white">
         <button pButton type="button" label="Close" class="w-full sm:w-auto" (click)="showViewDrawer = false">
         </button>
+      </div>
+    </ng-template>
+  </p-drawer>
+
+  <!-- History Drawer -->
+  <p-drawer [(visible)]="showHistoryDrawer" position="right" [style]="{ width: '400px' }" styleClass="custom-drawer h-full shadow-2xl">
+    <ng-template pTemplate="header">
+      <div class="flex items-center gap-2">
+        <i class="pi pi-history text-xl text-primary"></i>
+        <span class="text-xl font-bold text-slate-800">Asset History</span>
+      </div>
+    </ng-template>
+
+    <div class="p-6 overflow-y-auto" style="height: calc(100vh - 150px);">
+      <div class="mb-4 pb-4 border-b">
+        <div class="text-sm text-slate-500">Asset Name</div>
+        <div class="font-semibold text-slate-800">{{ selectedAsset?.asset_name }} ({{ selectedAsset?.asset_code }})</div>
+      </div>
+      
+      <div *ngIf="assetHistory.length === 0" class="text-slate-500 italic text-center py-4">
+        No history available.
+      </div>
+
+      <div class="space-y-4">
+        <div *ngFor="let item of assetHistory" class="flex gap-4">
+          <div class="flex flex-col items-center">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm"
+                 [ngClass]="item.status === 'APPROVED' ? 'bg-emerald-500' : (item.status === 'REJECTED' || item.status === 'WITHDRAWN' ? 'bg-red-500' : (item.status === 'RETURNED' ? 'bg-blue-500' : 'bg-amber-500'))">
+              <i class="pi" [ngClass]="item.status === 'APPROVED' ? 'pi-check' : (item.status === 'REJECTED' ? 'pi-times' : 'pi-clock')"></i>
+            </div>
+            <div class="w-px h-full bg-slate-200 my-1" *ngIf="item !== assetHistory[assetHistory.length - 1]"></div>
+          </div>
+          <div class="flex-1 pb-4">
+            <div class="font-semibold text-slate-800">{{ item.status }}</div>
+            <div class="text-xs text-slate-500">{{ item.created_at | date:'medium' }}</div>
+            <div class="text-sm text-slate-600 mt-1">
+              By: {{ item.action_by_name || 'System' }} <span *ngIf="item.action_by_designation">({{ item.action_by_designation }})</span>
+            </div>
+            <div class="text-sm text-slate-700 mt-1 p-2 bg-slate-50 rounded" *ngIf="item.remarks">
+              {{ item.remarks }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <div class="flex justify-end p-4 border-t bg-white">
+        <button pButton type="button" label="Close" class="w-full sm:w-auto" (click)="showHistoryDrawer = false"></button>
       </div>
     </ng-template>
   </p-drawer>

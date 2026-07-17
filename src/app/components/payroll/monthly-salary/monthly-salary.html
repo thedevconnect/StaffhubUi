@@ -1,37 +1,113 @@
 <p-toast></p-toast>
-<app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
-<div class="min-h-screen bg-slate-50/50">
-    <section class="space-y-4">
-        <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
-            <div class="w-full overflow-x-auto">
-                <div class="flex justify-end p-3 bg-slate-50">
-                    <button pButton type="button" label="Run Salary for Month" icon="pi pi-check"
-                        class="p-button-success" (click)="openRunSalaryDialog()">
-                    </button>
-                </div>
-                <app-table-template [data]="monthlySalary" [columns]="columns" [pageSize]="pageSize"
-                    [totalCount]="totalCount" [isLoading]="loading()" [currentPage]="pageNo"
-                    (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
-                    (sortChange)="onSortChange($event)" (searchChange)="onSearchChange($event)"
-                    [searchText]="searchText" [showRefresh]="true" (refresh)="loadDashboardData()">
-                </app-table-template>
-            </div>
-        </div>
-    </section>
+
+<!-- Breadcrumb -->
+<div class="bg-white px-4 md:px-6 py-2 -mx-4 -mt-4 md:-mx-6 md:-mt-6 border-b border-slate-200">
+  <p-breadcrumb [model]="breadcrumbItems" styleClass="!border-0 !rounded-none !bg-transparent !px-0 !py-1 text-xs md:text-sm"></p-breadcrumb>
 </div>
 
-<!-- Run Salary Dialog -->
-<p-dialog header="Run Salary" [(visible)]="runSalaryDialog" [modal]="true" [style]="{ width: '25rem' }">
-    <div class="flex flex-col space-y-3">
-        <div class="flex items-center gap-3">
-            <label class="font-medium w-28">Select Month:</label>
-            <p-datepicker [(ngModel)]="selectedMonth" view="month" [showIcon]="true" dateFormat="MM/yy" class="w-full"
-                inputId="monthpicker"></p-datepicker>
-        </div>
+<!-- Top Control Bar -->
+<div class="bg-white border-b border-slate-200 -mx-4 md:-mx-6 mb-6 px-4 md:px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+  <div class="flex items-center gap-3 w-full md:w-auto">
+    <div class="flex flex-col">
+      <label class="text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Month</label>
+      <p-select [options]="months" [(ngModel)]="selectedMonth" (onChange)="onMonthYearChange()" styleClass="w-32"></p-select>
     </div>
-    <div class="flex justify-end gap-2 mt-6">
-        <button pButton pRipple label="Cancel" severity="secondary" (click)="runSalaryDialog = false"
-            class="px-4 py-2"></button>
-        <button pButton pRipple label="Run" icon="pi pi-check" class="px-4 py-2" (click)="confirmRunSalary()"></button>
+    <div class="flex flex-col">
+      <label class="text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Year</label>
+      <p-select [options]="years" [(ngModel)]="selectedYear" (onChange)="onMonthYearChange()" styleClass="w-24"></p-select>
     </div>
-</p-dialog>
+  </div>
+  
+  <div class="flex items-center gap-3">
+    <p-button label="Process All Draft Salaries" icon="pi pi-check-circle" (onClick)="processAllPayroll()" [loading]="processing" styleClass="p-button-success rounded-xl px-4 py-2 font-bold shadow-sm"></p-button>
+  </div>
+</div>
+
+<!-- Main Content Area -->
+<div class="flex flex-col gap-6">
+  <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+      <div>
+        <h3 class="font-bold text-slate-800 text-lg">
+          <i class="pi pi-users text-slate-400 mr-2"></i>
+          Employee Salaries
+        </h3>
+        <p class="text-xs text-slate-500 mt-1">Showing all employee salaries for the selected month.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-1 rounded-full">{{monthlySalary.length}} Employees</span>
+      </div>
+    </div>
+    
+    <div class="p-4">
+      <p-table [value]="monthlySalary" [loading]="loading" [paginator]="true" [rows]="15"
+               [tableStyle]="{ 'min-width': '100%' }" 
+               styleClass="p-datatable-sm p-datatable-striped rounded-xl overflow-hidden border border-slate-200">
+        
+        <ng-template pTemplate="header">
+          <tr class="bg-slate-100 text-slate-600 text-xs uppercase tracking-wider">
+            <th class="py-3 px-4 font-bold rounded-tl-lg">Employee Code</th>
+            <th class="py-3 px-4 font-bold">Employee Name</th>
+            <th class="py-3 px-4 font-bold text-right">Master Base</th>
+            <th class="py-3 px-4 font-bold text-center">Working Days</th>
+            <th class="py-3 px-4 font-bold text-center">Payable Days</th>
+            <th class="py-3 px-4 font-bold text-right">Net Salary</th>
+            <th class="py-3 px-4 font-bold text-center">Status</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-emp>
+          <tr class="text-sm border-b border-slate-100 hover:bg-slate-50 transition-colors">
+            <td class="py-3 px-4">
+              <span class="font-mono text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">
+                {{emp.emp_code || 'N/A'}}
+              </span>
+            </td>
+            <td class="py-3 px-4 font-medium text-slate-800">
+              <div class="flex flex-col">
+                <span>{{emp.first_name}}</span>
+                <span class="text-[10px] text-slate-500 font-normal" *ngIf="emp.company_name"><i class="pi pi-building text-[9px] mr-1"></i>{{emp.company_name}}</span>
+              </div>
+            </td>
+            <td class="py-3 px-4 text-right text-slate-600">
+              ₹{{emp.master_base_salary || 0 | number:'1.2-2'}}
+            </td>
+            <td class="py-3 px-4 text-center text-slate-600 font-medium">
+              {{emp.total_days || '-'}}
+            </td>
+            <td class="py-3 px-4 text-center font-bold" [ngClass]="{'text-blue-600': emp.payable_days > 0, 'text-slate-400': !emp.payable_days}">
+              {{emp.payable_days || '-'}}
+            </td>
+            <td class="py-3 px-4 text-right">
+              <span class="text-lg font-bold" [ngClass]="emp.calculated_salary ? 'text-green-700' : 'text-slate-400'">
+                ₹{{emp.calculated_salary || 0 | number:'1.2-2'}}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <span *ngIf="emp.status === 'Processed'" class="px-3 py-1 text-[11px] font-bold rounded-md bg-green-100 text-green-700 border border-green-200 shadow-sm">
+                <i class="pi pi-check-circle text-[10px] mr-1"></i> Processed
+              </span>
+              <span *ngIf="emp.status === 'Draft'" class="px-3 py-1 text-[11px] font-bold rounded-md bg-amber-100 text-amber-700 border border-amber-200 shadow-sm">
+                <i class="pi pi-clock text-[10px] mr-1"></i> Draft
+              </span>
+              <span *ngIf="!emp.status" class="px-3 py-1 text-[11px] font-bold rounded-md bg-slate-100 text-slate-600 border border-slate-200">
+                <i class="pi pi-question-circle text-[10px] mr-1"></i> Pending
+              </span>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7" class="text-center p-10 text-slate-500">
+              <div class="flex flex-col items-center justify-center">
+                <i class="pi pi-inbox text-4xl mb-3 text-slate-300"></i>
+                <p>No employees found for this month.</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>

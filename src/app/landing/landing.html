@@ -246,7 +246,7 @@
                 <span
                   class="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Today's
                   Shift</span>
-                <span class="text-lg font-black text-slate-900 dark:text-white block mt-1">09:00 AM - 06:00 PM</span>
+                <span class="text-lg font-black text-slate-900 dark:text-white block mt-1">10:00 AM - 07:00 PM</span>
                 <span class="text-[10px] font-semibold text-emerald-500 mt-0.5 block flex items-center gap-1">
                   <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Active Shift
                 </span>
@@ -256,8 +256,12 @@
                 <span
                   class="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Logged
                   Hours</span>
-                <span class="text-lg font-black text-slate-900 dark:text-white block mt-1">05h 24m 12s</span>
-                <span class="text-[10px] font-semibold mt-0.5 block" [ngClass]="textColor">Progressing...</span>
+                <span class="text-lg font-black text-slate-900 dark:text-white block mt-1">{{ loggedHoursStr }}</span>
+                <div class="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full mt-2 overflow-hidden">
+                  <div class="h-full rounded-full transition-all duration-1000 ease-linear" [ngClass]="bgClass"
+                    [style.width.%]="shiftProgress"></div>
+                </div>
+                <span class="text-[10px] font-semibold mt-1 block" [ngClass]="textColor">Progressing...</span>
               </div>
             </div>
 
@@ -654,7 +658,8 @@
         <div class="flex flex-col gap-6 text-center lg:text-left">
           <span class="text-xs font-extrabold uppercase tracking-widest block" [ngClass]="textColor">Mobile App</span>
           <h2 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">StaffHub Mobile App
-            <br /><span class="text-amber-500 text-2xl md:text-3xl">(Under Development)</span></h2>
+            <br /><span class="text-amber-500 text-2xl md:text-3xl">(Under Development)</span>
+          </h2>
           <p class="text-slate-500 dark:text-slate-400 text-sm sm:text-base leading-relaxed mt-2">
             Manage your daily workflow directly from your pocket. We are actively developing our mobile app so you will
             soon be able to access all Employee Self

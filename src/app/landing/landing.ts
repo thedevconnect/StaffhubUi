@@ -1,4 +1,4 @@
-import { Component, inject, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, inject, CUSTOM_ELEMENTS_SCHEMA, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
@@ -18,8 +18,9 @@ import { Router } from '@angular/router';
   templateUrl: './landing.html',
   styleUrl: './landing.scss',
 })
-export class Landing {
+export class Landing implements OnInit, OnDestroy {
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   // Theme configuration states
   selectedColor = 'indigo';
@@ -29,6 +30,53 @@ export class Landing {
 
   isModuleDialogVisible = false;
   selectedModule: any = null;
+
+  shiftProgress: number = 0;
+  loggedHoursStr: string = '00h 00m 00s';
+  private timer: any;
+
+  ngOnInit() {
+    this.updateShiftProgress();
+    this.timer = setInterval(() => {
+      this.updateShiftProgress();
+      this.cdr.detectChanges();
+    }, 1000);
+  }
+
+  ngOnDestroy() {
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+  }
+
+  updateShiftProgress() {
+    const now = new Date();
+    const start = new Date();
+    start.setHours(10, 0, 0, 0); // 10:00 AM
+    const end = new Date();
+    end.setHours(19, 0, 0, 0); // 07:00 PM
+
+    let progress = 0;
+    if (now < start) {
+      progress = 0;
+      this.loggedHoursStr = '00h 00m 00s';
+    } else if (now > end) {
+      progress = 100;
+      this.loggedHoursStr = '09h 00m 00s';
+    } else {
+      const elapsedMs = now.getTime() - start.getTime();
+      const totalMs = end.getTime() - start.getTime();
+      progress = (elapsedMs / totalMs) * 100;
+
+      const totalSeconds = Math.floor(elapsedMs / 1000);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      this.loggedHoursStr = `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
+    }
+    this.shiftProgress = progress;
+  }
 
   moduleDetails: any = {
     'onboarding': {

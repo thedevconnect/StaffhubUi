@@ -1,13 +1,15 @@
 import { Routes } from "@angular/router";
 
-
-
-
 export const payrollRoutes: Routes = [
     {
         path: '',
         redirectTo: 'payroll-dashboard',
         pathMatch: 'full'
+    },
+    {
+        path: 'employee-salary-preparation',
+        title: 'Master Salary Preparation',
+        loadComponent: () => import('../payroll/employee-salary-preparation/employee-salary-preparation').then((m) => m.EmployeeSalaryPreparation)
     },
     {
         path: 'payroll-dashboard',
@@ -19,6 +21,7 @@ export const payrollRoutes: Routes = [
     },
     {
         path: 'employee-expense-statement',
+        title: 'Employee Expense Statement',
         loadComponent: () => import('../reports/employee-expense-statement/employee-expense-statement').then((m) => m.EmployeeExpenseStatement)
     },
     {
@@ -36,9 +39,5 @@ export const payrollRoutes: Routes = [
     {
         path: 'monthly-salary-approval',
         loadComponent: () => import('../payroll/monthly-salary-approval/monthly-salary-approval').then((m) => m.MonthlySalaryApproval)
-    },
-    {
-        path: 'employee-salary-preparation',
-        loadComponent: () => import('../payroll/employee-salary-preparation/employee-salary-preparation').then((m) => m.EmployeeSalaryPreparation)
     }
 ];
