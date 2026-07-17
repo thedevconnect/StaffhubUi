@@ -146,6 +146,10 @@ export class AttendanceService {
   getHRDashboardDetails(category: string): Observable<ApiResponse<any[]>> {
     return this.http.get<ApiResponse<any[]>>(`${this.apiBase}/api/attendance/hr-dashboard-details?category=${category}`);
   }
+
+  getHRDashboardChart(): Observable<ApiResponse<any[]>> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiBase}/api/attendance/hr-dashboard-chart`);
+  }
   // getEmployeeHistory(employeeId: number | string): Observable<ApiResponse<AttendanceRecord[]>> {
   //   return this.http.get<ApiResponse<AttendanceRecord[]>>(`${this.apiBase}/api/attendance/employee-history/${employeeId}`);
   // }

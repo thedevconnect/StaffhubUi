@@ -140,13 +140,7 @@ export class HrDashboard implements OnInit, OnDestroy {
   donutSegments: DonutSegment[] = [];
 
   // Stacked Bar Chart data
-  barChartData: StackedBarData[] = [
-    { day: 'Monday', onTime: 77, late: 10, total: 87 },
-    { day: 'Tuesday', onTime: 79, late: 13, total: 92 },
-    { day: 'Wednesday', onTime: 71, late: 7, total: 78 },
-    { day: 'Thursday', onTime: 66, late: 17, total: 83 },
-    { day: 'Friday', onTime: 74, late: 9, total: 83 },
-  ];
+  barChartData: StackedBarData[] = [];
 
   maxBarValue = 120; // Y-axis max value
 
@@ -238,15 +232,11 @@ export class HrDashboard implements OnInit, OnDestroy {
   ];
 
   ngOnInit(): void {
-    const currentDay = new Date().getDay();
-    if (currentDay >= 1 && currentDay <= 5) {
-      this.barChartData = this.barChartData.slice(0, currentDay);
-    } else if (currentDay === 0 || currentDay === 6) {
-      this.barChartData = this.barChartData.slice(0, 5);
-    }
+    // Chart data is now fetched from the backend
 
     this.loadPendencyData();
     this.loadDashboardSummary();
+    this.loadChartData();
 
     const user = this.authService.user();
     if (user?.companyId) {
@@ -281,6 +271,7 @@ export class HrDashboard implements OnInit, OnDestroy {
     this.isLoading = true;
     this.loadDashboardSummary();
     this.loadPendencyData();
+    this.loadChartData();
 
     // Simulate slight delay for visual feedback if API is too fast
     setTimeout(() => {
@@ -335,6 +326,29 @@ export class HrDashboard implements OnInit, OnDestroy {
         strokeDashArray: `${strokeLength} ${circumference - strokeLength}`,
         strokeDashOffset: strokeOffset,
       };
+    });
+  }
+
+  loadChartData(): void {
+    this.attendanceService.getHRDashboardChart().subscribe({
+      next: (res: any) => {
+        if (res && res.data) {
+          this.barChartData = res.data.map((item: any) => ({
+            day: item.day,
+            onTime: item.swipeInCount,
+            late: item.swipeOutCount,
+            total: item.total
+          }));
+          
+          // Calculate max bar value dynamically based on highest total
+          const maxTotal = Math.max(...this.barChartData.map(d => Math.max(d.onTime, d.late)), 10);
+          this.maxBarValue = Math.ceil(maxTotal * 1.2); // Add 20% headroom
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching chart data:', err);
+      }
     });
   }
 
