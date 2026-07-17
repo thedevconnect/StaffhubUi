@@ -13,7 +13,8 @@
         <h2 class="text-xl font-semibold text-gray-800">Resignation Requests</h2>
         <p class="text-xs text-slate-500 mt-1">Review and approve employee resignation requests.</p>
       </div>
-      <div>
+      <div class="flex items-center gap-2">
+        <p-button label="Add Resignation" icon="pi pi-plus" styleClass="p-button-primary p-button-sm" (onClick)="openAddDrawer()"></p-button>
         <p-button icon="pi pi-refresh" styleClass="p-button-text p-button-sm" (onClick)="loadResignations()" [loading]="isLoading"></p-button>
       </div>
     </div>
@@ -40,6 +41,7 @@
             <td class="p-3 text-center">
               <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold" [ngClass]="{
                   'bg-amber-50 text-amber-700 border border-amber-100': req.status === 'PENDING',
+                  'bg-blue-50 text-blue-700 border border-blue-100': req.status === 'IN_PROCESS',
                   'bg-emerald-50 text-emerald-700 border border-emerald-100': req.status === 'APPROVED',
                   'bg-rose-50 text-rose-700 border border-rose-100': req.status === 'REJECTED',
                   'bg-slate-100 text-slate-600 border border-slate-200': req.status === 'WITHDRAWN'
@@ -49,11 +51,12 @@
             </td>
             <td class="p-3 text-center text-slate-500 text-xs">{{ req.created_at | date: 'mediumDate' }}</td>
             <td class="p-3 text-center">
-              <div class="flex items-center justify-center gap-2" *ngIf="req.status === 'PENDING'">
+              <div class="flex items-center justify-center gap-2" *ngIf="req.status === 'PENDING' || req.status === 'IN_PROCESS'">
                 <p-button icon="pi pi-check" styleClass="p-button-success p-button-sm p-button-rounded p-button-text" (onClick)="openActionDialog(req, 'APPROVED')" pTooltip="Approve"></p-button>
                 <p-button icon="pi pi-times" styleClass="p-button-danger p-button-sm p-button-rounded p-button-text" (onClick)="openActionDialog(req, 'REJECTED')" pTooltip="Reject"></p-button>
+                <p-button *ngIf="req.status === 'PENDING'" icon="pi pi-clock" styleClass="p-button-info p-button-sm p-button-rounded p-button-text" (onClick)="openActionDialog(req, 'IN_PROCESS')" pTooltip="Mark In Process"></p-button>
               </div>
-              <span *ngIf="req.status !== 'PENDING'" class="text-xs text-slate-400 font-semibold">-</span>
+              <span *ngIf="req.status !== 'PENDING' && req.status !== 'IN_PROCESS'" class="text-xs text-slate-400 font-semibold">-</span>
             </td>
           </tr>
         </ng-template>
@@ -79,6 +82,61 @@
   </div>
   <ng-template pTemplate="footer">
     <p-button label="Cancel" styleClass="p-button-text p-button-secondary" (onClick)="displayDialog = false"></p-button>
-    <p-button label="Confirm" [styleClass]="actionType === 'APPROVED' ? 'p-button-success' : 'p-button-danger'" (onClick)="confirmAction()"></p-button>
+    <p-button label="Confirm" [styleClass]="actionType === 'APPROVED' ? 'p-button-success' : (actionType === 'REJECTED' ? 'p-button-danger' : 'p-button-info')" (onClick)="confirmAction()"></p-button>
   </ng-template>
 </p-dialog>
+
+<!-- Add Resignation Drawer -->
+<p-drawer [(visible)]="displayAddDrawer" position="right" [style]="{width: '35rem'}" header="Submit Resignation (HR)">
+  <div class="flex flex-col h-full bg-slate-50/50">
+    <div class="flex-1 overflow-y-auto p-6" [formGroup]="resignationForm">
+      
+      <div class="mb-6">
+        <label class="block text-sm font-semibold text-slate-700 mb-2">Select Employee <span class="text-rose-500">*</span></label>
+        <p-select 
+          [options]="employees" 
+          formControlName="employeeId" 
+          placeholder="Search and select employee" 
+          [filter]="true"
+          filterBy="label"
+          styleClass="w-full">
+        </p-select>
+      </div>
+
+      <div class="mb-6">
+        <label class="block text-sm font-semibold text-slate-700 mb-2">Leaving Reason <span class="text-rose-500">*</span></label>
+        <input pInputText type="text" formControlName="leavingReason" class="w-full p-2 border border-slate-300 rounded-md bg-white" placeholder="e.g. Better Career Opportunity" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Will join again? <span class="text-rose-500">*</span></label>
+          <p-select [options]="yesNoOptions" formControlName="willJoinAgain" styleClass="w-full"></p-select>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Will refer us? <span class="text-rose-500">*</span></label>
+          <p-select [options]="yesNoOptions" formControlName="willRefer" styleClass="w-full"></p-select>
+        </div>
+      </div>
+
+      <div class="mb-6">
+        <label class="block text-sm font-semibold text-slate-700 mb-2">Last Working Date (Requested) <span class="text-rose-500">*</span></label>
+        <p-datePicker formControlName="lwdEmployee" appendTo="body" styleClass="w-full" dateFormat="yy-mm-dd"></p-datePicker>
+      </div>
+
+      <div class="mb-6">
+        <label class="block text-sm font-semibold text-slate-700 mb-2">Remarks / Notes</label>
+        <textarea pInputTextarea formControlName="remarks" rows="4" class="w-full p-2 border border-slate-300 rounded-md bg-white" placeholder="Any additional information..."></textarea>
+      </div>
+
+    </div>
+
+    <!-- Drawer Footer -->
+    <div class="p-6 bg-white border-t border-slate-200">
+      <div class="flex gap-3 justify-end">
+        <button pButton type="button" label="Cancel" class="p-button-text text-slate-600" (click)="displayAddDrawer = false"></button>
+        <button pButton type="button" label="Submit Resignation" class="p-button-primary bg-indigo-600 hover:bg-indigo-700 border-none" (click)="submitResignation()" [loading]="isSubmitting" [disabled]="resignationForm.invalid"></button>
+      </div>
+    </div>
+  </div>
+</p-drawer>

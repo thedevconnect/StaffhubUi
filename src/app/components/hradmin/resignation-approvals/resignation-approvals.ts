@@ -11,6 +11,11 @@ import { DialogModule } from 'primeng/dialog';
 import { FormsModule } from '@angular/forms';
 import { TextareaModule } from 'primeng/textarea';
 import { ResignationService, Resignation } from '../../../shared/services/resignation.service';
+import { EmployeeManagementService } from '../../../shared/services/employee-management.service';
+import { DatePickerModule } from 'primeng/datepicker';
+import { SelectModule } from 'primeng/select';
+import { DrawerModule } from 'primeng/drawer';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-resignation-approvals',
@@ -25,7 +30,11 @@ import { ResignationService, Resignation } from '../../../shared/services/resign
     ToastModule,
     DialogModule,
     FormsModule,
-    TextareaModule
+    TextareaModule,
+    DatePickerModule,
+    SelectModule,
+    DrawerModule,
+    ReactiveFormsModule
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './resignation-approvals.html',
@@ -44,17 +53,55 @@ export class ResignationApprovals implements OnInit {
 
   displayDialog = false;
   selectedResignation: Resignation | null = null;
-  actionType: 'APPROVED' | 'REJECTED' | null = null;
+  actionType: 'APPROVED' | 'REJECTED' | 'IN_PROCESS' | null = null;
   hrRemarks = '';
+
+  // Add Resignation State
+  displayAddDrawer = false;
+  employees: any[] = [];
+  resignationForm: FormGroup;
+  isSubmitting = false;
+
+  yesNoOptions = [
+    { label: 'Yes', value: 'Yes' },
+    { label: 'No', value: 'No' }
+  ];
 
   constructor(
     private resignationService: ResignationService,
+    private employeeManagementService: EmployeeManagementService,
     private messageService: MessageService,
-    private cdr: ChangeDetectorRef
-  ) {}
+    private cdr: ChangeDetectorRef,
+    private fb: FormBuilder
+  ) {
+    this.resignationForm = this.fb.group({
+      employeeId: [null, Validators.required],
+      leavingReason: ['', Validators.required],
+      willJoinAgain: ['Yes', Validators.required],
+      willRefer: ['Yes', Validators.required],
+      lwdEmployee: [null, Validators.required],
+      remarks: ['']
+    });
+  }
 
   ngOnInit(): void {
     this.loadResignations();
+    this.loadEmployees();
+  }
+
+  loadEmployees(): void {
+    this.employeeManagementService.getEmployees().subscribe({
+      next: (data: any[]) => {
+        this.employees = data.map(emp => ({
+          label: `${emp.first_name} ${emp.last_name} (${emp.employee_code})`,
+          value: emp.id
+        }));
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load employees' });
+      }
+    });
   }
 
   loadResignations(): void {
@@ -75,7 +122,7 @@ export class ResignationApprovals implements OnInit {
     });
   }
 
-  openActionDialog(resignation: Resignation, type: 'APPROVED' | 'REJECTED'): void {
+  openActionDialog(resignation: Resignation, type: 'APPROVED' | 'REJECTED' | 'IN_PROCESS'): void {
     this.selectedResignation = resignation;
     this.actionType = type;
     this.hrRemarks = '';
@@ -84,6 +131,11 @@ export class ResignationApprovals implements OnInit {
 
   confirmAction(): void {
     if (!this.selectedResignation || !this.actionType) return;
+
+    if (this.actionType === 'REJECTED' && !this.hrRemarks?.trim()) {
+      this.messageService.add({ severity: 'warn', summary: 'Required', detail: 'HR Remarks are required for rejection.' });
+      return;
+    }
 
     this.resignationService.updateStatus(this.selectedResignation.id, this.actionType, this.hrRemarks).subscribe({
       next: () => {
@@ -97,6 +149,39 @@ export class ResignationApprovals implements OnInit {
       },
       error: () => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update status' });
+      }
+    });
+  }
+
+  openAddDrawer(): void {
+    this.resignationForm.reset({
+      willJoinAgain: 'Yes',
+      willRefer: 'Yes'
+    });
+    this.displayAddDrawer = true;
+  }
+
+  submitResignation(): void {
+    if (this.resignationForm.invalid) {
+      this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Please fill all required fields.' });
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.resignationService.submitResignation(this.resignationForm.value).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Resignation submitted successfully' });
+          this.displayAddDrawer = false;
+          this.loadResignations();
+        }
+        this.isSubmitting = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to submit resignation' });
+        this.isSubmitting = false;
+        this.cdr.detectChanges();
       }
     });
   }
