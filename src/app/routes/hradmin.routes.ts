@@ -32,6 +32,11 @@ export const hradminRoutes: Routes = [
     //     loadComponent: () => import('../components/hradmin/monthly-attendance/monthly-attendance').then(c => c.MonthlyAttendance)
     // },
     {
+        path: 'resignation-approvals',
+        title: 'Resignation Requests',
+        loadComponent: () => import('../components/hradmin/resignation-approvals/resignation-approvals').then(c => c.ResignationApprovals)
+    },
+    {
         path: 'monthly-attendance-calendar',
         title: 'Manage Attendance Calendar',
         loadComponent: () => import('../components/hradmin/monthly-attendance-calendar/monthly-attendance-calendar').then(c => c.HRMonthlyAttendanceCalendar)

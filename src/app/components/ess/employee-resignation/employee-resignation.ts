@@ -11,6 +11,7 @@ import { DrawerModule } from 'primeng/drawer';
 import { TableModule } from 'primeng/table';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { ResignationService } from '../../../shared/services/resignation.service';
 
 @Component({
   selector: 'app-employee-resignation',
@@ -66,28 +67,18 @@ export class EmployeeResignation implements OnInit {
     { label: 'May Be', value: 'May Be' }
   ];
 
-  resignationRecords: any[] = [
-    {
-      id: 1,
-      reason: 'Better Career Opportunity',
-      joinAgain: 'Yes',
-      referUs: 'Yes',
-      lwdPolicy: new Date(2026, 7, 3),
-      lwdEmployee: new Date(2026, 7, 3),
-      status: 'PENDING',
-      remarks: 'Looking for a new professional path. Thank you!',
-      createdDate: new Date(2026, 6, 5)
-    }
-  ];
+  resignationRecords: any[] = [];
 
   constructor(
     private fb: FormBuilder,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
+    private resignationService: ResignationService,
     private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
+    this.loadMyResignations();
     const lwdDate = new Date();
     lwdDate.setDate(lwdDate.getDate() + 30);
 
@@ -118,6 +109,31 @@ export class EmployeeResignation implements OnInit {
     this.cdr.detectChanges();
   }
 
+  loadMyResignations(): void {
+    this.resignationService.getMyResignations().subscribe({
+      next: (res) => {
+        if (res && res.success) {
+          this.resignationRecords = res.data.map((r: any) => ({
+            id: r.id,
+            reason: r.reason,
+            joinAgain: r.join_again,
+            referUs: r.refer_us,
+            lwdPolicy: new Date(r.lwd_policy),
+            lwdEmployee: new Date(r.lwd_employee),
+            status: r.status,
+            remarks: r.remarks,
+            hrRemarks: r.hr_remarks,
+            createdDate: new Date(r.created_at)
+          }));
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err) => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load resignations' });
+      }
+    });
+  }
+
   onDrawerHide(): void {
     this.visible = false;
   }
@@ -134,26 +150,33 @@ export class EmployeeResignation implements OnInit {
     }
 
     const formVal = this.resignationForm.getRawValue();
-    const newRecord = {
-      id: this.resignationRecords.length + 1,
-      reason: formVal.leavingReason,
-      joinAgain: formVal.willJoinAgain,
-      referUs: formVal.willRefer,
+    const payload = {
+      leavingReason: formVal.leavingReason,
+      willJoinAgain: formVal.willJoinAgain,
+      willRefer: formVal.willRefer,
       lwdPolicy: formVal.lwdPolicy,
       lwdEmployee: formVal.lwdEmployee,
-      status: 'PENDING',
-      remarks: formVal.remarks,
-      createdDate: new Date()
+      remarks: formVal.remarks
     };
 
-    this.resignationRecords = [newRecord, ...this.resignationRecords];
-    this.visible = false;
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: 'Resignation request has been submitted successfully.'
+    this.resignationService.submitResignation(payload).subscribe({
+      next: (res) => {
+        this.visible = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Resignation request has been submitted successfully.'
+        });
+        this.loadMyResignations();
+      },
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to submit resignation request.'
+        });
+      }
     });
-    this.cdr.detectChanges();
   }
 
   onWithdraw(id: number, event: Event): void {
@@ -165,18 +188,23 @@ export class EmployeeResignation implements OnInit {
       rejectButtonProps: { label: 'No', severity: 'secondary', outlined: true },
       acceptButtonProps: { label: 'Yes' },
       accept: () => {
-        this.resignationRecords = this.resignationRecords.map(rec => {
-          if (rec.id === id) {
-            return { ...rec, status: 'WITHDRAWN' };
+        this.resignationService.withdrawResignation(id).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Withdrawn',
+              detail: 'Resignation request has been withdrawn successfully.'
+            });
+            this.loadMyResignations();
+          },
+          error: (err) => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Failed to withdraw resignation request.'
+            });
           }
-          return rec;
         });
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Withdrawn',
-          detail: 'Resignation request has been withdrawn successfully.'
-        });
-        this.cdr.detectChanges();
       }
     });
   }
