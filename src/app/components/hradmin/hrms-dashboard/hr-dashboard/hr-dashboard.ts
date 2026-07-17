@@ -63,7 +63,7 @@ export class HrDashboard implements OnInit, OnDestroy {
   constructor(private router: Router) { }
 
   // Total headcount in statistics
-  totalEmployees = 147;
+  totalEmployees = 0;
 
   breadcrumbItems: MenuItem[] = [{ label: 'HR Dashboard' }];
   isLoading = false;
@@ -129,12 +129,12 @@ export class HrDashboard implements OnInit, OnDestroy {
 
   // Raw statistics for the donut chart
   donutRawData = [
-    { label: 'Swipe In', value: 83, color: '#10b981' }, // emerald-500
-    { label: 'Not Swipe In', value: 38, color: '#f43f5e' }, // rose-500
-    { label: 'OD', value: 15, color: '#b45309' }, // amber-700
-    { label: 'On Leave', value: 7, color: '#3b82f6' }, // blue-500
-    { label: 'Short Leave', value: 2, color: '#a855f7' }, // purple-500
-    { label: 'Swipe Out', value: 2, color: '#f97316' }, // orange-500
+    { label: 'Swipe In', value: 0, color: '#10b981' },
+    { label: 'Not Swipe In', value: 0, color: '#f43f5e' },
+    { label: 'OD', value: 0, color: '#b45309' },
+    { label: 'On Leave', value: 0, color: '#3b82f6' },
+    { label: 'Short Leave', value: 0, color: '#a855f7' },
+    { label: 'Swipe Out', value: 0, color: '#f97316' },
   ];
 
   donutSegments: DonutSegment[] = [];
@@ -147,7 +147,7 @@ export class HrDashboard implements OnInit, OnDestroy {
   // Source distribution
   sources = [
     { label: 'Desktop Swipe In', count: 0, percentage: 0, color: 'bg-slate-400' },
-    { label: 'Mobile Swipe In', count: 83, percentage: 100, color: 'bg-blue-600' },
+    { label: 'Mobile Swipe In', count: 0, percentage: 0, color: 'bg-blue-600' },
     { label: 'AI Swipe In', count: 0, percentage: 0, color: 'bg-indigo-600' },
   ];
 
@@ -440,11 +440,12 @@ export class HrDashboard implements OnInit, OnDestroy {
           }
 
           // Update Sources
-          const totalSwipes = s.mobileCount + s.desktopCount;
+          const aiCount = s.aiCount || 0;
+          const totalSwipes = s.mobileCount + s.desktopCount + aiCount;
           this.sources = [
-            { label: 'Desktop Swipe In', count: s.desktopCount, percentage: totalSwipes > 0 ? (s.desktopCount / totalSwipes) * 100 : 0, color: 'bg-slate-400' },
-            { label: 'Mobile Swipe In', count: s.mobileCount, percentage: totalSwipes > 0 ? (s.mobileCount / totalSwipes) * 100 : 100, color: 'bg-blue-600' },
-            { label: 'AI Swipe In', count: 0, percentage: 0, color: 'bg-indigo-600' },
+            { label: 'Desktop Swipe In', count: s.desktopCount, percentage: totalSwipes > 0 ? Math.round((s.desktopCount / totalSwipes) * 100) : 0, color: 'bg-slate-400' },
+            { label: 'Mobile Swipe In', count: s.mobileCount, percentage: totalSwipes > 0 ? Math.round((s.mobileCount / totalSwipes) * 100) : 0, color: 'bg-blue-600' },
+            { label: 'AI Swipe In', count: aiCount, percentage: totalSwipes > 0 ? Math.round((aiCount / totalSwipes) * 100) : 0, color: 'bg-indigo-600' },
           ];
 
           // Update Exceptions

@@ -77,7 +77,9 @@ export class ApprovalAttendanceRegularization implements OnInit {
 
   // Drawer states
   detailDrawerVisible: boolean = false;
+  historyDrawerVisible: boolean = false;
   selectedRequest: any = null;
+  historyEvents: any[] = [];
   processForm: FormGroup;
   isLoading: boolean = false;
 
@@ -183,6 +185,34 @@ export class ApprovalAttendanceRegularization implements OnInit {
     });
     this.detailDrawerVisible = true;
     this.cdr.markForCheck();
+  }
+
+  viewHistory(req: any) {
+    this.selectedRequest = req;
+    this.historyEvents = [];
+    this.historyDrawerVisible = true;
+    this.isLoading = true;
+    this.attendanceService.getRegularizationHistory(req.id).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        if (res.success && res.data) {
+          this.historyEvents = res.data.map((h: any) => ({
+            status: h.status,
+            date: h.created_at,
+            icon: h.status === 'Approved' ? 'pi pi-check' : (h.status === 'Rejected' ? 'pi pi-times' : 'pi pi-clock'),
+            color: h.status === 'Approved' ? 'bg-emerald-500' : (h.status === 'Rejected' ? 'bg-rose-500' : 'bg-amber-500'),
+            title: `Request ${h.status}`,
+            description: `${h.status} by ${h.action_by_name || 'System'}${h.action_by_designation ? ' (' + h.action_by_designation + ')' : ''}. Remarks: ${h.remarks || 'No remarks provided.'}`
+          }));
+        }
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.isLoading = false;
+        this.messageService.add({ severity: 'error', summary: 'Failed', detail: 'Unable to fetch history' });
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   quickApprove(req: any) {

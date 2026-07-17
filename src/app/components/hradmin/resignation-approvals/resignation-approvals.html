@@ -51,12 +51,14 @@
             </td>
             <td class="p-3 text-center text-slate-500 text-xs">{{ req.created_at | date: 'mediumDate' }}</td>
             <td class="p-3 text-center">
-              <div class="flex items-center justify-center gap-2" *ngIf="req.status === 'PENDING' || req.status === 'IN_PROCESS'">
-                <p-button icon="pi pi-check" styleClass="p-button-success p-button-sm p-button-rounded p-button-text" (onClick)="openActionDialog(req, 'APPROVED')" pTooltip="Approve"></p-button>
-                <p-button icon="pi pi-times" styleClass="p-button-danger p-button-sm p-button-rounded p-button-text" (onClick)="openActionDialog(req, 'REJECTED')" pTooltip="Reject"></p-button>
-                <p-button *ngIf="req.status === 'PENDING'" icon="pi pi-clock" styleClass="p-button-info p-button-sm p-button-rounded p-button-text" (onClick)="openActionDialog(req, 'IN_PROCESS')" pTooltip="Mark In Process"></p-button>
+              <div class="flex items-center justify-center gap-2">
+                <p-button icon="pi pi-history" styleClass="p-button-secondary p-button-sm p-button-rounded p-button-text" (onClick)="openHistoryDrawer(req)" pTooltip="View History"></p-button>
+                <ng-container *ngIf="req.status === 'PENDING' || req.status === 'IN_PROCESS'">
+                  <p-button icon="pi pi-check" styleClass="p-button-success p-button-sm p-button-rounded p-button-text" (onClick)="openActionDialog(req, 'APPROVED')" pTooltip="Approve"></p-button>
+                  <p-button icon="pi pi-times" styleClass="p-button-danger p-button-sm p-button-rounded p-button-text" (onClick)="openActionDialog(req, 'REJECTED')" pTooltip="Reject"></p-button>
+                  <p-button *ngIf="req.status === 'PENDING'" icon="pi pi-clock" styleClass="p-button-info p-button-sm p-button-rounded p-button-text" (onClick)="openActionDialog(req, 'IN_PROCESS')" pTooltip="Mark In Process"></p-button>
+                </ng-container>
               </div>
-              <span *ngIf="req.status !== 'PENDING' && req.status !== 'IN_PROCESS'" class="text-xs text-slate-400 font-semibold">-</span>
             </td>
           </tr>
         </ng-template>
@@ -85,6 +87,53 @@
     <p-button label="Confirm" [styleClass]="actionType === 'APPROVED' ? 'p-button-success' : (actionType === 'REJECTED' ? 'p-button-danger' : 'p-button-info')" (onClick)="confirmAction()"></p-button>
   </ng-template>
 </p-dialog>
+
+<!-- History Drawer -->
+<p-drawer [(visible)]="displayHistoryDrawer" position="right" [style]="{width: '35rem'}" header="Resignation History & Details">
+  <div class="flex flex-col h-full bg-slate-50/50" *ngIf="selectedResignation">
+    <div class="flex-1 overflow-y-auto p-6">
+       <!-- Details -->
+       <div class="mb-5">
+         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Employee Details</label>
+         <div class="text-sm font-semibold text-slate-800">{{ selectedResignation.employee_name }} ({{ selectedResignation.employee_code }})</div>
+       </div>
+       <div class="mb-5 grid grid-cols-2 gap-4">
+         <div>
+           <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Submitted On</label>
+           <div class="text-sm font-semibold text-slate-800">{{ selectedResignation.created_at | date: 'mediumDate' }}</div>
+         </div>
+         <div>
+           <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Requested LWD</label>
+           <div class="text-sm font-semibold text-blue-600">{{ selectedResignation.lwd_employee | date: 'dd-MM-yyyy' }}</div>
+         </div>
+       </div>
+       <div class="mb-5">
+         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Employee Reason</label>
+         <div class="text-sm font-semibold text-slate-800 p-3 bg-white border border-slate-200 rounded-md whitespace-pre-wrap">{{ selectedResignation.reason }}</div>
+       </div>
+
+       <!-- Action Area -->
+       <div *ngIf="selectedResignation.status === 'PENDING' || selectedResignation.status === 'IN_PROCESS'" class="mt-8 border-t border-slate-200 pt-6">
+         <label class="block text-sm font-semibold text-slate-700 mb-2">HR Reason / Remarks <span class="text-rose-500">*</span></label>
+         <textarea pInputTextarea [(ngModel)]="hrRemarks" rows="4" class="w-full p-2 border border-slate-300 rounded-md bg-white" placeholder="Enter HR Reason before submitting..."></textarea>
+         <small class="text-slate-500">Validation: HR Reason is required to process the resignation.</small>
+       </div>
+       
+       <!-- Display HR reason if already resolved -->
+       <div *ngIf="selectedResignation.status !== 'PENDING' && selectedResignation.status !== 'IN_PROCESS' && selectedResignation.hr_remarks" class="mt-8 border-t border-slate-200 pt-6">
+         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">HR Remarks</label>
+         <div class="text-sm font-semibold text-slate-800 p-3 bg-white border border-slate-200 rounded-md whitespace-pre-wrap">{{ selectedResignation.hr_remarks }}</div>
+       </div>
+    </div>
+    
+    <div class="p-6 bg-white border-t border-slate-200" *ngIf="selectedResignation.status === 'PENDING' || selectedResignation.status === 'IN_PROCESS'">
+      <div class="flex gap-3 justify-end">
+        <button pButton type="button" label="Reject" class="p-button-danger p-button-outlined" (click)="submitHistoryAction('REJECTED')"></button>
+        <button pButton type="button" label="Approve" class="p-button-success" (click)="submitHistoryAction('APPROVED')"></button>
+      </div>
+    </div>
+  </div>
+</p-drawer>
 
 <!-- Add Resignation Drawer -->
 <p-drawer [(visible)]="displayAddDrawer" position="right" [style]="{width: '35rem'}" header="Submit Resignation (HR)">

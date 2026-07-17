@@ -290,57 +290,31 @@ export class AttendanceRegularization implements OnInit {
   openHistoryDrawer(req: any) {
     this.selectedRequest = req;
     this.historyEvents = [];
-
-    // Created Event
-    if (req.submittedOn) {
-      this.historyEvents.push({
-        status: 'Submitted',
-        date: req.submittedOn,
-        icon: 'pi pi-file-arrow-up',
-        color: 'bg-blue-500',
-        title: 'Request Submitted',
-        description: `A regularization request for the date of ${new Date(req.attendanceDate).toLocaleDateString()} was submitted by ${req.employeeName || 'You'}.`
-      });
-
-      this.historyEvents.push({
-        status: 'Forwarded',
-        date: req.submittedOn,
-        icon: 'pi pi-send',
-        color: 'bg-purple-500',
-        title: 'Request Forwarded',
-        description: 'Your request has been automatically forwarded to your Reporting Manager and HR Admin for review.'
-      });
-    }
-
-    // Pending State
-    if (req.status === 'Pending') {
-      this.historyEvents.push({
-        status: 'Pending',
-        date: req.submittedOn,
-        icon: 'pi pi-clock',
-        color: 'bg-amber-500',
-        title: 'Pending Approval',
-        description: 'Request is currently waiting for HR Admin or Manager approval.'
-      });
-    }
-
-    // Processed State (Approved/Rejected)
-    if (req.status === 'Approved' || req.status === 'Rejected') {
-      const processedBy = req.approvedByName || (req.hrRemarks ? 'HR Admin' : (req.managerRemarks ? 'Manager' : 'HR Admin/Manager'));
-      const remarks = req.hrRemarks || req.managerRemarks || 'No remarks provided.';
-
-      this.historyEvents.push({
-        status: req.status,
-        date: req.updatedAt || req.submittedOn,
-        icon: req.status === 'Approved' ? 'pi pi-check' : 'pi pi-times',
-        color: req.status === 'Approved' ? 'bg-emerald-500' : 'bg-rose-500',
-        title: `Request ${req.status}`,
-        description: `Your request was ${req.status.toLowerCase()} by ${processedBy}. Remarks: ${remarks}`
-      });
-    }
-
     this.historyDrawerVisible = true;
-    this.cdr.markForCheck();
+    this.isLoading = true;
+    this.attendanceService.getRegularizationHistory(req.id).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        if (res.success && res.data) {
+          this.historyEvents = res.data.map((h: any) => ({
+            status: h.status,
+            date: h.created_at,
+            icon: h.status === 'Approved' ? 'pi pi-check' : (h.status === 'Rejected' ? 'pi pi-times' : 'pi pi-clock'),
+            color: h.status === 'Approved' ? 'bg-emerald-500' : (h.status === 'Rejected' ? 'bg-rose-500' : 'bg-amber-500'),
+            title: `Request ${h.status}`,
+            description: `${h.status} by ${h.action_by_name || 'System'}${h.action_by_designation ? ' (' + h.action_by_designation + ')' : ''}. Remarks: ${h.remarks || 'No remarks provided.'}`,
+            actionByName: h.action_by_name || 'System',
+            actionByDesignation: h.action_by_designation || ''
+          }));
+        }
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.isLoading = false;
+        this.messageService.add({ severity: 'error', summary: 'Failed', detail: 'Unable to fetch history' });
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   onFileSelected(event: any) {
