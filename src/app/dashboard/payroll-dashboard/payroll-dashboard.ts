@@ -43,6 +43,13 @@ export class PayrollDashboard {
 
   activeModules = [
     {
+      title: 'Employee Salary Preparation',
+      desc: 'Define pay structures, regular allowances, and individual variables.',
+      route: '/payroll/employee-salary-preparation',
+      icon: 'pi-user-edit',
+      color: 'from-emerald-500 to-teal-600'
+    },
+    {
       title: 'Monthly Salary',
       desc: 'Calculate monthly wages, generate salary slips, and disburse bank transfers.',
       route: '/payroll/monthly-salary',
@@ -52,7 +59,6 @@ export class PayrollDashboard {
   ];
 
   upcomingModules = [
-    { title: 'Employee Salary Preparation', desc: 'Define pay structures, regular allowances, and individual variables.' },
     { title: 'Monthly Salary Preparation', desc: 'Consolidate attendance records, leaves, and calculate gross figures.' },
     { title: 'Monthly Salary Approval', desc: 'Review calculated payroll values and authorize final fund disbursements.' },
     { title: 'Monthly Salary Components', desc: 'Configure customized basic, HRA, allowance, and tax structures.' },
