@@ -54,9 +54,10 @@
         'type': customCellTypeTpl,
         'duration': customCellDurationTpl,
         'reason': customCellReasonTpl,
-        'status': customCellStatusTpl,
-        'actions': actionCellTpl
-      }">
+        'status': customCellStatusTpl
+      }"
+      [tableActions]="[]"
+      [actionTemplate]="actionCellTpl">
       
       <!-- Custom Cell Template for Rich Formatting -->
       <ng-template #customCellEmployeeTpl let-row>
@@ -229,6 +230,42 @@
         Approve Request
       </button>
     </div>
+
+    <!-- History Timeline -->
+    <div class="border-t border-slate-100 pt-6 mt-2">
+      <h4 class="text-xs font-bold text-slate-800 mb-4 uppercase tracking-wide">Approval History</h4>
+      
+      <div *ngIf="isLoadingHistory" class="flex justify-center p-4">
+        <i class="pi pi-spinner pi-spin text-indigo-500 text-xl"></i>
+      </div>
+      
+      <div *ngIf="!isLoadingHistory && leaveHistory.length === 0" class="text-xs text-slate-400 text-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+        No history found for this request.
+      </div>
+
+      <div *ngIf="!isLoadingHistory && leaveHistory.length > 0" class="relative pl-4 space-y-6 before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-slate-200">
+        <div *ngFor="let item of leaveHistory" class="relative">
+          <div class="absolute -left-[21px] top-1 rounded-full p-1 border-2 border-white bg-slate-200"
+            [class.bg-emerald-500]="item.status === 'APPROVED' || item.status === 'Approved'"
+            [class.bg-rose-500]="item.status === 'REJECTED' || item.status === 'Rejected'"
+            [class.bg-amber-500]="item.status === 'PENDING' || item.status === 'Pending'">
+            <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+          </div>
+          <div>
+            <div class="flex justify-between items-start mb-0.5">
+              <span class="text-xs font-bold text-slate-800">{{ item.status }}</span>
+              <span class="text-[10px] font-medium text-slate-400">{{ item.created_at | date:'medium' }}</span>
+            </div>
+            <div class="text-[11px] text-slate-500 mb-1">
+              By <span class="font-semibold text-slate-700">{{ item.action_by_name || 'System' }}</span> <span *ngIf="item.action_by_role" class="text-[9px] px-1.5 py-0.5 bg-slate-100 rounded text-slate-500 ml-1">{{ item.action_by_role }}</span>
+            </div>
+            <div *ngIf="item.remarks" class="text-[11px] text-slate-600 bg-slate-50 p-2 rounded border border-slate-100 mt-1.5">
+              "{{ item.remarks }}"
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </p-drawer>
 
@@ -261,7 +298,7 @@
     </div>
 
     <!-- Brief Detail Summary -->
-    <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-100 text-xs mb-6 flex flex-col gap-2 font-sans">
+    <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-100 text-xs mb-4 flex flex-col gap-2 font-sans">
       <div class="flex justify-between">
         <span class="text-slate-400 font-medium">Employee:</span>
         <span class="text-slate-800 font-semibold">{{ selectedRequest?.employeeName }}</span>
@@ -274,6 +311,14 @@
         <span class="text-slate-400 font-medium">Duration:</span>
         <span class="text-slate-800 font-semibold">{{ selectedRequest?.duration }}</span>
       </div>
+    </div>
+
+    <!-- Remarks Field -->
+    <div class="mb-6 font-sans text-left">
+      <label class="block text-xs font-bold text-slate-700 mb-1.5">Remarks (Optional)</label>
+      <textarea [(ngModel)]="remarks" rows="2"
+        class="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors placeholder:text-slate-400 resize-none bg-white"
+        placeholder="Add your comments here..."></textarea>
     </div>
 
     <!-- Yes and No Buttons -->

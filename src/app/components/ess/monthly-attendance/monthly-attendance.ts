@@ -8,6 +8,8 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService, ConfirmationService } from 'primeng/api';
 
 import { MonthlyAttendanceService } from '../../../shared/services/monthly-attendance.service';
+import { EmployeeManagementService } from '../../../shared/services/employee-management.service';
+import { UserService } from '../../../shared/services/user-service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -33,9 +35,14 @@ import { InputTextModule } from 'primeng/inputtext';
 export class MonthlyAttendance implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private monthlyService = inject(MonthlyAttendanceService);
+  private employeeService = inject(EmployeeManagementService);
+  private userService = inject(UserService);
   private fb = inject(FormBuilder);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
+
+  isPrivileged = false;
+  employees: any[] = [];
 
   breadcrumbItems = [
     { label: 'Employee Self Service', icon: 'pi pi-home', routerLink: '/ess' },
@@ -62,16 +69,16 @@ export class MonthlyAttendance implements OnInit {
     { label: 'Absent', value: 'Absent' },
     { label: 'Weekly Off', value: 'Weekly Off' },
     { label: 'Holiday', value: 'Holiday' },
-    { label: 'CL', value: 'CL' },
-    { label: 'EL', value: 'EL' },
-    { label: 'SL', value: 'SL' },
+    { label: 'Casual Leave', value: 'CL' },
+    { label: 'Earned Leave', value: 'EL' },
+    { label: 'Sick Leave', value: 'SL' },
     { label: 'Half Day', value: 'Half Day' },
-    { label: 'CL/2', value: 'CL/2' },
-    { label: 'EL/2', value: 'EL/2' },
-    { label: 'SL/2', value: 'SL/2' },
-    { label: 'WFH', value: 'WFH' },
-    { label: 'OD', value: 'OD' },
-    { label: 'LWP', value: 'LWP' }
+    { label: 'Casual Leave/2', value: 'CL/2' },
+    { label: 'Earned Leave/2', value: 'EL/2' },
+    { label: 'Sick Leave/2', value: 'SL/2' },
+    { label: 'Work From Home', value: 'WFH' },
+    { label: 'Other Duty', value: 'OD' },
+    { label: 'Leave Without Pay', value: 'LWP' }
   ];
 
   filterForm: FormGroup;
@@ -82,7 +89,7 @@ export class MonthlyAttendance implements OnInit {
 
   currentRecord: any = null;
   summary: any = null;
-  
+
   isEditable = computed(() => {
     if (!this.currentRecord) return false;
     return ['Draft', 'Rejected'].includes(this.currentRecord.status);
@@ -90,6 +97,7 @@ export class MonthlyAttendance implements OnInit {
 
   constructor() {
     this.filterForm = this.fb.group({
+      employee_id: [null],
       month: [new Date().getMonth() + 1],
       year: [new Date().getFullYear()]
     });
@@ -105,6 +113,27 @@ export class MonthlyAttendance implements OnInit {
   }
 
   ngOnInit(): void {
+    this.userService.getUserSidebar('').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (res: any) => {
+        // Just checking if user is HR by checking their token roles or sidebar response
+        // We will decode the token or rely on a simple backend call if needed, but since we don't have direct role access easily without user service, we can fetch employees and if it fails, they are not HR.
+        this.loadEmployees();
+      }
+    });
+  }
+
+  loadEmployees() {
+    this.employeeService.getGlobalEmployees().subscribe({
+      next: (res) => {
+        this.employees = res || [];
+        if (this.employees.length > 0) {
+          this.isPrivileged = true; // Only HR/Admin can successfully fetch all employees
+        }
+      },
+      error: () => {
+        this.isPrivileged = false;
+      }
+    });
   }
 
   get detailsArray() {
@@ -115,9 +144,9 @@ export class MonthlyAttendance implements OnInit {
     if (this.filterForm.invalid) return;
     this.loading.set(true);
 
-    const { month, year } = this.filterForm.value;
-    
-    this.monthlyService.createMonthlyAttendance(month, year)
+    const { month, year, employee_id } = this.filterForm.value;
+
+    this.monthlyService.createMonthlyAttendance(month, year, employee_id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -150,7 +179,7 @@ export class MonthlyAttendance implements OnInit {
 
   calculateSummary(details: any[]) {
     if (!details) return;
-    
+
     const sum: any = {
       Present: 0, Absent: 0, 'Weekly Off': 0, Holiday: 0,
       CL: 0, EL: 0, SL: 0, 'Half Day': 0,
@@ -164,8 +193,8 @@ export class MonthlyAttendance implements OnInit {
       }
     });
 
-    sum['Paid Days'] = 
-      sum.Present + sum['Weekly Off'] + sum.Holiday + 
+    sum['Paid Days'] =
+      sum.Present + sum['Weekly Off'] + sum.Holiday +
       sum.CL + sum.EL + sum.SL + sum.WFH + sum.OD +
       ((sum['Half Day'] + sum['CL/2'] + sum['EL/2'] + sum['SL/2']) * 0.5);
 
@@ -228,5 +257,16 @@ export class MonthlyAttendance implements OnInit {
 
   isWeekend(day: string): boolean {
     return day === 'Sunday';
+  }
+
+  applyBulkStatus(status: string) {
+    if (!status) return;
+    this.detailsArray.controls.forEach(ctrl => {
+      if (this.isWeekend(ctrl.get('day')?.value)) {
+        ctrl.get('attendance_status')?.setValue('Weekly Off');
+      } else {
+        ctrl.get('attendance_status')?.setValue(status);
+      }
+    });
   }
 }

@@ -68,7 +68,11 @@ export class LeaveApproval implements OnInit {
   actionType: 'Approve' | 'Reject' | null = null;
   showConfirmModal = false;
   showDetailsDrawer = false;
+  remarks = '';
   
+  leaveHistory: any[] = [];
+  isLoadingHistory = false;
+
   activeTab: string = 'All';
   
   tabs = [
@@ -175,6 +179,7 @@ export class LeaveApproval implements OnInit {
   triggerAction(request: LeaveRequestUI, type: 'Approve' | 'Reject') {
     this.selectedRequest = request;
     this.actionType = type;
+    this.remarks = '';
     this.showConfirmModal = true;
   }
 
@@ -198,7 +203,8 @@ export class LeaveApproval implements OnInit {
       startDate: startStr,
       endDate: endStr,
       reason: req.raw.reason,
-      status: newStatus
+      status: newStatus,
+      remarks: this.remarks
     }).subscribe({
       next: (res: any) => {
         if (res.success) {
@@ -233,5 +239,19 @@ export class LeaveApproval implements OnInit {
   viewDetails(request: LeaveRequestUI) {
     this.selectedRequest = request;
     this.showDetailsDrawer = true;
+    this.leaveHistory = [];
+    this.isLoadingHistory = true;
+
+    this.leaveService.getLeaveHistory(request.id).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.leaveHistory = res.data || [];
+        }
+        this.isLoadingHistory = false;
+      },
+      error: () => {
+        this.isLoadingHistory = false;
+      }
+    });
   }
 }

@@ -84,6 +84,24 @@
         <label class="text-sm font-semibold text-slate-700">Employee's Present Days</label>
         <p-inputNumber [(ngModel)]="payableDays" (onInput)="calculateSalary()" [min]="0" [max]="31" styleClass="w-full"
           inputStyleClass="!text-xl !font-bold !py-3"></p-inputNumber>
+          
+        <div class="flex flex-wrap gap-2 mt-1" *ngIf="payrollSummary">
+          <span class="text-[10px] px-2 py-1 bg-green-50 text-green-700 rounded border border-green-200" title="Present">
+            P: {{payrollSummary['Present'] || 0}}
+          </span>
+          <span class="text-[10px] px-2 py-1 bg-red-50 text-red-700 rounded border border-red-200" title="Absent">
+            A: {{payrollSummary['Absent'] || 0}}
+          </span>
+          <span class="text-[10px] px-2 py-1 bg-blue-50 text-blue-700 rounded border border-blue-200" title="Leave">
+            L: {{payrollSummary['Leave'] || 0}}
+          </span>
+          <span class="text-[10px] px-2 py-1 bg-amber-50 text-amber-700 rounded border border-amber-200" title="Half Day">
+            HD: {{payrollSummary['Half Day'] || 0}}
+          </span>
+          <span class="text-[10px] px-2 py-1 bg-slate-100 text-slate-700 rounded border border-slate-300" title="Weekly Off">
+            WO: {{payrollSummary['Weekly Off'] || 0}}
+          </span>
+        </div>
       </div>
 
       <div class="flex flex-col gap-2">

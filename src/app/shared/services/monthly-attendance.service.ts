@@ -10,8 +10,12 @@ export class MonthlyAttendanceService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiBaseUrl}/api/attendance-monthly`;
 
-  createMonthlyAttendance(month: number, year: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/generate`, { month, year });
+  createMonthlyAttendance(month: number, year: number, employee_id?: number): Observable<any> {
+    const payload: any = { month, year };
+    if (employee_id) {
+      payload.employee_id = employee_id;
+    }
+    return this.http.post(`${this.apiUrl}/generate`, payload);
   }
 
   getMonthlyAttendance(employeeId: number, month: number, year: number): Observable<any> {
