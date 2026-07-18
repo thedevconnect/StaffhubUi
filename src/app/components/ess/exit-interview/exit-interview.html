@@ -1,136 +1,253 @@
 <p-toast></p-toast>
 <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
 
-<div class="p-6 font-sans bg-slate-50 min-h-screen">
-  <div class="max-w-6xl mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-    <!-- Card Header -->
-    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 flex items-center justify-between text-white">
-      <div class="flex items-center gap-2">
-        <i class="pi pi-file-edit text-lg"></i>
-        <h2 class="text-lg font-bold tracking-tight">Exit Interview Form</h2>
+<div class="bg-[#FFFFFF] min-h-screen p-4 sm:p-6 lg:p-6 font-sans">
+  <div class="bg-white overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 border-b border-gray-200 gap-3">
+      <div>
+        <h2 class="text-xl font-semibold text-gray-800">Exit Interview Feedback</h2>
+        <p class="text-xs text-slate-500 mt-1">Submit your exit interview responses and view your past feedback submissions.</p>
       </div>
-      <div class="flex items-center gap-4 text-xs opacity-90 select-none">
-        <div class="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-lg cursor-pointer">
-          <i class="pi pi-question-circle"></i>
-          <span>Help</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <i class="pi pi-expand cursor-pointer"></i>
-          <i class="pi pi-chevron-up cursor-pointer"></i>
-        </div>
+      <div class="flex items-center gap-2">
+        <p-button *ngIf="myExitInterviews.length === 0" (onClick)="openFormDrawer()" label="Fill Exit Interview" icon="pi pi-plus"
+          styleClass="p-button-sm p-button-primary rounded-xl font-semibold px-4 py-2 shadow-sm transition-all" [raised]="true">
+        </p-button>
+        <span *ngIf="myExitInterviews.length > 0" class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full select-none flex items-center gap-1.5">
+          <i class="pi pi-check-circle"></i> Exit Interview Submitted
+        </span>
       </div>
     </div>
 
-    <!-- Form Content -->
-    <form [formGroup]="exitInterviewForm" (ngSubmit)="onSubmit()" class="p-6 md:p-8 space-y-6">
+    <!-- Employee Submissions Table -->
+    <div class="overflow-x-auto">
+      <p-table [value]="myExitInterviews" [loading]="isLoading" styleClass="p-datatable-sm" responsiveLayout="scroll">
+        <ng-template pTemplate="header">
+          <tr class="text-xs uppercase bg-slate-50/50 text-slate-500 tracking-wider">
+            <th class="p-3.5 text-left">Expectations</th>
+            <th class="p-3.5 text-left">Suggestions Summary</th>
+            <th class="p-3.5 text-center">Status</th>
+            <th class="p-3.5 text-center">Submitted Date</th>
+            <th class="p-3.5 text-center">Actions</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-item>
+          <tr class="border-b border-slate-100 hover:bg-slate-50/40 text-sm">
+            <td class="p-3.5 text-slate-800 font-medium max-w-[250px] truncate" [title]="item.expectations">
+              {{ item.expectations }}
+            </td>
+            <td class="p-3.5 text-slate-700 max-w-[280px] truncate" [title]="item.suggestions">
+              {{ item.suggestions }}
+            </td>
+            <td class="p-3.5 text-center">
+              <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                SUBMITTED
+              </span>
+            </td>
+            <td class="p-3.5 text-center text-slate-500 text-xs">
+              {{ item.created_at | date: 'mediumDate' }}
+            </td>
+            <td class="p-3.5 text-center">
+              <p-button icon="pi pi-eye" styleClass="p-button-secondary p-button-sm p-button-rounded p-button-text"
+                (onClick)="viewDetails(item)" pTooltip="View Feedback Details"></p-button>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5" class="text-center p-8 text-slate-500">
+              <div class="flex flex-col items-center justify-center gap-3">
+                <i class="pi pi-file-edit text-3xl text-slate-300"></i>
+                <p class="text-sm font-medium">No exit interview submissions found.</p>
+                <p-button (onClick)="openFormDrawer()" label="Fill Exit Interview Form" icon="pi pi-plus" styleClass="p-button-sm p-button-outlined p-button-primary rounded-xl"></p-button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
+
+<!-- Drawer 1: Form Drawer for Submitting Exit Interview -->
+<p-drawer [(visible)]="displayFormDrawer" position="right" [modal]="true" [style]="{ width: '100%', maxWidth: '750px' }" styleClass="modern-drawer">
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-3">
+      <div class="h-10 w-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-base shadow-sm">
+        <i class="pi pi-file-edit"></i>
+      </div>
+      <div>
+        <h3 class="text-lg font-bold text-slate-800">Exit Interview Form</h3>
+        <p class="text-xs text-slate-400">Please answer all required questions before leaving</p>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="content">
+    <form [formGroup]="exitInterviewForm" (ngSubmit)="onSubmit()" class="p-4 space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Question 1 -->
         <div class="flex flex-col gap-2">
-          <label class="text-sm font-semibold text-slate-700 leading-snug">
-            What were your expectations when you joined the company? <span class="text-rose-500">*</span>
+          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
+            1. Expectations When Joining <span class="text-rose-500">*</span>
           </label>
-          <textarea formControlName="expectations" placeholder="Type your answer here..." rows="3"
-            [class.border-red-500]="exitInterviewForm.get('expectations')?.touched && exitInterviewForm.get('expectations')?.invalid"
-            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"></textarea>
-          <div *ngIf="exitInterviewForm.get('expectations')?.touched && exitInterviewForm.get('expectations')?.invalid"
-            class="text-rose-500 text-xs">
+          <textarea formControlName="expectations" placeholder="What were your expectations when you joined?" rows="3"
+            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"></textarea>
+          <div *ngIf="exitInterviewForm.get('expectations')?.touched && exitInterviewForm.get('expectations')?.invalid" class="text-rose-500 text-xs">
             This field is required.
           </div>
         </div>
 
         <!-- Question 2 -->
         <div class="flex flex-col gap-2">
-          <label class="text-sm font-semibold text-slate-700 leading-snug">
-            Would you say that your expectations have been fulfilled? <span class="text-rose-500">*</span>
+          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
+            2. Expectations Fulfilled? <span class="text-rose-500">*</span>
           </label>
-          <textarea formControlName="fulfilled" placeholder="Type your answer here..." rows="3"
-            [class.border-red-500]="exitInterviewForm.get('fulfilled')?.touched && exitInterviewForm.get('fulfilled')?.invalid"
-            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"></textarea>
-          <div *ngIf="exitInterviewForm.get('fulfilled')?.touched && exitInterviewForm.get('fulfilled')?.invalid"
-            class="text-rose-500 text-xs">
+          <textarea formControlName="fulfilled" placeholder="Would you say your expectations were fulfilled?" rows="3"
+            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"></textarea>
+          <div *ngIf="exitInterviewForm.get('fulfilled')?.touched && exitInterviewForm.get('fulfilled')?.invalid" class="text-rose-500 text-xs">
             This field is required.
           </div>
         </div>
 
         <!-- Question 3 -->
         <div class="flex flex-col gap-2">
-          <label class="text-sm font-semibold text-slate-700 leading-snug">
-            What are the three things that attract you to your new job? <span class="text-rose-500">*</span>
+          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
+            3. Attraction To New Job <span class="text-rose-500">*</span>
           </label>
-          <textarea formControlName="attractNewJob" placeholder="Type your answer here..." rows="3"
-            [class.border-red-500]="exitInterviewForm.get('attractNewJob')?.touched && exitInterviewForm.get('attractNewJob')?.invalid"
-            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"></textarea>
-          <div
-            *ngIf="exitInterviewForm.get('attractNewJob')?.touched && exitInterviewForm.get('attractNewJob')?.invalid"
-            class="text-rose-500 text-xs">
+          <textarea formControlName="attractNewJob" placeholder="Three things attracting you to your new job..." rows="3"
+            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"></textarea>
+          <div *ngIf="exitInterviewForm.get('attractNewJob')?.touched && exitInterviewForm.get('attractNewJob')?.invalid" class="text-rose-500 text-xs">
             This field is required.
           </div>
         </div>
 
         <!-- Question 4 -->
         <div class="flex flex-col gap-2">
-          <label class="text-sm font-semibold text-slate-700 leading-snug">
-            Would you consider coming back to join us at a later date? <span class="text-rose-500">*</span>
+          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
+            4. Consider Joining Again? <span class="text-rose-500">*</span>
           </label>
-          <textarea formControlName="comeBackLater" placeholder="Type your answer here..." rows="3"
-            [class.border-red-500]="exitInterviewForm.get('comeBackLater')?.touched && exitInterviewForm.get('comeBackLater')?.invalid"
-            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"></textarea>
-          <div
-            *ngIf="exitInterviewForm.get('comeBackLater')?.touched && exitInterviewForm.get('comeBackLater')?.invalid"
-            class="text-rose-500 text-xs">
+          <textarea formControlName="comeBackLater" placeholder="Would you consider coming back at a later date?" rows="3"
+            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"></textarea>
+          <div *ngIf="exitInterviewForm.get('comeBackLater')?.touched && exitInterviewForm.get('comeBackLater')?.invalid" class="text-rose-500 text-xs">
             This field is required.
           </div>
         </div>
 
         <!-- Question 5 -->
         <div class="flex flex-col gap-2">
-          <label class="text-sm font-semibold text-slate-700 leading-snug">
-            What did you like about the company? <span class="text-rose-500">*</span>
+          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
+            5. What Liked About Company <span class="text-rose-500">*</span>
           </label>
-          <textarea formControlName="whatLiked" placeholder="Type your answer here..." rows="3"
-            [class.border-red-500]="exitInterviewForm.get('whatLiked')?.touched && exitInterviewForm.get('whatLiked')?.invalid"
-            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"></textarea>
-          <div *ngIf="exitInterviewForm.get('whatLiked')?.touched && exitInterviewForm.get('whatLiked')?.invalid"
-            class="text-rose-500 text-xs">
+          <textarea formControlName="whatLiked" placeholder="What did you like most about the company?" rows="3"
+            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"></textarea>
+          <div *ngIf="exitInterviewForm.get('whatLiked')?.touched && exitInterviewForm.get('whatLiked')?.invalid" class="text-rose-500 text-xs">
             This field is required.
           </div>
         </div>
 
         <!-- Question 6 -->
         <div class="flex flex-col gap-2">
-          <label class="text-sm font-semibold text-slate-700 leading-snug">
-            What did you dislike about the company? <span class="text-rose-500">*</span>
+          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
+            6. What Disliked About Company <span class="text-rose-500">*</span>
           </label>
-          <textarea formControlName="whatDisliked" placeholder="Type your answer here..." rows="3"
-            [class.border-red-500]="exitInterviewForm.get('whatDisliked')?.touched && exitInterviewForm.get('whatDisliked')?.invalid"
-            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"></textarea>
-          <div *ngIf="exitInterviewForm.get('whatDisliked')?.touched && exitInterviewForm.get('whatDisliked')?.invalid"
-            class="text-rose-500 text-xs">
+          <textarea formControlName="whatDisliked" placeholder="What did you dislike or feel needs improvement?" rows="3"
+            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"></textarea>
+          <div *ngIf="exitInterviewForm.get('whatDisliked')?.touched && exitInterviewForm.get('whatDisliked')?.invalid" class="text-rose-500 text-xs">
             This field is required.
           </div>
         </div>
 
-        <!-- Suggestions (Full Width) -->
+        <!-- Question 7 (Full Width) -->
         <div class="flex flex-col gap-2 md:col-span-2">
-          <label class="text-sm font-semibold text-slate-700 leading-snug">
-            Suggestions For Organization <span class="text-rose-500">*</span>
+          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
+            7. Suggestions For Organization <span class="text-rose-500">*</span>
           </label>
-          <textarea formControlName="suggestions"
-            placeholder="Provide any feedback or suggestions for the organization..." rows="3"
-            [class.border-red-500]="exitInterviewForm.get('suggestions')?.touched && exitInterviewForm.get('suggestions')?.invalid"
-            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"></textarea>
-          <div *ngIf="exitInterviewForm.get('suggestions')?.touched && exitInterviewForm.get('suggestions')?.invalid"
-            class="text-rose-500 text-xs">
+          <textarea formControlName="suggestions" placeholder="Provide any suggestions or recommendations..." rows="3"
+            class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"></textarea>
+          <div *ngIf="exitInterviewForm.get('suggestions')?.touched && exitInterviewForm.get('suggestions')?.invalid" class="text-rose-500 text-xs">
             This field is required.
           </div>
         </div>
-      </div>
-
-      <!-- Action Button -->
-      <div class="pt-4 flex justify-start">
-        <button pButton type="submit" label="Submit"
-          class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-sm transition font-bold"></button>
       </div>
     </form>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end space-x-3 pt-3 border-t border-slate-100">
+      <button pButton type="button" label="Cancel" (click)="displayFormDrawer = false" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg shadow-sm transition"></button>
+      <button pButton type="submit" label="Submit Feedback" [loading]="isSubmitting" (click)="onSubmit()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition font-bold"></button>
+    </div>
+  </ng-template>
+</p-drawer>
+
+<!-- Drawer 2: View Details Drawer -->
+<p-drawer [(visible)]="displayViewDrawer" position="right" [style]="{width: '38rem'}" header="Your Exit Interview Feedback">
+  <div class="flex flex-col h-full bg-slate-50/50" *ngIf="selectedInterview">
+    <div class="flex-1 overflow-y-auto p-6 space-y-4">
+      
+      <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+        <div>
+          <h4 class="font-bold text-slate-900 text-sm">Exit Interview Submission</h4>
+          <p class="text-xs text-slate-500 mt-0.5">Submitted on {{ selectedInterview.created_at | date: 'dd MMM yyyy, hh:mm a' }}</p>
+        </div>
+        <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
+          SUBMITTED
+        </span>
+      </div>
+
+      <div class="space-y-4">
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-1.5">
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">1. Expectations When Joining</label>
+          <p class="text-xs font-medium text-slate-800 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed whitespace-pre-wrap">
+            {{ selectedInterview.expectations }}
+          </p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-1.5">
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">2. Expectations Fulfilled?</label>
+          <p class="text-xs font-medium text-slate-800 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed whitespace-pre-wrap">
+            {{ selectedInterview.fulfilled }}
+          </p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-1.5">
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">3. What Attracts To New Job</label>
+          <p class="text-xs font-medium text-slate-800 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed whitespace-pre-wrap">
+            {{ selectedInterview.attract_new_job || selectedInterview.attractNewJob }}
+          </p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-1.5">
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">4. Consider Joining Again?</label>
+          <p class="text-xs font-medium text-slate-800 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed whitespace-pre-wrap">
+            {{ selectedInterview.come_back_later || selectedInterview.comeBackLater }}
+          </p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-1.5">
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">5. What Liked About Company</label>
+          <p class="text-xs font-medium text-slate-800 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed whitespace-pre-wrap">
+            {{ selectedInterview.what_liked || selectedInterview.whatLiked }}
+          </p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-1.5">
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">6. What Disliked About Company</label>
+          <p class="text-xs font-medium text-slate-800 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed whitespace-pre-wrap">
+            {{ selectedInterview.what_disliked || selectedInterview.whatDisliked }}
+          </p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-1.5">
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">7. Suggestions For Organization</label>
+          <p class="text-xs font-medium text-slate-800 bg-indigo-50/50 p-3 rounded-xl border border-indigo-100 leading-relaxed whitespace-pre-wrap">
+            {{ selectedInterview.suggestions }}
+          </p>
+        </div>
+      </div>
+
+    </div>
   </div>
-</div>
+</p-drawer>

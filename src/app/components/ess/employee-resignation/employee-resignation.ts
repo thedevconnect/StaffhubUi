@@ -88,7 +88,7 @@ export class EmployeeResignation implements OnInit {
       willRefer: [null, Validators.required],
       lwdPolicy: [{ value: lwdDate, disabled: true }],
       lwdEmployee: [lwdDate, Validators.required],
-      remarks: ['']
+      remarks: ['', Validators.required]
     });
   }
 
@@ -109,6 +109,22 @@ export class EmployeeResignation implements OnInit {
     this.cdr.detectChanges();
   }
 
+  getShortfallDays(policyDateInput: any, empDateInput: any): number {
+    if (!policyDateInput || !empDateInput) return 0;
+    const policyDate = new Date(policyDateInput);
+    const empDate = new Date(empDateInput);
+    policyDate.setHours(0, 0, 0, 0);
+    empDate.setHours(0, 0, 0, 0);
+    const diffTime = policyDate.getTime() - empDate.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  }
+
+  get currentShortfallDays(): number {
+    const formVal = this.resignationForm?.getRawValue();
+    return this.getShortfallDays(formVal?.lwdPolicy, formVal?.lwdEmployee);
+  }
+
   loadMyResignations(): void {
     this.resignationService.getMyResignations().subscribe({
       next: (res) => {
@@ -120,6 +136,7 @@ export class EmployeeResignation implements OnInit {
             referUs: r.refer_us,
             lwdPolicy: new Date(r.lwd_policy),
             lwdEmployee: new Date(r.lwd_employee),
+            shortfallDays: this.getShortfallDays(r.lwd_policy, r.lwd_employee),
             status: r.status,
             remarks: r.remarks,
             hrRemarks: r.hr_remarks,
