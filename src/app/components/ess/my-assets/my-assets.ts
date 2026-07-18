@@ -210,6 +210,7 @@ export class MyAssets implements OnInit {
   mapAsset(item: any): any {
     return {
       ...item,
+      employee_name: item.employee_name || item.EmployeeName || item.employeeName || (item.employee_id ? `Employee #${item.employee_id}` : '-'),
       assigned_date: item.assigned_date ? item.assigned_date.split('T')[0] : null
     }
   }
