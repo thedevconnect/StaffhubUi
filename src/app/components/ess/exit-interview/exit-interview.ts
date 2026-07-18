@@ -10,6 +10,25 @@ import { DrawerModule } from 'primeng/drawer';
 import { MessageService } from 'primeng/api';
 import { ExitInterviewService, ExitInterviewData } from '../../../shared/services/exit-interview.service';
 
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+
+export function minWordsValidator(minWords: number = 25): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    if (!control.value || typeof control.value !== 'string') {
+      return { minWords: { requiredWords: minWords, actualWords: 0 } };
+    }
+    const trimmed = control.value.trim();
+    if (!trimmed) {
+      return { minWords: { requiredWords: minWords, actualWords: 0 } };
+    }
+    const words = trimmed.split(/\s+/).filter(w => w.length > 0);
+    if (words.length < minWords) {
+      return { minWords: { requiredWords: minWords, actualWords: words.length } };
+    }
+    return null;
+  };
+}
+
 @Component({
   selector: 'app-exit-interview',
   standalone: true,
@@ -53,16 +72,24 @@ export class ExitInterview implements OnInit {
 
   ngOnInit(): void {
     this.exitInterviewForm = this.fb.group({
-      expectations: ['', Validators.required],
-      fulfilled: ['', Validators.required],
-      attractNewJob: ['', Validators.required],
-      comeBackLater: ['', Validators.required],
-      whatLiked: ['', Validators.required],
-      whatDisliked: ['', Validators.required],
-      suggestions: ['', Validators.required]
+      expectations: ['', [Validators.required, minWordsValidator(25)]],
+      fulfilled: ['', [Validators.required, minWordsValidator(25)]],
+      attractNewJob: ['', [Validators.required, minWordsValidator(25)]],
+      comeBackLater: ['', [Validators.required, minWordsValidator(25)]],
+      whatLiked: ['', [Validators.required, minWordsValidator(25)]],
+      whatDisliked: ['', [Validators.required, minWordsValidator(25)]],
+      suggestions: ['', [Validators.required, minWordsValidator(25)]]
     });
 
     this.loadMySubmissions();
+  }
+
+  getWordCount(fieldName: string): number {
+    const val = this.exitInterviewForm.get(fieldName)?.value;
+    if (!val || typeof val !== 'string') return 0;
+    const trimmed = val.trim();
+    if (!trimmed) return 0;
+    return trimmed.split(/\s+/).filter(w => w.length > 0).length;
   }
 
   loadMySubmissions(): void {
