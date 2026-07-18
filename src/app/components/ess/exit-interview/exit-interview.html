@@ -89,85 +89,127 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Question 1 -->
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
-            1. Expectations When Joining <span class="text-rose-500">*</span>
-          </label>
-          <textarea formControlName="expectations" placeholder="What were your expectations when you joined?" rows="3"
+          <div class="flex justify-between items-center">
+            <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
+              1. Expectations When Joining <span class="text-rose-500">*</span>
+            </label>
+            <span class="text-[11px] font-semibold" [ngClass]="getWordCount('expectations') >= 25 ? 'text-emerald-600' : 'text-slate-400'">
+              {{ getWordCount('expectations') }} / 25 words
+            </span>
+          </div>
+          <textarea formControlName="expectations" placeholder="What were your expectations when you joined? (Minimum 25 words)..." rows="3"
             class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"></textarea>
-          <div *ngIf="exitInterviewForm.get('expectations')?.touched && exitInterviewForm.get('expectations')?.invalid" class="text-rose-500 text-xs">
-            This field is required.
+          <div *ngIf="exitInterviewForm.get('expectations')?.touched && exitInterviewForm.get('expectations')?.invalid" class="text-rose-500 text-xs font-medium">
+            <span *ngIf="exitInterviewForm.get('expectations')?.errors?.['required']">This field is required.</span>
+            <span *ngIf="exitInterviewForm.get('expectations')?.errors?.['minWords']">Minimum 25 words required (currently {{ getWordCount('expectations') }} words).</span>
           </div>
         </div>
 
         <!-- Question 2 -->
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
-            2. Expectations Fulfilled? <span class="text-rose-500">*</span>
-          </label>
-          <textarea formControlName="fulfilled" placeholder="Would you say your expectations were fulfilled?" rows="3"
+          <div class="flex justify-between items-center">
+            <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
+              2. Expectations Fulfilled? <span class="text-rose-500">*</span>
+            </label>
+            <span class="text-[11px] font-semibold" [ngClass]="getWordCount('fulfilled') >= 25 ? 'text-emerald-600' : 'text-slate-400'">
+              {{ getWordCount('fulfilled') }} / 25 words
+            </span>
+          </div>
+          <textarea formControlName="fulfilled" placeholder="Would you say your expectations were fulfilled? (Minimum 25 words)..." rows="3"
             class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"></textarea>
-          <div *ngIf="exitInterviewForm.get('fulfilled')?.touched && exitInterviewForm.get('fulfilled')?.invalid" class="text-rose-500 text-xs">
-            This field is required.
+          <div *ngIf="exitInterviewForm.get('fulfilled')?.touched && exitInterviewForm.get('fulfilled')?.invalid" class="text-rose-500 text-xs font-medium">
+            <span *ngIf="exitInterviewForm.get('fulfilled')?.errors?.['required']">This field is required.</span>
+            <span *ngIf="exitInterviewForm.get('fulfilled')?.errors?.['minWords']">Minimum 25 words required (currently {{ getWordCount('fulfilled') }} words).</span>
           </div>
         </div>
 
         <!-- Question 3 -->
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
-            3. Attraction To New Job <span class="text-rose-500">*</span>
-          </label>
-          <textarea formControlName="attractNewJob" placeholder="Three things attracting you to your new job..." rows="3"
+          <div class="flex justify-between items-center">
+            <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
+              3. Attraction To New Job <span class="text-rose-500">*</span>
+            </label>
+            <span class="text-[11px] font-semibold" [ngClass]="getWordCount('attractNewJob') >= 25 ? 'text-emerald-600' : 'text-slate-400'">
+              {{ getWordCount('attractNewJob') }} / 25 words
+            </span>
+          </div>
+          <textarea formControlName="attractNewJob" placeholder="Three things attracting you to your new job (Minimum 25 words)..." rows="3"
             class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"></textarea>
-          <div *ngIf="exitInterviewForm.get('attractNewJob')?.touched && exitInterviewForm.get('attractNewJob')?.invalid" class="text-rose-500 text-xs">
-            This field is required.
+          <div *ngIf="exitInterviewForm.get('attractNewJob')?.touched && exitInterviewForm.get('attractNewJob')?.invalid" class="text-rose-500 text-xs font-medium">
+            <span *ngIf="exitInterviewForm.get('attractNewJob')?.errors?.['required']">This field is required.</span>
+            <span *ngIf="exitInterviewForm.get('attractNewJob')?.errors?.['minWords']">Minimum 25 words required (currently {{ getWordCount('attractNewJob') }} words).</span>
           </div>
         </div>
 
         <!-- Question 4 -->
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
-            4. Consider Joining Again? <span class="text-rose-500">*</span>
-          </label>
-          <textarea formControlName="comeBackLater" placeholder="Would you consider coming back at a later date?" rows="3"
+          <div class="flex justify-between items-center">
+            <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
+              4. Consider Joining Again? <span class="text-rose-500">*</span>
+            </label>
+            <span class="text-[11px] font-semibold" [ngClass]="getWordCount('comeBackLater') >= 25 ? 'text-emerald-600' : 'text-slate-400'">
+              {{ getWordCount('comeBackLater') }} / 25 words
+            </span>
+          </div>
+          <textarea formControlName="comeBackLater" placeholder="Would you consider coming back at a later date? (Minimum 25 words)..." rows="3"
             class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"></textarea>
-          <div *ngIf="exitInterviewForm.get('comeBackLater')?.touched && exitInterviewForm.get('comeBackLater')?.invalid" class="text-rose-500 text-xs">
-            This field is required.
+          <div *ngIf="exitInterviewForm.get('comeBackLater')?.touched && exitInterviewForm.get('comeBackLater')?.invalid" class="text-rose-500 text-xs font-medium">
+            <span *ngIf="exitInterviewForm.get('comeBackLater')?.errors?.['required']">This field is required.</span>
+            <span *ngIf="exitInterviewForm.get('comeBackLater')?.errors?.['minWords']">Minimum 25 words required (currently {{ getWordCount('comeBackLater') }} words).</span>
           </div>
         </div>
 
         <!-- Question 5 -->
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
-            5. What Liked About Company <span class="text-rose-500">*</span>
-          </label>
-          <textarea formControlName="whatLiked" placeholder="What did you like most about the company?" rows="3"
+          <div class="flex justify-between items-center">
+            <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
+              5. What Liked About Company <span class="text-rose-500">*</span>
+            </label>
+            <span class="text-[11px] font-semibold" [ngClass]="getWordCount('whatLiked') >= 25 ? 'text-emerald-600' : 'text-slate-400'">
+              {{ getWordCount('whatLiked') }} / 25 words
+            </span>
+          </div>
+          <textarea formControlName="whatLiked" placeholder="What did you like most about the company? (Minimum 25 words)..." rows="3"
             class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"></textarea>
-          <div *ngIf="exitInterviewForm.get('whatLiked')?.touched && exitInterviewForm.get('whatLiked')?.invalid" class="text-rose-500 text-xs">
-            This field is required.
+          <div *ngIf="exitInterviewForm.get('whatLiked')?.touched && exitInterviewForm.get('whatLiked')?.invalid" class="text-rose-500 text-xs font-medium">
+            <span *ngIf="exitInterviewForm.get('whatLiked')?.errors?.['required']">This field is required.</span>
+            <span *ngIf="exitInterviewForm.get('whatLiked')?.errors?.['minWords']">Minimum 25 words required (currently {{ getWordCount('whatLiked') }} words).</span>
           </div>
         </div>
 
         <!-- Question 6 -->
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
-            6. What Disliked About Company <span class="text-rose-500">*</span>
-          </label>
-          <textarea formControlName="whatDisliked" placeholder="What did you dislike or feel needs improvement?" rows="3"
+          <div class="flex justify-between items-center">
+            <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
+              6. What Disliked About Company <span class="text-rose-500">*</span>
+            </label>
+            <span class="text-[11px] font-semibold" [ngClass]="getWordCount('whatDisliked') >= 25 ? 'text-emerald-600' : 'text-slate-400'">
+              {{ getWordCount('whatDisliked') }} / 25 words
+            </span>
+          </div>
+          <textarea formControlName="whatDisliked" placeholder="What did you dislike or feel needs improvement? (Minimum 25 words)..." rows="3"
             class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"></textarea>
-          <div *ngIf="exitInterviewForm.get('whatDisliked')?.touched && exitInterviewForm.get('whatDisliked')?.invalid" class="text-rose-500 text-xs">
-            This field is required.
+          <div *ngIf="exitInterviewForm.get('whatDisliked')?.touched && exitInterviewForm.get('whatDisliked')?.invalid" class="text-rose-500 text-xs font-medium">
+            <span *ngIf="exitInterviewForm.get('whatDisliked')?.errors?.['required']">This field is required.</span>
+            <span *ngIf="exitInterviewForm.get('whatDisliked')?.errors?.['minWords']">Minimum 25 words required (currently {{ getWordCount('whatDisliked') }} words).</span>
           </div>
         </div>
 
         <!-- Question 7 (Full Width) -->
         <div class="flex flex-col gap-2 md:col-span-2">
-          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
-            7. Suggestions For Organization <span class="text-rose-500">*</span>
-          </label>
-          <textarea formControlName="suggestions" placeholder="Provide any suggestions or recommendations..." rows="3"
+          <div class="flex justify-between items-center">
+            <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">
+              7. Suggestions For Organization <span class="text-rose-500">*</span>
+            </label>
+            <span class="text-[11px] font-semibold" [ngClass]="getWordCount('suggestions') >= 25 ? 'text-emerald-600' : 'text-slate-400'">
+              {{ getWordCount('suggestions') }} / 25 words
+            </span>
+          </div>
+          <textarea formControlName="suggestions" placeholder="Provide any suggestions or recommendations (Minimum 25 words)..." rows="3"
             class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"></textarea>
-          <div *ngIf="exitInterviewForm.get('suggestions')?.touched && exitInterviewForm.get('suggestions')?.invalid" class="text-rose-500 text-xs">
-            This field is required.
+          <div *ngIf="exitInterviewForm.get('suggestions')?.touched && exitInterviewForm.get('suggestions')?.invalid" class="text-rose-500 text-xs font-medium">
+            <span *ngIf="exitInterviewForm.get('suggestions')?.errors?.['required']">This field is required.</span>
+            <span *ngIf="exitInterviewForm.get('suggestions')?.errors?.['minWords']">Minimum 25 words required (currently {{ getWordCount('suggestions') }} words).</span>
           </div>
         </div>
       </div>

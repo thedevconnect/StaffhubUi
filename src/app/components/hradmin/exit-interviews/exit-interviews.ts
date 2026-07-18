@@ -52,12 +52,15 @@ export class ExitInterviews implements OnInit {
     this.exitInterviewService.getCompanyExitInterviews().subscribe({
       next: (res) => {
         if (res && res.success) {
-          this.exitInterviews = res.data;
+          this.exitInterviews = res.data || [];
+        } else {
+          this.exitInterviews = [];
         }
         this.isLoading = false;
         this.cdr.detectChanges();
       },
       error: () => {
+        this.exitInterviews = [];
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load exit interviews.' });
         this.isLoading = false;
         this.cdr.detectChanges();
