@@ -180,7 +180,7 @@ export class AppShell {
 
         const pathLower = route.path.toLowerCase();
 
-        if (pathLower.includes('approval')) {
+        if (pathLower.includes('approval') || pathLower.includes('exit')) {
           approvalSubmenus.push(item);
         } else if (pathLower.includes('employee-management') || pathLower.includes('offboarding') || pathLower.includes('office-location') || pathLower.includes('device-management')) {
           empMgmtSubmenus.push(item);

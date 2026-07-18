@@ -6,7 +6,7 @@ import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
-import { MessageService, ConfirmationService } from 'primeng/api';
+import { MessageService, ConfirmationService, MenuItem } from 'primeng/api';
 import { DialogModule } from 'primeng/dialog';
 import { FormsModule } from '@angular/forms';
 import { TextareaModule } from 'primeng/textarea';
@@ -15,6 +15,7 @@ import { EmployeeManagementService } from '../../../shared/services/employee-man
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 import { DrawerModule } from 'primeng/drawer';
+import { MenuModule } from 'primeng/menu';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
@@ -34,6 +35,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
     DatePickerModule,
     SelectModule,
     DrawerModule,
+    MenuModule,
     ReactiveFormsModule
   ],
   providers: [MessageService, ConfirmationService],
@@ -50,6 +52,7 @@ export class ResignationApprovals implements OnInit {
 
   resignations: Resignation[] = [];
   isLoading = false;
+  actionMenuItems: MenuItem[] = [];
 
   displayDialog = false;
   selectedResignation: Resignation | null = null;
@@ -154,6 +157,52 @@ export class ResignationApprovals implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update status' });
       }
     });
+  }
+
+  getShortfallDays(policyDateInput: any, empDateInput: any): number {
+    if (!policyDateInput || !empDateInput) return 0;
+    const policyDate = new Date(policyDateInput);
+    const empDate = new Date(empDateInput);
+    policyDate.setHours(0, 0, 0, 0);
+    empDate.setHours(0, 0, 0, 0);
+    const diffTime = policyDate.getTime() - empDate.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  }
+
+  openActionMenu(event: Event, req: Resignation, menu: any): void {
+    this.actionMenuItems = [
+      {
+        label: 'View History & Details',
+        icon: 'pi pi-history',
+        command: () => this.openHistoryDrawer(req)
+      }
+    ];
+
+    if (req.status === 'PENDING' || req.status === 'IN_PROCESS') {
+      this.actionMenuItems.push(
+        {
+          label: 'Approve',
+          icon: 'pi pi-check',
+          command: () => this.openActionDialog(req, 'APPROVED')
+        },
+        {
+          label: 'Reject',
+          icon: 'pi pi-times',
+          command: () => this.openActionDialog(req, 'REJECTED')
+        }
+      );
+
+      if (req.status === 'PENDING') {
+        this.actionMenuItems.push({
+          label: 'Mark In Process',
+          icon: 'pi pi-clock',
+          command: () => this.openActionDialog(req, 'IN_PROCESS')
+        });
+      }
+    }
+
+    menu.toggle(event);
   }
 
   openHistoryDrawer(req: Resignation): void {
