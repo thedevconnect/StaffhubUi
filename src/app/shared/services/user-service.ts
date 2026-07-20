@@ -141,6 +141,27 @@ export class UserService {
     return this.http.put(`${this.apiUrl}/api/companies/office-location`, data);
   }
 
+  // Time-Bound Anywhere Swipe Exemption Rules API
+  getExemptionRules(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/api/companies/location-exemptions`);
+  }
+
+  createExemptionRule(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/api/companies/location-exemptions`, data);
+  }
+
+  updateExemptionRule(id: string | number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/api/companies/location-exemptions/${id}`, data);
+  }
+
+  toggleExemptionRuleStatus(id: string | number, isActive: boolean): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/api/companies/location-exemptions/${id}/status`, { isActive });
+  }
+
+  deleteExemptionRule(id: string | number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/api/companies/location-exemptions/${id}`);
+  }
+
   login(username: string, password: string) {
     return this.http.post(`${this.apiUrl}/api/auth/login`, {
       username,

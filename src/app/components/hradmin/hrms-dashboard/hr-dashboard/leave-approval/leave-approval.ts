@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -69,12 +69,12 @@ export class LeaveApproval implements OnInit {
   showConfirmModal = false;
   showDetailsDrawer = false;
   remarks = '';
-  
+
   leaveHistory: any[] = [];
   isLoadingHistory = false;
 
   activeTab: string = 'All';
-  
+
   tabs = [
     { label: 'Pending', value: 'Pending', icon: 'pi pi-clock' },
     { label: 'Processed', value: 'Processed', icon: 'pi pi-check-circle' },
@@ -83,8 +83,9 @@ export class LeaveApproval implements OnInit {
 
   onTabChange(tab: string) {
     this.activeTab = tab;
+    this.cdr.markForCheck();
   }
-  
+
   get filteredLeaveRequests(): LeaveRequestUI[] {
     return this.leaveRequests.filter(req => {
       if (this.activeTab === 'All') return true;
@@ -98,7 +99,8 @@ export class LeaveApproval implements OnInit {
 
   constructor(
     private messageService: MessageService,
-    private leaveService: LeaveService
+    private leaveService: LeaveService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -107,6 +109,7 @@ export class LeaveApproval implements OnInit {
 
   loadLeaves(): void {
     this.isLoading = true;
+    this.cdr.markForCheck();
     this.leaveService.getLeaves().subscribe({
       next: (res: any) => {
         if (res.success && res.data) {
@@ -139,6 +142,8 @@ export class LeaveApproval implements OnInit {
           });
         }
         this.isLoading = false;
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         this.isLoading = false;
@@ -147,6 +152,8 @@ export class LeaveApproval implements OnInit {
           summary: 'Error',
           detail: 'Failed to load leave requests.'
         });
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       }
     });
   }
@@ -181,6 +188,7 @@ export class LeaveApproval implements OnInit {
     this.actionType = type;
     this.remarks = '';
     this.showConfirmModal = true;
+    this.cdr.markForCheck();
   }
 
   confirmAction(confirm: boolean) {
@@ -188,11 +196,13 @@ export class LeaveApproval implements OnInit {
     if (!confirm || !this.selectedRequest || !this.actionType) {
       this.selectedRequest = null;
       this.actionType = null;
+      this.cdr.markForCheck();
       return;
     }
 
     const req = this.selectedRequest;
-    const newStatus = this.actionType === 'Approve' ? 'APPROVED' : 'REJECTED';
+    const currentAction = this.actionType;
+    const newStatus = currentAction === 'Approve' ? 'APPROVED' : 'REJECTED';
 
     // Fallback formatting for dates in case they aren't parsed nicely
     const startStr = req.raw.start_date ? String(req.raw.start_date).substring(0, 10) : '';
@@ -208,10 +218,11 @@ export class LeaveApproval implements OnInit {
     }).subscribe({
       next: (res: any) => {
         if (res.success) {
+          const isApprove = currentAction === 'Approve';
           this.messageService.add({
-            severity: this.actionType === 'Approve' ? 'success' : 'error',
-            summary: this.actionType === 'Approve' ? 'Leave Approved' : 'Leave Rejected',
-            detail: `Leave request for ${req.employeeName} has been ${this.actionType === 'Approve' ? 'approved' : 'rejected'} successfully.`
+            severity: isApprove ? 'success' : 'warn',
+            summary: isApprove ? 'Leave Approved' : 'Leave Rejected',
+            detail: `Leave request for ${req.employeeName} has been ${isApprove ? 'approved' : 'rejected'} successfully.`
           });
           this.loadLeaves(); // Reload to get fresh data
         } else {
@@ -221,6 +232,8 @@ export class LeaveApproval implements OnInit {
             detail: res.message || 'Failed to update leave request.'
           });
         }
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         this.messageService.add({
@@ -228,12 +241,15 @@ export class LeaveApproval implements OnInit {
           summary: 'Error',
           detail: 'Failed to update leave request.'
         });
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       }
     });
 
     this.selectedRequest = null;
     this.actionType = null;
     this.showDetailsDrawer = false;
+    this.cdr.markForCheck();
   }
 
   viewDetails(request: LeaveRequestUI) {
@@ -241,6 +257,7 @@ export class LeaveApproval implements OnInit {
     this.showDetailsDrawer = true;
     this.leaveHistory = [];
     this.isLoadingHistory = true;
+    this.cdr.markForCheck();
 
     this.leaveService.getLeaveHistory(request.id).subscribe({
       next: (res: any) => {
@@ -248,9 +265,13 @@ export class LeaveApproval implements OnInit {
           this.leaveHistory = res.data || [];
         }
         this.isLoadingHistory = false;
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       },
       error: () => {
         this.isLoadingHistory = false;
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       }
     });
   }

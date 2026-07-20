@@ -1,4 +1,5 @@
 <p-toast></p-toast>
+
 <!-- Page Header Inline with Breadcrumb -->
 <div
   class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6">
@@ -9,51 +10,56 @@
 </div>
 
 <div class="space-y-6">
-  <!-- Title section -->
-  <div>
-    <h2 class="text-xl font-bold text-slate-800">Office Location Settings</h2>
-    <p class="text-xs text-slate-500 mt-1">Configure company location for Geo Attendance</p>
-  </div>
 
   <p-tabs value="0">
+
     <p-tablist>
       <p-tab value="0">Company Location</p-tab>
       <p-tab value="1">Employee Specific Locations</p-tab>
+      <p-tab value="2">Time-Bound Anywhere Swipe</p-tab>
     </p-tablist>
+
     <p-tabpanels>
       <p-tabpanel value="0">
         <!-- Table View -->
         <div *ngIf="!isCompanyLocationEditing()" class="mb-4">
-          <p-table [value]="companyLocationData()" responsiveLayout="scroll" [rowHover]="true">
-            <ng-template pTemplate="header">
-              <tr>
-                <th>Company Name</th>
-                <th>Address</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
-                <th>Radius (m)</th>
-                <th class="text-center">Action</th>
-              </tr>
+          <app-table-template [columns]="companyLocationColumns" [data]="companyLocationData()" [cellTemplates]="{
+              'companyName': companyNameCellTpl,
+              'address': addressCellTpl,
+              'officeLatitude': latCellTpl,
+              'officeLongitude': lngCellTpl,
+              'allowedRadius': radiusCellTpl
+            }" [tableActions]="[]" [actionTemplate]="companyActionCellTpl">
+
+            <ng-template #companyNameCellTpl let-row>
+              <span class="font-bold text-slate-900 text-xs">{{ row.companyName }}</span>
             </ng-template>
-            <ng-template pTemplate="body" let-loc>
-              <tr>
-                <td class="font-medium">{{ loc.companyName }}</td>
-                <td>{{ loc.address || '-' }}</td>
-                <td>{{ loc.officeLatitude || '-' }}</td>
-                <td>{{ loc.officeLongitude || '-' }}</td>
-                <td>{{ loc.allowedRadius || '-' }}</td>
-                <td class="text-center">
-                  <p-button icon="pi pi-pencil" styleClass="p-button-rounded p-button-text p-button-sm"
-                    (onClick)="editCompanyLocation()" pTooltip="Edit Location"></p-button>
-                </td>
-              </tr>
+
+            <ng-template #addressCellTpl let-row>
+              <span class="text-xs text-slate-700">{{ row.address || '-' }}</span>
             </ng-template>
-            <ng-template pTemplate="emptymessage">
-              <tr>
-                <td colspan="6" class="text-center p-4">No company location set.</td>
-              </tr>
+
+            <ng-template #latCellTpl let-row>
+              <span class="text-xs text-slate-600 font-mono">{{ row.officeLatitude || '-' }}</span>
             </ng-template>
-          </p-table>
+
+            <ng-template #lngCellTpl let-row>
+              <span class="text-xs text-slate-600 font-mono">{{ row.officeLongitude || '-' }}</span>
+            </ng-template>
+
+            <ng-template #radiusCellTpl let-row>
+              <span
+                class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                {{ row.allowedRadius || '-' }} m
+              </span>
+            </ng-template>
+
+            <ng-template #companyActionCellTpl let-row>
+              <p-button icon="pi pi-pencil" styleClass="p-button-rounded p-button-text p-button-sm"
+                (onClick)="editCompanyLocation()" pTooltip="Edit Location"></p-button>
+            </ng-template>
+
+          </app-table-template>
         </div>
 
         <!-- Edit Form -->
@@ -158,55 +164,51 @@
       <!-- Tab 2: Employee Specific Locations -->
       <p-tabpanel value="1">
         <div class="mb-4">
-          <p-table [value]="employees" [paginator]="true" [rows]="10" responsiveLayout="scroll"
-            [globalFilterFields]="['fullName', 'emp_id']" #dt [rowHover]="true">
-            <ng-template pTemplate="caption">
-              <div class="flex justify-between items-center">
-                <h5 class="m-0 text-lg font-semibold">Employee Location Mapping</h5>
-                <span class="p-input-icon-left">
-                  <i class="pi pi-search"></i>
-                  <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')"
-                    placeholder="Search Employee..." class="p-2 border rounded-md" />
-                </span>
-              </div>
+          <app-table-template [columns]="employeeColumns" [data]="employees" [showExport]="true"
+            exportFileName="Employee_Locations" [cellTemplates]="{
+              'emp_id': empIdCellTpl,
+              'fullName': empNameCellTpl,
+              'custom_location_allowed': empTypeCellTpl,
+              'custom_latitude': empLatCellTpl,
+              'custom_longitude': empLngCellTpl,
+              'custom_radius': empRadiusCellTpl
+            }" [tableActions]="[]" [actionTemplate]="empActionCellTpl">
+
+            <ng-template #empIdCellTpl let-row>
+              <span class="font-bold text-slate-800 text-xs">{{ row.emp_id }}</span>
             </ng-template>
-            <ng-template pTemplate="header">
-              <tr>
-                <th>Employee ID</th>
-                <th>Name</th>
-                <th>Location Type</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
-                <th>Radius (m)</th>
-                <th class="text-center">Action</th>
-              </tr>
+
+            <ng-template #empNameCellTpl let-row>
+              <div class="font-bold text-slate-900 text-xs">{{ row.fullName }}</div>
+              <div class="text-[10px] text-slate-500">{{ row.department || 'General' }}</div>
             </ng-template>
-            <ng-template pTemplate="body" let-emp>
-              <tr>
-                <td>{{ emp.emp_id }}</td>
-                <td>
-                  <div class="font-medium">{{ emp.fullName }}</div>
-                  <div class="text-xs text-gray-500">{{ emp.department }}</div>
-                </td>
-                <td>
-                  <p-tag [severity]="emp.custom_location_allowed ? 'info' : 'success'"
-                    [value]="emp.custom_location_allowed ? 'Custom Location' : 'Company Location'"></p-tag>
-                </td>
-                <td>{{ emp.custom_location_allowed ? emp.custom_latitude : '-' }}</td>
-                <td>{{ emp.custom_location_allowed ? emp.custom_longitude : '-' }}</td>
-                <td>{{ emp.custom_location_allowed ? emp.custom_radius : '-' }}</td>
-                <td class="text-center">
-                  <p-button icon="pi pi-pencil" styleClass="p-button-rounded p-button-text p-button-sm"
-                    (onClick)="openDrawer(emp)" pTooltip="Edit Location"></p-button>
-                </td>
-              </tr>
+
+            <ng-template #empTypeCellTpl let-row>
+              <p-tag [severity]="row.custom_location_allowed ? 'info' : 'success'"
+                [value]="row.custom_location_allowed ? 'Custom Location' : 'Company Location'"></p-tag>
             </ng-template>
-            <ng-template pTemplate="emptymessage">
-              <tr>
-                <td colspan="7" class="text-center p-4">No employees found.</td>
-              </tr>
+
+            <ng-template #empLatCellTpl let-row>
+              <span class="text-xs font-mono text-slate-600">{{ row.custom_location_allowed ? row.custom_latitude : '-'
+                }}</span>
             </ng-template>
-          </p-table>
+
+            <ng-template #empLngCellTpl let-row>
+              <span class="text-xs font-mono text-slate-600">{{ row.custom_location_allowed ? row.custom_longitude : '-'
+                }}</span>
+            </ng-template>
+
+            <ng-template #empRadiusCellTpl let-row>
+              <span class="text-xs font-semibold text-slate-700">{{ row.custom_location_allowed ? (row.custom_radius + '
+                m') : '-' }}</span>
+            </ng-template>
+
+            <ng-template #empActionCellTpl let-row>
+              <p-button icon="pi pi-pencil" styleClass="p-button-rounded p-button-text p-button-sm"
+                (onClick)="openDrawer(row)" pTooltip="Edit Location"></p-button>
+            </ng-template>
+
+          </app-table-template>
         </div>
 
         <!-- Drawer for Editing Employee Location -->
@@ -273,6 +275,231 @@
           </ng-template>
         </p-drawer>
       </p-tabpanel>
+
+      <!-- Tab 3: Time-Bound Anywhere Swipe Exemption Rules -->
+      <p-tabpanel value="2">
+        <div class="mb-4">
+          <app-table-template [columns]="exemptionColumns" [data]="exemptionRules()" [showExport]="true"
+            exportFileName="Anywhere_Swipe_Exemptions" [headerExtraTemplate]="headerExtraTpl" [cellTemplates]="{
+              'title': ruleScopeCellTpl,
+              'reasonCategory': reasonCellTpl,
+              'startDateTime': validityCellTpl,
+              'requireShiftTiming': shiftCellTpl,
+              'status': statusCellTpl
+            }" [tableActions]="[]" [actionTemplate]="actionCellTpl">
+
+            <!-- Extra Header Content -->
+            <ng-template #headerExtraTpl>
+              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full">
+                <div>
+                  <h5 class="m-0 text-base font-bold text-slate-800">Time-Bound Anywhere Swipe Exemption Rules</h5>
+                  <div class="flex items-center gap-2 mt-1">
+                    <span
+                      class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                      <i class="pi pi-building text-[10px]"></i>
+                      {{ companyName || 'Current Company' }}
+                    </span>
+                    <span class="text-xs text-slate-500">• {{ employees.length }} Employees enrolled</span>
+                  </div>
+                </div>
+                <p-button label="Create Rule" icon="pi pi-plus" (onClick)="openExemptionDrawer()"
+                  styleClass="p-button-sm rounded-lg shadow-sm shrink-0"></p-button>
+              </div>
+            </ng-template>
+
+            <!-- Custom Cell Templates -->
+            <ng-template #ruleScopeCellTpl let-row>
+              <div class="font-bold text-slate-900 text-xs mb-1">{{ row.title }}</div>
+              <span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                [class.bg-purple-50]="row.scope === 'COMPANY'" [class.text-purple-700]="row.scope === 'COMPANY'"
+                [class.bg-teal-50]="row.scope === 'EMPLOYEE'" [class.text-teal-700]="row.scope === 'EMPLOYEE'"
+                [class.bg-blue-50]="row.scope === 'DEPARTMENT'" [class.text-blue-700]="row.scope === 'DEPARTMENT'">
+                <i [class]="row.scope === 'COMPANY' ? 'pi pi-building' : 'pi pi-user'" class="text-[10px]"></i>
+                {{ row.scope === 'COMPANY' ? 'Company Wide (All Staff)' : (row.targetEmployeeNames?.join(', ') ||
+                'Selected Employees') }}
+              </span>
+            </ng-template>
+
+            <ng-template #reasonCellTpl let-row>
+              <div class="flex flex-col gap-1 max-w-xs">
+                <span
+                  class="inline-block text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded w-fit">
+                  {{ getCategoryLabel(row.reasonCategory) }}
+                </span>
+                <p class="text-xs text-slate-600 truncate" [title]="row.reasonRemarks">
+                  {{ row.reasonRemarks }}
+                </p>
+              </div>
+            </ng-template>
+
+            <ng-template #validityCellTpl let-row>
+              <div class="text-xs font-medium text-slate-700 space-y-0.5">
+                <div><span class="text-slate-400 text-[10px] font-bold">From:</span> {{ row.startDateTime | date:'dd
+                  MMM, hh:mm a' }}</div>
+                <div><span class="text-slate-400 text-[10px] font-bold">To:</span> {{ row.endDateTime | date:'dd MMM,
+                  hh:mm a' }}</div>
+              </div>
+            </ng-template>
+
+            <ng-template #shiftCellTpl let-row>
+              <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-md"
+                [class.bg-emerald-50]="row.requireShiftTiming" [class.text-emerald-700]="row.requireShiftTiming"
+                [class.bg-slate-100]="!row.requireShiftTiming" [class.text-slate-600]="!row.requireShiftTiming">
+                <i [class]="row.requireShiftTiming ? 'pi pi-clock' : 'pi pi-globe'" class="text-[10px]"></i>
+                {{ row.requireShiftTiming ? 'Shift Time Required' : 'Flexible Hours' }}
+              </span>
+            </ng-template>
+
+            <ng-template #statusCellTpl let-row>
+              <p-tag [severity]="getRuleStatusInfo(row).severity" [value]="getRuleStatusInfo(row).label"></p-tag>
+            </ng-template>
+
+            <!-- Actions Cell Template -->
+            <ng-template #actionCellTpl let-row>
+              <div class="flex items-center justify-center gap-1">
+                <p-button [icon]="row.isActive ? 'pi pi-pause' : 'pi pi-play'"
+                  styleClass="p-button-rounded p-button-text p-button-sm" (onClick)="toggleRuleStatus(row)"
+                  [pTooltip]="row.isActive ? 'Pause Rule' : 'Activate Rule'"></p-button>
+                <p-button icon="pi pi-pencil" styleClass="p-button-rounded p-button-text p-button-sm"
+                  (onClick)="openExemptionDrawer(row)" pTooltip="Edit Rule"></p-button>
+                <p-button icon="pi pi-trash" styleClass="p-button-rounded p-button-text p-button-danger p-button-sm"
+                  (onClick)="deleteExemptionRule(row.id)" pTooltip="Delete Rule"></p-button>
+              </div>
+            </ng-template>
+          </app-table-template>
+        </div>
+
+        <!-- Drawer: Create / Edit Exemption Rule -->
+        <p-drawer [(visible)]="isExemptionDrawerVisible" position="right" [style]="{width: '100%', maxWidth: ' 50%'}"
+          [baseZIndex]="10000" (onHide)="closeExemptionDrawer()">
+          <ng-template pTemplate="header">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                <i class="pi pi-map-marker text-lg"></i>
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-slate-900 m-0 leading-tight">
+                  {{ editingExemptionRule ? 'Edit Exemption Rule' : 'Create Exemption Rule' }}
+                </h3>
+                <p class="text-xs text-slate-400 m-0 mt-0.5">Configure temporary location bypass for swipe in/out</p>
+              </div>
+            </div>
+          </ng-template>
+
+          <ng-template pTemplate="content">
+            <form [formGroup]="exemptionForm" (ngSubmit)="saveExemptionRule()" class="p-2 space-y-5 font-sans">
+              <!-- Rule Title -->
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-bold text-slate-700">Rule Title <span class="text-red-500">*</span></label>
+                <input pInputText formControlName="title" placeholder="e.g. Monsoon Transit WFH Exemption"
+                  class="w-full text-xs p-2.5 rounded-lg border border-slate-300" />
+                <small
+                  *ngIf="exemptionForm.get('title')?.invalid && (exemptionForm.get('title')?.dirty || exemptionForm.get('title')?.touched)"
+                  class="text-red-500 text-[10px] font-bold">
+                  Rule Title is required
+                </small>
+              </div>
+
+              <!-- Scope Selection -->
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-bold text-slate-700">Applicable Target Scope <span
+                    class="text-red-500">*</span></label>
+                <p-select [options]="scopeOptions" formControlName="scope" optionLabel="label" optionValue="value"
+                  styleClass="w-full text-xs" appendTo="body"></p-select>
+              </div>
+
+              <!-- Scope Specific Selection -->
+              <div *ngIf="exemptionForm.get('scope')?.value === 'DEPARTMENT'" class="flex flex-col gap-1.5">
+                <label class="text-xs font-bold text-slate-700">Select Departments <span
+                    class="text-red-500">*</span></label>
+                <p-multiselect [options]="departmentOptions" formControlName="targetDepartments" optionLabel="label"
+                  optionValue="value" placeholder="Select Departments" styleClass="w-full text-xs"
+                  appendTo="body"></p-multiselect>
+              </div>
+
+              <div *ngIf="exemptionForm.get('scope')?.value === 'EMPLOYEE'" class="flex flex-col gap-1.5">
+                <label class="text-xs font-bold text-slate-700">Select Employees <span
+                    class="text-red-500">*</span></label>
+                <p-multiselect [options]="employeeOptions" formControlName="targetEmployeeIds" optionLabel="label"
+                  optionValue="value" placeholder="Select Employees" styleClass="w-full text-xs"
+                  appendTo="body"></p-multiselect>
+              </div>
+
+              <!-- Reason Category -->
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-bold text-slate-700">Reason Category / Tag <span
+                    class="text-red-500">*</span></label>
+                <p-select [options]="reasonCategoryOptions" formControlName="reasonCategory" optionLabel="label"
+                  optionValue="value" styleClass="w-full text-xs" appendTo="body"></p-select>
+              </div>
+
+              <!-- Reason & Policy Remarks -->
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-bold text-slate-700">Reason & Exemption Notes <span
+                    class="text-red-500">*</span></label>
+                <textarea pTextarea formControlName="reasonRemarks" rows="3"
+                  class="w-full text-xs p-2.5 rounded-lg border border-slate-300 resize-none"
+                  placeholder="Provide detailed explanation (e.g., Anywhere swipe granted due to flood alert, but shift timings apply)."></textarea>
+                <small
+                  *ngIf="exemptionForm.get('reasonRemarks')?.invalid && (exemptionForm.get('reasonRemarks')?.dirty || exemptionForm.get('reasonRemarks')?.touched)"
+                  class="text-red-500 text-[10px] font-bold">
+                  Reason note is required
+                </small>
+              </div>
+
+              <!-- Validity Window (Start & End Date/Time) -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-bold text-slate-700">Start Date & Time <span
+                      class="text-red-500">*</span></label>
+                  <p-datepicker formControlName="startDateTime" [showTime]="true" [showIcon]="true"
+                    dateFormat="dd/mm/yy" appendTo="body" styleClass="w-full" class="w-full"></p-datepicker>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-bold text-slate-700">End Date & Time <span
+                      class="text-red-500">*</span></label>
+                  <p-datepicker formControlName="endDateTime" [showTime]="true" [showIcon]="true" dateFormat="dd/mm/yy"
+                    appendTo="body" styleClass="w-full" class="w-full"></p-datepicker>
+                </div>
+              </div>
+
+              <!-- Shift Timing Enforcement -->
+              <div class="bg-indigo-50/60 rounded-xl p-3.5 border border-indigo-100/80 flex items-start gap-3">
+                <p-checkbox formControlName="requireShiftTiming" [binary]="true" inputId="shiftCheck"
+                  styleClass="mt-0.5"></p-checkbox>
+                <div>
+                  <label for="shiftCheck" class="text-xs font-bold text-indigo-900 cursor-pointer block">
+                    Require Standard Shift Timing for Swipe In/Out
+                  </label>
+                  <p class="text-[11px] text-indigo-700 mt-0.5 leading-snug">
+                    When enabled, employees can swipe from anywhere, but must perform swipe in/out at their scheduled
+                    shift start and end times.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Active Switch -->
+              <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200 flex items-center justify-between">
+                <div>
+                  <span class="text-xs font-bold text-slate-800 block">Rule Status</span>
+                  <span class="text-[10px] text-slate-500 block">Enable or disable this exemption immediately</span>
+                </div>
+                <p-checkbox formControlName="isActive" [binary]="true" inputId="ruleActive"></p-checkbox>
+              </div>
+
+              <!-- Form Buttons -->
+              <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                <p-button label="Cancel" styleClass="p-button-outlined p-button-secondary text-xs"
+                  (onClick)="closeExemptionDrawer()" type="button"></p-button>
+                <p-button label="Save Exemption Rule" type="submit" styleClass="p-button-primary text-xs"
+                  icon="pi pi-check"></p-button>
+              </div>
+            </form>
+          </ng-template>
+        </p-drawer>
+      </p-tabpanel>
+
     </p-tabpanels>
   </p-tabs>
+
 </div>
