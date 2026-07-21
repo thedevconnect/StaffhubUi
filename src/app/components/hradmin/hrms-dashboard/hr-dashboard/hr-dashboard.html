@@ -233,8 +233,8 @@
           <i class="pi pi-exclamation-circle text-slate-400"></i>
         </div>
         <div class="space-y-3">
-          <div *ngFor="let ex of exceptions"
-            class="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:bg-slate-50 transition">
+          <div *ngFor="let ex of exceptions" (click)="onExceptionClick(ex)"
+            class="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:bg-slate-50 cursor-pointer transition">
             <div class="flex items-center gap-2.5">
               <span class="flex h-8 w-8 items-center justify-center rounded-lg"
                 [class.bg-rose-50]="ex.severity === 'danger'" [class.text-rose-600]="ex.severity === 'danger'"

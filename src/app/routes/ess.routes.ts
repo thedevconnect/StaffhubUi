@@ -80,7 +80,12 @@ export const essRoutes: Routes = [
     loadComponent: () => import('../components/ess/ticket/ticket').then(c => c.Ticket)
   },
   {
+    path: 'onboarding',
+    loadComponent: () => import('../components/ess/profile/onboarding/onboarding').then(c => c.Onboarding)
+  },
+  {
     path: 'profile',
-    loadComponent: () => import('../components/ess/profile/profile/profile').then(c => c.Profile)
+    redirectTo: 'onboarding',
+    pathMatch: 'full'
   },
 ];

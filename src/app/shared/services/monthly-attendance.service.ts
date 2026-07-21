@@ -26,8 +26,12 @@ export class MonthlyAttendanceService {
     return this.http.get(`${this.apiUrl}/record/${id}`);
   }
 
-  saveDraft(id: number, details: any[]): Observable<any> {
-    return this.http.put(`${this.apiUrl}/save`, { id, details });
+  saveDraft(id: number, details: any[], month?: number, year?: number, employee_id?: number): Observable<any> {
+    const payload: any = { id, details };
+    if (month) payload.month = month;
+    if (year) payload.year = year;
+    if (employee_id) payload.employee_id = employee_id;
+    return this.http.put(`${this.apiUrl}/save`, payload);
   }
 
   submitAttendance(id: number): Observable<any> {

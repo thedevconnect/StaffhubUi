@@ -64,7 +64,7 @@
                 [class.group]="onboardingStatus !== 'COMPLETED' && onboardingStatus !== 'APPROVED'"
                 (click)="onboardingStatus !== 'COMPLETED' && onboardingStatus !== 'APPROVED' ? photoInput.click() : openOnboardingDrawer()">
 
-                <img [src]="profileData.personal.avatarUrl" alt="Avatar" class="h-full w-full object-cover">
+                <img [src]="profileData?.personal?.avatarUrl || 'assets/img/hrms logo.jpg'" (error)="onAvatarError($event)" alt="Avatar" class="h-full w-full object-cover">
 
                 <!-- Hover overlay -->
                 <div *ngIf="onboardingStatus !== 'COMPLETED' && onboardingStatus !== 'APPROVED'"

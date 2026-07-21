@@ -18,7 +18,7 @@ import { EmployeeManagementService } from '../../../../shared/services/employee-
 import { EmployeeOnboardingService } from '../../../../shared/services/employee-onboarding.service';
 
 @Component({
-  selector: 'app-profile',
+  selector: 'app-onboarding',
   standalone: true,
   imports: [
     CommonModule,
@@ -35,14 +35,14 @@ import { EmployeeOnboardingService } from '../../../../shared/services/employee-
     InputTextModule
   ],
   providers: [MessageService],
-  templateUrl: './profile.html',
-  styleUrl: './profile.scss',
+  templateUrl: './onboarding.html',
+  styleUrl: './onboarding.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Profile implements OnInit {
+export class Onboarding implements OnInit {
   breadcrumbItems: any[] = [
     { label: 'Employee Self Service', icon: 'pi pi-home', routerLink: '/ess' },
-    { label: 'Profile', icon: 'pi pi-user', routerLink: '/ess/profile' }
+    { label: 'Onboarding', icon: 'pi pi-id-card', routerLink: '/ess/onboarding' }
   ];
 
   activeTab: string = 'details';
@@ -87,7 +87,7 @@ export class Profile implements OnInit {
       motherName: '',
       maritalStatus: 'Single',
       nationality: 'Indian',
-      avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'
+      avatarUrl: 'assets/img/hrms logo.jpg'
     },
     employment: {
       employeeCode: 'EMP-2026-042',
@@ -126,9 +126,7 @@ export class Profile implements OnInit {
       pfNumber: ''
     },
     assets: [
-      { id: 'AST-940', name: 'MacBook Pro 16"', type: 'Laptop', serial: 'C02FG123Q05D', assignedDate: '2025-05-14', status: 'In Use' },
-      { id: 'AST-284', name: 'Dell 27" UltraSharp Monitor', type: 'Display', serial: 'MX-084W1-593B', assignedDate: '2025-05-14', status: 'In Use' },
-      { id: 'AST-105', name: 'Logitech MX Keys Keyboard', type: 'Input Device', serial: '2103LZ940B', assignedDate: '2025-06-01', status: 'In Use' }
+
     ],
     leaves: {
       annualTotal: 18,
@@ -466,5 +464,11 @@ export class Profile implements OnInit {
 
   onRequestUpdate(): void {
     this.openOnboardingDrawer();
+  }
+
+  onAvatarError(event: any): void {
+    if (event?.target) {
+      event.target.src = 'assets/img/hrms logo.jpg';
+    }
   }
 }

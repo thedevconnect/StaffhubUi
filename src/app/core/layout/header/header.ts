@@ -73,7 +73,7 @@ export class AppHeader {
 
   ngOnInit(): void {
     this.userMenuItems = [
-      { label: 'Profile', icon: 'pi pi-user', command: () => this.handleProfile() },
+      { label: 'Onboarding', icon: 'pi pi-id-card', command: () => this.handleOnboarding() },
       { separator: true },
       { label: 'Logout', icon: 'pi pi-sign-out', command: () => this.logout() },
     ];
@@ -122,8 +122,8 @@ export class AppHeader {
     });
   }
 
-  private handleProfile(): void {
-    this.router.navigate(['/ess/profile']);
+  private handleOnboarding(): void {
+    this.router.navigate(['/ess/onboarding']);
   }
 
 }

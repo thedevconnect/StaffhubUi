@@ -202,10 +202,18 @@ export class LeaveApplication {
   columns: TableColumn[] = [];
 
   disableAction = (actionId: string, row: any): boolean => {
-    if (row['leave Status'] !== 'PENDING') {
-      return actionId === 'edit' || actionId === 'delete';
+    const status = (row['leave Status'] || row['status'] || '').toString().toUpperCase();
+
+    if (status === 'DELETED' || status === 'CANCELLED') {
+      return true; // Completely disable all actions for deleted/cancelled leaves
     }
-    return false;
+
+    if (status === 'PENDING' || status === 'REJECTED') {
+      return false; // Enable actions (edit & delete) for PENDING and REJECTED leaves
+    }
+
+    // For Approved or other statuses, disable edit and delete
+    return actionId === 'edit' || actionId === 'delete';
   };
 
   onActionClicked(event: { actionId: string; row: any }) {
