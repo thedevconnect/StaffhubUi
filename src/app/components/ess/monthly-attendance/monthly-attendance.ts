@@ -206,8 +206,15 @@ export class MonthlyAttendance implements OnInit {
     this.saving.set(true);
 
     const payload = this.attendanceForm.getRawValue().details;
+    const filter = this.filterForm.value;
 
-    this.monthlyService.saveDraft(this.currentRecord.id, payload)
+    this.monthlyService.saveDraft(
+      this.currentRecord.id,
+      payload,
+      filter.month || this.currentRecord.month,
+      filter.year || this.currentRecord.year,
+      filter.employee_id || this.currentRecord.employee_id
+    )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -232,7 +239,14 @@ export class MonthlyAttendance implements OnInit {
         this.submitting.set(true);
         // Save first then submit
         const payload = this.attendanceForm.getRawValue().details;
-        this.monthlyService.saveDraft(this.currentRecord.id, payload).subscribe({
+        const filter = this.filterForm.value;
+        this.monthlyService.saveDraft(
+          this.currentRecord.id,
+          payload,
+          filter.month || this.currentRecord.month,
+          filter.year || this.currentRecord.year,
+          filter.employee_id || this.currentRecord.employee_id
+        ).subscribe({
           next: () => {
             this.monthlyService.submitAttendance(this.currentRecord.id).subscribe({
               next: () => {

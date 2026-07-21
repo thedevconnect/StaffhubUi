@@ -90,7 +90,7 @@
     <!-- Template for Table Actions -->
     <ng-template #actionTpl let-item>
       <div class="flex items-center justify-center">
-        <p-button *ngIf="item['leave Status'] === 'PENDING'" label="Withdraw" icon="pi pi-times"
+        <p-button *ngIf="item['leave Status'] === 'PENDING' || item['leave Status'] === 'REJECTED' || item['leave Status'] === 'Rejected'" label="Withdraw" icon="pi pi-times"
           (click)="onWithdraw(item.id)" styleClass="p-button-danger p-button-sm p-button-text font-bold"></p-button>
         <p-button icon="pi pi-history" pTooltip="Approval History" tooltipPosition="left" (click)="viewHistory(item.id)"
           styleClass="p-button-info p-button-sm p-button-text font-bold ml-2"></p-button>

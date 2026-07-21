@@ -87,7 +87,7 @@ export class Onboarding implements OnInit {
       motherName: '',
       maritalStatus: 'Single',
       nationality: 'Indian',
-      avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'
+      avatarUrl: 'assets/img/hrms logo.jpg'
     },
     employment: {
       employeeCode: 'EMP-2026-042',
@@ -126,9 +126,7 @@ export class Onboarding implements OnInit {
       pfNumber: ''
     },
     assets: [
-      { id: 'AST-940', name: 'MacBook Pro 16"', type: 'Laptop', serial: 'C02FG123Q05D', assignedDate: '2025-05-14', status: 'In Use' },
-      { id: 'AST-284', name: 'Dell 27" UltraSharp Monitor', type: 'Display', serial: 'MX-084W1-593B', assignedDate: '2025-05-14', status: 'In Use' },
-      { id: 'AST-105', name: 'Logitech MX Keys Keyboard', type: 'Input Device', serial: '2103LZ940B', assignedDate: '2025-06-01', status: 'In Use' }
+
     ],
     leaves: {
       annualTotal: 18,
@@ -466,5 +464,11 @@ export class Onboarding implements OnInit {
 
   onRequestUpdate(): void {
     this.openOnboardingDrawer();
+  }
+
+  onAvatarError(event: any): void {
+    if (event?.target) {
+      event.target.src = 'assets/img/hrms logo.jpg';
+    }
   }
 }
