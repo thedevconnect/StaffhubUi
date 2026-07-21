@@ -9,12 +9,13 @@ import { ToastModule } from 'primeng/toast';
 import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
 import { MessageService } from 'primeng/api';
-import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EmployeeManagementService } from '../../../shared/services/employee-management.service';
 import { AttendanceService, AttendanceRecord } from '../../../shared/services/attendance.service';
 import { Employee } from '../../../shared/services/models/employee.model';
 import { TableTemplate, TableColumn, Tab } from '../../../shared/ui/table-template/table-template';
+
+import { BreadcrumbModule } from 'primeng/breadcrumb';
 
 @Component({
   selector: 'app-hr-attendance-report',
@@ -27,7 +28,7 @@ import { TableTemplate, TableColumn, Tab } from '../../../shared/ui/table-templa
     SelectModule,
     ToastModule,
     TooltipModule,
-    AppBreadcrumb,
+    BreadcrumbModule,
     TableTemplate
   ],
   providers: [MessageService],
@@ -71,7 +72,7 @@ export class HrAttendanceReport implements OnInit {
   currentRecords = computed(() => {
     const tab = this.activeTab();
     const now = new Date();
-    
+
     if (tab === 0) {
       // Monthly
       const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -100,7 +101,24 @@ export class HrAttendanceReport implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          this.employees.set(res);
+          const todayStr = new Date().toISOString().split('T')[0];
+          const activeEmployees = (res || []).filter(e => {
+            const statusUpper = String(e.status || '').toUpperCase();
+            const lwdVal = e.last_working_day || e.lastWorkingDay;
+            if (statusUpper === 'INACTIVE') {
+              if (lwdVal) {
+                const lwdStr = new Date(lwdVal).toISOString().split('T')[0];
+                return todayStr <= lwdStr;
+              }
+              return false;
+            }
+            if (lwdVal) {
+              const lwdStr = new Date(lwdVal).toISOString().split('T')[0];
+              return todayStr <= lwdStr;
+            }
+            return true;
+          });
+          this.employees.set(activeEmployees);
         },
         error: (err) => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load employees' });
@@ -175,7 +193,7 @@ export class HrAttendanceReport implements OnInit {
       const firstRecord = dayRecords[0];
       const lastRecord = dayRecords[dayRecords.length - 1];
       const totalMinutes = dayRecords.reduce((sum, r) => sum + (Number(r.total_work_minutes) || 0), 0);
-      
+
       const isPresent = dayRecords.some(r => r.attendance_status === 'PRESENT' || r.attendance_status === 'Present');
 
       result.push({

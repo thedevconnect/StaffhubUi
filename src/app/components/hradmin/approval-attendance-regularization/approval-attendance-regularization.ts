@@ -66,7 +66,8 @@ export class ApprovalAttendanceRegularization implements OnInit {
 
   tabs: Tab[] = [
     { label: 'Pending', value: 'Pending', icon: 'pi pi-clock' },
-    { label: 'Processed', value: 'Processed', icon: 'pi pi-check-circle' },
+    { label: 'Approved', value: 'Approved', icon: 'pi pi-check-circle' },
+    { label: 'Rejected', value: 'Rejected', icon: 'pi pi-times-circle' },
     { label: 'All', value: 'All', icon: 'pi pi-list' }
   ];
 
@@ -82,6 +83,17 @@ export class ApprovalAttendanceRegularization implements OnInit {
   historyEvents: any[] = [];
   processForm: FormGroup;
   isLoading: boolean = false;
+
+  isDetailDrawerFullScreen = false;
+  isHistoryDrawerFullScreen = false;
+
+  toggleDetailDrawerFullScreen(): void {
+    this.isDetailDrawerFullScreen = !this.isDetailDrawerFullScreen;
+  }
+
+  toggleHistoryDrawerFullScreen(): void {
+    this.isHistoryDrawerFullScreen = !this.isHistoryDrawerFullScreen;
+  }
 
   correctionTypes = [
     { label: 'All Types', value: 'All' },
@@ -160,10 +172,16 @@ export class ApprovalAttendanceRegularization implements OnInit {
   get filteredRequests(): any[] {
     return this.requests.filter((req: any) => {
       let matchesTab = true;
-      if (this.activeTab !== 'All') {
-        matchesTab = this.activeTab === 'Pending' 
-          ? req.status.toLowerCase() === 'pending'
-          : req.status.toLowerCase() !== 'pending';
+      const statusLower = (req.status || '').toLowerCase();
+
+      if (this.activeTab === 'Pending') {
+        matchesTab = statusLower === 'pending';
+      } else if (this.activeTab === 'Approved') {
+        matchesTab = statusLower === 'approved';
+      } else if (this.activeTab === 'Rejected') {
+        matchesTab = statusLower === 'rejected';
+      } else if (this.activeTab === 'Processed') {
+        matchesTab = statusLower !== 'pending';
       }
 
       const matchesType = this.typeFilter !== 'All' ? req.correctionType === this.typeFilter : true;
@@ -227,6 +245,23 @@ export class ApprovalAttendanceRegularization implements OnInit {
         this.selectedRequest = req;
         this.processForm.patchValue({ hrRemarks: 'Approved automatically from quick action.' });
         this.processRequest('Approved');
+      }
+    });
+  }
+
+  quickReject(req: any) {
+    this.confirmationService.confirm({
+      message: `Are you sure you want to reject regularization for ${req.employeeName}?`,
+      header: 'Reject Request',
+      icon: 'pi pi-times-circle',
+      acceptIcon: "none",
+      rejectIcon: "none",
+      acceptButtonStyleClass: "p-button-danger",
+      rejectButtonStyleClass: "p-button-text",
+      accept: () => {
+        this.selectedRequest = req;
+        this.processForm.patchValue({ hrRemarks: 'Rejected from quick action.' });
+        this.processRequest('Rejected');
       }
     });
   }

@@ -143,6 +143,12 @@ export class EmployeeManagement implements OnInit {
   selectedEmployee: Employee | null = null;
   employeeForm: FormGroup;
 
+  isDrawerFullScreen = false;
+
+  toggleDrawerFullScreen(): void {
+    this.isDrawerFullScreen = !this.isDrawerFullScreen;
+  }
+
   // Onboarding Properties
   showOnboardingDialog = false;
   onboardingDetails: any = null;

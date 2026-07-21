@@ -32,11 +32,18 @@
 </div>
 
 <!-- Add/Edit Employee Drawer -->
-<p-drawer [(visible)]="showDrawer" position="right" [modal]="true" [style]="{ width: '100%', maxWidth: '800px' }">
+<p-drawer [(visible)]="showDrawer" position="right" [modal]="true"
+    [style]="isDrawerFullScreen ? { width: '100vw', maxWidth: '100vw' } : { width: '100%', maxWidth: '800px' }">
     <ng-template pTemplate="header">
-        <h2 class="text-xl font-semibold text-gray-800 m-0">
-            {{ isViewMode ? 'View Employee' : (isEditMode ? 'Edit Employee' : 'Add New Employee') }}
-        </h2>
+        <div class="flex items-center justify-between w-full pr-2">
+            <h2 class="text-xl font-semibold text-gray-800 m-0">
+                {{ isViewMode ? 'View Employee Details' : (isEditMode ? 'Edit Employee Details' : 'Add New Employee') }}
+            </h2>
+            <button type="button" (click)="toggleDrawerFullScreen()" [title]="isDrawerFullScreen ? 'Exit Full Screen' : 'Full Screen'"
+                class="p-2 text-slate-500 hover:text-blue-600 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer mr-2">
+                <i class="pi text-base" [ngClass]="isDrawerFullScreen ? 'pi-window-minimize' : 'pi-window-maximize'"></i>
+            </button>
+        </div>
     </ng-template>
 
     <form [formGroup]="employeeForm" (ngSubmit)="saveEmployee()" class="space-y-4 pb-2">
@@ -177,7 +184,7 @@
 
 <!-- Onboarding Review Dialog -->
 <p-dialog [(visible)]="showOnboardingDialog" header="Review Employee Onboarding" [modal]="true"
-    [style]="{ width: '48rem', maxWidth: '95vw' }">
+    [style]="{ width: '56rem', maxWidth: '95vw' }" [maximizable]="true" [resizable]="true">
     <div *ngIf="onboardingDetails" class="space-y-6 pt-2">
         <!-- Header Section -->
         <div class="flex items-center justify-between border-b pb-3">

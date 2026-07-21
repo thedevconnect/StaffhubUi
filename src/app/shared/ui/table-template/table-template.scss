@@ -1,3 +1,25 @@
+:host {
+  display: block;
+}
+
+:host(:fullscreen),
+:host(.is-fullscreen),
+:fullscreen,
+:-webkit-full-screen {
+  background-color: #ffffff !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  padding: 1.25rem !important;
+  overflow: auto !important;
+  box-sizing: border-box !important;
+  z-index: 999999 !important;
+
+  .table-container {
+    max-height: calc(100vh - 100px) !important;
+    height: calc(100vh - 100px) !important;
+  }
+}
+
 .table-container {
   display: flex;
   flex-direction: column;

@@ -11,39 +11,30 @@
       <p class="text-xs text-slate-500 mt-1">Review, process, and authorize employee attendance regularization and punch
         adjustments.</p>
     </div>
-    <div class="flex-none">
-      <p-button (click)="onRefresh()" label="Synchronize" icon="pi pi-sync" [loading]="isLoading"
-        styleClass="p-button-sm p-button-secondary rounded-lg" [raised]="true">
-      </p-button>
+    <!-- Search & Filters Bar (Removed status dropdown) -->
+    <div
+      class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+        <!-- Search input is handled by TableTemplate natively -->
+
+        <!-- Correction Type Filter -->
+        <p-select [options]="correctionTypes" [(ngModel)]="typeFilter" optionLabel="label" optionValue="value"
+          placeholder="Correction Type" class="w-full sm:w-44 select-sm"></p-select>
+      </div>
+
+      <!-- Clear Filters Button -->
+      <p-button (click)="clearFilters()" label="Clear Filters" icon="pi pi-filter-slash" [outlined]="true"
+        styleClass="p-button-sm p-button-secondary rounded-lg w-full md:w-auto"></p-button>
     </div>
   </div>
 
-  <!-- Search & Filters Bar (Removed status dropdown) -->
-  <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-    <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-      <!-- Search input is handled by TableTemplate natively -->
 
-      <!-- Correction Type Filter -->
-      <p-select [options]="correctionTypes" [(ngModel)]="typeFilter" optionLabel="label" optionValue="value"
-        placeholder="Correction Type" class="w-full sm:w-44 select-sm"></p-select>
-    </div>
-
-    <!-- Clear Filters Button -->
-    <p-button (click)="clearFilters()" label="Clear Filters" icon="pi pi-filter-slash" [outlined]="true"
-      styleClass="p-button-sm p-button-secondary rounded-lg w-full md:w-auto"></p-button>
-  </div>
 
   <!-- Regularization Request Table -->
   <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-    <app-table-template 
-      [data]="filteredRequests" 
-      [columns]="columns" 
-      [tabs]="tabs"
-      [activeTab]="activeTab"
-      (tabChange)="onTabChange($event)"
-      [showExport]="true" exportFileName="Regularization_Approvals"
-      (refresh)="onRefresh()"
-      [cellTemplates]="{
+    <app-table-template [data]="filteredRequests" [columns]="columns" [tabs]="tabs" [activeTab]="activeTab"
+      (tabChange)="onTabChange($event)" [showExport]="true" exportFileName="Regularization_Approvals"
+      (refresh)="onRefresh()" [cellTemplates]="{
         id: idTpl,
         employee: employeeTpl,
         reason: reasonTpl,
@@ -98,6 +89,10 @@
         size="small" pTooltip="Approve" tooltipPosition="top"
         *ngIf="item.status === 'Pending' || item.status === 'PENDING'"></p-button>
 
+      <p-button (click)="quickReject(item)" icon="pi pi-times" [text]="true" [rounded]="true" severity="danger"
+        size="small" pTooltip="Reject" tooltipPosition="top"
+        *ngIf="item.status === 'Pending' || item.status === 'PENDING'"></p-button>
+
       <p-button (click)="viewHistory(item)" icon="pi pi-history" [text]="true" [rounded]="true" severity="secondary"
         size="small" pTooltip="View History" tooltipPosition="top"></p-button>
     </div>
@@ -106,17 +101,25 @@
 
 <!-- Process / Action Drawer -->
 <p-drawer [(visible)]="detailDrawerVisible" position="right" [modal]="true"
-  [style]="{ width: '100%', maxWidth: '580px' }" styleClass="modern-drawer">
+  [style]="isDetailDrawerFullScreen ? { width: '100vw', maxWidth: '100vw' } : { width: '100%', maxWidth: '580px' }"
+  styleClass="modern-drawer">
 
   <ng-template pTemplate="header">
-    <div class="flex items-center gap-2.5">
-      <div class="h-10 w-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center text-base">
-        <i class="pi pi-check-square"></i>
+    <div class="flex items-center justify-between w-full pr-2">
+      <div class="flex items-center gap-2.5">
+        <div class="h-10 w-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center text-base">
+          <i class="pi pi-check-square"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold">Process Regularization</h3>
+          <p class="text-xs text-slate-400">Evaluate employee attendance log adjustment</p>
+        </div>
       </div>
-      <div>
-        <h3 class="text-lg font-bold">Process Regularization</h3>
-        <p class="text-xs text-slate-400">Evaluate employee attendance log adjustment</p>
-      </div>
+      <button type="button" (click)="toggleDetailDrawerFullScreen()"
+        [title]="isDetailDrawerFullScreen ? 'Exit Full Screen' : 'Full Screen'"
+        class="p-2 text-slate-500 hover:text-indigo-600 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer mr-2">
+        <i class="pi text-base" [ngClass]="isDetailDrawerFullScreen ? 'pi-window-minimize' : 'pi-window-maximize'"></i>
+      </button>
     </div>
   </ng-template>
 
@@ -233,7 +236,8 @@
 
 <!-- History Drawer -->
 <p-drawer [(visible)]="historyDrawerVisible" position="right" [modal]="true" [showCloseIcon]="false"
-  [style]="{ width: '100%', maxWidth: '580px' }" styleClass="modern-drawer transition-all duration-300">
+  [style]="isHistoryDrawerFullScreen ? { width: '100vw', maxWidth: '100vw' } : { width: '100%', maxWidth: '580px' }"
+  styleClass="modern-drawer transition-all duration-300">
 
   <!-- Header -->
   <ng-template pTemplate="header">
@@ -249,6 +253,12 @@
 
     <!-- Action Icons -->
     <div class="absolute right-4 top-4 flex items-center gap-2">
+      <button type="button" (click)="toggleHistoryDrawerFullScreen()"
+        [title]="isHistoryDrawerFullScreen ? 'Exit Full Screen' : 'Full Screen'"
+        class="h-8 w-8 rounded-full bg-slate-50 hover:bg-slate-100 hover:text-indigo-600 flex items-center justify-center text-slate-500 transition-colors cursor-pointer">
+        <i class="pi text-sm" [ngClass]="isHistoryDrawerFullScreen ? 'pi-window-minimize' : 'pi-window-maximize'"></i>
+      </button>
+
       <!-- Close Button -->
       <button (click)="historyDrawerVisible = false" pTooltip="Close" tooltipPosition="left"
         class="h-8 w-8 rounded-full bg-slate-50 hover:bg-slate-100 hover:text-rose-500 flex items-center justify-center text-slate-500 transition-colors">
@@ -272,14 +282,16 @@
           No history available.
         </div>
         <div *ngFor="let event of historyEvents" class="relative">
-          <div class="absolute -left-[27px] mt-1 h-6 w-6 rounded-full border-4 border-white flex items-center justify-center text-white"
-               [ngClass]="event.color">
+          <div
+            class="absolute -left-[27px] mt-1 h-6 w-6 rounded-full border-4 border-white flex items-center justify-center text-white"
+            [ngClass]="event.color">
             <i [class]="event.icon" class="text-[10px]"></i>
           </div>
           <div class="bg-white border border-slate-100 rounded-xl p-4 shadow-sm ml-2 hover:shadow transition-shadow">
             <div class="flex justify-between items-start mb-2">
               <h5 class="text-sm font-bold text-slate-800">{{ event.title }}</h5>
-              <span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-md">{{ event.date | date:'medium' }}</span>
+              <span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-md">{{ event.date |
+                date:'medium' }}</span>
             </div>
             <p class="text-xs text-slate-600 font-medium leading-relaxed">{{ event.description }}</p>
           </div>

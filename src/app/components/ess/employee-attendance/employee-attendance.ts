@@ -308,6 +308,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
           summary: 'Swipe In Failed',
           detail: err.error?.message || 'Already checked in or server error.'
         });
+        this.loadAllData();
       }
     });
   }
@@ -416,6 +417,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
           summary: 'Swipe Out Failed',
           detail: err.error?.message || 'Server error.'
         });
+        this.loadAllData();
       }
     });
   }
@@ -470,9 +472,8 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     recordsList.forEach(record => {
       if (record.swipe_in) {
         const dt = this.parseDbDate(record.swipe_in);
-        const loc = record.swipe_in_address || record.location_address;
         timeline.push({
-          type: loc ? `Swipe In (${loc})` : 'Swipe In',
+          type: 'Swipe In',
           time: this.formatDateTimeToTime(record.swipe_in),
           timestamp: dt ? dt.getTime() : 0,
           icon: 'pi pi-sign-in',
@@ -481,10 +482,9 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
       }
       if (record.swipe_out) {
         const dt = this.parseDbDate(record.swipe_out);
-        const loc = record.swipe_out_address;
         const typeStr = record.notes
-          ? `Swipe Out (${record.notes})${loc ? ' @ ' + loc : ''}`
-          : `Swipe Out${loc ? ' @ ' + loc : ''}`;
+          ? `Swipe Out (${record.notes})`
+          : 'Swipe Out';
         timeline.push({
           type: typeStr,
           time: this.formatDateTimeToTime(record.swipe_out),

@@ -31,6 +31,8 @@ export interface Employee {
   custom_latitude?: string;
   custom_longitude?: string;
   custom_radius?: number;
+  last_working_day?: string | Date;
+  lastWorkingDay?: string | Date;
 }
 
 export interface CreateEmployeeRequest {

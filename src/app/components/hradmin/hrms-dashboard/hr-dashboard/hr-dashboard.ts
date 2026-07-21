@@ -153,8 +153,8 @@ export class HrDashboard implements OnInit, OnDestroy {
 
   // Exceptions list
   exceptions = [
-    { label: 'Late Coming', count: 9, severity: 'danger', icon: 'pi-clock' },
-    { label: 'Early Swipe Out', count: 2, severity: 'warning', icon: 'pi-sign-out' },
+    { label: 'Late Coming (> 10:00 AM)', count: 0, severity: 'danger', icon: 'pi-clock' },
+    { label: 'Early Logout (< 07:00 PM)', count: 0, severity: 'warning', icon: 'pi-sign-out' },
   ];
 
   // Pendency numbers
@@ -480,8 +480,8 @@ export class HrDashboard implements OnInit, OnDestroy {
 
           // Update Exceptions
           this.exceptions = [
-            { label: 'Late Coming', count: s.lateComingCount, severity: 'danger', icon: 'pi-clock' },
-            { label: 'Early Swipe Out', count: s.earlyOutCount, severity: 'warning', icon: 'pi-sign-out' },
+            { label: 'Late Coming (> 10:00 AM)', count: s.lateComingCount, severity: 'danger', icon: 'pi-clock' },
+            { label: 'Early Logout (< 07:00 PM)', count: s.earlyOutCount, severity: 'warning', icon: 'pi-sign-out' },
           ];
 
           this.cdr.detectChanges();

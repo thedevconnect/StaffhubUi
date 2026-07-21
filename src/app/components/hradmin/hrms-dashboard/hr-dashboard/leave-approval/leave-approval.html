@@ -16,141 +16,161 @@
   </div>
 </div>
 
-<div class="space-y-6">
-  <!-- Title section -->
+<!-- Title section with Quick Summary Badges -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
   <div>
     <h2 class="text-xl font-bold text-slate-800">Leave Approvals</h2>
     <p class="text-xs text-slate-500 mt-1">Review, approve, or reject employee leave applications in real time.</p>
   </div>
 
+  <!-- Quick Stats Summary -->
+  <div class="flex flex-wrap items-center gap-2">
+    <div class="px-3 py-1.5 rounded-xl bg-amber-50/80 border border-amber-200/80 flex items-center gap-2 shadow-xs">
+      <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+      <span class="text-xs font-bold text-amber-800">Pending: {{ pendingCount }}</span>
+    </div>
+    <div class="px-3 py-1.5 rounded-xl bg-emerald-50/80 border border-emerald-200/80 flex items-center gap-2 shadow-xs">
+      <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+      <span class="text-xs font-bold text-emerald-800">Approved: {{ approvedCount }}</span>
+    </div>
+    <div class="px-3 py-1.5 rounded-xl bg-rose-50/80 border border-rose-200/80 flex items-center gap-2 shadow-xs">
+      <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+      <span class="text-xs font-bold text-rose-800">Rejected: {{ rejectedCount }}</span>
+    </div>
+  </div>
+</div>
 
-  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-    <!-- Section Header -->
-    <div
-      class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div>
-        <h3 class="text-base font-bold text-slate-900">Incoming Requests Queue</h3>
-        <p class="text-xs text-slate-500 mt-0.5">Manage leave applications submitted by the staff members.</p>
-      </div>
 
-      <!-- Filter Badge -->
-      <span
-        class="self-start sm:self-auto text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100/80 px-3 py-1.5 rounded-full select-none">
-        Showing {{ filteredLeaveRequests.length }} requests
-      </span>
+<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+  <!-- Section Header -->
+  <div
+    class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h3 class="text-base font-bold text-slate-900">Incoming Requests Queue</h3>
+      <p class="text-xs text-slate-500 mt-0.5">Manage leave applications submitted by the staff members.</p>
     </div>
 
-    <!-- Table content using TableTemplate -->
-    <app-table-template 
-      [columns]="tableColumns" 
-      [data]="filteredLeaveRequests" 
-      [tabs]="tabs"
-      [activeTab]="activeTab"
-      (tabChange)="onTabChange($event)"
-      [showExport]="true" exportFileName="Leave_Approvals"
-      (refresh)="onRefresh()"
-      [cellTemplates]="{
+    <!-- Filter Badge -->
+    <span
+      class="self-start sm:self-auto text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100/80 px-3 py-1.5 rounded-full select-none">
+      Showing {{ filteredLeaveRequests.length }} requests
+    </span>
+  </div>
+
+  <!-- Table content using TableTemplate -->
+  <app-table-template [columns]="tableColumns" [data]="filteredLeaveRequests" [tabs]="tabs" [activeTab]="activeTab"
+    (tabChange)="onTabChange($event)" [showExport]="true" exportFileName="Leave_Approvals" (refresh)="onRefresh()"
+    [cellTemplates]="{
         'employeeName': customCellEmployeeTpl,
         'type': customCellTypeTpl,
         'duration': customCellDurationTpl,
         'reason': customCellReasonTpl,
         'status': customCellStatusTpl
-      }"
-      [tableActions]="[]"
-      [actionTemplate]="actionCellTpl">
-      
-      <!-- Custom Cell Template for Rich Formatting -->
-      <ng-template #customCellEmployeeTpl let-row>
-          <div class="flex items-center gap-3">
-            <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-100 to-indigo-50 text-indigo-700 flex items-center justify-center font-black border border-indigo-100 shadow-sm">
-              {{ row.employeeName.charAt(0) }}
-            </div>
-            <div>
-              <div class="font-bold text-slate-900">{{ row.employeeName }}</div>
-              <div class="text-[10px] text-slate-400 mt-0.5 font-medium">{{ row.employeeCode }}</div>
-            </div>
-          </div>
-        </ng-template>
+      }" [tableActions]="[]" [actionTemplate]="actionCellTpl">
 
-        <ng-template #customCellTypeTpl let-row>
-          <span class="inline-flex items-center gap-1.5 font-bold text-slate-700">
-            <span class="h-1.5 w-1.5 rounded-full" 
-              [class.bg-indigo-500]="row.type.includes('Casual')"
-              [class.bg-rose-500]="row.type.includes('Sick') || row.type.includes('LOP')" 
-              [class.bg-emerald-500]="row.type.includes('Earned')"
-              [class.bg-amber-500]="!row.type.includes('Casual') && !row.type.includes('Sick') && !row.type.includes('Earned') && !row.type.includes('LOP')">
-            </span>
-            {{ row.type }}
-          </span>
-        </ng-template>
-
-        <ng-template #customCellDurationTpl let-row>
-          <div class="flex flex-col gap-0.5 font-medium text-slate-600">
-            <span>{{ row.duration }}</span>
-            <span class="text-[10px] text-slate-400 font-medium">Applied: {{ row.appliedDate }}</span>
-          </div>
-        </ng-template>
-
-        <ng-template #customCellReasonTpl let-row>
-          <div class="text-slate-500 font-medium max-w-xs truncate" [title]="row.reason">
-            {{ row.reason }}
-          </div>
-        </ng-template>
-
-        <ng-template #customCellStatusTpl let-row>
-          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black border uppercase tracking-wider"
-            [class.bg-amber-50]="row.status === 'Pending'" [class.text-amber-700]="row.status === 'Pending'"
-            [class.border-amber-100]="row.status === 'Pending'" [class.bg-emerald-50]="row.status === 'Approved'"
-            [class.text-emerald-700]="row.status === 'Approved'"
-            [class.border-emerald-100]="row.status === 'Approved'" [class.bg-rose-50]="row.status === 'Rejected'"
-            [class.text-rose-700]="row.status === 'Rejected'" [class.border-rose-100]="row.status === 'Rejected'">
-            {{ row.status }}
-          </span>
-        </ng-template>
-
-      <!-- Action Cell Template for multiple action buttons -->
-      <ng-template #actionCellTpl let-row>
-        <div class="flex items-center justify-end gap-2">
-          <!-- View Details Button -->
-          <button (click)="viewDetails(row)" type="button"
-            class="p-2 text-slate-500 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-100 rounded-lg transition duration-150 cursor-pointer"
-            title="View Full Details">
-            <i class="pi pi-eye text-xs"></i>
-          </button>
-
-          <!-- Approve Button (Only visible if status is Pending) -->
-          <button *ngIf="row.status === 'Pending'" (click)="triggerAction(row, 'Approve')" type="button"
-            class="p-2 text-emerald-600 hover:text-white bg-emerald-50 hover:bg-emerald-600 border border-emerald-200 hover:border-emerald-600 rounded-lg transition duration-150 cursor-pointer"
-            title="Approve Leave">
-            <i class="pi pi-check text-xs"></i>
-          </button>
-
-          <!-- Reject Button (Only visible if status is Pending) -->
-          <button *ngIf="row.status === 'Pending'" (click)="triggerAction(row, 'Reject')" type="button"
-            class="p-2 text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 border border-rose-200 hover:border-rose-600 rounded-lg transition duration-150 cursor-pointer"
-            title="Reject Leave">
-            <i class="pi pi-times text-xs"></i>
-          </button>
+    <!-- Custom Cell Template for Rich Formatting -->
+    <ng-template #customCellEmployeeTpl let-row>
+      <div class="flex items-center gap-3">
+        <div
+          class="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-100 to-indigo-50 text-indigo-700 flex items-center justify-center font-black border border-indigo-100 shadow-sm">
+          {{ row.employeeName.charAt(0) }}
         </div>
-      </ng-template>
+        <div>
+          <div class="font-bold text-slate-900">{{ row.employeeName }}</div>
+          <div class="text-[10px] text-slate-400 mt-0.5 font-medium">{{ row.employeeCode }}</div>
+        </div>
+      </div>
+    </ng-template>
 
-    </app-table-template>
-  </div>
+    <ng-template #customCellTypeTpl let-row>
+      <span class="inline-flex items-center gap-1.5 font-bold text-slate-700">
+        <span class="h-1.5 w-1.5 rounded-full" [class.bg-indigo-500]="row.type.includes('Casual')"
+          [class.bg-rose-500]="row.type.includes('Sick') || row.type.includes('LOP')"
+          [class.bg-emerald-500]="row.type.includes('Earned')"
+          [class.bg-amber-500]="!row.type.includes('Casual') && !row.type.includes('Sick') && !row.type.includes('Earned') && !row.type.includes('LOP')">
+        </span>
+        {{ row.type }}
+      </span>
+    </ng-template>
+
+    <ng-template #customCellDurationTpl let-row>
+      <div class="flex flex-col gap-0.5 font-medium text-slate-600">
+        <span>{{ row.duration }}</span>
+        <span class="text-[10px] text-slate-400 font-medium">Applied: {{ row.appliedDate }}</span>
+      </div>
+    </ng-template>
+
+    <ng-template #customCellReasonTpl let-row>
+      <div class="text-slate-500 font-medium max-w-xs truncate" [title]="row.reason">
+        {{ row.reason }}
+      </div>
+    </ng-template>
+
+    <ng-template #customCellStatusTpl let-row>
+      <span
+        class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black border uppercase tracking-wider"
+        [class.bg-amber-50]="row.status?.toLowerCase() === 'pending'"
+        [class.text-amber-700]="row.status?.toLowerCase() === 'pending'"
+        [class.border-amber-100]="row.status?.toLowerCase() === 'pending'"
+        [class.bg-emerald-50]="row.status?.toLowerCase() === 'approved'"
+        [class.text-emerald-700]="row.status?.toLowerCase() === 'approved'"
+        [class.border-emerald-100]="row.status?.toLowerCase() === 'approved'"
+        [class.bg-rose-50]="row.status?.toLowerCase() === 'rejected'"
+        [class.text-rose-700]="row.status?.toLowerCase() === 'rejected'"
+        [class.border-rose-100]="row.status?.toLowerCase() === 'rejected'">
+        {{ row.status }}
+      </span>
+    </ng-template>
+
+    <!-- Action Cell Template for multiple action buttons -->
+    <ng-template #actionCellTpl let-row>
+      <div class="flex items-center justify-end gap-2">
+        <!-- View Details Button -->
+        <button (click)="viewDetails(row)" type="button"
+          class="p-2 text-slate-500 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-100 rounded-lg transition duration-150 cursor-pointer"
+          title="View Full Details">
+          <i class="pi pi-eye text-xs"></i>
+        </button>
+
+        <!-- Approve Button (Only visible if status is Pending) -->
+        <button *ngIf="row.status === 'Pending'" (click)="triggerAction(row, 'Approve')" type="button"
+          class="p-2 text-emerald-600 hover:text-white bg-emerald-50 hover:bg-emerald-600 border border-emerald-200 hover:border-emerald-600 rounded-lg transition duration-150 cursor-pointer"
+          title="Approve Leave">
+          <i class="pi pi-check text-xs"></i>
+        </button>
+
+        <!-- Reject Button (Only visible if status is Pending) -->
+        <button *ngIf="row.status === 'Pending'" (click)="triggerAction(row, 'Reject')" type="button"
+          class="p-2 text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 border border-rose-200 hover:border-rose-600 rounded-lg transition duration-150 cursor-pointer"
+          title="Reject Leave">
+          <i class="pi pi-times text-xs"></i>
+        </button>
+      </div>
+    </ng-template>
+
+  </app-table-template>
 </div>
 
 <!-- Drawer: Leave Details -->
 <p-drawer [(visible)]="showDetailsDrawer" position="right"
-  styleClass="w-full max-w-md border-l border-slate-100 shadow-2xl" [modal]="true">
+  [style]="isDetailsDrawerFullScreen ? { width: '100vw', maxWidth: '100vw' } : { width: '100%', maxWidth: '28rem' }"
+  styleClass="modern-drawer shadow-2xl" [modal]="true">
   <ng-template pTemplate="header">
-    <div class="flex items-center gap-3">
-      <div
-        class="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-base shadow-sm">
-        <i class="pi pi-info-circle"></i>
+    <div class="flex items-center justify-between w-full pr-2">
+      <div class="flex items-center gap-3">
+        <div
+          class="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-base shadow-sm">
+          <i class="pi pi-info-circle"></i>
+        </div>
+        <div>
+          <h3 class="text-sm font-black text-slate-900 uppercase tracking-wide">Leave Details</h3>
+          <p class="text-[10px] text-slate-400">Review request information</p>
+        </div>
       </div>
-      <div>
-        <h3 class="text-sm font-black text-slate-900 uppercase tracking-wide">Leave Details</h3>
-        <p class="text-[10px] text-slate-400">Review request information</p>
-      </div>
+      <button type="button" (click)="toggleDetailsDrawerFullScreen()" [title]="isDetailsDrawerFullScreen ? 'Exit Full Screen' : 'Full Screen'"
+        class="p-2 text-slate-500 hover:text-indigo-600 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer mr-2">
+        <i class="pi text-base" [ngClass]="isDetailsDrawerFullScreen ? 'pi-window-minimize' : 'pi-window-maximize'"></i>
+      </button>
     </div>
   </ng-template>
 
@@ -234,16 +254,18 @@
     <!-- History Timeline -->
     <div class="border-t border-slate-100 pt-6 mt-2">
       <h4 class="text-xs font-bold text-slate-800 mb-4 uppercase tracking-wide">Approval History</h4>
-      
+
       <div *ngIf="isLoadingHistory" class="flex justify-center p-4">
         <i class="pi pi-spinner pi-spin text-indigo-500 text-xl"></i>
       </div>
-      
-      <div *ngIf="!isLoadingHistory && leaveHistory.length === 0" class="text-xs text-slate-400 text-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+
+      <div *ngIf="!isLoadingHistory && leaveHistory.length === 0"
+        class="text-xs text-slate-400 text-center p-4 bg-slate-50 rounded-xl border border-slate-100">
         No history found for this request.
       </div>
 
-      <div *ngIf="!isLoadingHistory && leaveHistory.length > 0" class="relative pl-4 space-y-6 before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-slate-200">
+      <div *ngIf="!isLoadingHistory && leaveHistory.length > 0"
+        class="relative pl-4 space-y-6 before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-slate-200">
         <div *ngFor="let item of leaveHistory" class="relative">
           <div class="absolute -left-[21px] top-1 rounded-full p-1 border-2 border-white bg-slate-200"
             [class.bg-emerald-500]="item.status === 'APPROVED' || item.status === 'Approved'"
@@ -257,9 +279,12 @@
               <span class="text-[10px] font-medium text-slate-400">{{ item.created_at | date:'medium' }}</span>
             </div>
             <div class="text-[11px] text-slate-500 mb-1">
-              By <span class="font-semibold text-slate-700">{{ item.action_by_name || 'System' }}</span> <span *ngIf="item.action_by_role" class="text-[9px] px-1.5 py-0.5 bg-slate-100 rounded text-slate-500 ml-1">{{ item.action_by_role }}</span>
+              By <span class="font-semibold text-slate-700">{{ item.action_by_name || 'System' }}</span> <span
+                *ngIf="item.action_by_role" class="text-[9px] px-1.5 py-0.5 bg-slate-100 rounded text-slate-500 ml-1">{{
+                item.action_by_role }}</span>
             </div>
-            <div *ngIf="item.remarks" class="text-[11px] text-slate-600 bg-slate-50 p-2 rounded border border-slate-100 mt-1.5">
+            <div *ngIf="item.remarks"
+              class="text-[11px] text-slate-600 bg-slate-50 p-2 rounded border border-slate-100 mt-1.5">
               "{{ item.remarks }}"
             </div>
           </div>

@@ -373,8 +373,10 @@
 
 <!-- Details Modal for Clickable KPIs -->
 <p-dialog [(visible)]="isDetailsModalVisible" [modal]="true" [header]="detailsCategoryLabel + ' Details'"
-  [style]="{width: '70vw'}" [draggable]="false" [resizable]="false">
-  <div class="p-4">
+  [style]="{width: '80vw'}" [maximizable]="true" [draggable]="false" [resizable]="true"
+  [breakpoints]="{'960px': '95vw', '640px': '100vw'}"
+  styleClass="custom-hr-details-dialog">
+  <div class="p-2 md:p-4">
     <app-table-template [data]="detailsTableData" [columns]="detailsColumns" [isLoading]="isLoadingDetails"
       [exportFileName]="detailsCategoryLabel ? detailsCategoryLabel.replace(' ', '_') + '_Report' : 'Dashboard_Report'"
       [cellTemplates]="{

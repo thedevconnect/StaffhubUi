@@ -21,6 +21,7 @@ export interface ExitInterviewData {
   employee_name?: string;
   employee_code?: string;
   department?: string;
+  status?: string;
   created_at?: string;
 }
 
@@ -39,6 +40,14 @@ export class ExitInterviewService {
 
   submitExitInterview(data: ExitInterviewData): Observable<ApiResponse<any>> {
     return this.http.post<ApiResponse<any>>(`${this.apiBase}/api/exit-interviews`, data);
+  }
+
+  updateExitInterview(id: number | string, data: ExitInterviewData): Observable<ApiResponse<any>> {
+    return this.http.put<ApiResponse<any>>(`${this.apiBase}/api/exit-interviews/${id}`, data);
+  }
+
+  deleteExitInterview(id: number | string): Observable<ApiResponse<any>> {
+    return this.http.delete<ApiResponse<any>>(`${this.apiBase}/api/exit-interviews/${id}`);
   }
 
   getMyExitInterviews(): Observable<ApiResponse<ExitInterviewData[]>> {

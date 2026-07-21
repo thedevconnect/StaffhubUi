@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { Breadcrumb } from 'primeng/breadcrumb';
 import { ButtonModule } from 'primeng/button';
@@ -77,7 +77,8 @@ export class LeaveApplication {
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private employeeService: EmployeeManagementService,
-    private leaveService: LeaveService
+    private leaveService: LeaveService,
+    private cdr: ChangeDetectorRef
   ) {
     this.initForm();
   }
@@ -146,9 +147,11 @@ export class LeaveApplication {
         } else {
           this.ccDrp = [];
         }
+        this.cdr.markForCheck();
       },
       error: () => {
         this.ccDrp = [];
+        this.cdr.markForCheck();
       }
     });
     this.leaveTypeDrp = [
@@ -167,6 +170,7 @@ export class LeaveApplication {
     if (this.leaveTypeDrp?.length > 0) {
       this.selectLeaveType(this.leaveTypeDrp[0].drpValue);
     }
+    this.cdr.markForCheck();
   }
 
   selectSessionFrom(val: any) {
@@ -224,6 +228,7 @@ export class LeaveApplication {
   onTabChange(tab: string) {
     this.activeTab = tab;
     this.pageNo = 1;
+    this.cdr.markForCheck();
   }
 
   get filteredData() {
@@ -251,12 +256,6 @@ export class LeaveApplication {
     return data;
   }
 
-  get paginatedData() {
-    const filtered = this.filteredData;
-    const start = (this.pageNo - 1) * this.pageSize;
-    return filtered.slice(start, start + this.pageSize);
-  }
-
   get totalCount() {
     return this.filteredData.length;
   }
@@ -266,6 +265,7 @@ export class LeaveApplication {
       this.isLoading = true;
       this.loadingService.startLoading();
     }
+    this.cdr.markForCheck();
 
     this.leaveService.getLeaves().subscribe({
       next: (res) => {
@@ -320,6 +320,8 @@ export class LeaveApplication {
             this.tblData = [];
           }
         }
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       },
       error: () => {
         if (showLoader) {
@@ -327,6 +329,8 @@ export class LeaveApplication {
           this.loadingService.stopLoading();
         }
         this.tblData = [];
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       }
     });
   }
@@ -335,11 +339,13 @@ export class LeaveApplication {
     this.visible = false;
     this.leaveForm.reset();
     this.leaveForm.enable();
+    this.cdr.markForCheck();
   }
 
   viewHistory(id: number) {
     this.isHistoryDrawerVisible = true;
     this.loadingService.startLoading();
+    this.cdr.markForCheck();
     this.leaveService.getLeaveHistory(id).subscribe({
       next: (res) => {
         this.loadingService.stopLoading();
@@ -348,10 +354,14 @@ export class LeaveApplication {
         } else {
           this.leaveHistoryData = [];
         }
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loadingService.stopLoading();
         this.leaveHistoryData = [];
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       }
     });
   }
@@ -400,6 +410,8 @@ export class LeaveApplication {
         leaveType: this.leaveTypeDrp?.[0]?.drpValue
       });
     }
+    this.cdr.markForCheck();
+    this.cdr.detectChanges();
   }
 
   onSubmit() {
@@ -458,10 +470,14 @@ export class LeaveApplication {
             this.leaveTypedata = lType;
 
             this.getViewData();
+            this.cdr.markForCheck();
+            this.cdr.detectChanges();
           },
           error: (err) => {
             this.loadingService.stopLoading();
             this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to submit leave application' });
+            this.cdr.markForCheck();
+            this.cdr.detectChanges();
           }
         });
       }
@@ -485,10 +501,14 @@ export class LeaveApplication {
             });
             this.getViewData();
             this.loadingService.stopLoading();
+            this.cdr.markForCheck();
+            this.cdr.detectChanges();
           },
           error: () => {
             this.loadingService.stopLoading();
             this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to withdraw leave application' });
+            this.cdr.markForCheck();
+            this.cdr.detectChanges();
           }
         });
       },
