@@ -63,21 +63,28 @@ export class LeaveApproval implements OnInit {
   ];
 
   leaveRequests: LeaveRequestUI[] = [];
-
   selectedRequest: LeaveRequestUI | null = null;
   actionType: 'Approve' | 'Reject' | null = null;
   showConfirmModal = false;
   showDetailsDrawer = false;
   remarks = '';
 
+  isDetailsDrawerFullScreen = false;
+
+  toggleDetailsDrawerFullScreen(): void {
+    this.isDetailsDrawerFullScreen = !this.isDetailsDrawerFullScreen;
+  }
+
   leaveHistory: any[] = [];
   isLoadingHistory = false;
 
-  activeTab: string = 'All';
+  activeTab: string = 'Pending';
 
   tabs = [
     { label: 'Pending', value: 'Pending', icon: 'pi pi-clock' },
-    { label: 'Processed', value: 'Processed', icon: 'pi pi-check-circle' },
+    { label: 'Approved', value: 'Approved', icon: 'pi pi-check-circle' },
+    { label: 'Rejected', value: 'Rejected', icon: 'pi pi-times-circle' },
+    { label: 'Processed', value: 'Processed', icon: 'pi pi-history' },
     { label: 'All', value: 'All', icon: 'pi pi-list' }
   ];
 
@@ -88,12 +95,21 @@ export class LeaveApproval implements OnInit {
 
   get filteredLeaveRequests(): LeaveRequestUI[] {
     return this.leaveRequests.filter(req => {
+      const statusUpper = (req.status || '').toUpperCase();
       if (this.activeTab === 'All') return true;
       if (this.activeTab === 'Pending') {
-        return req.status === 'Pending' || req.status === 'PENDING';
-      } else {
-        return req.status !== 'Pending' && req.status !== 'PENDING';
+        return statusUpper === 'PENDING';
       }
+      if (this.activeTab === 'Approved') {
+        return statusUpper === 'APPROVED' || statusUpper === 'APPROVE';
+      }
+      if (this.activeTab === 'Rejected') {
+        return statusUpper === 'REJECTED' || statusUpper === 'REJECT';
+      }
+      if (this.activeTab === 'Processed') {
+        return statusUpper !== 'PENDING';
+      }
+      return true;
     });
   }
 
@@ -129,7 +145,7 @@ export class LeaveApproval implements OnInit {
               id: l.id,
               employeeName: l.employee_name || 'Unknown',
               employeeCode: l.employee_code || '-',
-              role: l.action_by_role || 'Employee', // default as we don't have it in API response
+              role: l.action_by_role || 'Employee',
               department: '-',
               type: l.leave_type,
               session: l.session || '-',
@@ -168,15 +184,15 @@ export class LeaveApproval implements OnInit {
   }
 
   get pendingCount() {
-    return this.leaveRequests.filter(r => r.status === 'Pending').length;
+    return this.leaveRequests.filter(r => (r.status || '').toUpperCase() === 'PENDING').length;
   }
 
   get approvedCount() {
-    return this.leaveRequests.filter(r => r.status === 'Approved').length;
+    return this.leaveRequests.filter(r => (r.status || '').toUpperCase() === 'APPROVED' || (r.status || '').toUpperCase() === 'APPROVE').length;
   }
 
   get rejectedCount() {
-    return this.leaveRequests.filter(r => r.status === 'Rejected').length;
+    return this.leaveRequests.filter(r => (r.status || '').toUpperCase() === 'REJECTED' || (r.status || '').toUpperCase() === 'REJECT').length;
   }
 
   get totalCount() {
@@ -204,7 +220,6 @@ export class LeaveApproval implements OnInit {
     const currentAction = this.actionType;
     const newStatus = currentAction === 'Approve' ? 'APPROVED' : 'REJECTED';
 
-    // Fallback formatting for dates in case they aren't parsed nicely
     const startStr = req.raw.start_date ? String(req.raw.start_date).substring(0, 10) : '';
     const endStr = req.raw.end_date ? String(req.raw.end_date).substring(0, 10) : '';
 
@@ -224,7 +239,7 @@ export class LeaveApproval implements OnInit {
             summary: isApprove ? 'Leave Approved' : 'Leave Rejected',
             detail: `Leave request for ${req.employeeName} has been ${isApprove ? 'approved' : 'rejected'} successfully.`
           });
-          this.loadLeaves(); // Reload to get fresh data
+          this.loadLeaves();
         } else {
           this.messageService.add({
             severity: 'error',

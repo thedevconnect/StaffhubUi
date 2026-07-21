@@ -51,7 +51,6 @@ export interface ExemptionRule {
     InputTextModule,
     ToastModule,
     BreadcrumbModule,
-    AppBreadcrumb,
     TabsModule,
     CheckboxModule,
     TableModule,
@@ -337,7 +336,23 @@ export class OfficeLocationSettings implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (employees) => {
-          this.employees = employees;
+          const todayStr = new Date().toISOString().split('T')[0];
+          this.employees = (employees || []).filter(e => {
+            const statusUpper = String(e.status || '').toUpperCase();
+            const lwdVal = e.last_working_day || e.lastWorkingDay;
+            if (statusUpper === 'INACTIVE') {
+              if (lwdVal) {
+                const lwdStr = new Date(lwdVal).toISOString().split('T')[0];
+                return todayStr <= lwdStr;
+              }
+              return false;
+            }
+            if (lwdVal) {
+              const lwdStr = new Date(lwdVal).toISOString().split('T')[0];
+              return todayStr <= lwdStr;
+            }
+            return true;
+          });
         },
         error: () => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load employees.' });

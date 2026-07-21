@@ -6,6 +6,8 @@ import {
   OnChanges,
   SimpleChanges,
   TemplateRef,
+  ElementRef,
+  HostListener,
   signal,
 } from '@angular/core';
 import { CommonModule, NgClass, NgIf, NgFor, DatePipe } from '@angular/common';
@@ -108,7 +110,52 @@ export class TableTemplate implements OnChanges {
     menu.toggle(event);
   }
 
+  constructor(
+    private userService: UserService,
+    private excelService: ExcelService,
+    private elementRef: ElementRef
+  ) { }
+
   toggleFullScreen() {
+    const el = this.elementRef.nativeElement;
+
+    if (!document.fullscreenElement) {
+      if (el.requestFullscreen) {
+        el.requestFullscreen().catch(() => this.toggleCssFullScreen());
+      } else if ((el as any).webkitRequestFullscreen) {
+        (el as any).webkitRequestFullscreen();
+      } else if ((el as any).msRequestFullscreen) {
+        (el as any).msRequestFullscreen();
+      } else {
+        this.toggleCssFullScreen();
+      }
+      this.isFullscreen = true;
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      } else if ((document as any).webkitExitFullscreen) {
+        (document as any).webkitExitFullscreen();
+      } else if ((document as any).msExitFullscreen) {
+        (document as any).msExitFullscreen();
+      }
+      this.isFullscreen = false;
+    }
+  }
+
+  @HostListener('document:fullscreenchange', ['$event'])
+  @HostListener('document:webkitfullscreenchange', ['$event'])
+  @HostListener('document:mozfullscreenchange', ['$event'])
+  @HostListener('document:MSFullscreenChange', ['$event'])
+  onFullscreenChange(event?: any): void {
+    this.isFullscreen = !!document.fullscreenElement;
+    if (this.isFullscreen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }
+
+  private toggleCssFullScreen(): void {
     this.isFullscreen = !this.isFullscreen;
     if (this.isFullscreen) {
       document.body.style.overflow = 'hidden';
@@ -167,8 +214,6 @@ export class TableTemplate implements OnChanges {
   get skeletonRows(): number[] {
     return Array.from({ length: 5 }, (_, i) => i);
   }
-
-  constructor(private userService: UserService, private excelService: ExcelService) { }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] || changes['currentPage'] || changes['pageSize'] || changes['totalCount']) {
@@ -389,5 +434,4 @@ export class TableTemplate implements OnChanges {
     // Use ExcelService to export
     this.excelService.exportAsExcelFile(exportData, this.exportFileName);
   }
-
 }
