@@ -153,8 +153,8 @@ export class HrDashboard implements OnInit, OnDestroy {
 
   // Exceptions list
   exceptions = [
-    { label: 'Late Coming (> 10:00 AM)', count: 0, severity: 'danger', icon: 'pi-clock' },
-    { label: 'Early Logout (< 07:00 PM)', count: 0, severity: 'warning', icon: 'pi-sign-out' },
+    { label: 'Late Coming  ', count: 0, severity: 'danger', icon: 'pi-clock' },
+    { label: 'Early Logout ', count: 0, severity: 'warning', icon: 'pi-sign-out' },
   ];
 
   // Pendency numbers
@@ -329,6 +329,36 @@ export class HrDashboard implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Error fetching details:', err);
+        this.isLoadingDetails = false;
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch details.' });
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  onExceptionClick(ex: any): void {
+    if (ex.count === 0) {
+      this.messageService.add({ severity: 'info', summary: 'Info', detail: `No records found for ${ex.label} today.` });
+      return;
+    }
+
+    this.detailsCategoryLabel = ex.label;
+    this.isDetailsModalVisible = true;
+    this.isLoadingDetails = true;
+    this.detailsTableData = [];
+
+    this.attendanceService.getHRDashboardDetails('swipe_in').subscribe({
+      next: (res) => {
+        const data = res.data || [];
+        if (ex.label.includes('Late')) {
+          this.detailsTableData = data.filter((r: any) => r.late_coming === 'Yes');
+        } else {
+          this.detailsTableData = data.filter((r: any) => r.early_going === 'Yes');
+        }
+        this.isLoadingDetails = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
         this.isLoadingDetails = false;
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch details.' });
         this.cdr.detectChanges();

@@ -18,7 +18,7 @@ import { EmployeeManagementService } from '../../../../shared/services/employee-
 import { EmployeeOnboardingService } from '../../../../shared/services/employee-onboarding.service';
 
 @Component({
-  selector: 'app-profile',
+  selector: 'app-onboarding',
   standalone: true,
   imports: [
     CommonModule,
@@ -35,14 +35,14 @@ import { EmployeeOnboardingService } from '../../../../shared/services/employee-
     InputTextModule
   ],
   providers: [MessageService],
-  templateUrl: './profile.html',
-  styleUrl: './profile.scss',
+  templateUrl: './onboarding.html',
+  styleUrl: './onboarding.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Profile implements OnInit {
+export class Onboarding implements OnInit {
   breadcrumbItems: any[] = [
     { label: 'Employee Self Service', icon: 'pi pi-home', routerLink: '/ess' },
-    { label: 'Profile', icon: 'pi pi-user', routerLink: '/ess/profile' }
+    { label: 'Onboarding', icon: 'pi pi-id-card', routerLink: '/ess/onboarding' }
   ];
 
   activeTab: string = 'details';

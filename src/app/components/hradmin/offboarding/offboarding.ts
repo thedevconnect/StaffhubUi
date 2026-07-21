@@ -14,6 +14,8 @@ import { MessageService } from 'primeng/api';
 import { EmployeeManagementService } from '../../../shared/services/employee-management.service';
 import { TableTemplate, TableColumn } from '../../../shared/ui/table-template/table-template';
 
+import { OffboardingService } from '../../../shared/services/offboarding.service';
+
 @Component({
   selector: 'app-offboarding',
   standalone: true,
@@ -50,7 +52,6 @@ export class OffboardingComponent implements OnInit {
     { label: 'Terminated', value: 'Terminated' },
     { label: 'Retired', value: 'Retired' },
     { label: 'Absconded', value: 'Absconded' },
-
   ];
 
   isLoading = false;
@@ -71,6 +72,7 @@ export class OffboardingComponent implements OnInit {
     private fb: FormBuilder,
     private messageService: MessageService,
     private employeeManagementService: EmployeeManagementService,
+    private offboardingService: OffboardingService,
     private cdr: ChangeDetectorRef
   ) {
     this.initForm();
@@ -120,17 +122,22 @@ export class OffboardingComponent implements OnInit {
   loadTableData(): void {
     this.isLoading = true;
     this.cdr.markForCheck();
-    
-    // Simulate API delay
-    setTimeout(() => {
-      // Mock data for table until API is ready
-      this.offboardings = [
-        { id: 1, employeeName: 'John Doe', employeeCode: 'EMP001', employmentStatus: 'Resigned', resignationDate: '2026-07-01', lastWorkingDate: '2026-07-15', reason: 'Better opportunity' },
-        { id: 2, employeeName: 'Jane Smith', employeeCode: 'EMP002', employmentStatus: 'Terminated', resignationDate: '2026-06-20', lastWorkingDate: '2026-06-20', reason: 'Performance issues' }
-      ];
-      this.isLoading = false;
-      this.cdr.markForCheck();
-    }, 500);
+    this.offboardingService.getOffboardings().subscribe({
+      next: (res: any) => {
+        this.offboardings = res.data || [];
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: (err: any) => {
+        this.isLoading = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to fetch offboarding records.'
+        });
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   refreshTable(): void {
@@ -149,26 +156,30 @@ export class OffboardingComponent implements OnInit {
     }
 
     const formData = this.offboardingForm.value;
-    console.log('Submitting Offboarding Details:', formData);
+    this.isLoading = true;
+    this.cdr.markForCheck();
 
-    // Find employee name for mock update
-    const selectedEmp = this.employees.find(e => e.value === formData.employeeId);
-
-    // Simulating API call
-    this.offboardings = [{
-      id: Date.now(),
-      employeeName: selectedEmp ? selectedEmp.label.split(' - ')[0] : 'Unknown',
-      employeeCode: selectedEmp ? selectedEmp.label.split(' - ')[1] : '-',
-      ...formData
-    }, ...this.offboardings];
-
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: 'Offboarding details submitted successfully.'
+    this.offboardingService.createOffboarding(formData).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Offboarding details saved successfully.'
+        });
+        this.loadTableData();
+        this.closeDrawer();
+      },
+      error: (err: any) => {
+        this.isLoading = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err.error?.message || 'Failed to save offboarding details.'
+        });
+        this.cdr.markForCheck();
+      }
     });
-
-    this.closeDrawer();
   }
 
   openDrawer(): void {
