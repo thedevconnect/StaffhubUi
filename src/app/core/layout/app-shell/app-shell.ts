@@ -131,7 +131,9 @@ export class AppShell {
           pathLower.includes('expense') ||
           pathLower.includes('performance') ||
           pathLower.includes('probation') ||
-          pathLower.includes('ticket')
+          pathLower.includes('ticket') ||
+          pathLower.includes('work-management') ||
+          pathLower.includes('task')
         ) {
           standaloneMenus.push(item);
         } else {
@@ -279,6 +281,7 @@ export class AppShell {
     if (p.includes('company')) return 'pi-building';
     if (p.includes('activity')) return 'pi-cog';
     if (p.includes('menu')) return 'pi-list';
+    if (p.includes('work') || p.includes('task')) return 'pi-check-square';
     if (p.includes('role')) return 'pi-users';
     return 'pi-file';
   }

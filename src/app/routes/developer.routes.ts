@@ -7,4 +7,5 @@ export const developerRoutes: Routes = [
     { path: 'menu-master', loadComponent: () => import('../components/developer/menu-master/menu-master').then(c => c.MenuMaster), title: 'Menu Master' },
     { path: 'role-master', loadComponent: () => import('../components/developer/role-master/role-master').then(c => c.RoleMaster), title: 'Role Master' },
     { path: 'company-approval', loadComponent: () => import('../components/developer/company-approval/company-approval').then(c => c.CompanyApproval), title: 'Company Approval' },
+    { path: 'work-management', loadComponent: () => import('../components/work-management/work-management').then(c => c.WorkManagementComponent), title: 'Work Management' },
 ];

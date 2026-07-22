@@ -1,0 +1,598 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<!-- Page Header Inline with Breadcrumb -->
+<div
+  class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6 shadow-sm">
+  <div class="flex-1 min-w-0">
+    <p-breadcrumb [model]="breadcrumbItems"
+      styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
+  </div>
+  <div class="flex-none">
+    <p-button (onClick)="openCreateTaskModal()" label="Create New Task" icon="pi pi-plus"
+      styleClass="p-button-sm p-button-info rounded-lg" [raised]="true"></p-button>
+  </div>
+</div>
+
+<div class="p-4 md:p-6 space-y-6 bg-slate-50 min-h-screen font-sans">
+
+
+
+  <!-- DASHBOARD STATS CARDS -->
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <!-- Total Tasks -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between text-slate-400 mb-2">
+        <span class="text-xs font-bold uppercase tracking-wider">Total Tasks</span>
+        <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
+          <i class="pi pi-bars text-sm"></i>
+        </div>
+      </div>
+      <div class="text-3xl font-black text-slate-900">{{ stats.totalTasks }}</div>
+      <div class="text-[11px] text-slate-500 mt-2 font-medium">Across all projects</div>
+    </div>
+
+    <!-- To Do -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between text-slate-400 mb-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-600">To Do</span>
+        <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+          <i class="pi pi-clock text-sm"></i>
+        </div>
+      </div>
+      <div class="text-3xl font-black text-slate-700">{{ stats.todoCount }}</div>
+      <div class="text-[11px] text-slate-500 mt-2 font-medium">Pending start</div>
+    </div>
+
+    <!-- In Progress -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between text-indigo-600 mb-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-indigo-700">In Progress</span>
+        <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+          <i class="pi pi-spin pi-spinner text-sm"></i>
+        </div>
+      </div>
+      <div class="text-3xl font-black text-indigo-600">{{ stats.inProgressCount }}</div>
+      <div class="text-[11px] text-indigo-600/80 mt-2 font-semibold">Active tasks</div>
+    </div>
+
+    <!-- In Review -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between text-amber-600 mb-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-amber-700">In Review</span>
+        <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
+          <i class="pi pi-eye text-sm"></i>
+        </div>
+      </div>
+      <div class="text-3xl font-black text-amber-600">{{ stats.inReviewCount }}</div>
+      <div class="text-[11px] text-amber-600/80 mt-2 font-semibold">Awaiting review</div>
+    </div>
+
+    <!-- Completed -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between text-emerald-600 mb-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Completed</span>
+        <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+          <i class="pi pi-check-circle text-sm"></i>
+        </div>
+      </div>
+      <div class="text-3xl font-black text-emerald-600">{{ stats.completedCount }}</div>
+      <div class="text-[11px] text-emerald-600/80 mt-2 font-semibold">Finished tasks</div>
+    </div>
+
+    <!-- Overdue -->
+    <div class="bg-white p-5 rounded-2xl border border-rose-100 bg-rose-50/20 shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between text-rose-600 mb-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-rose-700">Overdue</span>
+        <div class="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center">
+          <i class="pi pi-exclamation-triangle text-sm"></i>
+        </div>
+      </div>
+      <div class="text-3xl font-black text-rose-600">{{ stats.overdueCount }}</div>
+      <div class="text-[11px] text-rose-600/80 mt-2 font-semibold">Passed due date</div>
+    </div>
+  </div>
+
+  <!-- FILTERS & VIEW MODE CONTROL BAR -->
+  <div
+    class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col lg:flex-row gap-4 items-center justify-between">
+    <!-- Left Filters Group -->
+    <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+      <!-- Search Input -->
+      <div class="relative w-full sm:w-64">
+        <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+        <input pInputText type="text" placeholder="Search task code, title..." [(ngModel)]="searchQuery"
+          (keyup.enter)="onSearch()"
+          class="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border-slate-200 rounded-xl focus:bg-white" />
+      </div>
+
+      <!-- Status Filter -->
+      <p-select [options]="statusOptions" [(ngModel)]="selectedStatus" optionLabel="label" optionValue="value"
+        (onChange)="onFilterChange()" styleClass="w-full sm:w-44 bg-slate-50 border-slate-200 text-sm rounded-xl" />
+
+      <!-- Priority Filter -->
+      <p-select [options]="priorityOptions" [(ngModel)]="selectedPriority" optionLabel="label" optionValue="value"
+        (onChange)="onFilterChange()" styleClass="w-full sm:w-40 bg-slate-50 border-slate-200 text-sm rounded-xl" />
+
+      <!-- Category Filter -->
+      <p-select [options]="categoryOptions" [(ngModel)]="selectedCategory" optionLabel="label" optionValue="value"
+        (onChange)="onFilterChange()" styleClass="w-full sm:w-44 bg-slate-50 border-slate-200 text-sm rounded-xl" />
+
+      <!-- Scope Filter -->
+      <p-select [options]="scopeOptions" [(ngModel)]="selectedScope" optionLabel="label" optionValue="value"
+        (onChange)="onFilterChange()"
+        styleClass="w-full sm:w-44 bg-slate-50 border-slate-200 text-sm rounded-xl font-semibold text-indigo-700" />
+    </div>
+
+    <!-- Right Actions: View Mode Switcher -->
+    <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200/80 self-end lg:self-auto">
+      <button type="button" (click)="viewMode = 'table'" [class.bg-white]="viewMode === 'table'"
+        [class.shadow-sm]="viewMode === 'table'" [class.text-indigo-600]="viewMode === 'table'"
+        class="px-3 py-1.5 text-xs font-bold rounded-lg text-slate-600 transition-all flex items-center gap-1.5">
+        <i class="pi pi-table"></i> Table View
+      </button>
+      <button type="button" (click)="viewMode = 'kanban'" [class.bg-white]="viewMode === 'kanban'"
+        [class.shadow-sm]="viewMode === 'kanban'" [class.text-indigo-600]="viewMode === 'kanban'"
+        class="px-3 py-1.5 text-xs font-bold rounded-lg text-slate-600 transition-all flex items-center gap-1.5">
+        <i class="pi pi-th-large"></i> Board View
+      </button>
+    </div>
+  </div>
+
+  <!-- TABLE VIEW (Using app-table-template) -->
+  <div *ngIf="viewMode === 'table'" class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+    <app-table-template 
+      [data]="tasks" 
+      [columns]="columns" 
+      [pageSize]="limit" 
+      [totalCount]="totalRecords" 
+      [isLoading]="loading" 
+      [currentPage]="page"
+      [serverSide]="true"
+      [tableActions]="tableActions"
+      [showRefresh]="true"
+      (refresh)="loadTasks()"
+      (pageChange)="page = $event; loadTasks()"
+      (pageSizeChange)="limit = $event; page = 1; loadTasks()"
+      (actionClicked)="onActionClicked($event)"
+      [cellTemplates]="{
+        task_code: taskCodeCol,
+        title: titleCol,
+        assignee_name: assigneeCol,
+        priority: priorityCol,
+        status: statusCol,
+        progress: progressCol,
+        due_date: dueDateCol
+      }">
+    </app-table-template>
+
+    <!-- Custom Cell Templates -->
+    <ng-template #taskCodeCol let-row>
+      <span class="font-mono font-bold text-indigo-600 cursor-pointer hover:underline" (click)="openTaskDetail(row)">
+        {{ row.task_code }}
+      </span>
+    </ng-template>
+
+    <ng-template #titleCol let-row>
+      <div class="max-w-xs">
+        <div class="font-bold text-slate-900 cursor-pointer hover:text-indigo-600 truncate" (click)="openTaskDetail(row)">
+          {{ row.title }}
+        </div>
+        <div class="flex items-center gap-2 mt-1">
+          <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">{{ row.category }}</span>
+          <span *ngIf="row.comments_count" class="text-[11px] text-slate-400 flex items-center gap-1">
+            <i class="pi pi-comment"></i> {{ row.comments_count }}
+          </span>
+          <span *ngIf="row.attachments_count" class="text-[11px] text-slate-400 flex items-center gap-1">
+            <i class="pi pi-paperclip"></i> {{ row.attachments_count }}
+          </span>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #assigneeCol let-row>
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-xs">
+          {{ (row.assignee_name || 'U').charAt(0).toUpperCase() }}
+        </div>
+        <div>
+          <div class="font-semibold text-slate-800 text-xs">{{ row.assignee_name || 'Unassigned' }}</div>
+          <div class="text-[10px] text-slate-400">{{ row.assignee_emp_id || '' }}</div>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #priorityCol let-row>
+      <p-tag [value]="row.priority" [severity]="getPrioritySeverity(row.priority)" styleClass="text-xs font-bold uppercase px-2 py-0.5" />
+    </ng-template>
+
+    <ng-template #statusCol let-row>
+      <p-tag [value]="row.status" [severity]="getStatusSeverity(row.status)" styleClass="text-xs font-bold uppercase px-2.5 py-1" />
+    </ng-template>
+
+    <ng-template #progressCol let-row>
+      <div class="w-32">
+        <div class="flex justify-between items-center text-xs font-semibold mb-1">
+          <span class="text-slate-500">{{ row.progress || 0 }}%</span>
+        </div>
+        <p-progressbar [value]="row.progress || 0" [showValue]="false" styleClass="h-2 rounded-full" />
+      </div>
+    </ng-template>
+
+    <ng-template #dueDateCol let-row>
+      <span *ngIf="row.due_date" [class.text-rose-600]="row.status !== 'COMPLETED' && row.due_date < '2026-07-22'" class="text-xs font-medium">
+        <i class="pi pi-calendar mr-1"></i>{{ row.due_date | date: 'dd MMM yyyy' }}
+      </span>
+      <span *ngIf="!row.due_date" class="text-slate-400 text-xs">No due date</span>
+    </ng-template>
+  </div>
+
+  <!-- KANBAN BOARD VIEW -->
+  <div *ngIf="viewMode === 'kanban'" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <!-- TODO COLUMN -->
+    <div class="bg-slate-100/80 p-4 rounded-2xl border border-slate-200/60 flex flex-col gap-3 min-h-[500px]">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+        <h3 class="font-black text-slate-700 text-sm uppercase tracking-wider flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-slate-400"></span> To Do
+        </h3>
+        <span class="bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full text-xs">
+          {{ getKanbanTasksByStatus('TODO').length }}
+        </span>
+      </div>
+
+      <div *ngFor="let task of getKanbanTasksByStatus('TODO')"
+        class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col gap-3 hover:shadow-md transition-all">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-mono font-bold text-indigo-600">{{ task.task_code }}</span>
+          <p-tag [value]="task.priority" [severity]="getPrioritySeverity(task.priority)"
+            styleClass="text-[10px] font-bold uppercase" />
+        </div>
+        <h4 class="font-bold text-slate-900 text-sm cursor-pointer hover:text-indigo-600"
+          (click)="openTaskDetail(task)">
+          {{ task.title }}
+        </h4>
+        <p class="text-xs text-slate-500 line-clamp-2">{{ task.description || 'No description' }}</p>
+
+        <div class="flex items-center justify-between pt-2 border-t border-slate-50 text-xs text-slate-500">
+          <span class="font-semibold">{{ task.assignee_name || 'Unassigned' }}</span>
+          <button (click)="quickStatusChange(task, 'IN_PROGRESS')" class="text-indigo-600 font-bold hover:underline">
+            Start &rarr;
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- IN PROGRESS COLUMN -->
+    <div class="bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100/80 flex flex-col gap-3 min-h-[500px]">
+      <div class="flex items-center justify-between pb-2 border-b border-indigo-100">
+        <h3 class="font-black text-indigo-800 text-sm uppercase tracking-wider flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-indigo-500"></span> In Progress
+        </h3>
+        <span class="bg-indigo-200/80 text-indigo-800 font-bold px-2 py-0.5 rounded-full text-xs">
+          {{ getKanbanTasksByStatus('IN_PROGRESS').length }}
+        </span>
+      </div>
+
+      <div *ngFor="let task of getKanbanTasksByStatus('IN_PROGRESS')"
+        class="bg-white p-4 rounded-xl shadow-sm border border-indigo-50 flex flex-col gap-3 hover:shadow-md transition-all">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-mono font-bold text-indigo-600">{{ task.task_code }}</span>
+          <p-tag [value]="task.priority" [severity]="getPrioritySeverity(task.priority)"
+            styleClass="text-[10px] font-bold uppercase" />
+        </div>
+        <h4 class="font-bold text-slate-900 text-sm cursor-pointer hover:text-indigo-600"
+          (click)="openTaskDetail(task)">
+          {{ task.title }}
+        </h4>
+
+        <p-progressbar [value]="task.progress || 50" [showValue]="false" styleClass="h-1.5 rounded-full" />
+
+        <div class="flex items-center justify-between pt-2 border-t border-slate-50 text-xs text-slate-500">
+          <span class="font-semibold">{{ task.assignee_name || 'Unassigned' }}</span>
+          <button (click)="quickStatusChange(task, 'IN_REVIEW')" class="text-indigo-600 font-bold hover:underline">
+            Review &rarr;
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- IN REVIEW COLUMN -->
+    <div class="bg-amber-50/50 p-4 rounded-2xl border border-amber-100/80 flex flex-col gap-3 min-h-[500px]">
+      <div class="flex items-center justify-between pb-2 border-b border-amber-100">
+        <h3 class="font-black text-amber-800 text-sm uppercase tracking-wider flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-amber-500"></span> In Review
+        </h3>
+        <span class="bg-amber-200/80 text-amber-800 font-bold px-2 py-0.5 rounded-full text-xs">
+          {{ getKanbanTasksByStatus('IN_REVIEW').length }}
+        </span>
+      </div>
+
+      <div *ngFor="let task of getKanbanTasksByStatus('IN_REVIEW')"
+        class="bg-white p-4 rounded-xl shadow-sm border border-amber-50 flex flex-col gap-3 hover:shadow-md transition-all">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-mono font-bold text-indigo-600">{{ task.task_code }}</span>
+          <p-tag [value]="task.priority" [severity]="getPrioritySeverity(task.priority)"
+            styleClass="text-[10px] font-bold uppercase" />
+        </div>
+        <h4 class="font-bold text-slate-900 text-sm cursor-pointer hover:text-indigo-600"
+          (click)="openTaskDetail(task)">
+          {{ task.title }}
+        </h4>
+
+        <div class="flex items-center justify-between pt-2 border-t border-slate-50 text-xs text-slate-500">
+          <span class="font-semibold">{{ task.assignee_name || 'Unassigned' }}</span>
+          <button (click)="quickStatusChange(task, 'COMPLETED')" class="text-emerald-600 font-bold hover:underline">
+            Complete &check;
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPLETED COLUMN -->
+    <div class="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100/80 flex flex-col gap-3 min-h-[500px]">
+      <div class="flex items-center justify-between pb-2 border-b border-emerald-100">
+        <h3 class="font-black text-emerald-800 text-sm uppercase tracking-wider flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-emerald-500"></span> Completed
+        </h3>
+        <span class="bg-emerald-200/80 text-emerald-800 font-bold px-2 py-0.5 rounded-full text-xs">
+          {{ getKanbanTasksByStatus('COMPLETED').length }}
+        </span>
+      </div>
+
+      <div *ngFor="let task of getKanbanTasksByStatus('COMPLETED')"
+        class="bg-white p-4 rounded-xl shadow-sm border border-emerald-50 flex flex-col gap-3 hover:shadow-md transition-all">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-mono font-bold text-emerald-600">{{ task.task_code }}</span>
+          <p-tag value="DONE" severity="success" styleClass="text-[10px] font-bold uppercase" />
+        </div>
+        <h4 class="font-bold text-slate-900 text-sm line-through text-slate-400 cursor-pointer"
+          (click)="openTaskDetail(task)">
+          {{ task.title }}
+        </h4>
+
+        <div class="flex items-center justify-between pt-2 border-t border-slate-50 text-xs text-slate-400">
+          <span>{{ task.assignee_name || 'Unassigned' }}</span>
+          <span class="text-emerald-600 font-bold">&check; 100%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- CREATE / EDIT TASK DIALOG -->
+<p-dialog [(visible)]="showTaskModal" [header]="isEditMode ? 'Edit Task' : 'Create New Task'" [modal]="true"
+  [style]="{ width: '600px' }" styleClass="p-dialog-rounded">
+
+  <form [formGroup]="taskForm" (ngSubmit)="saveTask()" class="space-y-4 pt-2">
+    <!-- Task Title -->
+    <div>
+      <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Task Title *</label>
+      <input pInputText formControlName="title" placeholder="Enter concise task title"
+        class="w-full text-sm rounded-xl" />
+      <small *ngIf="taskForm.get('title')?.touched && taskForm.get('title')?.invalid"
+        class="text-rose-500 text-xs block mt-1">Title is required.</small>
+    </div>
+
+    <!-- Category & Priority -->
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Category</label>
+        <p-select [options]="categoryOptions" formControlName="category" optionLabel="label" optionValue="value"
+          styleClass="w-full text-sm rounded-xl" />
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Priority</label>
+        <p-select [options]="priorityOptions" formControlName="priority" optionLabel="label" optionValue="value"
+          styleClass="w-full text-sm rounded-xl" />
+      </div>
+    </div>
+
+    <!-- Status & Assignee -->
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Status</label>
+        <p-select [options]="statusOptions" formControlName="status" optionLabel="label" optionValue="value"
+          styleClass="w-full text-sm rounded-xl" />
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Assign To *</label>
+        <p-select [options]="employees" formControlName="assigned_to" optionLabel="label" optionValue="value"
+          placeholder="Select Employee" styleClass="w-full text-sm rounded-xl" />
+      </div>
+    </div>
+
+    <!-- Due Date & Estimated Hours -->
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Due Date</label>
+        <input pInputText type="date" formControlName="due_date" class="w-full text-sm rounded-xl" />
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Estimated Hours</label>
+        <input pInputText type="number" formControlName="estimated_hours" placeholder="e.g. 8"
+          class="w-full text-sm rounded-xl" />
+      </div>
+    </div>
+
+    <!-- Progress Slider (if edit mode) -->
+    <div *ngIf="isEditMode">
+      <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Progress ({{
+        taskForm.get('progress')?.value }}%)</label>
+      <p-slider formControlName="progress" [min]="0" [max]="100" styleClass="mt-2" />
+    </div>
+
+    <!-- Description -->
+    <div>
+      <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Description /
+        Requirements</label>
+      <textarea pTextarea formControlName="description" rows="4"
+        placeholder="Add detailed instructions, specs, or task checklist..."
+        class="w-full text-sm rounded-xl"></textarea>
+    </div>
+
+    <!-- Dialog Actions -->
+    <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
+      <p-button label="Cancel" [text]="true" (onClick)="showTaskModal = false" styleClass="text-slate-600 font-bold" />
+      <p-button [label]="isEditMode ? 'Update Task' : 'Create Task'" type="submit"
+        styleClass="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl border-none" />
+    </div>
+  </form>
+</p-dialog>
+
+<!-- TASK DETAIL & ACTIVITY DRAWER / DIALOG -->
+<p-dialog [(visible)]="showDetailModal" [modal]="true" [style]="{ width: '800px' }" styleClass="p-dialog-rounded">
+
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-3">
+      <span
+        class="font-mono font-black text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg text-sm border border-indigo-100">
+        {{ selectedTask?.task_code }}
+      </span>
+      <h2 class="text-lg font-black text-slate-900">{{ selectedTask?.title }}</h2>
+    </div>
+  </ng-template>
+
+  <div *ngIf="selectedTask" class="space-y-6 pt-2">
+    <!-- Header Meta Badges -->
+    <div
+      class="flex flex-wrap items-center justify-between gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100 text-xs">
+      <div class="flex items-center gap-3">
+        <p-tag [value]="selectedTask.status" [severity]="getStatusSeverity(selectedTask.status)"
+          styleClass="font-bold uppercase px-2.5 py-1" />
+        <p-tag [value]="selectedTask.priority" [severity]="getPrioritySeverity(selectedTask.priority)"
+          styleClass="font-bold uppercase px-2.5 py-1" />
+        <span class="font-bold text-slate-600 uppercase">{{ selectedTask.category }}</span>
+      </div>
+
+      <div class="text-slate-500 font-semibold">
+        Assigned to: <strong class="text-slate-900">{{ selectedTask.assignee_name || 'Unassigned' }}</strong>
+      </div>
+    </div>
+
+    <!-- Description Box -->
+    <div class="bg-white p-4 rounded-xl border border-slate-100">
+      <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Description</h4>
+      <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{{ selectedTask.description || 'No
+        description provided.' }}</p>
+    </div>
+
+    <!-- TABS: Comments, Attachments, Activity Log -->
+    <div class="space-y-4">
+      <div class="flex border-b border-slate-200 gap-6 text-sm font-bold text-slate-500">
+        <button (click)="activeDetailTab = 0" [class.text-indigo-600]="activeDetailTab === 0"
+          [class.border-indigo-600]="activeDetailTab === 0"
+          class="pb-2.5 border-b-2 transition-all flex items-center gap-2">
+          <i class="pi pi-comment"></i> Comments ({{ selectedTask.comments?.length || 0 }})
+        </button>
+
+        <button (click)="activeDetailTab = 1" [class.text-indigo-600]="activeDetailTab === 1"
+          [class.border-indigo-600]="activeDetailTab === 1"
+          class="pb-2.5 border-b-2 transition-all flex items-center gap-2">
+          <i class="pi pi-paperclip"></i> Attachments ({{ selectedTask.attachments?.length || 0 }})
+        </button>
+
+        <button (click)="activeDetailTab = 2" [class.text-indigo-600]="activeDetailTab === 2"
+          [class.border-indigo-600]="activeDetailTab === 2"
+          class="pb-2.5 border-b-2 transition-all flex items-center gap-2">
+          <i class="pi pi-history"></i> Activity Logs ({{ selectedTask.activityLogs?.length || 0 }})
+        </button>
+      </div>
+
+      <!-- TAB 0: COMMENTS THREAD -->
+      <div *ngIf="activeDetailTab === 0" class="space-y-4">
+        <!-- Add Comment Input -->
+        <div class="flex gap-3">
+          <textarea pTextarea [(ngModel)]="newCommentText" rows="2" placeholder="Write a comment or status update..."
+            class="w-full text-sm rounded-xl p-3 bg-slate-50 border-slate-200"></textarea>
+          <p-button label="Post" icon="pi pi-send" (onClick)="postComment()"
+            styleClass="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 rounded-xl border-none h-full" />
+        </div>
+
+        <!-- Comments List -->
+        <div class="space-y-3 max-h-60 overflow-y-auto pr-1">
+          <div *ngFor="let comment of selectedTask.comments"
+            class="bg-slate-50 p-3.5 rounded-xl border border-slate-100 space-y-1">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-bold text-slate-900">{{ comment.user_name }}</span>
+              <span class="text-slate-400">{{ comment.created_at | date: 'dd MMM, hh:mm a' }}</span>
+            </div>
+            <p class="text-sm text-slate-700">{{ comment.comment }}</p>
+          </div>
+
+          <div *ngIf="!selectedTask.comments || selectedTask.comments.length === 0"
+            class="text-center text-xs text-slate-400 py-4">
+            No comments yet. Start the conversation!
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 1: ATTACHMENTS -->
+      <div *ngIf="activeDetailTab === 1" class="space-y-4">
+        <!-- File Upload Area -->
+        <div
+          class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center bg-slate-50/50 hover:bg-slate-50 transition-all">
+          <input type="file" #fileInput (change)="onFileSelected($event)" class="hidden" />
+          <i class="pi pi-upload text-2xl text-slate-400 mb-1 block"></i>
+          <p class="text-xs text-slate-600 font-semibold mb-2">Upload document, screenshot, or specifications</p>
+          <p-button label="Select File" icon="pi pi-file" [loading]="uploadingFile" (onClick)="fileInput.click()"
+            styleClass="bg-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg border-none" />
+        </div>
+
+        <!-- Attachments List -->
+        <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
+          <div *ngFor="let att of selectedTask.attachments"
+            class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs">
+                <i class="pi pi-file"></i>
+              </div>
+              <div>
+                <a [href]="att.file_url" target="_blank"
+                  class="font-bold text-xs text-indigo-600 hover:underline block truncate max-w-xs">
+                  {{ att.file_name }}
+                </a>
+                <div class="text-[10px] text-slate-400">{{ att.file_size || 'File' }} &bull; Uploaded by {{
+                  att.user_name }}</div>
+              </div>
+            </div>
+
+            <button (click)="deleteAttachment(att.id)"
+              class="text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg transition-all">
+              <i class="pi pi-trash text-sm"></i>
+            </button>
+          </div>
+
+          <div *ngIf="!selectedTask.attachments || selectedTask.attachments.length === 0"
+            class="text-center text-xs text-slate-400 py-4">
+            No files attached to this task yet.
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: ACTIVITY AUDIT LOG -->
+      <div *ngIf="activeDetailTab === 2" class="space-y-3 max-h-60 overflow-y-auto pr-1">
+        <div *ngFor="let log of selectedTask.activityLogs"
+          class="flex items-start gap-3 border-l-2 border-indigo-200 pl-3 py-1">
+          <div class="w-2 h-2 rounded-full bg-indigo-600 mt-1.5 -ml-4"></div>
+          <div>
+            <div class="text-xs font-bold text-slate-800">{{ log.user_name }} &bull; <span class="text-indigo-600">{{
+                log.action }}</span></div>
+            <p class="text-xs text-slate-600 mt-0.5">{{ log.description }}</p>
+            <span class="text-[10px] text-slate-400 block mt-0.5">{{ log.created_at | date: 'dd MMM yyyy, hh:mm a'
+              }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="!selectedTask.activityLogs || selectedTask.activityLogs.length === 0"
+          class="text-center text-xs text-slate-400 py-4">
+          No activity logs recorded yet.
+        </div>
+      </div>
+    </div>
+  </div>
+</p-dialog>

@@ -17,5 +17,9 @@ export const superadminRoutes: Routes = [
         path: 'all-employees',
         loadComponent: () => import('../components/superAdmin/all-employees/all-employees').then(m => m.AllEmployeesComponent)
     },
-
+    {
+        path: 'work-management',
+        title: 'Work Management',
+        loadComponent: () => import('../components/work-management/work-management').then(m => m.WorkManagementComponent)
+    }
 ];
