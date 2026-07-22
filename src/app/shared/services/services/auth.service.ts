@@ -50,6 +50,14 @@ export class AuthService {
     );
   }
 
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post(`${this.apiBase}/api/auth/forgot-password`, { email });
+  }
+
+  resetPassword(payload: { email: string; password: string }): Observable<any> {
+    return this.http.post(`${this.apiBase}/api/auth/reset-password`, payload);
+  }
+
   logout(): void {
     this._user.set(null);
     this._selectedRoleId.set(null);
