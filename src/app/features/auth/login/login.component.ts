@@ -100,6 +100,19 @@ export class LoginComponent implements OnInit {
     this.show = !this.show;
   }
 
+  onEmailInput(event: Event, controlName: string): void {
+    const inputElement = event.target as HTMLInputElement;
+    let value = inputElement.value;
+
+    if (value.endsWith('@')) {
+      value = value + 'gmail.com';
+      const control = this.loginForm.get(controlName) || this.forgateForm.get(controlName) || this.createPassForm.get(controlName);
+      if (control) {
+        control.setValue(value);
+      }
+    }
+  }
+
   togglePassword() {
     this.showPassword = !this.showPassword;
   }

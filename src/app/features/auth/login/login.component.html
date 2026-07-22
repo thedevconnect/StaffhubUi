@@ -119,6 +119,7 @@
                     <div>
                         <p-floatlabel>
                             <input pInputText id="username" type="text" formControlName="username" class="w-full"
+                                (input)="onEmailInput($event, 'username')"
                                 [class.ng-invalid]="f['username'].invalid && f['username'].touched"
                                 [class.ng-dirty]="f['username'].invalid && f['username'].touched" />
                             <label for="username"><i class="pi pi-user mr-2 text-slate-400"></i>Username</label>
@@ -175,6 +176,7 @@
                     <div>
                         <p-floatlabel>
                             <input pInputText id="fpEmail" type="email" formControlName="email" class="w-full"
+                                (input)="onEmailInput($event, 'email')"
                                 [class.ng-invalid]="f1['email'].invalid && f1['email'].touched"
                                 [class.ng-dirty]="f1['email'].invalid && f1['email'].touched" />
                             <label for="fpEmail"><i class="pi pi-envelope mr-2 text-slate-400"></i>Email Address</label>
