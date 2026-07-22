@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { ActivatedRoute } from '@angular/router';
 
 import { MonthlyAttendanceService } from '../../../shared/services/monthly-attendance.service';
 import { EmployeeManagementService } from '../../../shared/services/employee-management.service';
@@ -34,12 +35,13 @@ import { InputTextModule } from 'primeng/inputtext';
 })
 export class MonthlyAttendance implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
-  private monthlyService = inject(MonthlyAttendanceService);
-  private employeeService = inject(EmployeeManagementService);
-  private userService = inject(UserService);
-  private fb = inject(FormBuilder);
-  private messageService = inject(MessageService);
-  private confirmationService = inject(ConfirmationService);
+  private readonly monthlyService = inject(MonthlyAttendanceService);
+  private readonly employeeService = inject(EmployeeManagementService);
+  private readonly userService = inject(UserService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly fb = inject(FormBuilder);
+  private readonly messageService = inject(MessageService);
+  private readonly confirmationService = inject(ConfirmationService);
 
   isPrivileged = false;
   employees: any[] = [];
@@ -49,7 +51,7 @@ export class MonthlyAttendance implements OnInit {
     { label: 'Monthly Final Attendance', icon: 'pi pi-calendar-times' },
   ];
 
-  months = [
+  allMonths = [
     { label: 'January', value: 1 }, { label: 'February', value: 2 },
     { label: 'March', value: 3 }, { label: 'April', value: 4 },
     { label: 'May', value: 5 }, { label: 'June', value: 6 },
@@ -90,9 +92,51 @@ export class MonthlyAttendance implements OnInit {
   currentRecord: any = null;
   summary: any = null;
 
+  // Dynamically filter months up to current month for current year
+  availableMonths = computed(() => {
+    const filterYear = Number(this.filterForm?.get('year')?.value || new Date().getFullYear());
+    const now = new Date();
+    const curYear = now.getFullYear();
+    const curMonth = now.getMonth() + 1;
+
+    let maxMonth = 12;
+    if (filterYear === curYear) {
+      maxMonth = curMonth;
+    } else if (filterYear > curYear) {
+      maxMonth = 0;
+    }
+
+    return this.allMonths.filter(m => m.value <= maxMonth);
+  });
+
+  // Current month & Last month can be edited/submitted
   isEditable = computed(() => {
-    if (!this.currentRecord) return false;
-    return ['Draft', 'Rejected'].includes(this.currentRecord.status);
+    const filter = this.filterForm?.value;
+    if (!filter) return true;
+
+    const selMonth = Number(filter.month);
+    const selYear = Number(filter.year);
+
+    const now = new Date();
+    const curMonth = now.getMonth() + 1;
+    const curYear = now.getFullYear();
+
+    // Current month
+    if (selYear === curYear && selMonth === curMonth) {
+      return true;
+    }
+
+    // Previous month in same year
+    if (selYear === curYear && selMonth === curMonth - 1) {
+      return true;
+    }
+
+    // Previous month across year boundary (e.g. Jan 2026 -> Dec 2025)
+    if (curMonth === 1 && selYear === curYear - 1 && selMonth === 12) {
+      return true;
+    }
+
+    return false; // Older months are read-only
   });
 
   constructor() {
@@ -106,17 +150,24 @@ export class MonthlyAttendance implements OnInit {
       details: this.fb.array([])
     });
 
-    // Listen to form changes to update summary live
     this.attendanceForm.valueChanges.pipe(takeUntilDestroyed()).subscribe(val => {
       this.calculateSummary(val.details);
     });
   }
 
   ngOnInit(): void {
+    this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      if (params['month'] && params['year']) {
+        this.filterForm.patchValue({
+          month: Number(params['month']),
+          year: Number(params['year'])
+        });
+      }
+      this.loadAttendance();
+    });
+
     this.userService.getUserSidebar('').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (res: any) => {
-        // Just checking if user is HR by checking their token roles or sidebar response
-        // We will decode the token or rely on a simple backend call if needed, but since we don't have direct role access easily without user service, we can fetch employees and if it fails, they are not HR.
+      next: () => {
         this.loadEmployees();
       }
     });
@@ -127,7 +178,7 @@ export class MonthlyAttendance implements OnInit {
       next: (res) => {
         this.employees = res || [];
         if (this.employees.length > 0) {
-          this.isPrivileged = true; // Only HR/Admin can successfully fetch all employees
+          this.isPrivileged = true;
         }
       },
       error: () => {
@@ -166,13 +217,14 @@ export class MonthlyAttendance implements OnInit {
 
   buildForm(details: any[]) {
     this.detailsArray.clear();
+    const editable = this.isEditable();
     details.forEach(d => {
       this.detailsArray.push(this.fb.group({
         id: [d.id],
         date: [d.date],
         day: [d.day],
-        attendance_status: [{ value: d.attendance_status, disabled: !this.isEditable() }],
-        remarks: [{ value: d.remarks, disabled: !this.isEditable() }]
+        attendance_status: [{ value: d.attendance_status || (d.day === 'Sunday' ? 'Weekly Off' : 'Present'), disabled: !editable }],
+        remarks: [{ value: d.remarks || '', disabled: !editable }]
       }));
     });
   }
@@ -193,8 +245,10 @@ export class MonthlyAttendance implements OnInit {
       }
     });
 
+    const effectiveWeeklyOffs = sum.Present >= 6 ? sum['Weekly Off'] : 0;
+
     sum['Paid Days'] =
-      sum.Present + sum['Weekly Off'] + sum.Holiday +
+      sum.Present + effectiveWeeklyOffs + sum.Holiday +
       sum.CL + sum.EL + sum.SL + sum.WFH + sum.OD +
       ((sum['Half Day'] + sum['CL/2'] + sum['EL/2'] + sum['SL/2']) * 0.5);
 
@@ -217,7 +271,7 @@ export class MonthlyAttendance implements OnInit {
     )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (res) => {
+        next: () => {
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Draft saved successfully' });
           this.saving.set(false);
         },
@@ -237,7 +291,6 @@ export class MonthlyAttendance implements OnInit {
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         this.submitting.set(true);
-        // Save first then submit
         const payload = this.attendanceForm.getRawValue().details;
         const filter = this.filterForm.value;
         this.monthlyService.saveDraft(
@@ -252,7 +305,7 @@ export class MonthlyAttendance implements OnInit {
               next: () => {
                 this.messageService.add({ severity: 'success', summary: 'Submitted', detail: 'Attendance submitted to HR.' });
                 this.submitting.set(false);
-                this.loadAttendance(); // Reload to get Pending status
+                this.loadAttendance();
               },
               error: (err) => {
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to submit' });
@@ -260,7 +313,7 @@ export class MonthlyAttendance implements OnInit {
               }
             });
           },
-          error: (err) => {
+          error: () => {
             this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to save before submitting' });
             this.submitting.set(false);
           }
@@ -274,7 +327,7 @@ export class MonthlyAttendance implements OnInit {
   }
 
   applyBulkStatus(status: string) {
-    if (!status) return;
+    if (!status || !this.isEditable()) return;
     this.detailsArray.controls.forEach(ctrl => {
       if (this.isWeekend(ctrl.get('day')?.value)) {
         ctrl.get('attendance_status')?.setValue('Weekly Off');

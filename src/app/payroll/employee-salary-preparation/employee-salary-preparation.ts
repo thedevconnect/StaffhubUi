@@ -184,8 +184,8 @@ export class EmployeeSalaryPreparation implements OnInit, OnDestroy {
   }
 
   calculateSalary() {
-    if (this.workingDays > 0) {
-      this.calculatedSalary = (this.baseSalary / this.workingDays) * this.payableDays;
+    if (this.totalDays > 0) {
+      this.calculatedSalary = Math.round(((this.baseSalary / this.totalDays) * this.payableDays) * 100) / 100;
     } else {
       this.calculatedSalary = 0;
     }

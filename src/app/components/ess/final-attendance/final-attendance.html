@@ -1,51 +1,88 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
 <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
-<section class="space-y-4">
-  <header class="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
+
+<section class="space-y-6">
+  <!-- Header with Year Selector -->
+  <header class="rounded-xl border border-slate-200 bg-white p-4 md:p-5 shadow-sm">
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div>
-        <h2 class="text-xl font-semibold text-slate-900">Final Attendance</h2>
-        <p class="mt-1 text-sm text-slate-500">Submit and track your final attendance sheet for payroll clearance.</p>
+        <h2 class="text-xl font-bold text-slate-900">Final Attendance Summary</h2>
+        <p class="mt-1 text-xs text-slate-500">Track and review monthly attendance sheets for all 12 months of the year.</p>
       </div>
-      <p-button (onClick)="submitCurrentMonth()" label="Submit Current Month" icon="pi pi-check"
-        [disabled]="isSubmitted"
-        styleClass="p-button-sm rounded-lg btn-submit text-xs font-semibold px-3 py-1.5 shadow-sm transition-all">
-      </p-button>
+      <div class="flex items-center gap-3">
+        <label class="text-xs font-semibold text-slate-700">Select Year:</label>
+        <p-select [options]="years" [(ngModel)]="selectedYear" (onChange)="onYearChange()" placeholder="Select Year" styleClass="w-36 text-sm"></p-select>
+        <p-button label="Refresh" icon="pi pi-refresh" (onClick)="loadYearlyRecords()" [loading]="loading" styleClass="p-button-outlined p-button-sm"></p-button>
+      </div>
     </div>
   </header>
 
-  <p-card header="Monthly Submissions">
-    <p-table [value]="records" styleClass="p-datatable-sm">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>Month</th>
-          <th>Total Days</th>
-          <th>Present</th>
-          <th>Leaves Taken</th>
-          <th>Holidays</th>
-          <th>Weekly Offs</th>
-          <th>Submission Date</th>
-          <th>Status</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-rec>
-        <tr>
-          <td class="font-medium text-slate-800">{{ rec.month }}</td>
-          <td>{{ rec.totalDays }}</td>
-          <td>{{ rec.present }}</td>
-          <td>{{ rec.leaves }}</td>
-          <td>{{ rec.holidays }}</td>
-          <td>{{ rec.weeklyOffs }}</td>
-          <td>{{ rec.submitDate | date:'mediumDate' }}</td>
-          <td>
-            <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold"
-              [ngClass]="rec.status === 'Approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'">
-              <span class="h-1.5 w-1.5 rounded-full"
-                [ngClass]="rec.status === 'Approved' ? 'bg-emerald-500' : 'bg-blue-500'"></span>
-              {{ rec.status }}
-            </span>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
+  <!-- 12 Months Attendance Table -->
+  <p-card styleClass="shadow-sm border border-slate-200 rounded-xl overflow-hidden">
+    <ng-template pTemplate="header">
+      <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <span class="text-sm font-bold text-slate-800">All 12 Months Attendance Overview ({{ selectedYear }})</span>
+        <span class="text-xs text-slate-500 font-medium">Click any row to open & edit attendance for that month</span>
+      </div>
+    </ng-template>
+
+    <div class="overflow-x-auto">
+      <p-table [value]="records" [loading]="loading" styleClass="p-datatable-sm text-sm">
+        <ng-template pTemplate="header">
+          <tr class="text-xs uppercase bg-slate-50 text-slate-600">
+            <th class="py-3 px-4 font-bold">Month</th>
+            <th class="py-3 px-4 font-bold text-center">Total Days</th>
+            <th class="py-3 px-4 font-bold text-center">Present</th>
+            <th class="py-3 px-4 font-bold text-center">Leaves</th>
+            <th class="py-3 px-4 font-bold text-center">Holidays</th>
+            <th class="py-3 px-4 font-bold text-center">Weekly Offs</th>
+            <th class="py-3 px-4 font-bold text-center">Paid Days</th>
+            <th class="py-3 px-4 font-bold text-center">Submission Date</th>
+            <th class="py-3 px-4 font-bold text-center">Status</th>
+            <th class="py-3 px-4 font-bold text-center">Action</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rec>
+          <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
+            <td class="py-3 px-4 font-bold text-slate-800">{{ rec.month }}</td>
+            <td class="py-3 px-4 text-center font-medium">{{ rec.totalDays }}</td>
+            <td class="py-3 px-4 text-center font-bold text-green-600">{{ rec.present }}</td>
+            <td class="py-3 px-4 text-center font-medium text-amber-600">{{ rec.leaves }}</td>
+            <td class="py-3 px-4 text-center font-medium text-purple-600">{{ rec.holidays }}</td>
+            <td class="py-3 px-4 text-center font-medium text-slate-500">{{ rec.weeklyOffs }}</td>
+            <td class="py-3 px-4 text-center font-bold text-blue-600">{{ rec.paidDays }}</td>
+            <td class="py-3 px-4 text-center text-xs text-slate-500">
+              {{ rec.submitDate ? (rec.submitDate | date:'mediumDate') : '-' }}
+            </td>
+            <td class="py-3 px-4 text-center">
+              <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold shadow-sm"
+                [ngClass]="{
+                  'bg-emerald-50 text-emerald-700 border border-emerald-200': rec.status === 'Approved',
+                  'bg-amber-50 text-amber-700 border border-amber-200': rec.status === 'Pending',
+                  'bg-slate-100 text-slate-700 border border-slate-200': rec.status === 'Draft',
+                  'bg-rose-50 text-rose-700 border border-rose-200': rec.status === 'Rejected',
+                  'bg-slate-50 text-slate-400 border border-slate-200': rec.status === 'Not Started'
+                }">
+                <span class="h-1.5 w-1.5 rounded-full"
+                  [ngClass]="{
+                    'bg-emerald-500': rec.status === 'Approved',
+                    'bg-amber-500': rec.status === 'Pending',
+                    'bg-slate-500': rec.status === 'Draft',
+                    'bg-rose-500': rec.status === 'Rejected',
+                    'bg-slate-400': rec.status === 'Not Started'
+                  }"></span>
+                {{ rec.status }}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <p-button (onClick)="navigateToMonthlyAttendance(rec)" label="Open" icon="pi pi-arrow-right" iconPos="right"
+                styleClass="p-button-text p-button-sm text-xs font-bold p-1"></p-button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
   </p-card>
 </section>

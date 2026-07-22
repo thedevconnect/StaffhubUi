@@ -1,16 +1,20 @@
-import { ChangeDetectionStrategy, Component, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, ChangeDetectorRef, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
-import { CommonModule } from '@angular/common';
 import { Breadcrumb } from 'primeng/breadcrumb';
 import { ButtonModule } from 'primeng/button';
 import { DrawerModule } from 'primeng/drawer';
+import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
-import { Toast } from 'primeng/toast';
+import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
+import { TooltipModule } from 'primeng/tooltip';
+
+import { DocumentService } from '../../../shared/services/document.service';
 
 @Component({
   selector: 'app-service-file',
@@ -22,156 +26,260 @@ import { InputTextModule } from 'primeng/inputtext';
     Breadcrumb,
     ButtonModule,
     DrawerModule,
+    DialogModule,
     SelectModule,
-    Toast,
+    ToastModule,
     ReactiveFormsModule,
     FormsModule,
     FloatLabelModule,
-    InputTextModule
+    InputTextModule,
+    TooltipModule
   ],
   providers: [MessageService],
   templateUrl: './service-file.html',
   styleUrl: './service-file.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ServiceFile {
+export class ServiceFile implements OnInit {
+  private fb = inject(FormBuilder);
+  private messageService = inject(MessageService);
+  private cdr = inject(ChangeDetectorRef);
+  private documentService = inject(DocumentService);
+
   breadcrumbItems: any[] = [
     { label: 'Employee Self Service', icon: 'pi pi-home', routerLink: '/ess' },
-    { label: 'Service File', icon: 'pi pi-file', routerLink: '/ess/service-file' }
+    { label: 'Service File & Documents', icon: 'pi pi-file', routerLink: '/ess/service-file' }
   ];
 
-  documents = [
-    { title: 'Offer Letter', type: 'PDF', size: '1.2 MB', uploadDate: '2026-01-10', category: 'Onboarding' },
-    { title: 'Appraisal Letter 2026', type: 'PDF', size: '840 KB', uploadDate: '2026-04-01', category: 'Appraisal' },
-    { title: 'Form 16 (FY 2025-26)', type: 'PDF', size: '2.1 MB', uploadDate: '2026-06-15', category: 'Taxation' }
-  ];
+  activeTab: 'PERSONAL' | 'COMPANY_ISSUED' = 'PERSONAL';
+  documents: any[] = [];
+
+  loading = signal(false);
+  submitting = signal(false);
 
   visible = false;
-  uploadForm: FormGroup;
-  selectedFileName = '';
-  isUploading = false;
+  previewModalVisible = false;
 
-  categories = [
-    { label: 'Onboarding', value: 'Onboarding' },
-    { label: 'Appraisal', value: 'Appraisal' },
-    { label: 'Taxation', value: 'Taxation' },
-    { label: 'Certifications', value: 'Certifications' },
-    { label: 'Other', value: 'Other' }
+  activePreviewUrl = '';
+  activePreviewTitle = '';
+  activePreviewType = 'PDF';
+
+  uploadForm!: FormGroup;
+  selectedFileName = '';
+  selectedFileBase64 = '';
+  selectedFileType = 'PDF';
+  selectedFileSize = '0 KB';
+
+  categoryOptions = [
+    { label: 'My Personal Documents (Aadhaar, PAN, Bank, Education)', value: 'PERSONAL' },
+    { label: 'Company Issued Documents (Offer Letter, Policy, Increment)', value: 'COMPANY_ISSUED' }
   ];
 
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly messageService: MessageService,
-    private readonly cdr: ChangeDetectorRef
-  ) {
+  docTypeOptionsMap: { [key: string]: { label: string; value: string }[] } = {
+    'PERSONAL': [
+      { label: 'Aadhaar Card', value: 'AADHAAR' },
+      { label: 'PAN Card', value: 'PAN' },
+      { label: 'Bank Passbook / Cheque Copy', value: 'BANK' },
+      { label: 'Educational Certificates (Degree / Marksheets)', value: 'EDUCATION' },
+      { label: 'Previous Work Experience / Relieving Letters', value: 'EXPERIENCE' },
+      { label: 'Other Personal Document', value: 'OTHER' }
+    ],
+    'COMPANY_ISSUED': [
+      { label: 'Offer Letter', value: 'OFFER_LETTER' },
+      { label: 'Appointment Letter', value: 'APPOINTMENT_LETTER' },
+      { label: 'Appraisal / Salary Revision Letter', value: 'INCREMENT_LETTER' },
+      { label: 'Company Policy & NDA Agreement', value: 'POLICY' },
+      { label: 'Asset Allocation Record', value: 'ASSET_AGREEMENT' },
+      { label: 'Experience / Relieving Certificate', value: 'EXPERIENCE_CERTIFICATE' },
+      { label: 'Other Company Document', value: 'OTHER' }
+    ]
+  };
+
+  currentDocTypes: { label: string; value: string }[] = [];
+
+  ngOnInit(): void {
+    this.initForm();
+    this.loadDocuments();
+  }
+
+  initForm(): void {
     this.uploadForm = this.fb.group({
-      title: ['', [Validators.required, Validators.minLength(3)]],
-      category: ['', [Validators.required]],
-      customCategory: [''],
-      file: [null as File | null, [Validators.required]]
+      docCategory: ['PERSONAL', [Validators.required]],
+      docType: ['AADHAAR', [Validators.required]],
+      docTitle: ['', [Validators.required, Validators.minLength(2)]],
+      docNumber: ['']
     });
 
-    this.uploadForm.get('category')?.valueChanges.subscribe(val => {
-      const customControl = this.uploadForm.get('customCategory');
-      if (val === 'Other') {
-        customControl?.setValidators([Validators.required, Validators.minLength(2)]);
-      } else {
-        customControl?.clearValidators();
+    this.currentDocTypes = this.docTypeOptionsMap['PERSONAL'];
+
+    this.uploadForm.get('docCategory')?.valueChanges.subscribe((cat: string) => {
+      this.currentDocTypes = this.docTypeOptionsMap[cat] || this.docTypeOptionsMap['PERSONAL'];
+      if (this.currentDocTypes.length > 0) {
+        this.uploadForm.patchValue({ docType: this.currentDocTypes[0].value });
       }
-      customControl?.updateValueAndValidity();
+      this.cdr.markForCheck();
+    });
+
+    this.uploadForm.get('docType')?.valueChanges.subscribe((type: string) => {
+      const typeObj = this.currentDocTypes.find(t => t.value === type);
+      if (typeObj && !this.uploadForm.get('docTitle')?.dirty) {
+        this.uploadForm.patchValue({ docTitle: typeObj.label }, { emitEvent: false });
+      }
       this.cdr.markForCheck();
     });
   }
 
-  openUploadDrawer(): void {
-    this.visible = true;
-    this.uploadForm.reset();
-    this.selectedFileName = '';
+  setTab(tab: 'PERSONAL' | 'COMPANY_ISSUED'): void {
+    this.activeTab = tab;
     this.cdr.markForCheck();
   }
 
-  onFileChange(event: any): void {
-    const file = event.target.files?.[0];
-    if (file) {
-      const maxSizeBytes = 2 * 1024 * 1024; // 2MB
-      if (file.size > maxSizeBytes) {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'File Too Large',
-          detail: 'Only files smaller than 2MB are allowed.',
-          life: 4000
-        });
-        this.selectedFileName = '';
-        this.uploadForm.patchValue({ file: null });
-        this.uploadForm.get('file')?.setErrors({ maxSizeBytes: true });
-        this.uploadForm.get('file')?.markAsTouched();
-        event.target.value = '';
-        this.cdr.markForCheck();
-        return;
-      }
-
-      this.selectedFileName = file.name;
-      this.uploadForm.patchValue({ file });
-      this.uploadForm.get('file')?.setErrors(null);
-      this.uploadForm.get('file')?.updateValueAndValidity();
-      this.cdr.markForCheck();
-    }
+  get filteredDocuments(): any[] {
+    return this.documents.filter(doc => (doc.doc_category || doc.docCategory || 'PERSONAL') === this.activeTab);
   }
 
-  isInvalid(controlName: string): boolean {
-    const control = this.uploadForm.get(controlName);
-    return !!(control && control.invalid && (control.dirty || control.touched));
+  loadDocuments(): void {
+    this.loading.set(true);
+    this.documentService.getDocuments().subscribe({
+      next: (res: any) => {
+        if (res && res.success) {
+          this.documents = res.data || [];
+        }
+        this.loading.set(false);
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Error fetching documents:', err);
+        this.loading.set(false);
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  openUploadDrawer(category: 'PERSONAL' | 'COMPANY_ISSUED' = 'PERSONAL'): void {
+    this.uploadForm.reset({
+      docCategory: category,
+      docType: category === 'PERSONAL' ? 'AADHAAR' : 'OFFER_LETTER',
+      docTitle: category === 'PERSONAL' ? 'Aadhaar Card' : 'Offer Letter',
+      docNumber: ''
+    });
+    this.currentDocTypes = this.docTypeOptionsMap[category];
+    this.selectedFileName = '';
+    this.selectedFileBase64 = '';
+    this.selectedFileType = 'PDF';
+    this.selectedFileSize = '0 KB';
+    this.visible = true;
+    this.cdr.markForCheck();
+  }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files?.[0];
+    if (file) {
+      this.selectedFileName = file.name;
+      this.selectedFileType = file.type.includes('image') ? 'IMAGE' : 'PDF';
+
+      const kb = Math.round(file.size / 1024);
+      this.selectedFileSize = kb > 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${kb} KB`;
+
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.selectedFileBase64 = e.target.result;
+        this.cdr.markForCheck();
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   onSubmit(): void {
     if (this.uploadForm.invalid) {
       this.uploadForm.markAllAsTouched();
+      this.messageService.add({ severity: 'warn', summary: 'Validation Error', detail: 'Please fill all required document details.' });
       return;
     }
 
-    this.isUploading = true;
+    if (!this.selectedFileBase64) {
+      this.messageService.add({ severity: 'warn', summary: 'File Required', detail: 'Please attach a document file (PDF / Image).' });
+      return;
+    }
 
-    // Simulate upload delay
-    setTimeout(() => {
-      const formVal = this.uploadForm.value;
-      const file = formVal.file as File;
+    const val = this.uploadForm.value;
+    const payload = {
+      docCategory: val.docCategory,
+      docType: val.docType,
+      docTitle: val.docTitle,
+      docNumber: val.docNumber || null,
+      fileName: this.selectedFileName || `${val.docTitle}.pdf`,
+      fileUrl: this.selectedFileBase64,
+      fileType: this.selectedFileType,
+      fileSize: this.selectedFileSize
+    };
 
-      const fileType = file.name.split('.').pop()?.toUpperCase() || 'UNKNOWN';
-      const fileSize = this.formatBytes(file.size);
-
-      const finalCategory = formVal.category === 'Other' ? formVal.customCategory : formVal.category;
-
-      const newDoc = {
-        title: formVal.title,
-        category: finalCategory,
-        type: fileType,
-        size: fileSize,
-        uploadDate: new Date().toISOString().split('T')[0]
-      };
-
-      this.documents = [newDoc, ...this.documents];
-      this.isUploading = false;
-      this.visible = false;
-      this.uploadForm.reset();
-      this.selectedFileName = '';
-
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Document uploaded successfully.',
-        life: 3000
-      });
-
-      this.cdr.markForCheck();
-    }, 1000);
+    this.submitting.set(true);
+    this.documentService.uploadDocument(payload).subscribe({
+      next: (res: any) => {
+        this.submitting.set(false);
+        if (res && res.success) {
+          this.messageService.add({ severity: 'success', summary: 'Uploaded', detail: 'Document uploaded successfully!' });
+          this.visible = false;
+          this.loadDocuments();
+        } else {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: res?.message || 'Upload failed' });
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.submitting.set(false);
+        console.error('Upload error:', err);
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to upload document' });
+        this.cdr.markForCheck();
+      }
+    });
   }
 
-  formatBytes(bytes: number, decimals = 1): string {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  previewDocument(doc: any): void {
+    const url = doc.file_url || doc.fileUrl;
+    if (!url) {
+      this.messageService.add({ severity: 'info', summary: 'No File Preview', detail: 'Document file preview is not available.' });
+      return;
+    }
+    this.activePreviewUrl = url;
+    this.activePreviewTitle = doc.doc_title || doc.docTitle || 'Document Preview';
+    this.activePreviewType = (doc.file_type || doc.fileType || 'PDF').toUpperCase();
+    this.previewModalVisible = true;
+    this.cdr.markForCheck();
+  }
+
+  downloadDocument(doc: any): void {
+    const url = doc.file_url || doc.fileUrl;
+    if (!url) return;
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = doc.file_name || doc.fileName || `${doc.doc_title || 'document'}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  deleteDocument(docId: number): void {
+    this.documentService.deleteDocument(docId).subscribe({
+      next: (res: any) => {
+        if (res && res.success) {
+          this.messageService.add({ severity: 'info', summary: 'Deleted', detail: 'Document deleted.' });
+          this.loadDocuments();
+        }
+      },
+      error: (err) => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to delete document' });
+      }
+    });
+  }
+
+  getBadgeClass(type: string): string {
+    const t = (type || '').toUpperCase();
+    if (t === 'AADHAAR' || t === 'PAN' || t === 'BANK') return 'bg-purple-50 text-purple-700 border-purple-200';
+    if (t === 'OFFER_LETTER' || t === 'APPOINTMENT_LETTER') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    if (t === 'POLICY' || t === 'ASSET_AGREEMENT') return 'bg-amber-50 text-amber-700 border-amber-200';
+    return 'bg-blue-50 text-blue-700 border-blue-200';
   }
 }
