@@ -69,7 +69,7 @@ export class RegisterCompanyComponent implements OnInit {
       companyName: ['', Validators.required],
       shortName: ['', Validators.required],
       companyEmail: ['', [Validators.required, Validators.email]],
-      companyPhone: ['', Validators.required],
+      companyPhone: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
       address: ['', Validators.required],
       industry: ['', Validators.required],
       otherIndustry: [''],
@@ -155,6 +155,16 @@ export class RegisterCompanyComponent implements OnInit {
         emailControl.setValue(value);
       }
     }
+  }
+
+  onlyNumbers(event: Event, controlName: string): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value.replace(/[^0-9]/g, '');
+    if (value.length > 10) {
+      value = value.substring(0, 10);
+    }
+    input.value = value;
+    this.signupForm.get(controlName)?.setValue(value, { emitEvent: false });
   }
 
   isLocating = false;

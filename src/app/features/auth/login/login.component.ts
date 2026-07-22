@@ -14,6 +14,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { IconFieldModule } from 'primeng/iconfield';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputIconModule } from 'primeng/inputicon';
 
 @Component({
@@ -29,6 +30,7 @@ import { InputIconModule } from 'primeng/inputicon';
     ButtonModule,
     TextareaModule,
     ToastModule,
+    ConfirmDialogModule,
     FloatLabelModule,
     IconFieldModule,
     InputIconModule
@@ -143,31 +145,85 @@ export class LoginComponent implements OnInit {
     }
 
     const email = this.forgateForm.value.email;
+    this.isProcess = true;
 
-    this.confirmationService.confirm({
-      message: `Are you sure you want to send a password reset link to ${email}?`,
-      header: 'Confirm Reset Request',
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Yes',
-      rejectLabel: 'No',
-      accept: () => {
-        this.isProcess = true;
-        setTimeout(() => {
-          this.isProcess = false;
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Recovery Email Sent',
-            detail: `A password reset link has been successfully sent to ${email}.`,
-            life: 4000
-          });
-          this.formType = 'login';
-          this.forgateForm.reset();
-        }, 1000);
+    this.authService.forgotPassword(email).subscribe({
+      next: (res: any) => {
+        this.isProcess = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Account Verified',
+          detail: res?.message || 'Account verified! Please set your new password.',
+          life: 4000
+        });
+
+        this.createPassForm.patchValue({
+          name: res?.data?.fullName || 'User',
+          email: res?.data?.email || email,
+          password: '',
+          confirmPassword: ''
+        });
+
+        this.formType = 'createPassword';
+        this.forgateForm.reset();
+      },
+      error: (err: any) => {
+        this.isProcess = false;
+        const errorMsg = err?.error?.message || err?.message || 'No account found with this Email ID or Username';
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Reset Request Failed',
+          detail: errorMsg,
+          life: 4000
+        });
       }
     });
   }
 
-  submitCreatePassForm() { }
+  submitCreatePassForm() {
+    if (this.createPassForm.invalid) {
+      this.createPassForm.markAllAsTouched();
+      return;
+    }
+
+    const { email, password, confirmPassword } = this.createPassForm.value;
+
+    if (password !== confirmPassword) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Validation Error',
+        detail: 'Passwords do not match. Please enter matching passwords.',
+        life: 4000
+      });
+      return;
+    }
+
+    this.isProcess = true;
+
+    this.authService.resetPassword({ email, password }).subscribe({
+      next: (res: any) => {
+        this.isProcess = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Password Reset Successful',
+          detail: res?.message || 'Password has been reset successfully. Please log in.',
+          life: 5000
+        });
+        this.formType = 'login';
+        this.createPassForm.reset();
+      },
+      error: (err: any) => {
+        this.isProcess = false;
+        const errorMsg = err?.error?.message || err?.message || 'Failed to reset password';
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Reset Failed',
+          detail: errorMsg,
+          life: 4000
+        });
+      }
+    });
+  }
 
   onCloseHandled() {
     this.display = 'none';
@@ -209,7 +265,13 @@ export class LoginComponent implements OnInit {
       },
       error: (err: any) => {
         this.isProcess = false;
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.message || 'Invalid username or password' });
+        const errorMessage = err?.error?.message || 'Invalid username/email or password. Please try again';
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Invalid Credentials',
+          detail: errorMessage === 'Invalid username or password' ? 'Invalid username/email or password. Please try again' : errorMessage,
+          life: 4000
+        });
       }
     });
   }
