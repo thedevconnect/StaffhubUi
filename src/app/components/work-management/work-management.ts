@@ -1,9 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TaskService, TaskStats, TaskItem, TaskDetailResponse } from '../../shared/services/task.service';
 import { AuthService } from '../../shared/services/services/auth.service';
-import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { MenuItem, MessageService, ConfirmationService } from 'primeng/api';
 
 import { TableModule } from 'primeng/table';
@@ -13,6 +12,7 @@ import { SelectModule } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { DialogModule } from 'primeng/dialog';
+import { DrawerModule } from 'primeng/drawer';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TabsModule } from 'primeng/tabs';
@@ -22,6 +22,7 @@ import { SliderModule } from 'primeng/slider';
 import { TextareaModule } from 'primeng/textarea';
 
 import { TableTemplate, TableColumn, TableAction } from '../../shared/ui/table-template/table-template';
+import { AppBreadcrumb } from '../../shared/ui/breadcrumb/breadcrumb';
 
 @Component({
   selector: 'app-work-management',
@@ -30,7 +31,7 @@ import { TableTemplate, TableColumn, TableAction } from '../../shared/ui/table-t
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    BreadcrumbModule,
+    AppBreadcrumb,
     TableModule,
     TableTemplate,
     ButtonModule,
@@ -39,6 +40,7 @@ import { TableTemplate, TableColumn, TableAction } from '../../shared/ui/table-t
     TagModule,
     ProgressBarModule,
     DialogModule,
+    DrawerModule,
     ToastModule,
     ConfirmDialogModule,
     TabsModule,
@@ -52,19 +54,20 @@ import { TableTemplate, TableColumn, TableAction } from '../../shared/ui/table-t
   styleUrls: ['./work-management.scss']
 })
 export class WorkManagementComponent implements OnInit {
-  breadcrumbItems: MenuItem[] = [
-    { icon: 'pi pi-home', routerLink: '/' },
-    { label: 'Work Management' }
+  breadcrumbItems: any[] = [
+    { label: 'Employee Self Service', icon: 'pi pi-home', routerLink: '/ess' },
+    { label: 'Work Management', icon: 'pi pi-briefcase', routerLink: '/ess/work-management' }
   ];
 
   columns: TableColumn[] = [
+    { key: 'actions', header: 'Actions', isVisible: true },
     { key: 'task_code', header: 'Task Code', isSortable: true, isCustom: true },
     { key: 'title', header: 'Title & Category', isSortable: true, isCustom: true },
     { key: 'assignee_name', header: 'Assignee', isSortable: true, isCustom: true },
     { key: 'priority', header: 'Priority', isSortable: true, isCustom: true },
     { key: 'status', header: 'Status', isSortable: true, isCustom: true },
     { key: 'progress', header: 'Progress', isCustom: true },
-    { key: 'due_date', header: 'Due Date', isSortable: true, isCustom: true }
+    { key: 'due_date', header: 'Due Date', isSortable: true, isCustom: true },
   ];
 
   tableActions: TableAction[] = [
@@ -122,26 +125,27 @@ export class WorkManagementComponent implements OnInit {
 
   priorityOptions = [
     { label: 'All Priorities', value: 'ALL' },
-    { label: 'Low', value: 'LOW' },
-    { label: 'Medium', value: 'MEDIUM' },
+    { label: 'Urgent', value: 'URGENT' },
     { label: 'High', value: 'HIGH' },
-    { label: 'Urgent', value: 'URGENT' }
+    { label: 'Medium', value: 'MEDIUM' },
+    { label: 'Low', value: 'LOW' }
   ];
 
   categoryOptions = [
     { label: 'All Categories', value: 'ALL' },
     { label: 'General', value: 'GENERAL' },
     { label: 'Development', value: 'DEVELOPMENT' },
-    { label: 'HR & Onboarding', value: 'HR' },
-    { label: 'Design & UI/UX', value: 'DESIGN' },
-    { label: 'Marketing', value: 'MARKETING' },
-    { label: 'Payroll & Finance', value: 'PAYROLL' }
+    { label: 'Design', value: 'DESIGN' },
+    { label: 'Testing/QA', value: 'TESTING' },
+    { label: 'Documentation', value: 'DOCUMENTATION' },
+    { label: 'Bug Fix', value: 'BUG_FIX' },
+    { label: 'HR/Admin Task', value: 'HR_TASK' }
   ];
 
   scopeOptions = [
-    { label: 'All Tasks', value: 'all' },
-    { label: 'Assigned to Me', value: 'assigned_to_me' },
-    { label: 'Created by Me', value: 'created_by_me' }
+    { label: 'All Accessible Tasks', value: 'all' },
+    { label: 'Assigned to Me', value: 'assigned_me' },
+    { label: 'Created by Me', value: 'created_me' }
   ];
 
   // Create / Edit Modal
@@ -165,18 +169,43 @@ export class WorkManagementComponent implements OnInit {
     private taskService: TaskService,
     private authService: AuthService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
-  ) {}
+    private confirmationService: ConfirmationService,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   ngOnInit(): void {
     const user = this.authService.user();
     this.currentUserId = user?.id || 0;
     this.userRole = this.authService.selectedRoleId() || '';
 
+    this.updateBreadcrumbs();
     this.initForm();
     this.loadEmployees();
     this.loadStats();
     this.loadTasks();
+  }
+
+  updateBreadcrumbs(): void {
+    const rawRoleId = (this.userRole || '').toLowerCase();
+    let rootPath = '/ess';
+    let rootLabel = 'Employee Self Service';
+
+    if (rawRoleId === 'hr_admin' || rawRoleId === 'hradmin') {
+      rootPath = '/hradmin';
+      rootLabel = 'HR Admin';
+    } else if (rawRoleId === 'developer') {
+      rootPath = '/developer';
+      rootLabel = 'Developer';
+    } else if (rawRoleId === 'super_admin' || rawRoleId === 'superadmin') {
+      rootPath = '/superadmin';
+      rootLabel = 'Super Admin';
+    }
+
+    this.breadcrumbItems = [
+      { label: rootLabel, icon: 'pi pi-home', routerLink: rootPath },
+      { label: 'Work Management', icon: 'pi pi-briefcase', routerLink: `${rootPath}/work-management` }
+    ];
+    this.cdr.markForCheck();
   }
 
   initForm(): void {
@@ -202,6 +231,7 @@ export class WorkManagementComponent implements OnInit {
             label: `${emp.full_name} (${emp.emp_id || 'Emp'})`,
             value: emp.id
           }));
+          this.cdr.markForCheck();
         }
       },
       error: (err) => console.error('Error loading employees:', err)
@@ -213,6 +243,7 @@ export class WorkManagementComponent implements OnInit {
       next: (res) => {
         if (res.success && res.data) {
           this.stats = res.data;
+          this.cdr.markForCheck();
         }
       },
       error: (err) => console.error('Error loading task stats:', err)
@@ -221,6 +252,7 @@ export class WorkManagementComponent implements OnInit {
 
   loadTasks(): void {
     this.loading = true;
+    this.cdr.markForCheck();
     this.taskService
       .getTasks({
         search: this.searchQuery,
@@ -238,6 +270,7 @@ export class WorkManagementComponent implements OnInit {
             this.tasks = res.data || [];
             this.totalRecords = res.pagination?.totalItems || 0;
           }
+          this.cdr.markForCheck();
         },
         error: (err) => {
           this.loading = false;
@@ -246,6 +279,7 @@ export class WorkManagementComponent implements OnInit {
             summary: 'Error',
             detail: err?.error?.message || 'Failed to load tasks'
           });
+          this.cdr.markForCheck();
         }
       });
   }
@@ -412,6 +446,7 @@ export class WorkManagementComponent implements OnInit {
           this.selectedTask = res.data;
           this.activeDetailTab = 0;
           this.showDetailModal = true;
+          this.cdr.markForCheck();
         }
       },
       error: (err) => {
@@ -420,6 +455,7 @@ export class WorkManagementComponent implements OnInit {
           summary: 'Error',
           detail: err?.error?.message || 'Failed to load task details'
         });
+        this.cdr.markForCheck();
       }
     });
   }
@@ -430,6 +466,7 @@ export class WorkManagementComponent implements OnInit {
       next: (res) => {
         if (res.success) {
           this.selectedTask = res.data;
+          this.cdr.markForCheck();
         }
       }
     });
