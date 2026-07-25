@@ -19,6 +19,11 @@ export const hradminRoutes: Routes = [
         loadComponent: () => import('../components/hradmin/hrms-dashboard/hr-dashboard/leave-approval/leave-approval').then(c => c.LeaveApproval)
     },
     {
+        path: 'employee-leave-management',
+        title: 'Employee Leave Management',
+        loadComponent: () => import('../components/hradmin/employee-leave-management/employee-leave-management').then(c => c.EmployeeLeaveManagement)
+    },
+    {
         path: 'employee-calendar',
         loadComponent: () => import('../components/hradmin/emp-monthly-calendar/emp-monthly-calendar').then(c => c.EmpMonthlyCalendar)
     },

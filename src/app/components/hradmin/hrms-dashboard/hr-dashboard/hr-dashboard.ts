@@ -229,6 +229,7 @@ export class HrDashboard implements OnInit, OnDestroy {
     { key: 'actions', header: 'Actions' },
     { key: 'id', header: 'Request ID', isSortable: true },
     { key: 'employeeName', header: 'Employee Name', isSortable: true },
+    { key: 'employeeCode', header: 'Employee Code', isSortable: true },
     { key: 'type', header: 'Request Type' },
     { key: 'details', header: 'Description / Details' },
     { key: 'date', header: 'Requested Date', isSortable: true },
@@ -236,7 +237,6 @@ export class HrDashboard implements OnInit, OnDestroy {
   ];
 
   ngOnInit(): void {
-    // Chart data is now fetched from the backend
 
     this.loadPendencyData();
     this.loadDashboardSummary();
@@ -538,10 +538,11 @@ export class HrDashboard implements OnInit, OnDestroy {
       next: (res: any) => {
         const mappedRegs = (res.regularizations?.data || []).map((item: any) => ({
           id: `REG-${item.id}`,
-          employeeName: item.employeeName,
+          employeeName: item.employeeName || item.employee_name || 'Employee',
+          employeeCode: item.employeeCode || item.employee_code || item.emp_code || `EMP-${item.employee_id || ''}`,
           type: 'Regularization',
-          details: `${item.correctionType}: ${item.reason}`,
-          date: item.attendanceDate,
+          details: `${item.correctionType || 'Attendance Correction'}: ${item.reason || ''}`,
+          date: item.created_at || item.attendanceDate,
           status: item.status === 'Pending' ? 'Pending Approval' : item.status,
           raw: item
         }));
@@ -549,11 +550,12 @@ export class HrDashboard implements OnInit, OnDestroy {
         const mappedLeaves = (res.leaves?.data || [])
           .map((item: any) => ({
             id: `LEV-${item.id}`,
-            employeeName: item.employee_name || 'Unknown',
+            employeeName: item.employee_name || item.employeeName || 'Employee',
+            employeeCode: item.employee_code || item.employeeCode || item.emp_code || `EMP-${item.employee_id || ''}`,
             type: 'Leave',
-            details: `${item.leave_type}: ${item.reason || ''}`,
-            date: item.start_date === item.end_date ? item.start_date : `${item.start_date} to ${item.end_date}`,
-            status: item.status === 'PENDING' ? 'Pending Approval' : item.status,
+            details: `${item.leave_type || 'Leave'} (${item.session || 'Full Day'}) - ${item.reason || 'No reason provided'}`,
+            date: item.created_at || (item.start_date === item.end_date ? item.start_date : `${item.start_date} to ${item.end_date}`),
+            status: (item.status === 'PENDING' || item.status === 'Pending') ? 'Pending Approval' : item.status,
             raw: item
           }));
 
