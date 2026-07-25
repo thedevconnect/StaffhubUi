@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -49,8 +49,9 @@ export class ManageProfileComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private userProfileService: UserProfileService,
-    private messageService: MessageService
-  ) {}
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   ngOnInit(): void {
     this.initForms();
@@ -67,7 +68,7 @@ export class ManageProfileComponent implements OnInit {
     this.profileForm = this.fb.group({
       empId: [{ value: '', disabled: true }],
       username: [{ value: '', disabled: true }],
-      fullName: ['', Validators.required],
+      fullName: [{ value: '', disabled: true }],
       email: ['', [Validators.required, Validators.email]],
       mobile: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
       role: [{ value: '', disabled: true }]
@@ -98,6 +99,7 @@ export class ManageProfileComponent implements OnInit {
             mobile: res.data.mobile,
             role: res.data.role
           });
+          this.cdr.detectChanges();
         }
       },
       error: (err) => {
@@ -107,6 +109,7 @@ export class ManageProfileComponent implements OnInit {
           summary: 'Error Loading Profile',
           detail: err?.error?.message || 'Failed to load user profile information.'
         });
+        this.cdr.detectChanges();
       }
     });
   }
@@ -120,25 +123,29 @@ export class ManageProfileComponent implements OnInit {
     if (fileInput.files && fileInput.files[0]) {
       const file = fileInput.files[0];
 
-      if (file.size > 5 * 1024 * 1024) {
+      if (file.size > 2 * 1024 * 1024) {
         this.messageService.add({
           severity: 'warn',
           summary: 'File Too Large',
-          detail: 'Profile picture must be smaller than 5MB.'
+          detail: 'Profile picture must be smaller than 2MB.'
         });
+        fileInput.value = '';
         return;
       }
 
       const reader = new FileReader();
       reader.onload = () => {
         this.profilePreviewUrl = reader.result as string;
+        this.cdr.detectChanges();
       };
       reader.readAsDataURL(file);
+      fileInput.value = '';
     }
   }
 
   selectOldPicture(pictureUrl: string): void {
     this.profilePreviewUrl = pictureUrl;
+    this.cdr.detectChanges();
     this.messageService.add({
       severity: 'info',
       summary: 'Image Selected',
