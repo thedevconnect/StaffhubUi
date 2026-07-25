@@ -18,7 +18,7 @@ export class SocketService {
     });
 
     this.socket.on('connect', () => {
-      console.log('Connected to WebSocket server');
+      //  console.log('Connected to WebSocket server');
       if (this.companyId) {
         this.socket.emit('join_company', this.companyId);
       }
@@ -44,7 +44,7 @@ export class SocketService {
   onAttendanceUpdated(): Observable<any> {
     return new Observable(observer => {
       this.socket.on('attendance_updated', (data) => {
-        console.log('SOCKET EVENT RECEIVED: attendance_updated', data);
+        //console.log('SOCKET EVENT RECEIVED: attendance_updated', data);
         observer.next(data);
       });
 

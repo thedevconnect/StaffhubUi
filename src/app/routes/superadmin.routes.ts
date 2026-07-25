@@ -18,8 +18,13 @@ export const superadminRoutes: Routes = [
         loadComponent: () => import('../components/superAdmin/all-employees/all-employees').then(m => m.AllEmployeesComponent)
     },
     {
-        path: 'work-management',
-        title: 'Work Management',
+        path: 'task-management',
+        title: 'Task Management',
         loadComponent: () => import('../components/work-management/work-management').then(m => m.WorkManagementComponent)
+    },
+    {
+        path: 'work-management',
+        redirectTo: 'task-management',
+        pathMatch: 'full'
     }
 ];

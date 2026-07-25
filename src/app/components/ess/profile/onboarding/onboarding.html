@@ -18,10 +18,10 @@
             <span class="h-1.5 w-1.5 rounded-full bg-amber-500 mr-1.5"></span>
             Onboarding: Pending Approval
         </span>
-        <span *ngIf="onboardingStatus === 'COMPLETED' || onboardingStatus === 'APPROVED'"
+        <span *ngIf="onboardingStatus === 'APPROVED'"
             class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 border border-emerald-100">
             <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 mr-1.5"></span>
-            Onboarding: Approved
+            Onboarding: Approved {{ approvedBy ? 'by ' + approvedBy : '' }}
         </span>
         <span *ngIf="onboardingStatus === 'REJECTED'"
             class="inline-flex items-center rounded-full bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 border border-rose-100 animate-pulse">
@@ -30,16 +30,16 @@
         </span>
 
         <!-- Edit/Complete Onboarding Button -->
-        <p-button *ngIf="onboardingStatus !== 'COMPLETED' && onboardingStatus !== 'APPROVED'"
-            (click)="openOnboardingDrawer()"
-            [label]="onboardingStatus === 'NOT_STARTED' || onboardingStatus === 'REJECTED' ? 'Complete Onboarding' : 'Edit Onboarding'"
+        <p-button *ngIf="onboardingStatus !== 'APPROVED'"
+            (click)="openSectionDrawer('all')"
+            [label]="onboardingStatus === 'NOT_STARTED' || onboardingStatus === 'REJECTED' ? 'Complete Onboarding' : 'Edit Full Profile'"
             icon="pi pi-user-edit"
             styleClass="p-button-sm rounded-lg btn-add text-xs font-semibold px-3 py-1.5 shadow-sm transition-all"
             [raised]="true">
         </p-button>
-        <p-button *ngIf="onboardingStatus === 'COMPLETED' || onboardingStatus === 'APPROVED'" [disabled]="true"
-            label="Profile Locked" icon="pi pi-lock"
-            styleClass="p-button-sm rounded-lg p-button-secondary text-xs font-semibold px-3 py-1.5 shadow-sm"
+        <p-button *ngIf="onboardingStatus === 'APPROVED'" [disabled]="true"
+            label="Profile Approved" icon="pi pi-lock"
+            styleClass="p-button-sm rounded-lg p-button-success text-xs font-semibold px-3 py-1.5 shadow-sm"
             [raised]="true">
         </p-button>
     </div>
@@ -60,20 +60,18 @@
             class="p-5 sm:p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-6 -mt-16 md:-mt-20 relative z-10">
             <!-- Avatar -->
             <div class="h-28 w-28 md:h-36 md:w-36 rounded-full border-4 border-white bg-slate-100 shadow-md overflow-hidden relative"
-                [class.cursor-pointer]="onboardingStatus !== 'COMPLETED' && onboardingStatus !== 'APPROVED'"
-                [class.group]="onboardingStatus !== 'COMPLETED' && onboardingStatus !== 'APPROVED'"
-                (click)="onboardingStatus !== 'COMPLETED' && onboardingStatus !== 'APPROVED' ? photoInput.click() : openOnboardingDrawer()">
+                [class.cursor-pointer]="onboardingStatus !== 'APPROVED'"
+                [class.group]="onboardingStatus !== 'APPROVED'"
+                (click)="onboardingStatus !== 'APPROVED' ? photoInput.click() : openSectionDrawer('all')">
 
                 <img [src]="profileData?.personal?.avatarUrl || 'assets/img/hrms logo.jpg'" (error)="onAvatarError($event)" alt="Avatar" class="h-full w-full object-cover">
 
-                <!-- Hover overlay -->
-                <div *ngIf="onboardingStatus !== 'COMPLETED' && onboardingStatus !== 'APPROVED'"
+                <div *ngIf="onboardingStatus !== 'APPROVED'"
                     class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <i class="pi pi-camera text-white text-xl mb-1"></i>
                     <span class="text-white text-[10px] font-bold uppercase tracking-wider">Change</span>
                 </div>
 
-                <!-- Hidden file input -->
                 <input type="file" #photoInput accept="image/*" class="hidden" (change)="onProfilePhotoSelect($event)">
             </div>
             <!-- Info Details -->
@@ -127,17 +125,11 @@
                 <i class="pi pi-credit-card"></i>
                 <span>Finance & Identity</span>
             </button>
-            <button type="button" (click)="setTab('assets')"
+            <button type="button" (click)="setTab('documents')"
                 class="px-6 py-4 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-2 whitespace-nowrap"
-                [ngClass]="activeTab === 'assets' ? 'border-blue-600 text-blue-600 bg-white font-extrabold' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'">
-                <i class="pi pi-desktop"></i>
-                <span>Assigned Assets</span>
-            </button>
-            <button type="button" (click)="setTab('leaves')"
-                class="px-6 py-4 text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center gap-2 whitespace-nowrap"
-                [ngClass]="activeTab === 'leaves' ? 'border-blue-600 text-blue-600 bg-white font-extrabold' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'">
-                <i class="pi pi-calendar"></i>
-                <span>Leaves & Attendance</span>
+                [ngClass]="activeTab === 'documents' ? 'border-blue-600 text-blue-600 bg-white font-extrabold' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'">
+                <i class="pi pi-file-pdf"></i>
+                <span>Qualification Documents</span>
             </button>
         </div>
 
@@ -147,663 +139,572 @@
             <!-- Tab 1: Details -->
             <div *ngIf="activeTab === 'details'" class="space-y-6">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Personal Details -->
-                    <div class="space-y-4">
-                        <h3
-                            class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2">
-                            <i class="pi pi-user text-blue-600"></i> Personal Information
-                        </h3>
+                    <div class="space-y-4 bg-slate-50/50 p-4 rounded-xl border border-slate-200">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                                <i class="pi pi-user text-blue-600"></i> Personal Information
+                            </h3>
+                            <button *ngIf="onboardingStatus !== 'APPROVED'" type="button" (click)="openSectionDrawer('personal')" 
+                                    class="px-2.5 py-1 text-xs font-bold text-indigo-600 bg-white hover:bg-indigo-50 border border-indigo-100 rounded-lg transition flex items-center gap-1 shadow-xs">
+                                <i class="pi pi-pencil text-[11px]"></i> Edit Section
+                            </button>
+                        </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Full
-                                    Name</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.fullName
-                                    }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Full Name</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.fullName }}</p>
                             </div>
                             <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Username</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.username
-                                    }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Username</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.username }}</p>
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date
-                                    of Birth</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.dob |
-                                    date:'mediumDate' }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date of Birth</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.dob ? (profileData.personal.dob | date:'mediumDate') : 'N/A' }}</p>
                             </div>
                             <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Gender</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.gender }}
-                                </p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Gender</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.gender }}</p>
                             </div>
                             <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Father's
-                                    Name</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{
-                                    profileData.personal.fatherName || 'Not Added' }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Blood Group</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.bloodGroup || 'N/A' }}</p>
                             </div>
                             <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mother's
-                                    Name</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{
-                                    profileData.personal.motherName || 'Not Added' }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Father's Name</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.fatherName || 'N/A' }}</p>
                             </div>
                             <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Marital
-                                    Status</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{
-                                    profileData.personal.maritalStatus }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mother's Name</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.motherName || 'N/A' }}</p>
                             </div>
                             <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nationality</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{
-                                    profileData.personal.nationality }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Marital Status</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.personal.maritalStatus }}</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Employment Details -->
-                    <div class="space-y-4">
-                        <h3
-                            class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2">
-                            <i class="pi pi-briefcase text-blue-600"></i> Employment Details
-                        </h3>
+                    <div class="space-y-4 bg-slate-50/50 p-4 rounded-xl border border-slate-200">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                                <i class="pi pi-briefcase text-blue-600"></i> Employment Information
+                            </h3>
+                            <span class="text-[10px] font-bold px-2 py-0.5 bg-slate-100 text-slate-500 rounded">Company Configured</span>
+                        </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Employee
-                                    ID / Code</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{
-                                    profileData.employment.employeeCode }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Employee Code</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5 font-mono">{{ profileData.employment.employeeCode }}</p>
                             </div>
                             <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Employment
-                                    Type</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{
-                                    profileData.employment.employmentType }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Designation</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.employment.designation }}</p>
                             </div>
                             <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Designation</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{
-                                    profileData.employment.designation }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Department</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.employment.department }}</p>
                             </div>
                             <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Department</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{
-                                    profileData.employment.department }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Reporting Manager</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.employment.reportingManager }}</p>
                             </div>
                             <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Reporting
-                                    Manager</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{
-                                    profileData.employment.reportingManager }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date of Joining</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.employment.joiningDate | date:'mediumDate' }}</p>
                             </div>
                             <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Joining
-                                    Date</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{
-                                    profileData.employment.joiningDate | date:'mediumDate' }}</p>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Work
-                                    Location</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{
-                                    profileData.employment.workLocation }}</p>
-                            </div>
-                            <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Assigned
-                                    System Role</label>
-                                <p class="text-xs font-semibold text-blue-600 mt-1 uppercase">{{
-                                    profileData.employment.role }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Work Location</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.employment.workLocation }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab 2: Contact & Emergency -->
+            <!-- Tab 2: Contact -->
             <div *ngIf="activeTab === 'contact'" class="space-y-6">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Contact Details -->
-                    <div class="space-y-4">
-                        <h3
-                            class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2">
-                            <i class="pi pi-envelope text-blue-600"></i> Contact Information
-                        </h3>
+                    <div class="space-y-4 bg-slate-50/50 p-4 rounded-xl border border-slate-200">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                                <i class="pi pi-map-marker text-blue-600"></i> Contact & Address Information
+                            </h3>
+                            <button *ngIf="onboardingStatus !== 'APPROVED'" type="button" (click)="openSectionDrawer('contact')" 
+                                    class="px-2.5 py-1 text-xs font-bold text-indigo-600 bg-white hover:bg-indigo-50 border border-indigo-100 rounded-lg transition flex items-center gap-1 shadow-xs">
+                                <i class="pi pi-pencil text-[11px]"></i> Edit Section
+                            </button>
+                        </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Official
-                                    Email</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{
-                                    profileData.contact.officialEmail }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Official Email</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5 text-blue-600">{{ profileData.contact.officialEmail }}</p>
                             </div>
                             <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Personal
-                                    Email</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{
-                                    profileData.contact.personalEmail }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Personal Email</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.contact.personalEmail || 'N/A' }}</p>
                             </div>
                             <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mobile
-                                    Number</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{
-                                    profileData.contact.mobileNumber }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mobile Number</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.contact.mobileNumber }}</p>
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Work
-                                    Extension</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.contact.extension
-                                    }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Alternate Mobile</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.contact.altPhone || 'N/A' }}</p>
                             </div>
                             <div class="sm:col-span-2">
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Current
-                                    Address</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{
-                                    profileData.contact.currentAddress }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Current Address</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.contact.currentAddress || 'N/A' }}</p>
                             </div>
                             <div class="sm:col-span-2">
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Permanent
-                                    Address</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{
-                                    profileData.contact.permanentAddress }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Permanent Address</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.contact.permanentAddress || 'N/A' }}</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Emergency Contact Details -->
-                    <div class="space-y-4">
-                        <h3
-                            class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2">
-                            <i class="pi pi-phone text-blue-600"></i> Emergency Contacts
-                        </h3>
+                    <div class="space-y-4 bg-slate-50/50 p-4 rounded-xl border border-slate-200">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                                <i class="pi pi-phone text-blue-600"></i> Emergency Contacts
+                            </h3>
+                            <button *ngIf="onboardingStatus !== 'APPROVED'" type="button" (click)="openSectionDrawer('emergency')" 
+                                    class="px-2.5 py-1 text-xs font-bold text-indigo-600 bg-white hover:bg-indigo-50 border border-indigo-100 rounded-lg transition flex items-center gap-1 shadow-xs">
+                                <i class="pi pi-pencil text-[11px]"></i> Edit Section
+                            </button>
+                        </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Contact
-                                    Name</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{
-                                    profileData.emergency.contactName }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Contact Name</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.emergency.contactName || 'N/A' }}</p>
                             </div>
                             <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Relationship</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{
-                                    profileData.emergency.relationship }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Relationship</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.emergency.relationship || 'N/A' }}</p>
                             </div>
                             <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Primary
-                                    Phone</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5 text-blue-600">{{
-                                    profileData.emergency.phone }}</p>
-                            </div>
-                            <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Alternate
-                                    Phone</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.emergency.altPhone
-                                    }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Primary Phone</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5 text-blue-600">{{ profileData.emergency.phone || 'N/A' }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab 3: Financial & Identity -->
+            <!-- Tab 3: Financial & Bank Details -->
             <div *ngIf="activeTab === 'financial'" class="space-y-6">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Bank Account -->
-                    <div class="space-y-4">
-                        <h3
-                            class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2">
-                            <i class="pi pi-building text-blue-600"></i> Bank Account Information
-                        </h3>
+                    <!-- Bank Account Details -->
+                    <div class="space-y-4 bg-slate-50/50 p-4 rounded-xl border border-slate-200">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                                <i class="pi pi-wallet text-blue-600"></i> Bank Account Information
+                            </h3>
+                            <button *ngIf="onboardingStatus !== 'APPROVED'" type="button" (click)="openSectionDrawer('financial')" 
+                                    class="px-2.5 py-1 text-xs font-bold text-indigo-600 bg-white hover:bg-indigo-50 border border-indigo-100 rounded-lg transition flex items-center gap-1 shadow-xs">
+                                <i class="pi pi-pencil text-[11px]"></i> Edit Section
+                            </button>
+                        </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Bank
-                                    Name</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.financial.bankName
-                                    }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Bank Name</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.financial.bankName || 'N/A' }}</p>
                             </div>
                             <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Account
-                                    Holder Name</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{
-                                    profileData.financial.accountName }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Account Holder</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.financial.accountName || 'N/A' }}</p>
                             </div>
                             <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Account
-                                    Number</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5 font-mono text-slate-800">{{
-                                    profileData.financial.accountNumber }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Account Number</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5 font-mono">{{ profileData.financial.accountNumber || 'N/A' }}</p>
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">IFSC
-                                    Code</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5 font-mono">{{
-                                    profileData.financial.ifscCode }}</p>
-                            </div>
-                            <div class="sm:col-span-2">
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Bank
-                                    Branch</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ profileData.financial.branch
-                                    }}</p>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">IFSC Code</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5 font-mono">{{ profileData.financial.ifscCode || 'N/A' }}</p>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Identity Details -->
-                    <div class="space-y-4">
-                        <h3
-                            class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2">
-                            <i class="pi pi-shield text-blue-600"></i> Identity & Statutories
-                        </h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">PAN
-                                    Card</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5 font-mono">{{
-                                    profileData.financial.panCard }}</p>
-                            </div>
-                            <div>
-                                <label
-                                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Aadhaar
-                                    Number</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5 font-mono">{{
-                                    profileData.financial.aadhaarNumber }}</p>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">UAN
-                                    Number</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5 font-mono">{{
-                                    profileData.financial.uan }}</p>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">PF
-                                    Account Number</label>
-                                <p class="text-sm font-semibold text-slate-700 mt-0.5 font-mono">{{
-                                    profileData.financial.pfNumber }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tab 4: Assets -->
-            <div *ngIf="activeTab === 'assets'" class="space-y-4">
-                <h3
-                    class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2">
-                    <i class="pi pi-desktop text-blue-600"></i> Assigned Company Resources
-                </h3>
-                <p class="text-xs text-slate-500 mb-2">The following hardware and software resources are currently
-                    allocated to you.</p>
-                <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                    <p-table [value]="profileData.assets" styleClass="p-datatable-sm">
-                        <ng-template pTemplate="header">
-                            <tr class="text-xs uppercase bg-slate-50 text-slate-500 tracking-wider">
-                                <th class="p-3">Asset ID</th>
-                                <th class="p-3">Asset Name</th>
-                                <th class="p-3">Type</th>
-                                <th class="p-3">Serial Number</th>
-                                <th class="p-3">Assigned Date</th>
-                                <th class="p-3 text-center">Status</th>
-                            </tr>
-                        </ng-template>
-                        <ng-template pTemplate="body" let-asset>
-                            <tr class="border-b border-slate-100 hover:bg-slate-50/50 text-sm text-slate-600">
-                                <td class="p-3 font-semibold text-blue-600">{{ asset.id }}</td>
-                                <td class="p-3 font-semibold text-slate-700">{{ asset.name }}</td>
-                                <td class="p-3">{{ asset.type }}</td>
-                                <td class="p-3 font-mono text-xs">{{ asset.serial }}</td>
-                                <td class="p-3 text-xs">{{ asset.assignedDate | date:'mediumDate' }}</td>
-                                <td class="p-3 text-center">
-                                    <span
-                                        class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 border border-blue-100">
-                                        {{ asset.status }}
-                                    </span>
-                                </td>
-                            </tr>
-                        </ng-template>
-                    </p-table>
-                </div>
-            </div>
-
-            <!-- Tab 5: Leaves & Attendance -->
-            <div *ngIf="activeTab === 'leaves'" class="space-y-6">
-                <h3
-                    class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2">
-                    <i class="pi pi-calendar text-blue-600"></i> Leaves & Time-off Summary
-                </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <!-- Card 1 -->
-                    <div
-                        class="border border-slate-200 bg-white p-5 rounded-xl flex items-center justify-between shadow-sm">
-                        <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Annual Leave
-                                Balance</p>
-                            <h4 class="text-2xl font-black text-slate-800 mt-1">{{ profileData.leaves.annualBalance }}
-                                <span class="text-xs text-slate-400 font-normal">/ {{ profileData.leaves.annualTotal }}
-                                    Days</span>
-                            </h4>
-                        </div>
-                        <div
-                            class="h-10 w-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center text-sm">
-                            <i class="pi pi-calendar"></i>
-                        </div>
-                    </div>
-                    <!-- Card 2 -->
-                    <div
-                        class="border border-slate-200 bg-white p-5 rounded-xl flex items-center justify-between shadow-sm">
-                        <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Sick Leave Balance
-                            </p>
-                            <h4 class="text-2xl font-black text-slate-800 mt-1">{{ profileData.leaves.sickBalance }}
-                                <span class="text-xs text-slate-400 font-normal">/ {{ profileData.leaves.sickTotal }}
-                                    Days</span>
-                            </h4>
-                        </div>
-                        <div
-                            class="h-10 w-10 bg-rose-50 text-rose-600 rounded-lg flex items-center justify-center text-sm">
-                            <i class="pi pi-heart"></i>
-                        </div>
-                    </div>
-                    <!-- Card 3 -->
-                    <div
-                        class="border border-slate-200 bg-white p-5 rounded-xl flex items-center justify-between shadow-sm">
-                        <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Short Leaves
-                                Consumed</p>
-                            <h4 class="text-2xl font-black text-slate-800 mt-1">{{ profileData.leaves.shortLeaveCount }}
-                                <span class="text-xs text-slate-400 font-normal">Requests</span>
-                            </h4>
-                        </div>
-                        <div
-                            class="h-10 w-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-sm">
-                            <i class="pi pi-clock"></i>
-                        </div>
-                    </div>
-                    <!-- Card 4 -->
-                    <div
-                        class="border border-slate-200 bg-white p-5 rounded-xl flex items-center justify-between shadow-sm">
-                        <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Regularizations</p>
-                            <h4 class="text-2xl font-black text-slate-800 mt-1">{{ profileData.leaves.regularizations }}
-                                <span class="text-xs text-slate-400 font-normal">Approved</span>
-                            </h4>
-                        </div>
-                        <div
-                            class="h-10 w-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-sm">
-                            <i class="pi pi-shield"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Onboarding Drawer -->
-
-    <p-drawer [(visible)]="showDrawer" position="right" [modal]="true"
-        [style]="isFullScreen ? { width: '100vw', maxWidth: '100vw' } : { width: '100%', maxWidth: '900px' }"
-        [showCloseIcon]="false">
-
-        <ng-template pTemplate="header">
-            <div class="absolute right-4 top-4 flex items-center">
-                <button type="button"
-                    class="h-8 w-8 rounded-full inline-flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors mr-1"
-                    (click)="toggleFullScreen()" pTooltip="{{ isFullScreen ? 'Restore Down' : 'Full Screen' }}"
-                    tooltipPosition="bottom">
-                    <i class="pi" [ngClass]="isFullScreen ? 'pi-window-minimize' : 'pi-window-maximize'"></i>
-                </button>
-                <button type="button"
-                    class="h-8 w-8 rounded-full inline-flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors"
-                    (click)="closeDrawer()" pTooltip="Close" tooltipPosition="bottom">
-                    <i class="pi pi-times"></i>
-                </button>
-            </div>
-        </ng-template>
-
-        <div class="flex flex-col h-full">
-            <div class="flex-none pb-4 border-b border-slate-200">
-                <h2 class="text-xl font-bold text-slate-800">Complete Employee Onboarding</h2>
-                <p class="text-xs text-slate-500 mt-1">Please fill in your onboarding details. These will be sent to the
-                    HR Admin for approval.</p>
-
-                <div *ngIf="onboardingStatus === 'REJECTED'"
-                    class="mt-4 p-3 bg-rose-50 border border-rose-200 rounded-lg flex gap-3 items-start">
-                    <i class="pi pi-exclamation-triangle text-rose-600 mt-0.5"></i>
-                    <div>
-                        <h4 class="text-sm font-bold text-rose-800">Onboarding Rejected</h4>
-                        <p class="text-xs text-rose-700 mt-1"><span class="font-semibold">Reason:</span> {{
-                            rejectionRemarks }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex-1 overflow-y-auto py-6 pr-1 space-y-6">
-                <form [formGroup]="onboardingForm" (ngSubmit)="submitOnboarding()" class="space-y-6">
-
-                    <!-- 1. Personal Details -->
-                    <div class="space-y-4">
-                        <h3
-                            class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2">
-                            <i class="pi pi-user text-blue-600"></i> Personal Information
-                        </h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="sm:col-span-2 space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">Employee Name</label>
-                                <input type="text" pInputText formControlName="employee_name"
-                                    class="w-full p-inputtext-sm bg-slate-100">
-                            </div>
-                            <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">Father's Name *</label>
-                                <input type="text" pInputText formControlName="father_name"
-                                    class="w-full p-inputtext-sm">
-                                <small
-                                    *ngIf="onboardingForm.get('father_name')?.touched && onboardingForm.get('father_name')?.errors?.['required']"
-                                    class="text-red-500 text-[10px]">Father's Name is required</small>
-                            </div>
-                            <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">Mother's Name</label>
-                                <input type="text" pInputText formControlName="mother_name"
-                                    class="w-full p-inputtext-sm">
-                            </div>
-                            <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">Date of Birth *</label>
-                                <p-datepicker formControlName="dob" appendTo="body" class="w-full custom-p-select"
-                                    [showIcon]="true" dateFormat="yy-mm-dd"></p-datepicker>
-                                <small
-                                    *ngIf="onboardingForm.get('dob')?.touched && onboardingForm.get('dob')?.errors?.['required']"
-                                    class="text-red-500 text-[10px]">Date of Birth is required</small>
-                            </div>
-                            <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">Gender *</label>
-                                <p-select [options]="genderOptions" optionLabel="label" optionValue="value"
-                                    formControlName="gender" placeholder="Select Gender"
-                                    class="w-full custom-p-select"></p-select>
-                                <small
-                                    *ngIf="onboardingForm.get('gender')?.touched && onboardingForm.get('gender')?.errors?.['required']"
-                                    class="text-red-500 text-[10px]">Gender is required</small>
-                            </div>
-                            <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">Blood Group</label>
-                                <p-select [options]="bloodGroupOptions" optionLabel="label" optionValue="value"
-                                    formControlName="blood_group" placeholder="Select Blood Group"
-                                    class="w-full custom-p-select"></p-select>
-                            </div>
-                            <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">Marital Status</label>
-                                <p-select
-                                    [options]="[{label: 'Single', value: 'SINGLE'}, {label: 'Married', value: 'MARRIED'}, {label: 'Divorced', value: 'DIVORCED'}, {label: 'Widowed', value: 'WIDOWED'}]"
-                                    optionLabel="label" optionValue="value" formControlName="marital_status"
-                                    placeholder="Select Marital Status" class="w-full custom-p-select"></p-select>
-                            </div>
-                            <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">Profile Photo (Max
-                                    1MB)</label>
-                                <input type="file" accept="image/*" (change)="onProfilePhotoSelect($event)"
-                                    class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                                <input type="hidden" formControlName="profile_photo">
-                                <div *ngIf="onboardingForm.get('profile_photo')?.value"
-                                    class="mt-2 text-xs text-green-600 font-medium">
-                                    <i class="pi pi-check-circle mr-1"></i> Photo selected
+                        <!-- Bank Passbook / Cancelled Cheque Upload Box -->
+                        <div class="pt-4 border-t border-slate-200">
+                            <label class="block text-xs font-bold text-slate-700 mb-2">Bank Passbook / Cancelled Cheque Photo Proof</label>
+                            <div class="flex items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+                                <div class="w-20 h-20 rounded-lg border border-slate-300 bg-slate-50 overflow-hidden flex items-center justify-center relative shadow-xs">
+                                    <img *ngIf="bankProofPhotoUrl" [src]="bankProofPhotoUrl" class="w-full h-full object-cover" />
+                                    <i *ngIf="!bankProofPhotoUrl" class="pi pi-credit-card text-2xl text-slate-300"></i>
+                                </div>
+                                <div class="flex-1 space-y-2">
+                                    <p class="text-xs text-slate-500">Upload a clear photo of your bank passbook or cancelled cheque (Max size: 5MB).</p>
+                                    <div class="flex items-center gap-2">
+                                        <label *ngIf="onboardingStatus !== 'APPROVED'" for="bankProofInput" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-lg cursor-pointer transition inline-flex items-center gap-1.5">
+                                            <i class="pi pi-upload"></i>
+                                            <span>{{ bankProofPhotoUrl ? 'Replace Photo' : 'Upload Passbook/Cheque' }}</span>
+                                        </label>
+                                        <button *ngIf="bankProofPhotoUrl" (click)="viewDocument({ fileUrl: bankProofPhotoUrl, title: 'Bank Passbook Proof' })" type="button" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition inline-flex items-center gap-1.5">
+                                            <i class="pi pi-eye"></i> View Photo
+                                        </button>
+                                        <input type="file" id="bankProofInput" (change)="onBankProofSelect($event)" accept="image/*,.pdf" class="hidden" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 2. Contact & Emergency -->
-                    <div class="space-y-4">
-                        <h3
-                            class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2">
-                            <i class="pi pi-phone text-blue-600"></i> Contact & Emergency
-                        </h3>
+                    <!-- Identity & Statutory -->
+                    <div class="space-y-4 bg-slate-50/50 p-4 rounded-xl border border-slate-200">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                                <i class="pi pi-shield text-blue-600"></i> Identity & Statutories
+                            </h3>
+                            <button *ngIf="onboardingStatus !== 'APPROVED'" type="button" (click)="openSectionDrawer('identity')" 
+                                    class="px-2.5 py-1 text-xs font-bold text-indigo-600 bg-white hover:bg-indigo-50 border border-indigo-100 rounded-lg transition flex items-center gap-1 shadow-xs">
+                                <i class="pi pi-pencil text-[11px]"></i> Edit Section
+                            </button>
+                        </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">Personal Email</label>
-                                <input type="email" pInputText formControlName="personal_email"
-                                    class="w-full p-inputtext-sm">
-                                <small
-                                    *ngIf="onboardingForm.get('personal_email')?.touched && onboardingForm.get('personal_email')?.errors?.['email']"
-                                    class="text-red-500 text-[10px]">Invalid email format</small>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">PAN Card</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5 font-mono">{{ profileData.financial.panCard || 'N/A' }}</p>
                             </div>
-                            <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">Alternate Mobile</label>
-                                <input type="text" pInputText formControlName="alternate_mobile" maxlength="10"
-                                    class="w-full p-inputtext-sm">
-                            </div>
-                            <div class="sm:col-span-2 space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">Current Address *</label>
-                                <input type="text" pInputText formControlName="current_address"
-                                    class="w-full p-inputtext-sm">
-                                <small
-                                    *ngIf="onboardingForm.get('current_address')?.touched && onboardingForm.get('current_address')?.errors?.['required']"
-                                    class="text-red-500 text-[10px]">Current Address is required</small>
-                            </div>
-                            <div class="sm:col-span-2 space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">Permanent Address</label>
-                                <input type="text" pInputText formControlName="permanent_address"
-                                    class="w-full p-inputtext-sm">
-                            </div>
-                            <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">Emergency Contact Name</label>
-                                <input type="text" pInputText formControlName="emergency_contact_name"
-                                    class="w-full p-inputtext-sm">
-                            </div>
-                            <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">Emergency Contact Phone
-                                    *</label>
-                                <input type="text" pInputText formControlName="emergency_contact" maxlength="10"
-                                    placeholder="10 digit mobile" class="w-full p-inputtext-sm">
-                                <small
-                                    *ngIf="onboardingForm.get('emergency_contact')?.touched && onboardingForm.get('emergency_contact')?.errors?.['required']"
-                                    class="text-red-500 text-[10px]">Emergency contact phone is required</small>
-                                <small
-                                    *ngIf="onboardingForm.get('emergency_contact')?.touched && onboardingForm.get('emergency_contact')?.errors?.['pattern']"
-                                    class="text-red-500 text-[10px]">Must be exactly 10 digits</small>
-                            </div>
-                            <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">Emergency Contact
-                                    Relation</label>
-                                <input type="text" pInputText formControlName="emergency_contact_relation"
-                                    placeholder="e.g. Mother, Father" class="w-full p-inputtext-sm">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Aadhaar Number</label>
+                                <p class="text-sm font-semibold text-slate-700 mt-0.5 font-mono">{{ profileData.financial.aadhaarNumber || 'N/A' }}</p>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <!-- 3. Financial & Identity -->
-                    <div class="space-y-4">
-                        <h3
-                            class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b pb-2 flex items-center gap-2">
-                            <i class="pi pi-credit-card text-blue-600"></i> Financial & Identity
-                        </h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">Bank Name *</label>
-                                <input type="text" pInputText formControlName="bank_name" class="w-full p-inputtext-sm">
-                                <small
-                                    *ngIf="onboardingForm.get('bank_name')?.touched && onboardingForm.get('bank_name')?.errors?.['required']"
-                                    class="text-red-500 text-[10px]">Bank Name is required</small>
+            <!-- Tab 4: Qualification & Educational Documents -->
+            <div *ngIf="activeTab === 'documents'" class="space-y-6 animate-fade-in">
+                <!-- Add Document Form Card -->
+                <div class="bg-slate-50/70 p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                                <i class="pi pi-plus-circle text-base"></i>
                             </div>
-                            <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">Account Holder Name *</label>
-                                <input type="text" pInputText formControlName="account_holder_name"
-                                    class="w-full p-inputtext-sm">
-                                <small
-                                    *ngIf="onboardingForm.get('account_holder_name')?.touched && onboardingForm.get('account_holder_name')?.errors?.['required']"
-                                    class="text-red-500 text-[10px]">Account Holder Name is required</small>
-                            </div>
-                            <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">Account Number *</label>
-                                <input type="text" pInputText formControlName="account_number"
-                                    class="w-full p-inputtext-sm">
-                                <small
-                                    *ngIf="onboardingForm.get('account_number')?.touched && onboardingForm.get('account_number')?.errors?.['required']"
-                                    class="text-red-500 text-[10px]">Account Number is required</small>
-                            </div>
-                            <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">IFSC Code *</label>
-                                <input type="text" pInputText formControlName="ifsc_code" class="w-full p-inputtext-sm">
-                                <small
-                                    *ngIf="onboardingForm.get('ifsc_code')?.touched && onboardingForm.get('ifsc_code')?.errors?.['required']"
-                                    class="text-red-500 text-[10px]">IFSC Code is required</small>
-                            </div>
-                            <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">PAN Number *</label>
-                                <input type="text" pInputText formControlName="pan_number" placeholder="ABCDE1234F"
-                                    class="w-full p-inputtext-sm">
-                                <small
-                                    *ngIf="onboardingForm.get('pan_number')?.touched && onboardingForm.get('pan_number')?.errors?.['required']"
-                                    class="text-red-500 text-[10px]">PAN Number is required</small>
-                                <small
-                                    *ngIf="onboardingForm.get('pan_number')?.touched && onboardingForm.get('pan_number')?.errors?.['pattern']"
-                                    class="text-red-500 text-[10px]">Invalid PAN format (e.g. ABCDE1234F)</small>
-                            </div>
-                            <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-slate-600">Aadhaar Number *</label>
-                                <input type="text" pInputText formControlName="aadhar_number"
-                                    placeholder="12 digit Aadhaar" class="w-full p-inputtext-sm">
-                                <small
-                                    *ngIf="onboardingForm.get('aadhar_number')?.touched && onboardingForm.get('aadhar_number')?.errors?.['required']"
-                                    class="text-red-500 text-[10px]">Aadhaar Number is required</small>
-                                <small
-                                    *ngIf="onboardingForm.get('aadhar_number')?.touched && onboardingForm.get('aadhar_number')?.errors?.['pattern']"
-                                    class="text-red-500 text-[10px]">Must be exactly 12 digits</small>
+                            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">
+                                {{ editingDocId ? 'Edit Educational Document' : 'Add Educational Document' }}
+                            </h3>
+                        </div>
+                        <button *ngIf="editingDocId" (click)="resetDocForm()" class="text-xs text-rose-600 font-bold hover:underline">
+                            Cancel Edit
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Doc Type Dropdown -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Document Category *</label>
+                            <p-select [options]="docTypeOptions" [(ngModel)]="docForm.docType" optionLabel="label" optionValue="value" styleClass="w-full text-xs" appendTo="body"></p-select>
+                        </div>
+
+                        <!-- Custom Doc Title (if 'Other' selected) -->
+                        <div *ngIf="docForm.docType === 'Other'">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Document Title *</label>
+                            <input pInputText [(ngModel)]="docForm.customDocTitle" placeholder="e.g. Diploma, Relieving Letter" class="w-full text-xs" />
+                        </div>
+
+                        <!-- Passing Year -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Passing Year *</label>
+                            <input pInputText [(ngModel)]="docForm.passingYear" placeholder="e.g. 2020" class="w-full text-xs" />
+                        </div>
+
+                        <!-- Marks Obtained -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Marks Obtained</label>
+                            <input pInputText [(ngModel)]="docForm.marksObtained" (input)="calculatePercentage()" placeholder="e.g. 450" class="w-full text-xs" />
+                        </div>
+
+                        <!-- Total Marks -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Total Marks</label>
+                            <input pInputText [(ngModel)]="docForm.totalMarks" (input)="calculatePercentage()" placeholder="e.g. 500" class="w-full text-xs" />
+                        </div>
+
+                        <!-- Percentage / CGPA -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Percentage / CGPA</label>
+                            <input pInputText [(ngModel)]="docForm.percentage" placeholder="e.g. 90%" class="w-full text-xs" />
+                        </div>
+
+                        <!-- Document File / Photo Upload Button -->
+                        <div class="sm:col-span-2 flex flex-col justify-end">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Upload Document Photo / File (Max 5MB) *</label>
+                            <div class="flex items-center gap-2">
+                                <label for="docFormFileInput" class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-xl cursor-pointer transition flex items-center gap-1.5 border border-indigo-200">
+                                    <i class="pi pi-cloud-upload"></i>
+                                    <span>{{ docForm.fileName ? 'Change File: ' + docForm.fileName : 'Choose Photo / PDF File' }}</span>
+                                </label>
+                                <input type="file" id="docFormFileInput" (change)="onDocFormFileSelect($event)" accept="image/*,.pdf" class="hidden" />
+                                
+                                <p-button (click)="addOrUpdateDocument()" [label]="editingDocId ? 'Update Doc' : 'Add to List'" [icon]="editingDocId ? 'pi pi-check' : 'pi pi-plus'" styleClass="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl border-none shadow-md"></p-button>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Actions -->
-                    <div class="flex gap-3 pt-4 border-t border-slate-200">
-                        <button type="button" pButton label="Cancel" class="flex-1 p-button-secondary p-button-sm"
-                            (click)="closeDrawer()"></button>
-                        <button type="submit" pButton [label]="loading ? 'Submitting...' : 'Submit for Approval'"
-                            class="flex-1 p-button-sm" [disabled]="loading || onboardingForm.invalid"></button>
+                <!-- Documents List Table -->
+                <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                    <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Submitted Educational Documents List</h3>
+                            <p class="text-xs text-slate-500">List of all educational marksheets and identity proofs submitted for onboarding verification.</p>
+                        </div>
+                        <span class="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-700">
+                            Total Documents: {{ documentsList.length }}
+                        </span>
                     </div>
 
-                </form>
+                    <p-table [value]="documentsList" styleClass="p-datatable-sm p-datatable-striped" [tableStyle]="{ 'min-width': '50rem' }">
+                        <ng-template pTemplate="header">
+                            <tr class="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200 text-xs">
+                                <th style="width: 3rem" class="p-3">#</th>
+                                <th class="p-3">Document Category / Title</th>
+                                <th class="p-3">Passing Year</th>
+                                <th class="p-3">Marks / Total</th>
+                                <th class="p-3">Percentage</th>
+                                <th class="p-3">Approval & Audit Status</th>
+                                <th class="p-3 text-right">Actions</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-doc let-i="rowIndex">
+                            <tr class="hover:bg-slate-50/50 transition text-xs font-semibold text-slate-700 border-b border-slate-100">
+                                <td class="p-3 text-slate-400 font-bold">{{ i + 1 }}</td>
+                                <td class="p-3 font-bold text-slate-900">
+                                    <div class="flex items-center gap-2">
+                                        <i class="pi pi-file text-indigo-500 text-sm"></i>
+                                        <span>{{ doc.title }}</span>
+                                    </div>
+                                </td>
+                                <td class="p-3">{{ doc.passingYear || 'N/A' }}</td>
+                                <td class="p-3">{{ doc.marksObtained && doc.totalMarks ? doc.marksObtained + ' / ' + doc.totalMarks : (doc.marksObtained || 'N/A') }}</td>
+                                <td class="p-3 font-bold text-indigo-600">{{ doc.percentage || 'N/A' }}</td>
+                                <td class="p-3">
+                                    <span *ngIf="onboardingStatus === 'APPROVED' || doc.status === 'APPROVED'" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold">
+                                        <i class="pi pi-lock text-[10px]"></i> Approved {{ approvedBy ? 'by ' + approvedBy : '' }}
+                                    </span>
+                                    <span *ngIf="onboardingStatus === 'PENDING' || doc.status === 'PENDING'" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-100 text-[10px] font-bold">
+                                        <i class="pi pi-spin pi-spinner text-[10px]"></i> Pending Approval
+                                    </span>
+                                    <span *ngIf="onboardingStatus === 'NOT_STARTED' || onboardingStatus === 'REJECTED'" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold">
+                                        Editable
+                                    </span>
+                                </td>
+                                <td class="p-3 text-right">
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        <button *ngIf="doc.fileUrl" (click)="viewDocument(doc)" type="button" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition" pTooltip="Preview Document">
+                                            <i class="pi pi-eye text-sm"></i>
+                                        </button>
+
+                                        <!-- Edit / Delete enabled when not approved -->
+                                        <ng-container *ngIf="onboardingStatus !== 'APPROVED'">
+                                            <button (click)="editDocument(doc)" type="button" class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition" pTooltip="Edit Document">
+                                                <i class="pi pi-pencil text-sm"></i>
+                                            </button>
+                                            <button (click)="deleteDocument(doc.id)" type="button" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition" pTooltip="Delete Document">
+                                                <i class="pi pi-trash text-sm"></i>
+                                            </button>
+                                        </ng-container>
+
+                                        <span *ngIf="onboardingStatus === 'APPROVED'" class="text-[10px] font-bold text-slate-400 italic">Locked</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="emptymessage">
+                            <tr>
+                                <td colspan="7" class="p-8 text-center text-slate-400">
+                                    <i class="pi pi-folder-open text-3xl text-slate-300 mb-2 block"></i>
+                                    <p class="text-xs font-semibold">No educational documents added yet.</p>
+                                    <p class="text-[10px]">Use the form above to add your 10th, 12th, Graduation, ITI, or other certificates.</p>
+                                </td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </div>
+
+                <!-- Submit All Documents Banner -->
+                <div class="flex justify-end pt-4 border-t border-slate-100" *ngIf="onboardingStatus !== 'APPROVED'">
+                    <p-button (click)="submitOnboarding()" label="Submit All Documents for Approval" icon="pi pi-check" [loading]="loading" styleClass="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border-none shadow-md shadow-indigo-600/20"></p-button>
+                </div>
             </div>
         </div>
-    </p-drawer>
+    </div>
 
+    <!-- Document Preview Modal Dialog -->
+    <p-dialog [(visible)]="showDocPreviewModal" [modal]="true" [style]="{width: '90vw', maxWidth: '800px'}" 
+      [header]="previewDocTitle" [draggable]="false" [resizable]="false">
+      <div class="flex flex-col items-center justify-center p-4 max-h-[70vh] overflow-y-auto">
+        <img *ngIf="previewDocUrl && !previewDocUrl.includes('application/pdf')" [src]="previewDocUrl" class="max-w-full max-h-[60vh] rounded-lg shadow" alt="Document Preview" />
+        <iframe *ngIf="previewDocUrl && previewDocUrl.includes('application/pdf')" [src]="previewDocUrl" class="w-full h-[60vh] rounded-lg"></iframe>
+      </div>
+    </p-dialog>
+
+    <!-- Section-Specific Drawer Modal for Updating Details -->
+    <p-drawer [(visible)]="showDrawer" position="right" [style]="{width: '100%', maxWidth: '550px'}">
+        <ng-template pTemplate="header">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+                    <i class="pi pi-user-edit"></i>
+                </div>
+                <h3 class="text-base font-bold text-slate-800">{{ getSectionTitle() }}</h3>
+            </div>
+        </ng-template>
+
+        <div class="p-4 space-y-6">
+            <form [formGroup]="onboardingForm" (ngSubmit)="submitOnboarding()" class="space-y-6">
+                <!-- Personal Details Section -->
+                <div *ngIf="editSection === 'personal' || editSection === 'all'" class="space-y-4">
+                    <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b pb-1 flex items-center gap-1.5">
+                        <i class="pi pi-user text-indigo-600"></i> Personal Details
+                    </h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Employee Name</label>
+                            <input pInputText formControlName="employee_name" class="w-full p-inputtext-sm bg-slate-100" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Father's Name</label>
+                            <input pInputText formControlName="father_name" class="w-full p-inputtext-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Mother's Name</label>
+                            <input pInputText formControlName="mother_name" class="w-full p-inputtext-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Gender</label>
+                            <p-select [options]="genderOptions" formControlName="gender" optionLabel="label" optionValue="value" styleClass="w-full p-inputtext-sm" appendTo="body"></p-select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Blood Group</label>
+                            <p-select [options]="bloodGroupOptions" formControlName="blood_group" optionLabel="label" optionValue="value" styleClass="w-full p-inputtext-sm" appendTo="body"></p-select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Marital Status</label>
+                            <input pInputText formControlName="marital_status" class="w-full p-inputtext-sm" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact & Address Section -->
+                <div *ngIf="editSection === 'contact' || editSection === 'all'" class="space-y-4">
+                    <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b pb-1 flex items-center gap-1.5">
+                        <i class="pi pi-map-marker text-indigo-600"></i> Contact & Address Details
+                    </h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Personal Email</label>
+                            <input pInputText formControlName="personal_email" class="w-full p-inputtext-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Alternate Mobile</label>
+                            <input pInputText formControlName="alternate_mobile" class="w-full p-inputtext-sm" />
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Current Address</label>
+                            <input pInputText formControlName="current_address" class="w-full p-inputtext-sm" />
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Permanent Address</label>
+                            <input pInputText formControlName="permanent_address" class="w-full p-inputtext-sm" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Contact Section -->
+                <div *ngIf="editSection === 'emergency' || editSection === 'all'" class="space-y-4">
+                    <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b pb-1 flex items-center gap-1.5">
+                        <i class="pi pi-phone text-indigo-600"></i> Emergency Contact
+                    </h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Contact Name</label>
+                            <input pInputText formControlName="emergency_contact_name" class="w-full p-inputtext-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Phone Number</label>
+                            <input pInputText formControlName="emergency_contact" class="w-full p-inputtext-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Relationship</label>
+                            <input pInputText formControlName="emergency_contact_relation" class="w-full p-inputtext-sm" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bank Details & Proof Section -->
+                <div *ngIf="editSection === 'financial' || editSection === 'all'" class="space-y-4">
+                    <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b pb-1 flex items-center gap-1.5">
+                        <i class="pi pi-wallet text-indigo-600"></i> Bank Account Information
+                    </h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Bank Name</label>
+                            <input pInputText formControlName="bank_name" class="w-full p-inputtext-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Account Holder Name</label>
+                            <input pInputText formControlName="account_holder_name" class="w-full p-inputtext-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Account Number</label>
+                            <input pInputText formControlName="account_number" class="w-full p-inputtext-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">IFSC Code</label>
+                            <input pInputText formControlName="ifsc_code" class="w-full p-inputtext-sm" />
+                        </div>
+                    </div>
+
+                    <!-- Bank Passbook / Cancelled Cheque Photo Upload in Drawer -->
+                    <div class="pt-3 border-t border-slate-200">
+                        <label class="block text-xs font-bold text-slate-700 mb-2">Bank Passbook / Cancelled Cheque Photo Proof</label>
+                        <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                            <div class="w-16 h-16 rounded-lg border border-slate-300 bg-white overflow-hidden flex items-center justify-center shadow-xs">
+                                <img *ngIf="bankProofPhotoUrl" [src]="bankProofPhotoUrl" class="w-full h-full object-cover" />
+                                <i *ngIf="!bankProofPhotoUrl" class="pi pi-credit-card text-xl text-slate-300"></i>
+                            </div>
+                            <div class="flex-1 space-y-1.5">
+                                <p class="text-[11px] text-slate-500">Upload photo of passbook or cancelled cheque (Max 5MB).</p>
+                                <div class="flex items-center gap-2">
+                                    <label for="drawerBankProofInput" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-lg cursor-pointer transition inline-flex items-center gap-1.5 border border-indigo-200">
+                                        <i class="pi pi-upload"></i>
+                                        <span>{{ bankProofPhotoUrl ? 'Change Photo' : 'Upload Passbook Photo' }}</span>
+                                    </label>
+                                    <input type="file" id="drawerBankProofInput" (change)="onBankProofSelect($event)" accept="image/*,.pdf" class="hidden" />
+                                    <button *ngIf="bankProofPhotoUrl" (click)="viewDocument({ fileUrl: bankProofPhotoUrl, title: 'Bank Passbook Proof' })" type="button" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition inline-flex items-center gap-1.5">
+                                        <i class="pi pi-eye"></i> View
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Identity Details Section -->
+                <div *ngIf="editSection === 'identity' || editSection === 'all'" class="space-y-4">
+                    <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b pb-1 flex items-center gap-1.5">
+                        <i class="pi pi-shield text-indigo-600"></i> Identity & Statutories
+                    </h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">PAN Number</label>
+                            <input pInputText formControlName="pan_number" class="w-full p-inputtext-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Aadhaar Number</label>
+                            <input pInputText formControlName="aadhar_number" class="w-full p-inputtext-sm" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-slate-200">
+                    <button type="button" pButton label="Cancel" class="p-button-secondary p-button-sm" (click)="closeDrawer()"></button>
+                    <button type="submit" pButton [label]="loading ? 'Saving...' : 'Save & Submit Section'" class="p-button-sm bg-indigo-600 hover:bg-indigo-700 text-white font-bold" [disabled]="loading"></button>
+                </div>
+            </form>
+        </div>
+    </p-drawer>
 </div>

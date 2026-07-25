@@ -52,6 +52,11 @@ export class OffboardingComponent implements OnInit {
     { label: 'Terminated', value: 'Terminated' },
     { label: 'Retired', value: 'Retired' },
     { label: 'Absconded', value: 'Absconded' },
+    { label: 'Death', value: 'Death' },
+    { label: 'Medical', value: 'Medical' },
+    { label: 'Personal', value: 'Personal' },
+    { label: 'End Of Contract', value: 'End-Of-Contract' },
+    { label: 'Other', value: 'Other' }
   ];
 
   isLoading = false;
@@ -60,6 +65,7 @@ export class OffboardingComponent implements OnInit {
   // Table Data
   offboardings: any[] = [];
   columns: TableColumn[] = [
+    { key: 'id', header: 'ID' },
     { key: 'employeeName', header: 'Employee Name' },
     { key: 'employeeCode', header: 'Employee Code' },
     { key: 'employmentStatus', header: 'Status' },

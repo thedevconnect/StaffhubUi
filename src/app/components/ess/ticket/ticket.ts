@@ -19,6 +19,8 @@ import { TextareaModule } from 'primeng/textarea';
 import { CardModule } from 'primeng/card';
 import { BadgeModule } from 'primeng/badge';
 
+import { Breadcrumb } from 'primeng/breadcrumb';
+
 interface CategoryCard {
   name: 'ADMINISTRATION' | 'HUMAN RESOURCE - CRG' | 'IT HELPDESK';
   label: string;
@@ -35,7 +37,7 @@ interface CategoryCard {
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    AppBreadcrumb,
+    Breadcrumb,
     TableModule,
     ButtonModule,
     InputTextModule,
@@ -97,6 +99,16 @@ export class Ticket implements OnInit {
     { label: 'ADMINISTRATION', value: 'ADMINISTRATION' },
     { label: 'HUMAN RESOURCE - CRG', value: 'HUMAN RESOURCE - CRG' },
     { label: 'IT HELPDESK', value: 'IT HELPDESK' }
+  ];
+
+  subjectSelectOptions = [
+    { label: 'Laptop Hardware Change / Upgrade', value: 'Laptop Hardware Change / Upgrade' },
+    { label: 'Laptop Charger / Mouse / Keyboard Request', value: 'Laptop Charger / Mouse / Keyboard Request' },
+    { label: 'Office Stationery (Pen, Diary, Notebook)', value: 'Office Stationery (Pen, Diary, Notebook)' },
+    { label: 'Asset / Identity Card Request', value: 'Asset / Identity Card Request' },
+    { label: 'Salary Slip / Leave Balance Query', value: 'Salary Slip / Leave Balance Query' },
+    { label: 'Software Installation / Access Request', value: 'Software Installation / Access Request' },
+    { label: 'Other', value: 'Other' }
   ];
 
   priorityOptions = [
@@ -173,48 +185,56 @@ export class Ticket implements OnInit {
     });
   }
 
+  applyQuickTemplate(category: string, subject: string, remark: string): void {
+    this.ticketForm.patchValue({
+      category,
+      subject,
+      remark
+    });
+    this.cdr.markForCheck();
+  }
+
   loadEmployees(): void {
-    this.employeeService.getEmployees().subscribe({
+    this.ticketService.getEmployees().subscribe({
       next: (res: any) => {
         const list = Array.isArray(res) ? res : (res?.data || []);
-        if (list.length > 0) {
+        if (list && list.length > 0) {
           this.employees = list.map((emp: any) => {
-            const name = emp.full_name || emp.fullName || emp.name || `Employee #${emp.id}`;
+            const empId = Number(emp.id || emp.employee_id);
+            const name = emp.full_name || emp.fullName || emp.employee_name || emp.name || `Employee #${empId}`;
             const desig = emp.designation || emp.role || 'Employee';
-            const empCode = emp.emp_id || emp.employeeCode ? ` (${emp.emp_id || emp.employeeCode})` : '';
+            const empCode = emp.emp_id || emp.employee_code || emp.employeeCode ? ` (${emp.emp_id || emp.employee_code || emp.employeeCode})` : '';
             return {
-              label: `${name}/${desig}${empCode}`,
-              value: emp.id
+              label: `${name} - ${desig}${empCode}`,
+              value: empId
             };
           });
           this.cdr.markForCheck();
         } else {
-          this.loadGlobalEmployees();
+          this.loadFallbackEmployees();
         }
       },
-      error: (err) => {
-        console.error('Error loading employees via EmployeeManagementService:', err);
-        this.loadGlobalEmployees();
-      }
+      error: () => this.loadFallbackEmployees()
     });
   }
 
-  loadGlobalEmployees(): void {
-    this.employeeService.getGlobalEmployees().subscribe({
+  loadFallbackEmployees(): void {
+    this.employeeService.getEmployees().subscribe({
       next: (res: any) => {
         const list = Array.isArray(res) ? res : (res?.data || []);
         this.employees = list.map((emp: any) => {
-          const name = emp.full_name || emp.fullName || emp.name || `Employee #${emp.id}`;
+          const empId = Number(emp.id || emp.employee_id);
+          const name = emp.full_name || emp.fullName || emp.name || `Employee #${empId}`;
           const desig = emp.designation || emp.role || 'Employee';
           const empCode = emp.emp_id || emp.employeeCode ? ` (${emp.emp_id || emp.employeeCode})` : '';
           return {
-            label: `${name}/${desig}${empCode}`,
-            value: emp.id
+            label: `${name} - ${desig}${empCode}`,
+            value: empId
           };
         });
         this.cdr.markForCheck();
       },
-      error: (err) => console.error('Error loading global employees:', err)
+      error: (err) => console.error('Error loading fallback employees:', err)
     });
   }
 
@@ -263,15 +283,17 @@ export class Ticket implements OnInit {
       });
   }
 
-  openRaiseDrawer(categoryName?: 'ADMINISTRATION' | 'HUMAN RESOURCE - CRG' | 'IT HELPDESK'): void {
+  openRaiseDrawer(categoryName?: string): void {
     this.ticketForm.reset({
-      category: categoryName || 'HUMAN RESOURCE - CRG',
-      subject: '',
+      category: categoryName || 'IT HELPDESK',
+      subject: 'Laptop Hardware Change / Upgrade',
+      custom_subject: '',
       priority: 'MEDIUM',
       cc_employees: [],
       remark: ''
     });
     this.showRaiseDrawer = true;
+    this.cdr.markForCheck();
   }
 
   submitTicket(): void {
@@ -285,8 +307,30 @@ export class Ticket implements OnInit {
       return;
     }
 
+    const formRaw = this.ticketForm.getRawValue();
+    let finalSubject = formRaw.subject;
+    if (finalSubject === 'Other') {
+      finalSubject = (formRaw.custom_subject || '').trim();
+      if (!finalSubject) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Subject Required',
+          detail: 'Please enter custom subject / issue title.'
+        });
+        return;
+      }
+    }
+
     this.submitting = true;
-    const payload = this.ticketForm.value;
+    this.cdr.markForCheck();
+
+    const payload = {
+      category: formRaw.category,
+      subject: finalSubject,
+      priority: formRaw.priority,
+      cc_employees: formRaw.cc_employees || [],
+      remark: formRaw.remark
+    };
 
     this.ticketService.createTicket(payload).subscribe({
       next: (res) => {
@@ -301,7 +345,6 @@ export class Ticket implements OnInit {
           this.loadStats();
           this.loadTickets();
           
-          // Automatically view the workflow drawer for the newly raised ticket
           if (res.data) {
             this.openWorkflowDrawer(res.data);
           }

@@ -50,8 +50,8 @@ export class HRMonthlyAttendanceCalendar implements OnInit {
 
   statusOptions = [
     { label: 'Present', value: 'PRESENT' },
-    { label: 'Absent', value: 'ABSENT' },
     { label: 'Half Day', value: 'HALF_DAY' },
+    { label: 'Absent', value: 'ABSENT' },
     { label: 'On Leave', value: 'ON_LEAVE' }
   ];
 
@@ -82,6 +82,13 @@ export class HRMonthlyAttendanceCalendar implements OnInit {
 
   onEmployeeChange() {
     this.loadData();
+  }
+
+  onStatusChange(newStatus: string) {
+    if (newStatus === 'ABSENT' || newStatus === 'ON_LEAVE') {
+      this.editForm.swipe_in = '';
+      this.editForm.swipe_out = '';
+    }
   }
 
   private formatTime(dateStr: string | null): string {
@@ -290,11 +297,14 @@ export class HRMonthlyAttendanceCalendar implements OnInit {
 
     this.selectedDay.set(day);
     
+    const status = day.rawStatus || 'PRESENT';
+    const isTimeHidden = status === 'ABSENT' || status === 'ON_LEAVE';
+
     // Prepare form
     this.editForm = {
-      attendance_status: day.rawStatus || 'PRESENT',
-      swipe_in: this.formatTimeForInput(day.rawSwipeIn),
-      swipe_out: this.formatTimeForInput(day.rawSwipeOut),
+      attendance_status: status,
+      swipe_in: isTimeHidden ? '' : this.formatTimeForInput(day.rawSwipeIn),
+      swipe_out: isTimeHidden ? '' : this.formatTimeForInput(day.rawSwipeOut),
       notes: day.notes || ''
     };
     
@@ -306,8 +316,10 @@ export class HRMonthlyAttendanceCalendar implements OnInit {
     const empId = this.selectedEmployeeId();
     if (!day || !empId) return;
 
-    let swipeInISO = this.editForm.swipe_in ? new Date(this.editForm.swipe_in).toISOString() : null;
-    let swipeOutISO = this.editForm.swipe_out ? new Date(this.editForm.swipe_out).toISOString() : null;
+    const isTimeHidden = this.editForm.attendance_status === 'ABSENT' || this.editForm.attendance_status === 'ON_LEAVE';
+
+    let swipeInISO = (!isTimeHidden && this.editForm.swipe_in) ? new Date(this.editForm.swipe_in).toISOString() : null;
+    let swipeOutISO = (!isTimeHidden && this.editForm.swipe_out) ? new Date(this.editForm.swipe_out).toISOString() : null;
 
     const payload = {
       id: day.primaryRecordId,

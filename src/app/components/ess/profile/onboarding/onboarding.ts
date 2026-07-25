@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Breadcrumb } from 'primeng/breadcrumb';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -11,11 +11,30 @@ import { DrawerModule } from 'primeng/drawer';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { InputTextModule } from 'primeng/inputtext';
+import { DialogModule } from 'primeng/dialog';
+import { TagModule } from 'primeng/tag';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../../../shared/services/services/auth.service';
 import { UserService } from '../../../../shared/services/user-service';
 import { EmployeeManagementService } from '../../../../shared/services/employee-management.service';
 import { EmployeeOnboardingService } from '../../../../shared/services/employee-onboarding.service';
+
+export interface QualificationDoc {
+  id: string;
+  docType: string;
+  title: string;
+  passingYear: string;
+  marksObtained: string;
+  totalMarks: string;
+  percentage: string;
+  fileUrl: string;
+  fileName: string;
+  uploadedAt: string | null;
+  status?: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  isLocked?: boolean;
+}
 
 @Component({
   selector: 'app-onboarding',
@@ -23,6 +42,7 @@ import { EmployeeOnboardingService } from '../../../../shared/services/employee-
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     Breadcrumb,
     ButtonModule,
     CardModule,
@@ -32,7 +52,9 @@ import { EmployeeOnboardingService } from '../../../../shared/services/employee-
     DrawerModule,
     SelectModule,
     DatePickerModule,
-    InputTextModule
+    InputTextModule,
+    DialogModule,
+    TagModule
   ],
   providers: [MessageService],
   templateUrl: './onboarding.html',
@@ -48,12 +70,46 @@ export class Onboarding implements OnInit {
   activeTab: string = 'details';
   onboardingStatus: string = 'NOT_STARTED'; // NOT_STARTED, PENDING, COMPLETED, APPROVED, REJECTED
   rejectionRemarks: string = '';
+  approvedBy: string = '';
+  approvedAt: string = '';
   showDrawer: boolean = false;
   onboardingForm: FormGroup;
   employeeId: string | number | null = null;
   companyId: string | number | null = null;
   loading: boolean = false;
   isFullScreen: boolean = false;
+
+  // Bank Proof Photo
+  bankProofPhotoUrl: string | null = null;
+
+  // Documents Upload State
+  documentsList: QualificationDoc[] = [];
+  editingDocId: string | null = null;
+
+  // Document Input Form State
+  docForm = {
+    docType: '10th',
+    customDocTitle: '',
+    passingYear: '',
+    marksObtained: '',
+    totalMarks: '',
+    percentage: '',
+    fileUrl: '',
+    fileName: ''
+  };
+
+  previewDocUrl: string | null = null;
+  previewDocTitle: string = '';
+  showDocPreviewModal: boolean = false;
+
+  docTypeOptions = [
+    { label: '10th Marksheet / Certificate', value: '10th' },
+    { label: '12th Marksheet / Certificate', value: '12th' },
+    { label: 'Graduation Degree / Marksheet', value: 'Graduation' },
+    { label: 'Post Graduation Degree / Marksheet', value: 'Post Graduation' },
+    { label: 'ITI Diploma / Certificate', value: 'ITI' },
+    { label: 'Other Document', value: 'Other' }
+  ];
 
   toggleFullScreen(): void {
     this.isFullScreen = !this.isFullScreen;
@@ -124,19 +180,6 @@ export class Onboarding implements OnInit {
       aadhaarNumber: '',
       uan: '',
       pfNumber: ''
-    },
-    assets: [
-
-    ],
-    leaves: {
-      annualTotal: 18,
-      annualConsumed: 4,
-      annualBalance: 14,
-      sickTotal: 12,
-      sickConsumed: 2,
-      sickBalance: 10,
-      shortLeaveCount: 2,
-      regularizations: 1
     }
   };
 
@@ -195,17 +238,60 @@ export class Onboarding implements OnInit {
           this.employeeId = emp.employeeId || emp.id;
           this.companyId = emp.companyId || emp.company_id || 15;
 
-          this.profileData.personal.fullName = emp.fullName || emp.full_name || this.profileData.personal.fullName;
+          this.profileData.personal.fullName = emp.fullName || emp.full_name || emp.employeeName || emp.name || this.profileData.personal.fullName;
           this.profileData.personal.username = emp.username || this.profileData.personal.username;
+          if (emp.dob || emp.dateOfBirth) {
+            this.profileData.personal.dob = emp.dob || emp.dateOfBirth;
+          }
+          if (emp.gender) {
+            this.profileData.personal.gender = emp.gender;
+          }
+          if (emp.fatherName || emp.father_name) {
+            this.profileData.personal.fatherName = emp.fatherName || emp.father_name;
+          }
+          if (emp.motherName || emp.mother_name) {
+            this.profileData.personal.motherName = emp.motherName || emp.mother_name;
+          }
+          if (emp.maritalStatus || emp.marital_status) {
+            this.profileData.personal.maritalStatus = emp.maritalStatus || emp.marital_status;
+          }
+
           this.profileData.contact.officialEmail = emp.officialEmail || emp.email || this.profileData.contact.officialEmail;
-          this.profileData.contact.mobileNumber = emp.mobileNumber || emp.mobile || this.profileData.contact.mobileNumber;
+          if (emp.personalEmail || emp.personal_email) {
+            this.profileData.contact.personalEmail = emp.personalEmail || emp.personal_email;
+          }
+          this.profileData.contact.mobileNumber = emp.mobileNumber || emp.mobile || emp.phone || this.profileData.contact.mobileNumber;
+          if (emp.alternateMobile || emp.alternate_mobile) {
+            this.profileData.contact.altPhone = emp.alternateMobile || emp.alternate_mobile;
+          }
+          if (emp.currentAddress || emp.current_address) {
+            this.profileData.contact.currentAddress = emp.currentAddress || emp.current_address;
+          }
+          if (emp.permanentAddress || emp.permanent_address) {
+            this.profileData.contact.permanentAddress = emp.permanentAddress || emp.permanent_address;
+          }
+
           this.profileData.employment.designation = emp.designation || this.profileData.employment.designation;
           this.profileData.employment.department = emp.department || this.profileData.employment.department;
           this.profileData.employment.reportingManager = emp.reportingManagerName || emp.reportingManager || this.profileData.employment.reportingManager;
           this.profileData.employment.joiningDate = emp.joiningDate || emp.joining_date || this.profileData.employment.joiningDate;
           this.profileData.employment.employmentType = emp.employmentType || emp.employment_type || this.profileData.employment.employmentType;
           this.profileData.employment.workLocation = emp.workLocation || emp.work_location || this.profileData.employment.workLocation;
-          this.profileData.employment.employeeCode = emp.employeeCode || emp.emp_id || this.profileData.employment.employeeCode;
+          this.profileData.employment.employeeCode = emp.employeeCode || emp.emp_id || emp.code || this.profileData.employment.employeeCode;
+
+          // Pre-fill form with master details
+          this.onboardingForm.patchValue({
+            employee_name: this.profileData.personal.fullName,
+            father_name: this.profileData.personal.fatherName || '',
+            mother_name: this.profileData.personal.motherName || '',
+            dob: this.profileData.personal.dob ? new Date(this.profileData.personal.dob) : null,
+            gender: this.profileData.personal.gender || 'MALE',
+            marital_status: this.profileData.personal.maritalStatus || 'Single',
+            personal_email: this.profileData.contact.personalEmail || '',
+            alternate_mobile: this.profileData.contact.altPhone || '',
+            current_address: this.profileData.contact.currentAddress || '',
+            permanent_address: this.profileData.contact.permanentAddress || ''
+          }, { emitEvent: false });
 
           if (this.employeeId) {
             this.loadOnboardingRecord(this.employeeId);
@@ -215,7 +301,6 @@ export class Onboarding implements OnInit {
         }
       },
       error: () => {
-        // Fall back to old userService just in case
         this.userService.getUserById(userId).subscribe({
           next: (response: any) => {
             if (response && response.data) {
@@ -242,6 +327,8 @@ export class Onboarding implements OnInit {
 
           if (rec.verification_status === 'APPROVED') {
             this.onboardingStatus = 'APPROVED';
+            this.approvedBy = rec.approved_by || 'HR Admin';
+            this.approvedAt = rec.approved_at ? new Date(rec.approved_at).toLocaleDateString('en-GB') : 'Approved';
           } else if (rec.verification_status === 'REJECTED') {
             this.onboardingStatus = 'REJECTED';
             this.rejectionRemarks = rec.remarks || 'No remarks provided.';
@@ -274,6 +361,17 @@ export class Onboarding implements OnInit {
           if (rec.profile_photo) {
             this.profileData.personal.avatarUrl = rec.profile_photo;
           }
+          if (rec.bank_proof_photo) {
+            this.bankProofPhotoUrl = rec.bank_proof_photo;
+          }
+
+          // Load documents
+          if (rec.documents) {
+            const docs = typeof rec.documents === 'string' ? JSON.parse(rec.documents) : rec.documents;
+            this.documentsList = Array.isArray(docs) ? docs : [];
+          } else {
+            this.documentsList = [];
+          }
 
           // Populate Form
           const formVal = {
@@ -301,7 +399,7 @@ export class Onboarding implements OnInit {
           };
           this.onboardingForm.patchValue(formVal);
 
-          if (this.onboardingStatus === 'COMPLETED' || this.onboardingStatus === 'APPROVED') {
+          if (this.onboardingStatus === 'APPROVED') {
             this.onboardingForm.disable();
           } else {
             this.onboardingForm.enable();
@@ -313,29 +411,48 @@ export class Onboarding implements OnInit {
         if (err.status === 404) {
           this.onboardingStatus = 'NOT_STARTED';
           this.onboardingForm.enable();
+          this.documentsList = [];
         }
         this.cdr.markForCheck();
       }
     });
   }
 
+  editSection: string = 'all'; // 'personal' | 'contact' | 'emergency' | 'financial' | 'identity' | 'all'
+
   setTab(tab: string): void {
     this.activeTab = tab;
     this.cdr.markForCheck();
   }
 
-  openOnboardingDrawer(): void {
-    if (this.onboardingStatus === 'COMPLETED' || this.onboardingStatus === 'APPROVED') {
+  openSectionDrawer(section: string = 'all'): void {
+    if (this.onboardingStatus === 'APPROVED') {
       this.messageService.add({
         severity: 'info',
-        summary: 'Profile Locked',
-        detail: 'Your onboarding is approved. Profile cannot be edited.',
+        summary: 'Profile Approved',
+        detail: 'Onboarding details have been approved by HR Admin and are locked.',
         life: 3000
       });
       return;
     }
+    this.editSection = section;
     this.showDrawer = true;
     this.cdr.markForCheck();
+  }
+
+  openOnboardingDrawer(): void {
+    this.openSectionDrawer('all');
+  }
+
+  getSectionTitle(): string {
+    switch (this.editSection) {
+      case 'personal': return 'Edit Personal Information';
+      case 'contact': return 'Edit Contact & Address';
+      case 'emergency': return 'Edit Emergency Contacts';
+      case 'financial': return 'Edit Bank Account Information';
+      case 'identity': return 'Edit Identity & Statutories';
+      default: return 'Edit Onboarding Profile';
+    }
   }
 
   closeDrawer(): void {
@@ -346,16 +463,13 @@ export class Onboarding implements OnInit {
   onProfilePhotoSelect(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     const file = inputElement.files?.[0];
+    if (!file) return;
 
-    if (!file) {
-      return;
-    }
-
-    if (file.size > 1024 * 1024) {
+    if (file.size > 2 * 1024 * 1024) {
       this.messageService.add({
         severity: 'error',
         summary: 'File Too Large',
-        detail: 'Profile photo must be less than 1MB.'
+        detail: 'Profile photo must be less than 2MB.'
       });
       inputElement.value = '';
       return;
@@ -364,21 +478,183 @@ export class Onboarding implements OnInit {
     const reader = new FileReader();
     reader.onload = () => {
       const base64String = reader.result as string;
-      this.onboardingForm.patchValue({
-        profile_photo: base64String
-      });
+      this.onboardingForm.patchValue({ profile_photo: base64String });
       this.profileData.personal.avatarUrl = base64String;
-      this.showDrawer = true;
       this.cdr.markForCheck();
-
-      this.messageService.add({
-        severity: 'info',
-        summary: 'Photo Selected',
-        detail: 'Please save your profile to apply changes permanently.',
-        life: 4000
-      });
     };
     reader.readAsDataURL(file);
+  }
+
+  onBankProofSelect(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    const file = inputElement.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'File Too Large',
+        detail: 'Bank passbook/cheque photo must be smaller than 5MB.'
+      });
+      inputElement.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.bankProofPhotoUrl = reader.result as string;
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Bank Proof Uploaded',
+        detail: 'Bank Passbook / Cheque photo attached.'
+      });
+      this.cdr.markForCheck();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  onDocFormFileSelect(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    const file = inputElement.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'File Too Large',
+        detail: 'Document file size must be less than 5MB.'
+      });
+      inputElement.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.docForm.fileUrl = reader.result as string;
+      this.docForm.fileName = file.name;
+      this.cdr.markForCheck();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  calculatePercentage(): void {
+    const obtained = parseFloat(this.docForm.marksObtained);
+    const total = parseFloat(this.docForm.totalMarks);
+    if (!isNaN(obtained) && !isNaN(total) && total > 0) {
+      const pct = ((obtained / total) * 100).toFixed(2);
+      this.docForm.percentage = `${pct}%`;
+    }
+    this.cdr.markForCheck();
+  }
+
+  addOrUpdateDocument(): void {
+    const title = this.docForm.docType === 'Other' ? this.docForm.customDocTitle.trim() : this.getDocTypeLabel(this.docForm.docType);
+
+    if (!title) {
+      this.messageService.add({ severity: 'warn', summary: 'Missing Title', detail: 'Please provide document title.' });
+      return;
+    }
+
+    if (!this.docForm.fileUrl && !this.editingDocId) {
+      this.messageService.add({ severity: 'warn', summary: 'File Required', detail: 'Please upload a document file/photo.' });
+      return;
+    }
+
+    if (this.editingDocId) {
+      const target = this.documentsList.find(d => d.id === this.editingDocId);
+      if (target) {
+        target.docType = this.docForm.docType;
+        target.title = title;
+        target.passingYear = this.docForm.passingYear;
+        target.marksObtained = this.docForm.marksObtained;
+        target.totalMarks = this.docForm.totalMarks;
+        target.percentage = this.docForm.percentage;
+        if (this.docForm.fileUrl) {
+          target.fileUrl = this.docForm.fileUrl;
+          target.fileName = this.docForm.fileName;
+        }
+        this.messageService.add({ severity: 'success', summary: 'Updated', detail: 'Document updated successfully.' });
+      }
+      this.editingDocId = null;
+    } else {
+      const newDoc: QualificationDoc = {
+        id: 'doc_' + Date.now(),
+        docType: this.docForm.docType,
+        title: title,
+        passingYear: this.docForm.passingYear,
+        marksObtained: this.docForm.marksObtained,
+        totalMarks: this.docForm.totalMarks,
+        percentage: this.docForm.percentage,
+        fileUrl: this.docForm.fileUrl,
+        fileName: this.docForm.fileName || title,
+        uploadedAt: new Date().toLocaleDateString('en-GB'),
+        status: 'PENDING',
+        isLocked: false
+      };
+      this.documentsList.push(newDoc);
+      this.messageService.add({ severity: 'success', summary: 'Added', detail: `${title} added to list.` });
+    }
+
+    this.resetDocForm();
+    this.cdr.markForCheck();
+  }
+
+  editDocument(doc: QualificationDoc): void {
+    if (this.onboardingStatus === 'APPROVED' && doc.status === 'APPROVED') {
+      this.messageService.add({ severity: 'info', summary: 'Locked', detail: 'Approved document cannot be edited.' });
+      return;
+    }
+    this.editingDocId = doc.id;
+    this.docForm = {
+      docType: doc.docType,
+      customDocTitle: doc.docType === 'Other' ? doc.title : '',
+      passingYear: doc.passingYear || '',
+      marksObtained: doc.marksObtained || '',
+      totalMarks: doc.totalMarks || '',
+      percentage: doc.percentage || '',
+      fileUrl: doc.fileUrl || '',
+      fileName: doc.fileName || ''
+    };
+    this.cdr.markForCheck();
+  }
+
+  deleteDocument(docId: string): void {
+    const target = this.documentsList.find(d => d.id === docId);
+    if (this.onboardingStatus === 'APPROVED' && target?.status === 'APPROVED') {
+      this.messageService.add({ severity: 'info', summary: 'Locked', detail: 'Approved document cannot be deleted.' });
+      return;
+    }
+    this.documentsList = this.documentsList.filter(d => d.id !== docId);
+    this.messageService.add({ severity: 'info', summary: 'Removed', detail: 'Document removed from list.' });
+    this.cdr.markForCheck();
+  }
+
+  resetDocForm(): void {
+    this.editingDocId = null;
+    this.docForm = {
+      docType: '10th',
+      customDocTitle: '',
+      passingYear: '',
+      marksObtained: '',
+      totalMarks: '',
+      percentage: '',
+      fileUrl: '',
+      fileName: ''
+    };
+    this.cdr.markForCheck();
+  }
+
+  getDocTypeLabel(val: string): string {
+    const match = this.docTypeOptions.find(o => o.value === val);
+    return match ? match.label : val;
+  }
+
+  viewDocument(doc: any): void {
+    if (!doc || !doc.fileUrl) return;
+    this.previewDocUrl = doc.fileUrl;
+    this.previewDocTitle = doc.title || 'Document Preview';
+    this.showDocPreviewModal = true;
+    this.cdr.markForCheck();
   }
 
   submitOnboarding(): void {
@@ -396,7 +672,6 @@ export class Onboarding implements OnInit {
     this.cdr.markForCheck();
 
     const formRaw = this.onboardingForm.getRawValue();
-    // Format Date to string
     let formattedDob = formRaw.dob;
     if (formattedDob instanceof Date) {
       formattedDob = formattedDob.toISOString().split('T')[0];
@@ -407,6 +682,8 @@ export class Onboarding implements OnInit {
       dob: formattedDob,
       employee_id: this.employeeId,
       company_id: this.companyId || 15,
+      bank_proof_photo: this.bankProofPhotoUrl,
+      documents: this.documentsList,
       profile_status: 'COMPLETED',
       verification_status: 'PENDING'
     };
@@ -417,7 +694,7 @@ export class Onboarding implements OnInit {
           this.messageService.add({
             severity: 'success',
             summary: 'Onboarding Submitted',
-            detail: 'Your onboarding details have been submitted to HR Admin for approval.',
+            detail: 'Your onboarding details, bank proof, and educational documents have been submitted to HR Admin for approval.',
             life: 4000
           });
           this.showDrawer = false;
@@ -442,7 +719,7 @@ export class Onboarding implements OnInit {
           this.messageService.add({
             severity: 'success',
             summary: 'Onboarding Updated',
-            detail: 'Your details have been updated and submitted for approval.',
+            detail: 'Your details and documents have been updated and submitted for approval.',
             life: 4000
           });
           this.showDrawer = false;
