@@ -56,7 +56,7 @@ import { AppBreadcrumb } from '../../shared/ui/breadcrumb/breadcrumb';
 export class WorkManagementComponent implements OnInit {
   breadcrumbItems: any[] = [
     { label: 'Employee Self Service', icon: 'pi pi-home', routerLink: '/ess' },
-    { label: 'Work Management', icon: 'pi pi-briefcase', routerLink: '/ess/work-management' }
+    { label: 'Task Management', icon: 'pi pi-briefcase', routerLink: '/ess/task-management' }
   ];
 
   columns: TableColumn[] = [
@@ -203,7 +203,7 @@ export class WorkManagementComponent implements OnInit {
 
     this.breadcrumbItems = [
       { label: rootLabel, icon: 'pi pi-home', routerLink: rootPath },
-      { label: 'Work Management', icon: 'pi pi-briefcase', routerLink: `${rootPath}/work-management` }
+      { label: 'Task Management', icon: 'pi pi-briefcase', routerLink: `${rootPath}/task-management` }
     ];
     this.cdr.markForCheck();
   }

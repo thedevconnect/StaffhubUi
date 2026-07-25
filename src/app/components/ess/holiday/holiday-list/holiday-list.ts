@@ -257,7 +257,7 @@ export class HolidayList implements OnInit {
         this.totalCount = res?.totalCount ?? this.holiday_calendar.length;
         this.loading.set(false);
 
-        console.log('Holiday Calendar:', this.holiday_calendar);
+        // console.log('Holiday Calendar:', this.holiday_calendar);
       },
       error: (err) => {
         console.error('Holiday API Error:', err);
@@ -280,7 +280,7 @@ export class HolidayList implements OnInit {
       return;
     }
 
-    console.log('Form Value:', this.assetForm.value);
+    // console.log('Form Value:', this.assetForm.value);
 
     this.showAssetDrawer = false;
     this.isEditMode = false;
@@ -305,7 +305,7 @@ export class HolidayList implements OnInit {
   }
 
   onSortChange(event: any): void {
-    console.log('Sort Event', event);
+    //  console.log('Sort Event', event);
   }
 
 

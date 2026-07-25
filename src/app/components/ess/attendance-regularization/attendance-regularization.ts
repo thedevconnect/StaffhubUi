@@ -13,6 +13,7 @@ import { SelectModule } from 'primeng/select';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { ActivatedRoute } from '@angular/router';
 import { AttendanceService } from '../../../shared/services/attendance.service';
 import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template';
 
@@ -75,10 +76,7 @@ export class AttendanceRegularization implements OnInit {
     this.activeTab = tab;
   }
 
-
-
   columns: TableColumn[] = [
-
     { key: 'actions', header: 'Action' },
     { key: 'attendanceDate', header: 'Attendance Date' },
     { key: 'correctionType', header: 'Correction Type' },
@@ -88,7 +86,6 @@ export class AttendanceRegularization implements OnInit {
     { key: 'status', header: 'Status' },
     { key: 'managerRemarks', header: 'managerRemarks' },
     { key: 'approvedByName', header: 'Approved By' },
-
     { key: 'submittedOn', header: 'Submitted On' },
   ];
 
@@ -143,12 +140,25 @@ export class AttendanceRegularization implements OnInit {
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private cdr: ChangeDetectorRef,
-    private attendanceService: AttendanceService
+    private attendanceService: AttendanceService,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit() {
     this.initForm();
     this.fetchRequests();
+    this.checkQueryParamDate();
+  }
+
+  checkQueryParamDate() {
+    this.route.queryParams.subscribe(params => {
+      if (params['date']) {
+        const targetDate = new Date(params['date']);
+        if (!isNaN(targetDate.getTime())) {
+          setTimeout(() => this.openNewDrawer(targetDate), 200);
+        }
+      }
+    });
   }
 
   toggleFullScreen(): void {
@@ -244,7 +254,7 @@ export class AttendanceRegularization implements OnInit {
     return !!(control?.invalid && (control?.touched || control?.dirty));
   }
 
-  openNewDrawer() {
+  openNewDrawer(targetDate?: Date | string) {
     this.drawerType = 'add';
     this.drawerVisible = true;
 
@@ -254,9 +264,14 @@ export class AttendanceRegularization implements OnInit {
     const defaultCheckOut = new Date();
     defaultCheckOut.setHours(19, 0, 0, 0);
 
+    let parsedDate: Date | null = null;
+    if (targetDate) {
+      parsedDate = targetDate instanceof Date ? targetDate : new Date(targetDate);
+    }
+
     this.regForm.reset({
-      attendanceDate: null,
-      correctionType: null,
+      attendanceDate: parsedDate,
+      correctionType: 'Missed Punch',
       checkIn: defaultCheckIn,
       checkOut: defaultCheckOut,
       reason: ''

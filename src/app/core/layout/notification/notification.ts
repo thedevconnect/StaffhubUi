@@ -1,7 +1,8 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { OverlayBadgeModule } from 'primeng/overlaybadge';
-import { PopoverModule } from 'primeng/popover';
+import { PopoverModule, Popover } from 'primeng/popover';
 import { ButtonModule } from 'primeng/button';
 import { Accordion, AccordionPanel, AccordionHeader, AccordionContent } from 'primeng/accordion';
 import { NotificationService } from '../../../shared/services/notification.service';
@@ -61,9 +62,17 @@ interface NotificationCategory {
                 </p-accordion-header>
                 <p-accordion-content>
                   <div class="flex flex-col">
-                    <div *ngFor="let item of getItemsForCategory(cat.title)" class="p-3 text-sm text-slate-600 border-t border-slate-100 flex items-start gap-2 hover:bg-slate-50 transition">
-                      <i class="pi pi-info-circle text-blue-500 mt-0.5"></i>
-                      <span>{{ item.message }}</span>
+                    <div *ngFor="let item of getItemsForCategory(cat.title)" 
+                         (click)="onNotificationClick(item)"
+                         class="p-3 text-sm text-slate-700 border-t border-slate-100 flex items-start gap-2.5 hover:bg-blue-50/60 transition cursor-pointer group">
+                      <i class="pi pi-calendar-plus text-blue-600 mt-0.5 text-base group-hover:scale-110 transition"></i>
+                      <div class="flex-1">
+                        <div class="font-bold text-slate-900 text-xs mb-0.5 flex items-center justify-between">
+                          <span>{{ item.date || 'Attendance Action' }}</span>
+                          <span class="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold uppercase">Apply &rarr;</span>
+                        </div>
+                        <div class="text-xs text-slate-600 leading-snug">{{ item.message }}</div>
+                      </div>
                     </div>
                   </div>
                 </p-accordion-content>
@@ -73,8 +82,8 @@ interface NotificationCategory {
 
           <!-- Footer -->
           <div class="border-t border-slate-100 p-3 bg-slate-50">
-            <button class="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-bold text-white transition hover:bg-blue-700 flex justify-center items-center gap-2 shadow-sm">
-              View All Notifications
+            <button (click)="onViewAllClick()" class="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-bold text-white transition hover:bg-blue-700 flex justify-center items-center gap-2 shadow-sm">
+              View All Regularizations
               <i class="pi pi-arrow-right text-xs"></i>
             </button>
           </div>
@@ -116,7 +125,9 @@ interface NotificationCategory {
   `]
 })
 export class NotificationComponent {
+  @ViewChild('op') op!: Popover;
   private notificationService = inject(NotificationService);
+  private router = inject(Router);
 
   categories = signal<NotificationCategory[]>([]);
   totalPending = signal<number>(0);
@@ -169,5 +180,24 @@ export class NotificationComponent {
       return this.pendingRequests();
     }
     return [];
+  }
+
+  onNotificationClick(item: any) {
+    if (this.op) {
+      this.op.hide();
+    }
+    const targetDate = item.date || item.attendanceDate;
+    if (targetDate) {
+      this.router.navigate(['/ess/attendance-regularization'], { queryParams: { date: targetDate } });
+    } else {
+      this.router.navigate(['/ess/attendance-regularization']);
+    }
+  }
+
+  onViewAllClick() {
+    if (this.op) {
+      this.op.hide();
+    }
+    this.router.navigate(['/ess/attendance-regularization']);
   }
 }

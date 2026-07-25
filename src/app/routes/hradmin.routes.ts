@@ -65,8 +65,13 @@ export const hradminRoutes: Routes = [
         loadComponent: () => import('../components/ess/my-assets/my-assets').then(c => c.MyAssets)
     },
     {
-        path: 'work-management',
-        title: 'Work Management',
+        path: 'task-management',
+        title: 'Task Management',
         loadComponent: () => import('../components/work-management/work-management').then(c => c.WorkManagementComponent)
+    },
+    {
+        path: 'work-management',
+        redirectTo: 'task-management',
+        pathMatch: 'full'
     }
 ];

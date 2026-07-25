@@ -191,7 +191,7 @@ export class EssDashboard implements OnInit {
           this.totalCount = res.data.length
         }
 
-        console.log(this.resData)
+        //console.log(this.resData)
 
         this.loading.set(false)
       },
@@ -235,7 +235,7 @@ export class EssDashboard implements OnInit {
   // Sorting
 
   onSortChange(event: any) {
-    console.log('Sort Event', event)
+    // console.log('Sort Event', event)
 
     this.loadDashboardData()
   }
@@ -243,10 +243,10 @@ export class EssDashboard implements OnInit {
   // Row Action
 
   onActionClicked(event: any) {
-    console.log(event)
+    // console.log(event)
 
     if (event.action === 'view') {
-      console.log('Selected Attendance:', event.row)
+      //  console.log('Selected Attendance:', event.row)
     }
   }
 
