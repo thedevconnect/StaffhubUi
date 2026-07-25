@@ -7,6 +7,7 @@ import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { DrawerModule } from 'primeng/drawer';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 import { MonthlyAttendanceService } from '../../../shared/services/monthly-attendance.service';
@@ -25,7 +26,8 @@ import { FormsModule } from '@angular/forms';
     ButtonModule,
     SelectModule,
     ToastModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    DrawerModule
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './final-attendance.html',
@@ -60,12 +62,35 @@ export class FinalAttendance implements OnInit {
   records: any[] = [];
   loading: boolean = false;
 
+  // Detail drawer variables
+  detailDrawerVisible: boolean = false;
+  selectedMonthRecord: any = null;
+  dailyDetails: any[] = [];
+  loadingDetails: boolean = false;
+
   ngOnInit(): void {
     this.loadYearlyRecords();
   }
 
   onYearChange(): void {
     this.loadYearlyRecords();
+  }
+
+  get totalYtdDays(): number {
+    return this.records.reduce((acc, r) => acc + (r.totalDays || 0), 0);
+  }
+
+  get totalYtdPresent(): number {
+    return this.records.reduce((acc, r) => acc + (r.present || 0), 0);
+  }
+
+  get totalYtdPayable(): number {
+    return this.records.reduce((acc, r) => acc + (r.paidDays || 0), 0);
+  }
+
+  get averageAttendanceRate(): number {
+    if (this.totalYtdDays === 0) return 0;
+    return Math.round((this.totalYtdPayable / this.totalYtdDays) * 100);
   }
 
   loadYearlyRecords(): void {
@@ -116,13 +141,16 @@ export class FinalAttendance implements OnInit {
               month: `${monthName} ${year}`,
               totalDays: daysInMonth,
               present: s.Present || 0,
-              leaves: (s.CL || 0) + (s.EL || 0) + (s.SL || 0) + (s.LWP || 0),
+              halfDays: (s['Half Day'] || 0) + (s['CL/2'] || 0) + (s['EL/2'] || 0) + (s['SL/2'] || 0),
+              absent: s.Absent || 0,
+              leaves: (s.CL || 0) + (s.EL || 0) + (s.SL || 0) + (s.LWP || 0) + (s.Leave || 0),
               holidays: s.Holiday || 0,
               weeklyOffs: s['Weekly Off'] || 0,
               paidDays: s['Paid Days'] || 0,
               status: h.status || 'Draft',
               submitDate: h.updated_at || h.created_at,
-              recordId: h.id
+              recordId: h.id,
+              rawDetails: res.data.details || []
             });
           } else {
             allMonthsRecords.push(this.getDefaultMonthRecord(month, year, daysInMonth, monthName));
@@ -160,14 +188,24 @@ export class FinalAttendance implements OnInit {
       month: `${monthName} ${year}`,
       totalDays: daysInMonth,
       present: 0,
+      halfDays: 0,
+      absent: daysInMonth - sundays,
       leaves: 0,
       holidays: 0,
       weeklyOffs: sundays,
       paidDays: effectiveWeeklyOffs,
       status: 'Not Started',
       submitDate: null,
-      recordId: null
+      recordId: null,
+      rawDetails: []
     };
+  }
+
+  openDetailDrawer(rec: any): void {
+    this.selectedMonthRecord = rec;
+    this.detailDrawerVisible = true;
+    this.dailyDetails = rec.rawDetails || [];
+    this.cdr.markForCheck();
   }
 
   navigateToMonthlyAttendance(record: any): void {

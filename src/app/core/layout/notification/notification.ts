@@ -135,6 +135,8 @@ export class NotificationComponent {
   // Store detailed lists
   missingSwipes = signal<any[]>([]);
   pendingRequests = signal<any[]>([]);
+  pendingLeaves = signal<any[]>([]);
+  pendingTickets = signal<any[]>([]);
 
   constructor() {
     this.loadNotifications();
@@ -146,6 +148,8 @@ export class NotificationComponent {
         if (res.success) {
           this.missingSwipes.set(res.data.missingSwipes || []);
           this.pendingRequests.set(res.data.pendingRequests || []);
+          this.pendingLeaves.set(res.data.pendingLeaves || []);
+          this.pendingTickets.set(res.data.pendingTickets || []);
           
           const newCategories: NotificationCategory[] = [];
           
@@ -162,10 +166,27 @@ export class NotificationComponent {
               count: this.pendingRequests().length
             });
           }
+
+          if (this.pendingLeaves().length > 0) {
+            newCategories.push({
+              title: 'Pending Leave Applications',
+              count: this.pendingLeaves().length
+            });
+          }
+
+          if (this.pendingTickets().length > 0) {
+            newCategories.push({
+              title: 'Pending Helpdesk Tickets',
+              count: this.pendingTickets().length
+            });
+          }
           
           this.categories.set(newCategories);
           
-          const total = this.missingSwipes().length + this.pendingRequests().length;
+          const total = this.missingSwipes().length + 
+                        this.pendingRequests().length + 
+                        this.pendingLeaves().length + 
+                        this.pendingTickets().length;
           this.totalPending.set(total);
         }
       },
@@ -178,6 +199,10 @@ export class NotificationComponent {
       return this.missingSwipes();
     } else if (title === 'Pending Regularizations') {
       return this.pendingRequests();
+    } else if (title === 'Pending Leave Applications') {
+      return this.pendingLeaves();
+    } else if (title === 'Pending Helpdesk Tickets') {
+      return this.pendingTickets();
     }
     return [];
   }
@@ -186,6 +211,16 @@ export class NotificationComponent {
     if (this.op) {
       this.op.hide();
     }
+
+    if (item.targetUrl) {
+      if (item.date && item.targetUrl.includes('attendance-regularization')) {
+        this.router.navigate([item.targetUrl], { queryParams: { date: item.date } });
+      } else {
+        this.router.navigate([item.targetUrl]);
+      }
+      return;
+    }
+
     const targetDate = item.date || item.attendanceDate;
     if (targetDate) {
       this.router.navigate(['/ess/attendance-regularization'], { queryParams: { date: targetDate } });
