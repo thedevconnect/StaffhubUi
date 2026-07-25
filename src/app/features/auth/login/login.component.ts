@@ -129,6 +129,10 @@ export class LoginComponent implements OnInit {
       this.router.navigate(['/register-company']);
       return;
     }
+    if (type === 'forgotpassword') {
+      this.router.navigate(['/forgot-password']);
+      return;
+    }
     this.formType = type;
   }
 

@@ -89,8 +89,13 @@ export const essRoutes: Routes = [
     loadComponent: () => import('../components/ess/profile/onboarding/onboarding').then(c => c.Onboarding)
   },
   {
+    path: 'manage-profile',
+    title: 'Manage Profile',
+    loadComponent: () => import('../components/ess/profile/manage-profile/manage-profile').then(c => c.ManageProfileComponent)
+  },
+  {
     path: 'profile',
-    redirectTo: 'onboarding',
+    redirectTo: 'manage-profile',
     pathMatch: 'full'
   },
 ];

@@ -73,6 +73,8 @@ export class AppHeader {
 
   ngOnInit(): void {
     this.userMenuItems = [
+      { label: 'Profile', icon: 'pi pi-user', command: () => this.handleProfile() },
+      { label: 'Change Password', icon: 'pi pi-key', command: () => this.handleChangePassword() },
       { label: 'Onboarding', icon: 'pi pi-id-card', command: () => this.handleOnboarding() },
       { separator: true },
       { label: 'Logout', icon: 'pi pi-sign-out', command: () => this.logout() },
@@ -120,6 +122,14 @@ export class AppHeader {
         this.onLogout.emit();
       }
     });
+  }
+
+  private handleProfile(): void {
+    this.router.navigate(['/ess/manage-profile']);
+  }
+
+  private handleChangePassword(): void {
+    this.router.navigate(['/ess/manage-profile'], { queryParams: { tab: 'password' } });
   }
 
   private handleOnboarding(): void {

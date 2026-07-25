@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard, guestGuard } from './shared/services/guards/auth.guard';
 import { Pagenotfound } from './shared/components/pagenotfound/pagenotfound';
 import { LoginComponent } from './features/auth/login/login.component';
+import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
 import { RegisterCompanyComponent } from './features/auth/register/register-company.component';
 import { AppShell } from './core/layout/app-shell/app-shell';
 import { Landing } from './landing/landing';
@@ -11,6 +12,7 @@ export const routes: Routes = [
   { path: 'register-company', component: RegisterCompanyComponent },
   { path: 'landing', component: Landing },
   { path: 'login', component: LoginComponent },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
 
   {
     path: '', component: AppShell, canActivate: [authGuard],

@@ -1,0 +1,49 @@
+/* Clean component styling for Manage Profile */
+:host ::ng-deep {
+  .custom-tabview {
+    .p-tabview-nav {
+      border-bottom: 1px solid #f1f5f9;
+      
+      li {
+        .p-tabview-nav-link {
+          border-radius: 0.75rem;
+          margin-right: 0.5rem;
+          color: #64748b;
+          transition: all 0.2s ease;
+          border: none !important;
+
+          &:hover {
+            background-color: #f8fafc;
+            color: #4f46e5;
+          }
+        }
+
+        &.p-highlight .p-tabview-nav-link {
+          background-color: #eef2ff !important;
+          color: #4f46e5 !important;
+          border: none !important;
+        }
+      }
+    }
+  }
+
+  .p-inputtext {
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    border-color: #cbd5e1;
+
+    &:focus {
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    }
+  }
+
+  .p-password {
+    width: 100%;
+
+    input {
+      width: 100%;
+    }
+  }
+}
