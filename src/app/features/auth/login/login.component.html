@@ -121,7 +121,7 @@
                     <!-- Username Input -->
                     <div>
                         <p-floatlabel>
-                            <input pInputText id="username" type="text" formControlName="username" class="w-full"
+                            <input pInputText id="username" type="text" formControlName="username" class="w-full bg-white"
                                 (input)="onEmailInput($event, 'username')"
                                 [class.ng-invalid]="f['username'].invalid && f['username'].touched"
                                 [class.ng-dirty]="f['username'].invalid && f['username'].touched" />
@@ -137,7 +137,7 @@
                     <div>
                         <p-floatlabel>
                             <p-password id="password" formControlName="password" [toggleMask]="true" [feedback]="false"
-                                styleClass="w-full" inputStyleClass="w-full"
+                                styleClass="w-full" inputStyleClass="w-full bg-white"
                                 [class.ng-invalid]="f['password'].invalid && f['password'].touched"
                                 [class.ng-dirty]="f['password'].invalid && f['password'].touched" />
                             <label for="password"><i class="pi pi-lock mr-2 text-slate-400"></i>Password</label>

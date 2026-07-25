@@ -80,12 +80,22 @@ export const essRoutes: Routes = [
     loadComponent: () => import('../components/ess/ticket/ticket').then(c => c.Ticket)
   },
   {
+    path: 'work-management',
+    title: 'Work Management',
+    loadComponent: () => import('../components/work-management/work-management').then(c => c.WorkManagementComponent)
+  },
+  {
     path: 'onboarding',
     loadComponent: () => import('../components/ess/profile/onboarding/onboarding').then(c => c.Onboarding)
   },
   {
+    path: 'manage-profile',
+    title: 'Manage Profile',
+    loadComponent: () => import('../components/ess/profile/manage-profile/manage-profile').then(c => c.ManageProfileComponent)
+  },
+  {
     path: 'profile',
-    redirectTo: 'onboarding',
+    redirectTo: 'manage-profile',
     pathMatch: 'full'
   },
 ];

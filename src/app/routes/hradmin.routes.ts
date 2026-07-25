@@ -63,6 +63,10 @@ export const hradminRoutes: Routes = [
         path: 'asset-approval',
         title: 'Asset Approval',
         loadComponent: () => import('../components/ess/my-assets/my-assets').then(c => c.MyAssets)
+    },
+    {
+        path: 'work-management',
+        title: 'Work Management',
+        loadComponent: () => import('../components/work-management/work-management').then(c => c.WorkManagementComponent)
     }
-
 ];
