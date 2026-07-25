@@ -9,7 +9,7 @@
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div>
         <h2 class="text-xl font-bold text-slate-900">Final Attendance Summary</h2>
-        <p class="mt-1 text-xs text-slate-500">Track and review monthly attendance sheets for all 12 months of the year.
+        <p class="mt-1 text-xs text-slate-500">Track final monthly attendance & payable days used for employee payroll & monthly salary calculation.
         </p>
       </div>
       <div class="flex items-center gap-3">
@@ -22,12 +22,52 @@
     </div>
   </header>
 
+  <!-- YTD KPI Stats Cards -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
+      <div class="h-10 w-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+        <i class="pi pi-calendar text-lg font-bold"></i>
+      </div>
+      <div>
+        <div class="text-xs font-medium text-slate-500">YTD Total Days</div>
+        <div class="text-lg font-extrabold text-slate-900">{{ totalYtdDays }}</div>
+      </div>
+    </div>
+    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
+      <div class="h-10 w-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+        <i class="pi pi-check-circle text-lg font-bold"></i>
+      </div>
+      <div>
+        <div class="text-xs font-medium text-slate-500">YTD Present Days</div>
+        <div class="text-lg font-extrabold text-emerald-600">{{ totalYtdPresent }}</div>
+      </div>
+    </div>
+    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
+      <div class="h-10 w-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+        <i class="pi pi-dollar text-lg font-bold"></i>
+      </div>
+      <div>
+        <div class="text-xs font-medium text-slate-500">Payable Days (Payroll)</div>
+        <div class="text-lg font-extrabold text-indigo-600">{{ totalYtdPayable }}</div>
+      </div>
+    </div>
+    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
+      <div class="h-10 w-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+        <i class="pi pi-chart-line text-lg font-bold"></i>
+      </div>
+      <div>
+        <div class="text-xs font-medium text-slate-500">Attendance Rate</div>
+        <div class="text-lg font-extrabold text-purple-600">{{ averageAttendanceRate }}%</div>
+      </div>
+    </div>
+  </div>
+
   <!-- 12 Months Attendance Table -->
   <p-card styleClass="shadow-sm border border-slate-200 rounded-xl overflow-hidden">
     <ng-template pTemplate="header">
       <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-        <span class="text-sm font-bold text-slate-800">All 12 Months Attendance Overview ({{ selectedYear }})</span>
-        <span class="text-xs text-slate-500 font-medium">Click any row to open & edit attendance for that month</span>
+        <span class="text-sm font-bold text-slate-800">Monthly Attendance & Payroll Summary ({{ selectedYear }})</span>
+        <span class="text-xs text-slate-500 font-medium">Click "View Daily Log" to inspect swipe in/out details</span>
       </div>
     </ng-template>
 
@@ -37,27 +77,28 @@
           <tr class="text-xs uppercase bg-slate-50 text-slate-600">
             <th class="py-3 px-4 font-bold">Month</th>
             <th class="py-3 px-4 font-bold text-center">Total Days</th>
-            <th class="py-3 px-4 font-bold text-center">Present</th>
+            <th class="py-3 px-4 font-bold text-center text-green-700">Present</th>
+            <th class="py-3 px-4 font-bold text-center text-amber-700">Half Days</th>
+            <th class="py-3 px-4 font-bold text-center text-rose-700">Absent</th>
             <th class="py-3 px-4 font-bold text-center">Leaves</th>
             <th class="py-3 px-4 font-bold text-center">Holidays</th>
             <th class="py-3 px-4 font-bold text-center">Weekly Offs</th>
-            <th class="py-3 px-4 font-bold text-center">Paid Days</th>
-            <th class="py-3 px-4 font-bold text-center">Submission Date</th>
+            <th class="py-3 px-4 font-bold text-center text-indigo-700 bg-indigo-50/50">Payable Days (Salary)</th>
             <th class="py-3 px-4 font-bold text-center">Status</th>
+            <th class="py-3 px-4 font-bold text-center">Actions</th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-rec>
           <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
             <td class="py-3 px-4 font-bold text-slate-800">{{ rec.month }}</td>
             <td class="py-3 px-4 text-center font-medium">{{ rec.totalDays }}</td>
-            <td class="py-3 px-4 text-center font-bold text-green-600">{{ rec.present }}</td>
-            <td class="py-3 px-4 text-center font-medium text-amber-600">{{ rec.leaves }}</td>
+            <td class="py-3 px-4 text-center font-extrabold text-green-600">{{ rec.present }}</td>
+            <td class="py-3 px-4 text-center font-semibold text-amber-600">{{ rec.halfDays || 0 }}</td>
+            <td class="py-3 px-4 text-center font-semibold text-rose-600">{{ rec.absent || 0 }}</td>
+            <td class="py-3 px-4 text-center font-medium text-slate-600">{{ rec.leaves }}</td>
             <td class="py-3 px-4 text-center font-medium text-purple-600">{{ rec.holidays }}</td>
             <td class="py-3 px-4 text-center font-medium text-slate-500">{{ rec.weeklyOffs }}</td>
-            <td class="py-3 px-4 text-center font-bold text-blue-600">{{ rec.paidDays }}</td>
-            <td class="py-3 px-4 text-center text-xs text-slate-500">
-              {{ rec.submitDate ? (rec.submitDate | date:'mediumDate') : '-' }}
-            </td>
+            <td class="py-3 px-4 text-center font-extrabold text-indigo-700 bg-indigo-50/50">{{ rec.paidDays }}</td>
             <td class="py-3 px-4 text-center">
               <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold shadow-sm"
                 [ngClass]="{
@@ -77,13 +118,87 @@
                 {{ rec.status }}
               </span>
             </td>
-            <!-- <td class="py-3 px-4 text-center">
-              <p-button (onClick)="navigateToMonthlyAttendance(rec)" label="Open" icon="pi pi-arrow-right"
-                iconPos="right" styleClass="p-button-text p-button-sm text-xs font-bold p-1"></p-button>
-            </td> -->
+            <td class="py-3 px-4 text-center">
+              <div class="flex items-center justify-center gap-2">
+                <button (click)="openDetailDrawer(rec)" title="View Daily Log" class="p-1.5 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 transition text-xs font-bold flex items-center gap-1">
+                  <i class="pi pi-eye"></i> Log
+                </button>
+                <button (click)="navigateToMonthlyAttendance(rec)" title="Open Monthly Sheet" class="p-1.5 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-xs font-bold flex items-center gap-1">
+                  <i class="pi pi-external-link"></i>
+                </button>
+              </div>
+            </td>
           </tr>
         </ng-template>
       </p-table>
     </div>
   </p-card>
 </section>
+
+<!-- Daily Attendance Detail Drawer -->
+<p-drawer [(visible)]="detailDrawerVisible" position="right" [modal]="true" [style]="{ width: '100%', maxWidth: '650px' }">
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-3">
+      <div class="h-9 w-9 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+        <i class="pi pi-calendar-plus"></i>
+      </div>
+      <div>
+        <h3 class="text-lg font-bold text-slate-900 m-0">Daily Attendance Log</h3>
+        <p class="text-xs text-slate-500 m-0" *ngIf="selectedMonthRecord">{{ selectedMonthRecord.month }} Breakdown</p>
+      </div>
+    </div>
+  </ng-template>
+
+  <div class="space-y-4" *ngIf="selectedMonthRecord">
+    <!-- Month Summary Pill Box -->
+    <div class="grid grid-cols-4 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-center text-xs">
+      <div>
+        <div class="text-slate-400 font-medium">Present</div>
+        <div class="font-extrabold text-emerald-600 text-sm">{{ selectedMonthRecord.present }}</div>
+      </div>
+      <div>
+        <div class="text-slate-400 font-medium">Half Days</div>
+        <div class="font-extrabold text-amber-600 text-sm">{{ selectedMonthRecord.halfDays || 0 }}</div>
+      </div>
+      <div>
+        <div class="text-slate-400 font-medium">Absent</div>
+        <div class="font-extrabold text-rose-600 text-sm">{{ selectedMonthRecord.absent || 0 }}</div>
+      </div>
+      <div>
+        <div class="text-slate-400 font-medium">Payable Days</div>
+        <div class="font-extrabold text-indigo-600 text-sm">{{ selectedMonthRecord.paidDays }}</div>
+      </div>
+    </div>
+
+    <!-- Daily Details Table -->
+    <div class="rounded-xl border border-slate-200 overflow-hidden">
+      <table class="w-full text-xs text-left">
+        <thead class="bg-slate-100 text-slate-700 font-bold uppercase">
+          <tr>
+            <th class="p-2.5">Date</th>
+            <th class="p-2.5">Status</th>
+            <th class="p-2.5">Remarks / Reason</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr *ngFor="let item of dailyDetails" class="hover:bg-slate-50 transition">
+            <td class="p-2.5 font-bold text-slate-800">{{ item.date | date: 'dd MMM yyyy (EEE)' }}</td>
+            <td class="p-2.5">
+              <span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-bold"
+                [ngClass]="{
+                  'bg-emerald-100 text-emerald-800': item.attendance_status === 'Present',
+                  'bg-amber-100 text-amber-800': item.attendance_status === 'Half Day',
+                  'bg-rose-100 text-rose-800': item.attendance_status === 'Absent',
+                  'bg-blue-100 text-blue-800': item.attendance_status === 'Weekly Off',
+                  'bg-purple-100 text-purple-800': item.attendance_status === 'Holiday' || item.attendance_status === 'Leave'
+                }">
+                {{ item.attendance_status || 'Absent' }}
+              </span>
+            </td>
+            <td class="p-2.5 text-slate-500 italic">{{ item.remarks || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</p-drawer>

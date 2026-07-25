@@ -1,0 +1,265 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<!-- Page Header Inline with Breadcrumb -->
+<div class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6">
+  <div class="flex-1 min-w-0">
+    <p-breadcrumb [model]="breadcrumbItems" styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
+  </div>
+  <div class="flex-none flex items-center gap-2">
+    <button (click)="onRunMonthlyCredit()" type="button"
+            class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-sm flex items-center gap-1.5 transition-all cursor-pointer">
+      <i class="pi pi-bolt"></i> Run Monthly Credit (+1 EL, +0.5 CL)
+    </button>
+    <p-button (click)="loadSummaries()" icon="pi pi-sync" [loading]="isLoading"
+              styleClass="p-button-sm p-button-secondary rounded-lg" [raised]="true">
+    </p-button>
+  </div>
+</div>
+
+<!-- Header Info & Search -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+  <div>
+    <h2 class="text-xl font-extrabold text-slate-800 flex items-center gap-2 tracking-tight">
+      <i class="pi pi-users text-indigo-600"></i>
+      Employee Leave Balances & Adjustments
+    </h2>
+    <p class="text-xs text-slate-500 mt-1">
+      HR Master View: Real-time employee leave balances, manual balance adjustments (+/-), and complete audit change history.
+    </p>
+  </div>
+
+  <div class="w-full sm:w-80">
+    <input type="text" [(ngModel)]="searchText" placeholder="Search employee name, code, designation..."
+           class="w-full text-xs px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-indigo-500 bg-white shadow-xs" />
+  </div>
+</div>
+
+<!-- Table Card -->
+<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-6">
+  <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+    <h3 class="text-sm font-black uppercase text-slate-700 tracking-wide">Active Staff Leave Directory</h3>
+    <span class="text-xs font-extrabold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+      Total Employees: {{ filteredSummaries.length }}
+    </span>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-xs border-collapse">
+      <thead>
+        <tr class="bg-slate-100/80 border-b border-slate-200 text-slate-600 uppercase font-black tracking-wider text-[10px]">
+          <th class="py-3.5 px-4">S.No</th>
+          <th class="py-3.5 px-4">Employee Details</th>
+          <th class="py-3.5 px-4 text-center">Earned Leave (EL)<br/><span class="text-[9px] text-emerald-600 font-bold lowercase">+1.0 / mo</span></th>
+          <th class="py-3.5 px-4 text-center">Casual Leave (CL)<br/><span class="text-[9px] text-blue-600 font-bold lowercase">+0.5 / mo</span></th>
+          <th class="py-3.5 px-4 text-center">Sick Leave (SL)</th>
+          <th class="py-3.5 px-4 text-center">Parental Leave (PL)</th>
+          <th class="py-3.5 px-4 text-center">Loss of Pay (LOP)</th>
+          <th class="py-3.5 px-4 text-center">Total Balance</th>
+          <th class="py-3.5 px-4 text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <tr *ngFor="let emp of filteredSummaries; let idx = index" class="hover:bg-slate-50/80 transition-colors">
+          <td class="py-3.5 px-4 font-bold text-slate-400">{{ idx + 1 }}</td>
+          <td class="py-3.5 px-4">
+            <div class="flex items-center gap-3">
+              <div class="h-9 w-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-black text-xs border border-indigo-200">
+                {{ emp.employeeName?.charAt(0) }}
+              </div>
+              <div>
+                <div class="font-black text-slate-900 text-xs">{{ emp.employeeName }}</div>
+                <div class="text-[10px] text-slate-400 font-medium">{{ emp.employeeCode || '-' }} • {{ emp.designation || 'Employee' }}</div>
+              </div>
+            </div>
+          </td>
+          <!-- EL -->
+          <td class="py-3.5 px-4 text-center">
+            <span class="inline-flex items-center gap-1 font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
+              {{ emp.summary?.earnedLeave?.remaining || 0 }} <span class="text-[9px] text-slate-400 font-normal">/ {{ emp.summary?.earnedLeave?.credited || 0 }}</span>
+            </span>
+          </td>
+          <!-- CL -->
+          <td class="py-3.5 px-4 text-center">
+            <span class="inline-flex items-center gap-1 font-black text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">
+              {{ emp.summary?.casualLeave?.remaining || 0 }} <span class="text-[9px] text-slate-400 font-normal">/ {{ emp.summary?.casualLeave?.credited || 0 }}</span>
+            </span>
+          </td>
+          <!-- SL -->
+          <td class="py-3.5 px-4 text-center">
+            <span class="font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg">
+              {{ emp.summary?.sickLeave?.remaining || 0 }}
+            </span>
+          </td>
+          <!-- PL -->
+          <td class="py-3.5 px-4 text-center">
+            <span class="font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-100">
+              {{ emp.summary?.parentalLeave?.remaining !== undefined ? emp.summary?.parentalLeave?.remaining : 5 }}
+            </span>
+          </td>
+          <!-- LOP -->
+          <td class="py-3.5 px-4 text-center">
+            <span class="font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100">
+              {{ emp.summary?.lossOfPay?.taken || 0 }} days
+            </span>
+          </td>
+          <!-- Total Remaining -->
+          <td class="py-3.5 px-4 text-center">
+            <span class="font-black text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100 text-xs">
+              {{ emp.summary?.totals?.totalRemaining || 0 }} Days
+            </span>
+          </td>
+          <!-- Actions -->
+          <td class="py-3.5 px-4 text-right">
+            <div class="flex items-center justify-end gap-1.5">
+              <button (click)="openEditDrawer(emp)" type="button"
+                      class="px-2.5 py-1 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-600 hover:text-white rounded-lg border border-indigo-200 transition-all cursor-pointer flex items-center gap-1"
+                      title="Edit Leave Balance">
+                <i class="pi pi-pencil text-[11px]"></i> Edit Balance
+              </button>
+              <button (click)="openHistoryDrawer(emp)" type="button"
+                      class="px-2.5 py-1 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-700 hover:text-white rounded-lg border border-slate-200 transition-all cursor-pointer flex items-center gap-1"
+                      title="View Audit Change History">
+                <i class="pi pi-history text-[11px]"></i> History
+              </button>
+            </div>
+          </td>
+        </tr>
+
+        <tr *ngIf="filteredSummaries.length === 0">
+          <td colspan="9" class="py-8 text-center text-slate-400 font-bold">
+            No employee leave data found.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Drawer: Edit Leave Balance -->
+<p-drawer [(visible)]="showEditDrawer" position="right" [style]="{ width: '100%', maxWidth: '28rem' }"
+  styleClass="modern-drawer shadow-2xl" [modal]="true">
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-3">
+      <div class="h-10 w-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
+        <i class="pi pi-pencil text-lg"></i>
+      </div>
+      <div>
+        <h3 class="text-sm font-black text-slate-900 uppercase">Adjust Leave Balance</h3>
+        <p class="text-[10px] text-slate-400">{{ selectedEmp?.employeeName }} ({{ selectedEmp?.employeeCode }})</p>
+      </div>
+    </div>
+  </ng-template>
+
+  <div *ngIf="selectedEmp" class="p-6 flex flex-col gap-5 font-sans">
+    <div class="p-4 rounded-2xl bg-indigo-50 border border-indigo-100">
+      <h4 class="font-bold text-slate-900 text-sm">{{ selectedEmp.employeeName }}</h4>
+      <p class="text-xs text-slate-500 mt-0.5">{{ selectedEmp.designation }} • Code: {{ selectedEmp.employeeCode }}</p>
+    </div>
+
+    <!-- Edit Form Inputs -->
+    <div class="grid grid-cols-2 gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[11px] font-black uppercase text-emerald-700">Earned Leave (EL)</label>
+        <input type="number" step="0.5" [(ngModel)]="editForm.earnedLeave"
+               class="text-sm p-2.5 rounded-xl border border-emerald-200 focus:outline-none focus:border-emerald-500 bg-emerald-50/30" />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[11px] font-black uppercase text-blue-700">Casual Leave (CL)</label>
+        <input type="number" step="0.5" [(ngModel)]="editForm.casualLeave"
+               class="text-sm p-2.5 rounded-xl border border-blue-200 focus:outline-none focus:border-blue-500 bg-blue-50/30" />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[11px] font-black uppercase text-amber-700">Sick Leave (SL)</label>
+        <input type="number" step="0.5" [(ngModel)]="editForm.sickLeave"
+               class="text-sm p-2.5 rounded-xl border border-amber-200 focus:outline-none focus:border-amber-500 bg-amber-50/30" />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[11px] font-black uppercase text-purple-700">Parental Leave (PL)</label>
+        <input type="number" step="0.5" [(ngModel)]="editForm.parentalLeave"
+               class="text-sm p-2.5 rounded-xl border border-purple-200 focus:outline-none focus:border-purple-500 bg-purple-50/30" />
+      </div>
+
+      <div class="flex flex-col gap-1.5 col-span-2">
+        <label class="text-[11px] font-black uppercase text-rose-700">Loss of Pay (LOP)</label>
+        <input type="number" step="0.5" [(ngModel)]="editForm.lossOfPay"
+               class="text-sm p-2.5 rounded-xl border border-rose-200 focus:outline-none focus:border-rose-500 bg-rose-50/30" />
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[11px] font-black uppercase text-slate-600">Reason / Remarks for Adjustment <span class="text-red-500">*</span></label>
+      <textarea [(ngModel)]="editForm.reason" rows="3" placeholder="Enter reason for modifying leave balance..."
+                class="text-xs p-3 rounded-xl border border-slate-300 focus:outline-none focus:border-indigo-500 bg-slate-50/50 resize-none"></textarea>
+    </div>
+
+    <div class="flex gap-3 pt-4">
+      <button (click)="showEditDrawer = false" type="button"
+              class="flex-1 py-3 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all cursor-pointer">
+        Cancel
+      </button>
+      <button (click)="submitBalanceUpdate()" type="button"
+              class="flex-1 py-3 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md transition-all cursor-pointer">
+        Save Changes
+      </button>
+    </div>
+  </div>
+</p-drawer>
+
+<!-- Drawer: Audit Modification History -->
+<p-drawer [(visible)]="showHistoryDrawer" position="right" [style]="{ width: '100%', maxWidth: '30rem' }"
+  styleClass="modern-drawer shadow-2xl" [modal]="true">
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-3">
+      <div class="h-10 w-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold">
+        <i class="pi pi-history text-lg"></i>
+      </div>
+      <div>
+        <h3 class="text-sm font-black text-slate-900 uppercase">Balance Audit History</h3>
+        <p class="text-[10px] text-slate-400">{{ selectedEmp?.employeeName }} ({{ selectedEmp?.employeeCode }})</p>
+      </div>
+    </div>
+  </ng-template>
+
+  <div *ngIf="selectedEmp" class="p-6 flex flex-col gap-5 font-sans">
+    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
+      <h4 class="font-bold text-slate-900 text-sm">{{ selectedEmp.employeeName }}</h4>
+      <p class="text-xs text-slate-500 mt-0.5">Audit log of all manual balance updates and changes</p>
+    </div>
+
+    <div *ngIf="isLoadingHistory" class="flex justify-center p-6">
+      <i class="pi pi-spinner pi-spin text-indigo-600 text-2xl"></i>
+    </div>
+
+    <div *ngIf="!isLoadingHistory && historyLogs.length === 0" class="text-center py-10 opacity-50">
+      <i class="pi pi-info-circle text-3xl mb-2 text-slate-400"></i>
+      <p class="font-bold text-slate-500 text-xs">No balance adjustments logged yet.</p>
+    </div>
+
+    <div *ngIf="!isLoadingHistory && historyLogs.length > 0" class="flex flex-col gap-3">
+      <div *ngFor="let item of historyLogs" class="p-4 rounded-xl bg-white border border-slate-200 shadow-xs flex flex-col gap-2">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+          <span class="text-xs font-black text-indigo-700">{{ item.leave_type }}</span>
+          <span class="text-[10px] text-slate-400 font-bold">{{ item.created_at | date:'dd-MM-yyyy HH:mm' }}</span>
+        </div>
+
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-slate-500">Old: <strong class="text-slate-800">{{ item.old_balance }}</strong></span>
+          <span class="text-slate-500">New: <strong class="text-indigo-800">{{ item.new_balance }}</strong></span>
+          <span class="font-black px-2 py-0.5 rounded text-[10px]"
+                [ngClass]="item.change_amount >= 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'">
+            {{ item.change_amount >= 0 ? '+' : '' }}{{ item.change_amount }}
+          </span>
+        </div>
+
+        <div class="text-[11px] text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100 mt-1">
+          <span class="font-bold text-slate-800">Reason:</span> {{ item.reason || 'Manual HR adjustment' }}
+          <div class="text-[9px] text-slate-400 mt-1">By: {{ item.action_by_name || 'System' }} ({{ item.action_by_role || 'HR' }})</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-drawer>

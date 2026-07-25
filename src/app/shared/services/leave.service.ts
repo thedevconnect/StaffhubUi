@@ -47,4 +47,27 @@ export class LeaveService {
   getLeaveHistory(id: number | string): Observable<any> {
     return this.http.get<any>(`${this.apiBase}/api/leaves/${id}/history`);
   }
+
+  getLeaveBalances(employeeId?: number): Observable<{ success: boolean; data: any }> {
+    const url = employeeId 
+      ? `${this.apiBase}/api/leaves/balances?employeeId=${employeeId}`
+      : `${this.apiBase}/api/leaves/balances`;
+    return this.http.get<{ success: boolean; data: any }>(url);
+  }
+
+  getCompanyLeaveSummary(): Observable<{ success: boolean; data: any[] }> {
+    return this.http.get<{ success: boolean; data: any[] }>(`${this.apiBase}/api/leaves/company-summary`);
+  }
+
+  triggerMonthlyCredit(monthYear?: string): Observable<any> {
+    return this.http.post<any>(`${this.apiBase}/api/leaves/credit-monthly`, { monthYear });
+  }
+
+  adjustLeaveBalance(data: { employeeId: number | string; earnedLeave: number; casualLeave: number; sickLeave: number; lossOfPay: number; reason?: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiBase}/api/leaves/adjust-balance`, data);
+  }
+
+  getLeaveBalanceHistory(employeeId: number | string): Observable<{ success: boolean; data: any[] }> {
+    return this.http.get<{ success: boolean; data: any[] }>(`${this.apiBase}/api/leaves/balance-history/${employeeId}`);
+  }
 }

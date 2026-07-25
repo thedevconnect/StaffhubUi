@@ -56,14 +56,119 @@
 </div>
 
 <div class="bg-[#FFFFFF] min-h-screen">
-  <div class="bg-white overflow-hidden">
-    <div
-      class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border-b border-gray-200 gap-3">
+  <!-- Leave Summary KPI Section -->
+  <div class="px-4 py-4 bg-gradient-to-r from-slate-50 via-blue-50/20 to-slate-50 border-b border-gray-200">
+
+    <!-- Header & Admin Controls -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
       <div>
-        <h2 class="text-xl font-semibold text-gray-800">Leave Applications</h2>
-        <p class="text-xs text-slate-500 mt-1">Apply for leaves, track approval status, and manage holiday balances.</p>
+        <h2 class="text-xl font-extrabold text-gray-800 flex items-center gap-2 tracking-tight">
+          <i class="pi pi-calendar-check text-blue-600 text-xl"></i>
+          Leave Applications & Balance Overview
+        </h2>
+        <p class="text-xs text-slate-500 mt-0.5">
+          Real-time employee leave balance metrics (+1.0 EL/month & +0.5 CL/month auto-credited).
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2" *ngIf="isHrAdmin">
+        <div class="w-64" *ngIf="employeeList && employeeList.length > 0">
+          <p-select [options]="employeeList" [(ngModel)]="selectedEmployeeId" optionLabel="drpOption" [filter]="true" filterBy="drpOption"
+                    placeholder="Filter Employee Balance..." (onChange)="onEmployeeSelectChange()" styleClass="w-full text-xs rounded-xl" appendTo="body">
+          </p-select>
+        </div>
+
+        <p-button (click)="onRunMonthlyCredit()" label="Trigger Monthly Credit" icon="pi pi-bolt"
+                  styleClass="p-button-outlined p-button-secondary p-button-sm text-xs font-bold rounded-xl shadow-xs">
+        </p-button>
       </div>
     </div>
+
+    <!-- KPI Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <!-- Earned Leave (EL) Card -->
+      <div class="bg-white p-4 rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-emerald-50 rounded-full group-hover:scale-125 transition-all opacity-70"></div>
+        <div class="flex items-center justify-between z-10">
+          <span class="text-[11px] font-black uppercase text-emerald-600 tracking-wider flex items-center gap-1.5">
+            <i class="pi pi-briefcase"></i> Earned Leave (EL)
+          </span>
+          <span class="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">+1.0 / mo</span>
+        </div>
+        <div class="mt-3 mb-2 z-10 flex items-baseline gap-2">
+          <span class="text-3xl font-black text-gray-900">{{ leaveSummary?.earnedLeave?.remaining || 0 }}</span>
+          <span class="text-xs font-bold text-gray-500">Days Available</span>
+        </div>
+        <div class="flex items-center justify-between text-[11px] text-gray-500 pt-2 border-t border-emerald-50 z-10">
+          <span>Credited: <strong class="text-gray-800">{{ leaveSummary?.earnedLeave?.credited || 0 }}</strong></span>
+          <span>Taken: <strong class="text-gray-800">{{ leaveSummary?.earnedLeave?.taken || 0 }}</strong></span>
+        </div>
+      </div>
+
+      <!-- Casual Leave (CL) Card -->
+      <div class="bg-white p-4 rounded-2xl border border-blue-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-blue-50 rounded-full group-hover:scale-125 transition-all opacity-70"></div>
+        <div class="flex items-center justify-between z-10">
+          <span class="text-[11px] font-black uppercase text-blue-600 tracking-wider flex items-center gap-1.5">
+            <i class="pi pi-user text-blue-600"></i> Casual Leave (CL)
+          </span>
+          <span class="bg-blue-100 text-blue-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">+0.5 / mo</span>
+        </div>
+        <div class="mt-3 mb-2 z-10 flex items-baseline gap-2">
+          <span class="text-3xl font-black text-gray-900">{{ leaveSummary?.casualLeave?.remaining || 0 }}</span>
+          <span class="text-xs font-bold text-gray-500">Days Available</span>
+        </div>
+        <div class="flex items-center justify-between text-[11px] text-gray-500 pt-2 border-t border-blue-50 z-10">
+          <span>Credited: <strong class="text-gray-800">{{ leaveSummary?.casualLeave?.credited || 0 }}</strong></span>
+          <span>Taken: <strong class="text-gray-800">{{ leaveSummary?.casualLeave?.taken || 0 }}</strong></span>
+        </div>
+      </div>
+
+      <!-- Pending Requests Card -->
+      <div class="bg-white p-4 rounded-2xl border border-amber-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-amber-50 rounded-full group-hover:scale-125 transition-all opacity-70"></div>
+        <div class="flex items-center justify-between z-10">
+          <span class="text-[11px] font-black uppercase text-amber-600 tracking-wider flex items-center gap-1.5">
+            <i class="pi pi-clock"></i> Pending Requests
+          </span>
+          <span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">Awaiting HR</span>
+        </div>
+        <div class="mt-3 mb-2 z-10 flex items-baseline gap-2">
+          <span class="text-3xl font-black text-gray-900">{{ leaveSummary?.totals?.totalPending || 0 }}</span>
+          <span class="text-xs font-bold text-gray-500">Days Pending</span>
+        </div>
+        <div class="flex items-center justify-between text-[11px] text-gray-500 pt-2 border-t border-amber-50 z-10">
+          <span>Sick Leave (SL): <strong class="text-gray-800">{{ leaveSummary?.sickLeave?.remaining || 0 }} bal</strong></span>
+          <span>LOP: <strong class="text-gray-800">{{ leaveSummary?.lossOfPay?.taken || 0 }} days</strong></span>
+        </div>
+      </div>
+
+      <!-- Total Taken Leaves Card -->
+      <div class="bg-white p-4 rounded-2xl border border-purple-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-purple-50 rounded-full group-hover:scale-125 transition-all opacity-70"></div>
+        <div class="flex items-center justify-between z-10">
+          <span class="text-[11px] font-black uppercase text-purple-600 tracking-wider flex items-center gap-1.5">
+            <i class="pi pi-check-circle"></i> Total Approved
+          </span>
+          <span class="bg-purple-100 text-purple-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">Used</span>
+        </div>
+        <div class="mt-3 mb-2 z-10 flex items-baseline gap-2">
+          <span class="text-3xl font-black text-gray-900">{{ leaveSummary?.totals?.totalTaken || 0 }}</span>
+          <span class="text-xs font-bold text-gray-500">Days Taken</span>
+        </div>
+        <div class="flex items-center justify-between text-[11px] text-gray-500 pt-2 border-t border-purple-50 z-10">
+          <span>Total Credited: <strong class="text-gray-800">{{ leaveSummary?.totals?.totalCredited || 0 }}</strong></span>
+          <span>Remaining: <strong class="text-gray-800">{{ leaveSummary?.totals?.totalRemaining || 0 }}</strong></span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="bg-white overflow-hidden">
+
 
     <div class="w-full overflow-x-auto">
       <app-table-template 
@@ -134,7 +239,7 @@
               <div class="flex flex-col gap-2">
                 <label class="text-[10px] uppercase font-black text-gray-400 tracking-widest px-1">To Date <span
                     class="text-red-500">*</span></label>
-                <p-datepicker formControlName="dateTo" [showIcon]="true" dateFormat="dd/mm/yy"
+                <p-datepicker formControlName="dateTo" (onSelect)="calculateDays()" [showIcon]="true" dateFormat="dd/mm/yy"
                   [minDate]="leaveForm.get('dateFrom')?.value || minDate" appendTo="body" styleClass="w-full"
                   placeholder="Select end date" [inputStyleClass]="'rounded-xl py-3 border-gray-100 bg-gray-50/50'"
                   class="w-full">
@@ -142,50 +247,44 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
-              <!-- Session From -->
-              <div class="flex flex-col gap-2">
-                <label class="text-[10px] uppercase font-black text-gray-400 tracking-widest px-1">Session From <span
-                    class="text-red-500">*</span></label>
-                <div class="grid grid-cols-2 gap-2 bg-gray-100/50 p-1 rounded-xl">
-                  <button *ngFor="let opt of sessionDrp" type="button" (click)="selectSessionFrom(opt.drpValue)"
-                    class="px-3 py-2.5 rounded-lg text-xs font-black transition-all" [ngClass]="{
-                                        'bg-white text-blue-600 shadow-sm scale-[0.98]': sessionFrom === opt.drpValue,
-                                        'text-gray-400 hover:text-gray-600': sessionFrom !== opt.drpValue
-                                    }">
-                    {{opt.drpOption}}
-                  </button>
-                </div>
-              </div>
+            <!-- Duration Badge -->
+            <div class="flex items-center justify-between bg-blue-50/70 p-3 rounded-xl border border-blue-100/60">
+              <span class="text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                <i class="pi pi-clock text-blue-600"></i> Requested Leave Duration:
+              </span>
+              <span class="text-xs font-black bg-blue-600 text-white px-2.5 py-1 rounded-lg">
+                {{ requestedDays }} {{ requestedDays === 1 ? 'Day' : 'Days' }}
+              </span>
+            </div>
 
-              <!-- Session To -->
-              <div class="flex flex-col gap-2">
-                <label class="text-[10px] uppercase font-black text-gray-400 tracking-widest px-1">Session To <span
-                    class="text-red-500">*</span></label>
-                <div class="grid grid-cols-2 gap-2 bg-gray-100/50 p-1 rounded-xl">
-                  <button *ngFor="let opt of sessionDrp" type="button" (click)="selectSessionTo(opt.drpValue)"
-                    class="px-3 py-2.5 rounded-lg text-xs font-black transition-all" [ngClass]="{
-                                        'bg-white text-blue-600 shadow-sm scale-[0.98]': sessionTo === opt.drpValue,
-                                        'text-gray-400 hover:text-gray-600': sessionTo !== opt.drpValue
-                                    }">
-                    {{opt.drpOption}}
-                  </button>
-                </div>
+            <!-- Single Session Dropdown / Selector -->
+            <div class="flex flex-col gap-2 pt-2">
+              <label class="text-[10px] uppercase font-black text-gray-400 tracking-widest px-1">Session <span class="text-red-500">*</span></label>
+              <div class="grid grid-cols-3 gap-2 bg-gray-100/60 p-1.5 rounded-xl border border-gray-100">
+                <button *ngFor="let opt of sessionDrp" type="button" (click)="selectSession(opt.drpValue)"
+                  class="px-3 py-2.5 rounded-lg text-xs font-black transition-all" [ngClass]="{
+                    'bg-white text-blue-600 shadow-sm scale-[0.98] border border-blue-100': session === opt.drpValue,
+                    'text-gray-400 hover:text-gray-600': session !== opt.drpValue
+                  }">
+                  {{opt.drpOption}}
+                </button>
               </div>
             </div>
           </div>
 
-          <!-- Leave Type -->
+          <!-- Leave Type Selection with Live Balance Badges -->
           <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-3">
-            <label class="text-[10px] uppercase font-black text-gray-400 tracking-widest px-1">Leave Type <span
-                class="text-red-500">*</span></label>
-            <div class="flex flex-wrap gap-2">
+            <label class="text-[10px] uppercase font-black text-gray-400 tracking-widest px-1">
+              Select Leave Type <span class="text-red-500">*</span>
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <button *ngFor="let opt of leaveTypeDrp" type="button" (click)="selectLeaveType(opt.drpValue)"
-                class="px-4 py-2.5 rounded-xl text-[11px] font-black transition-all border" [ngClass]="{
-                                'bg-blue-600 text-white border-blue-600 shadow-lg scale-105': leaveTypedata === opt.drpValue,
-                                'bg-gray-50 text-gray-500 border-gray-100 hover:bg-gray-100': leaveTypedata !== opt.drpValue
-                            }">
-                {{opt.drpOption}}
+                class="px-3.5 py-3 rounded-xl text-xs font-black transition-all border flex items-center justify-between cursor-pointer" [ngClass]="{
+                  'bg-indigo-600 text-white border-indigo-600 shadow-md scale-[1.01]': leaveTypedata === opt.drpValue,
+                  'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100': leaveTypedata !== opt.drpValue
+                }">
+                <span>{{ opt.drpOption }}</span>
+                <i *ngIf="leaveTypedata === opt.drpValue" class="pi pi-check-circle text-white text-sm"></i>
               </button>
             </div>
           </div>

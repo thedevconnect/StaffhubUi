@@ -380,6 +380,68 @@ export class TableTemplate implements OnChanges {
     }, o);
   }
 
+  isDateField(col: TableColumn, item: any): boolean {
+    if (col.format === 'date' || col.pipe === 'date') return true;
+    const lowerKey = (col.key || '').toLowerCase();
+    if (
+      lowerKey.includes('date') ||
+      lowerKey.includes('created_at') ||
+      lowerKey.includes('updated_at') ||
+      lowerKey.includes('joiningdate')
+    ) {
+      const val = this.getDeepValue(item, col.key);
+      if (typeof val === 'string' && (val.includes('T') || /^\d{4}-\d{2}-\d{2}/.test(val))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  formatDateCell(val: any, pipeArgs?: string): string {
+    if (!val) return '-';
+    if (typeof val === 'string') {
+      const str = val.trim();
+      if (str.includes(' to ')) {
+        const parts = str.split(' to ');
+        return `${this.formatDateCell(parts[0])} to ${this.formatDateCell(parts[1])}`;
+      }
+    }
+
+    try {
+      const d = new Date(val);
+      if (isNaN(d.getTime())) return String(val);
+
+      const isISOString = typeof val === 'string' && val.includes('T');
+
+      const year = isISOString ? d.getUTCFullYear() : d.getFullYear();
+      const month = String((isISOString ? d.getUTCMonth() : d.getMonth()) + 1).padStart(2, '0');
+      const day = String(isISOString ? d.getUTCDate() : d.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
+
+      const rawHours = isISOString ? d.getUTCHours() : d.getHours();
+      const rawMinutes = isISOString ? d.getUTCMinutes() : d.getMinutes();
+      const rawSeconds = isISOString ? d.getUTCSeconds() : d.getSeconds();
+
+      const hasTime = typeof val === 'string'
+        ? (val.includes('T') && !val.endsWith('T00:00:00.000Z') && !val.endsWith('T00:00:00Z')) || val.includes(':')
+        : (rawHours > 0 || rawMinutes > 0 || rawSeconds > 0);
+
+      if (hasTime) {
+        let hours = rawHours;
+        const minutes = String(rawMinutes).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // hour '0' should be '12'
+        const formattedHours = String(hours).padStart(2, '0');
+        return `${dateStr} ${formattedHours}:${minutes} ${ampm}`;
+      }
+
+      return dateStr;
+    } catch (e) {
+      return String(val);
+    }
+  }
+
   exportToExcel(): void {
     if (!this.data || this.data.length === 0) return;
 

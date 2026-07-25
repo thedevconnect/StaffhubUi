@@ -69,6 +69,12 @@ export class LeaveApplication {
   isHistoryDrawerVisible: boolean = false;
   leaveHistoryData: any[] = [];
 
+  leaveSummary: any = null;
+  employeeList: any[] = [];
+  selectedEmployeeId: any = null;
+  isHrAdmin: boolean = false;
+  requestedDays: number = 1;
+
   constructor(
     private loadingService: LoadingService,
     private router: Router,
@@ -87,8 +93,9 @@ export class LeaveApplication {
     this.leaveForm = this.fb.group({
       dateFrom: [new Date(), Validators.required],
       dateTo: [new Date(), Validators.required],
-      sessionFrom: ['', Validators.required],
-      sessionTo: ['', Validators.required],
+      session: ['Full Day', Validators.required],
+      sessionFrom: ['Full Day'],
+      sessionTo: ['Full Day'],
       leaveType: ['', Validators.required],
       ccTo: [null],
       reason: ['', [Validators.required, Validators.minLength(12), Validators.maxLength(200)]]
@@ -104,6 +111,15 @@ export class LeaveApplication {
       this.formlable = paramjs.formName;
     }
 
+    const userDataStr = sessionStorage.getItem('user') || localStorage.getItem('user');
+    if (userDataStr) {
+      try {
+        const user = JSON.parse(userDataStr);
+        const roles = (user.role || '').toUpperCase();
+        this.isHrAdmin = roles.includes('ADMIN') || roles.includes('SUPER_ADMIN') || roles.includes('HR') || roles.includes('DEVELOPER');
+      } catch (e) {}
+    }
+
     this.breadcrumbItems = [
       { label: 'Home', routerLink: '/ess/employee-attendance' },
       { label: this.menulabel || 'ESS', routerLink: '/ess' },
@@ -112,6 +128,50 @@ export class LeaveApplication {
     this.loadingService.stopLoading();
     this.getViewData();
     this.getDrpData();
+    this.fetchLeaveBalances();
+  }
+
+  fetchLeaveBalances() {
+    this.leaveService.getLeaveBalances(this.selectedEmployeeId ? this.selectedEmployeeId.id || this.selectedEmployeeId : undefined).subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.leaveSummary = res.data;
+          this.updateLeaveTypeOptions();
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Error fetching leave balances:', err);
+      }
+    });
+  }
+
+  onEmployeeSelectChange() {
+    this.fetchLeaveBalances();
+  }
+
+  onRunMonthlyCredit() {
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to trigger the monthly leave auto-credit (+1.0 EL & +0.5 CL per employee)?',
+      header: 'Trigger Monthly Credit',
+      icon: 'pi pi-calendar-plus',
+      accept: () => {
+        this.loadingService.startLoading();
+        this.leaveService.triggerMonthlyCredit().subscribe({
+          next: (res) => {
+            this.loadingService.stopLoading();
+            this.messageService.add({ severity: 'success', summary: 'Credit Completed', detail: res.message });
+            this.fetchLeaveBalances();
+            this.cdr.markForCheck();
+          },
+          error: (err) => {
+            this.loadingService.stopLoading();
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to credit monthly leaves' });
+            this.cdr.markForCheck();
+          }
+        });
+      }
+    });
   }
 
   currentDate: Date = new Date();
@@ -141,46 +201,68 @@ export class LeaveApplication {
     this.employeeService.getEmployees().subscribe({
       next: (res: any) => {
         if (Array.isArray(res)) {
+          this.employeeList = res.map((emp: any) => ({
+            id: emp.id,
+            drpOption: `${emp.full_name} (${emp.emp_id || 'EMP'})`
+          }));
           this.ccDrp = res.map((emp: any) => ({
             drpOption: `${emp.full_name}/${emp.designation || emp.role || 'Employee'}`
           }));
         } else {
+          this.employeeList = [];
           this.ccDrp = [];
         }
         this.cdr.markForCheck();
       },
       error: () => {
+        this.employeeList = [];
         this.ccDrp = [];
         this.cdr.markForCheck();
       }
     });
-    this.leaveTypeDrp = [
-      { drpOption: 'Casual Leave', drpValue: 'Casual Leave' },
-      { drpOption: 'Sick Leave', drpValue: 'Sick Leave' },
-      { drpOption: 'Earned Leave', drpValue: 'Earned Leave' },
-      { drpOption: 'Loss of Pay (LOP)', drpValue: 'LOP' }
-    ];
+    this.updateLeaveTypeOptions();
     this.leaveStatus = 'Apply';
 
-    // Set defaults if chips aren't selected
     if (this.sessionDrp?.length > 0) {
-      this.selectSessionFrom(this.sessionDrp[0].drpValue);
-      this.selectSessionTo(this.sessionDrp[0].drpValue);
-    }
-    if (this.leaveTypeDrp?.length > 0) {
-      this.selectLeaveType(this.leaveTypeDrp[0].drpValue);
+      this.selectSession('Full Day');
     }
     this.cdr.markForCheck();
   }
 
-  selectSessionFrom(val: any) {
+  updateLeaveTypeOptions() {
+    const elBal = this.leaveSummary?.earnedLeave?.remaining ?? 0;
+    const clBal = this.leaveSummary?.casualLeave?.remaining ?? 0;
+    const slBal = this.leaveSummary?.sickLeave?.remaining ?? 0;
+    const plBal = this.leaveSummary?.parentalLeave?.remaining ?? 5;
+
+    this.leaveTypeDrp = [
+      { drpOption: `Casual Leave (${clBal} bal)`, drpValue: 'Casual Leave', bal: clBal },
+      { drpOption: `Earned Leave (${elBal} bal)`, drpValue: 'Earned Leave', bal: elBal },
+      { drpOption: `Sick Leave (${slBal} bal)`, drpValue: 'Sick Leave', bal: slBal },
+      { drpOption: `Parental Leave (${plBal} bal)`, drpValue: 'Parental Leave', bal: plBal },
+      { drpOption: `Loss of Pay (LOP)`, drpValue: 'LOP', bal: 'LOP' }
+    ];
+
+    if (!this.leaveTypedata && this.leaveTypeDrp.length > 0) {
+      this.selectLeaveType(this.leaveTypeDrp[0].drpValue);
+    }
+  }
+
+  session = 'Full Day';
+
+  selectSession(val: any) {
+    this.session = val;
     this.sessionFrom = val;
-    this.leaveForm.patchValue({ sessionFrom: val });
+    this.sessionTo = val;
+    this.leaveForm.patchValue({ session: val, sessionFrom: val, sessionTo: val });
+  }
+
+  selectSessionFrom(val: any) {
+    this.selectSession(val);
   }
 
   selectSessionTo(val: any) {
-    this.sessionTo = val;
-    this.leaveForm.patchValue({ sessionTo: val });
+    this.selectSession(val);
   }
 
   selectLeaveType(val: any) {
@@ -194,8 +276,19 @@ export class LeaveApplication {
     if (from && to && from > to) {
       this.leaveForm.patchValue({ dateTo: from });
     }
+    this.calculateDays();
   }
 
+  calculateDays() {
+    const from = this.leaveForm.get('dateFrom')?.value;
+    const to = this.leaveForm.get('dateTo')?.value;
+    if (from && to) {
+      const start = new Date(from).getTime();
+      const end = new Date(to).getTime();
+      const diffDays = Math.round((end - start) / (1000 * 3600 * 24)) + 1;
+      this.requestedDays = diffDays > 0 ? diffDays : 1;
+    }
+  }
   noDatafoundCard: boolean = false;
   tblData: any[] = [];
   tableHeaders: any[] = [];
@@ -288,6 +381,8 @@ export class LeaveApplication {
 
             return {
               id: l.id,
+              'employee Name': l.employee_name || 'Employee',
+              'employee Code': l.employee_code || '-',
               'date From': startDate ? `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}` : '',
               'date To': endDate ? `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}` : '',
               'leave Type': l.leave_type,
@@ -399,23 +494,29 @@ export class LeaveApplication {
       this.leaveForm.patchValue({
         dateFrom: data['date From'] ? new Date(data['date From']) : null,
         dateTo: data['date To'] ? new Date(data['date To']) : null,
-        sessionFrom: data['from Session'],
-        sessionTo: data['to Session'],
-        leaveType: data['leave Type'],
+        session: data['session'] || 'Full Day',
+        sessionFrom: data['from Session'] || 'Full Day',
+        sessionTo: data['to Session'] || 'Full Day',
+        leaveType: data['leave Type'] || data['leave_type'],
         ccTo: data['cc To'],
         reason: data['reason']
       });
-      this.sessionFrom = data['from Session'];
-      this.sessionTo = data['to Session'];
-      this.leaveTypedata = data['leave Type'];
+      this.session = data['session'] || 'Full Day';
+      this.sessionFrom = data['from Session'] || 'Full Day';
+      this.sessionTo = data['to Session'] || 'Full Day';
+      this.leaveTypedata = data['leave Type'] || data['leave_type'];
     } else {
       this.editingId = null;
+      const defaultLType = this.leaveTypeDrp?.[0]?.drpValue || 'Casual Leave';
+      this.leaveTypedata = defaultLType;
+      this.session = 'Full Day';
       this.leaveForm.reset({
         dateFrom: new Date(),
         dateTo: new Date(),
-        sessionFrom: this.sessionDrp?.[0]?.drpValue,
-        sessionTo: this.sessionDrp?.[0]?.drpValue,
-        leaveType: this.leaveTypeDrp?.[0]?.drpValue
+        session: 'Full Day',
+        sessionFrom: 'Full Day',
+        sessionTo: 'Full Day',
+        leaveType: defaultLType
       });
     }
     this.cdr.markForCheck();
@@ -444,9 +545,10 @@ export class LeaveApplication {
         };
 
         const payload = {
-          leaveType: val.leaveType,
+          leaveType: val.leaveType || this.leaveTypedata,
           startDate: formatDateStr(val.dateFrom),
           endDate: formatDateStr(val.dateTo),
+          session: val.session || this.session || 'Full Day',
           reason: val.reason,
           status: 'PENDING'
         };
@@ -461,29 +563,29 @@ export class LeaveApplication {
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Data saved successfully!' });
             this.visible = false;
 
-            const sFrom = this.sessionDrp?.[0]?.drpValue;
-            const sTo = this.sessionDrp?.[0]?.drpValue;
-            const lType = this.leaveTypeDrp?.[0]?.drpValue;
+            const lType = this.leaveTypeDrp?.[0]?.drpValue || 'Casual Leave';
 
             this.leaveForm.reset({
               dateFrom: new Date(),
               dateTo: new Date(),
-              sessionFrom: sFrom,
-              sessionTo: sTo,
+              session: 'Full Day',
+              sessionFrom: 'Full Day',
+              sessionTo: 'Full Day',
               leaveType: lType
             });
 
-            this.sessionFrom = sFrom;
-            this.sessionTo = sTo;
+            this.session = 'Full Day';
             this.leaveTypedata = lType;
 
             this.getViewData();
+            this.fetchLeaveBalances();
             this.cdr.markForCheck();
             this.cdr.detectChanges();
           },
           error: (err) => {
             this.loadingService.stopLoading();
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to submit leave application' });
+            const errMsg = err?.error?.message || err?.message || 'Failed to submit leave application';
+            this.messageService.add({ severity: 'error', summary: 'Submission Error', detail: errMsg });
             this.cdr.markForCheck();
             this.cdr.detectChanges();
           }

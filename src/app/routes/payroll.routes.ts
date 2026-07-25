@@ -17,7 +17,7 @@ export const payrollRoutes: Routes = [
     },
     {
         path: 'monthly-salary',
-        loadComponent: () => import('../components/payroll/monthly-salary/monthly-salary').then(m => m.MonthlySalary)
+        loadComponent: () => import('../components/payroll/monthly-salary-prepration/monthly-salary').then(m => m.MonthlySalary)
     },
     {
         path: 'employee-expense-statement',
