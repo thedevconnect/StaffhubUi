@@ -8,6 +8,8 @@ import { DrawerModule } from 'primeng/drawer';
 import { ToastModule } from 'primeng/toast';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { TagModule } from 'primeng/tag';
+import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { LeaveService } from '../../../../../shared/services/leave.service';
 import { TableTemplate, TableColumn } from '../../../../../shared/ui/table-template/table-template';
@@ -40,6 +42,8 @@ export interface LeaveRequestUI {
     ToastModule,
     BreadcrumbModule,
     ConfirmDialogModule,
+    TagModule,
+    TooltipModule,
     TableTemplate
   ],
   providers: [MessageService, ConfirmationService],
@@ -146,7 +150,7 @@ export class LeaveApproval implements OnInit {
               employeeName: l.employee_name || 'Unknown',
               employeeCode: l.employee_code || '-',
               role: l.action_by_role || 'Employee',
-              department: '-',
+              department: l.department || '-',
               type: l.leave_type,
               session: l.session || '-',
               duration: `${diffDays} day(s) ${l.session && l.session !== 'Full Day' ? '(' + l.session + ')' : ''}`,
@@ -289,5 +293,14 @@ export class LeaveApproval implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  getStatusSeverity(status: string): "success" | "info" | "warn" | "danger" | "secondary" | "contrast" | undefined {
+    switch ((status || '').toUpperCase()) {
+      case 'APPROVED': return 'success';
+      case 'PENDING': return 'warn';
+      case 'REJECTED': return 'danger';
+      default: return 'info';
+    }
   }
 }
