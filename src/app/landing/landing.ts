@@ -80,22 +80,22 @@ export class Landing implements OnInit, OnDestroy {
 
   moduleDetails: any = {
     'onboarding': {
-      title: 'Employee Onboarding',
+      title: 'Employee Onboarding & Directory',
       icon: 'pi pi-user-plus',
       lordIcon: 'https://cdn.lordicon.com/ljvjsnvh.json',
       bgClass: 'bg-indigo-50 dark:bg-indigo-950/20',
       textClass: 'text-indigo-600',
-      description: 'Seamlessly add new hires, assign roles, departments, and generate employee credentials instantly. Complete the digital paperwork effortlessly.',
-      features: ['Automated profile creation', 'Department assignment', 'Credential generation', 'Document management']
+      description: 'Seamlessly add new hires, assign roles, departments, and generate employee credentials instantly.',
+      features: ['Automated profile creation', 'Department assignment', 'Credential generation', 'Master directory']
     },
     'leave': {
-      title: 'Leave Approvals',
+      title: 'Leave Requests & Approvals',
       icon: 'pi pi-check-square',
       lordIcon: 'https://cdn.lordicon.com/egiwmiit.json',
       bgClass: 'bg-rose-50 dark:bg-rose-950/20',
       textClass: 'text-rose-600',
-      description: 'Review and approve or reject employee leave applications directly from a centralized HR dashboard queue. Ensure smooth team availability.',
-      features: ['One-click approvals', 'Leave balance tracking', 'Multi-level workflows', 'Real-time notifications']
+      description: 'Review and approve employee leave applications. Auto-credit 1.0 EL & 0.5 CL monthly leave balances.',
+      features: ['Monthly EL/CL auto credits', 'Leave balance tracking', 'Half-day & Full-day requests', 'Real-time notifications']
     },
     'regularization': {
       title: 'Attendance Regularization',
@@ -103,8 +103,8 @@ export class Landing implements OnInit, OnDestroy {
       lordIcon: 'https://cdn.lordicon.com/qznlhdss.json',
       bgClass: 'bg-amber-50 dark:bg-amber-950/20',
       textClass: 'text-amber-600',
-      description: 'Manage missing swipes or late marks. HR Admins can verify the GPS location and approve regularization requests.',
-      features: ['GPS location verification', 'Late/early departure flagging', 'Bulk approvals', 'Audit trails']
+      description: 'Manage missing swipes or late marks. Verify GPS location and approve regularization requests.',
+      features: ['GPS location verification', 'Late/early departure flagging', 'Approval workflows', 'Audit trails']
     },
     'calendar': {
       title: 'Monthly Attendance Calendar',
@@ -112,7 +112,7 @@ export class Landing implements OnInit, OnDestroy {
       lordIcon: 'https://cdn.lordicon.com/bgebyztw.json',
       bgClass: 'bg-emerald-50 dark:bg-emerald-950/20',
       textClass: 'text-emerald-600',
-      description: 'Employees can view their full month\'s attendance, including daily check-in times and present/absent statuses at a glance.',
+      description: 'View full month attendance, check-in/out times, working hours, and present/absent statuses.',
       features: ['Visual attendance tracking', 'Holiday markings', 'Weekly off indicators', 'Total worked hours']
     },
     'gps': {
@@ -121,17 +121,65 @@ export class Landing implements OnInit, OnDestroy {
       lordIcon: 'https://cdn.lordicon.com/zzcjjxew.json',
       bgClass: 'bg-blue-50 dark:bg-blue-950/20',
       textClass: 'text-blue-600',
-      description: 'Mark attendance securely with real-time location tracking and IP address logging to ensure authenticity and prevent proxy attendance.',
-      features: ['Geo-fencing support', 'Accurate lat/long capturing', 'Device & IP tracking', 'Offline sync support']
+      description: 'Mark attendance with real-time GPS location tracking, geofencing, IP address logging, and auto 4 AM swipe-out.',
+      features: ['Geofencing support', 'Accurate lat/long capturing', 'IP address logging', 'Auto 4 AM swipe-out']
     },
     'profile': {
-      title: 'Employee Profile',
+      title: 'Employee Profile & Records',
       icon: 'pi pi-id-card',
       lordIcon: 'https://cdn.lordicon.com/bhfjfgqz.json',
       bgClass: 'bg-purple-50 dark:bg-purple-950/20',
       textClass: 'text-purple-600',
-      description: 'Employees can manage their personal details, view assigned assets, and track their shift schedules all in one centralized hub.',
+      description: 'Manage personal details, view assigned assets, emergency contacts, and track shift schedules in one hub.',
       features: ['Personal details management', 'Asset tracking', 'Shift schedules', 'Emergency contacts']
+    },
+    'probation': {
+      title: 'Probation & Confirmation Tracker',
+      icon: 'pi pi-user-check',
+      bgClass: 'bg-amber-50 dark:bg-amber-950/20',
+      textClass: 'text-amber-600',
+      description: 'Track 6-month probation evaluations, mid-term reviews, manager ratings, and confirmation status decisions.',
+      features: ['Probation end-date tracker', 'Performance evaluation rating', 'Confirmation/extension decision', 'Manager feedback']
+    },
+    'expense': {
+      title: 'Expense Claims & Reimbursements',
+      icon: 'pi pi-receipt',
+      bgClass: 'bg-rose-50 dark:bg-rose-950/20',
+      textClass: 'text-rose-600',
+      description: 'Submit travel expense claims with location, dates, bill photos, itemized breakdown, and HR approvals.',
+      features: ['Bill receipt upload preview', 'Itemized expense breakdown', 'HR approval workflow', 'Fullscreen drawer view']
+    },
+    'ticket': {
+      title: 'Support Ticket Helpdesk',
+      icon: 'pi pi-ticket',
+      bgClass: 'bg-purple-50 dark:bg-purple-950/20',
+      textClass: 'text-purple-600',
+      description: 'Raise support tickets for Administration, HR-CRG, and IT Helpdesk. CC team members and post updates.',
+      features: ['3 managed categories', 'CC team members notification', 'Activity comment timeline', 'Status workflow']
+    },
+    'task': {
+      title: 'Task Management & Collaboration',
+      icon: 'pi pi-briefcase',
+      bgClass: 'bg-blue-50 dark:bg-blue-950/20',
+      textClass: 'text-blue-600',
+      description: 'Assign and collaborate on team tasks with Kanban board & Table views, progress sliders, and due dates.',
+      features: ['Kanban board view', 'Table view with sorting', 'Progress percentage slider', 'Due date alerts']
+    },
+    'payroll': {
+      title: 'Automated Payroll & Salary Slips',
+      icon: 'pi pi-calculator',
+      bgClass: 'bg-teal-50 dark:bg-teal-950/20',
+      textClass: 'text-teal-600',
+      description: 'Calculate monthly salaries based on verified attendance, deductions, allowances, and downloadable salary slips.',
+      features: ['Automated salary calculation', 'Deduction & allowance rules', 'Downloadable PDF salary slips', 'Payroll summary']
+    },
+    'exit': {
+      title: 'Resignation & Exit Management',
+      icon: 'pi pi-file-export',
+      bgClass: 'bg-indigo-50 dark:bg-indigo-950/20',
+      textClass: 'text-indigo-600',
+      description: 'Submit digital resignation applications, track notice period countdowns, and conduct exit interviews.',
+      features: ['Notice period countdown', 'Digital resignation letter', 'Exit interview survey', 'Offboarding clearance']
     }
   };
 
@@ -201,7 +249,6 @@ export class Landing implements OnInit, OnDestroy {
     this.isColorMenuOpen = !this.isColorMenuOpen;
   }
 
-  // Get active text color class
   get textColor() {
     const map: any = {
       indigo: 'text-indigo-600',
@@ -216,7 +263,6 @@ export class Landing implements OnInit, OnDestroy {
     return map[this.selectedColor] || 'text-indigo-600';
   }
 
-  // Get active bg class
   get bgClass() {
     const map: any = {
       indigo: 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500/20',
@@ -231,7 +277,6 @@ export class Landing implements OnInit, OnDestroy {
     return map[this.selectedColor] || 'bg-indigo-600 hover:bg-indigo-700';
   }
 
-  // Get active border class
   get borderClass() {
     const map: any = {
       indigo: 'border-indigo-600 hover:bg-indigo-50/50 text-indigo-600 dark:hover:bg-indigo-950/20',
@@ -246,7 +291,6 @@ export class Landing implements OnInit, OnDestroy {
     return map[this.selectedColor] || 'border-indigo-600 text-indigo-600';
   }
 
-  // Get gradient background class
   get heroGradient() {
     const map: any = {
       indigo: 'from-indigo-600 via-indigo-700 to-emerald-500',
@@ -261,7 +305,6 @@ export class Landing implements OnInit, OnDestroy {
     return map[this.selectedColor] || 'from-indigo-600 via-indigo-700 to-emerald-500';
   }
 
-  // Get active outline text class (for subtle details)
   get textTintClass() {
     const map: any = {
       indigo: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-950/40 dark:text-indigo-300',

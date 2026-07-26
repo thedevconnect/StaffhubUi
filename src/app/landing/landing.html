@@ -413,121 +413,222 @@
       </div>
     </section>
 
-    <!-- Key Features & Capabilities Grid -->
-    <section id="modules"
-      class="py-20 md:py-28 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 relative z-10">
-      <div class="container mx-auto px-6">
+    <!-- StaffHub Features Showcase (Matching HR Partner Layout) -->
+    <section id="features" class="py-20 md:py-28 bg-slate-50/50 dark:bg-slate-950 border-t border-slate-100 dark:border-slate-800/80 relative z-10">
+      <div class="container mx-auto px-6 max-w-6xl">
 
-        <div class="max-w-3xl mx-auto text-center mb-16 md:mb-20">
-          <span class="text-xs font-extrabold uppercase tracking-widest block mb-2" [ngClass]="textColor">Everything You
-            Need</span>
-          <h2 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">Powerful Features
-            Tailored by Role</h2>
-          <p class="text-slate-500 dark:text-slate-400 text-sm sm:text-base mt-4 leading-relaxed">
-            StaffHub provides specific tools for HR Admins to manage the company and Employee Self-Service (ESS) tools
-            for staff to track their daily work.
-          </p>
-        </div>
-
-        <!-- HR Admin Features -->
-        <div class="mb-12">
-          <h3
-            class="text-2xl font-black text-slate-800 dark:text-white mb-6 border-b border-slate-100 dark:border-slate-800 pb-2">
-            <i class="pi pi-briefcase text-indigo-500 mr-2"></i> HR Admin Capabilities
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Onboarding -->
-            <div (click)="openModuleDetails('onboarding')"
-              class="cursor-pointer group border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-white dark:hover:bg-slate-950 rounded-3xl p-6 hover:shadow-xl transition-all duration-300">
-              <div
-                class="w-16 h-16 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <lord-icon src="https://cdn.lordicon.com/ljvjsnvh.json" trigger="loop" delay="2000"
-                  style="width:40px;height:40px" colors="primary:#4f46e5,secondary:#818cf8"></lord-icon>
-              </div>
-              <h4 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Employee Onboarding</h4>
-              <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
-                Seamlessly add new hires, assign roles, departments, and generate employee credentials instantly.
-              </p>
-            </div>
-            <!-- Leave Approvals -->
-            <div (click)="openModuleDetails('leave')"
-              class="cursor-pointer group border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-white dark:hover:bg-slate-950 rounded-3xl p-6 hover:shadow-xl transition-all duration-300">
-              <div
-                class="w-16 h-16 bg-rose-50 dark:bg-rose-950/20 text-rose-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <lord-icon src="https://cdn.lordicon.com/egiwmiit.json" trigger="loop" delay="2500"
-                  style="width:40px;height:40px" colors="primary:#e11d48,secondary:#fb7185"></lord-icon>
-              </div>
-              <h4 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Leave Approvals</h4>
-              <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
-                Review and approve or reject employee leave applications directly from a centralized HR dashboard queue.
-              </p>
-            </div>
-            <!-- Regularization Approvals -->
-            <div (click)="openModuleDetails('regularization')"
-              class="cursor-pointer group border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-white dark:hover:bg-slate-950 rounded-3xl p-6 hover:shadow-xl transition-all duration-300">
-              <div
-                class="w-16 h-16 bg-amber-50 dark:bg-amber-950/20 text-amber-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <lord-icon src="https://cdn.lordicon.com/qznlhdss.json" trigger="loop" delay="1500"
-                  style="width:40px;height:40px" colors="primary:#d97706,secondary:#fbbf24"></lord-icon>
-              </div>
-              <h4 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Attendance Regularization</h4>
-              <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
-                Manage missing swipes or late marks. HR Admins can verify the GPS location and approve regularization
-                requests.
-              </p>
-            </div>
+        <!-- Top Header & Action Row -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-16">
+          <div>
+            <h2 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+              StaffHub HRMS Features
+            </h2>
+            <p class="text-slate-500 dark:text-slate-400 text-sm md:text-base mt-1.5 font-medium">
+              Everything you need to manage your HR records, attendance, payroll, and employee processes
+            </p>
+          </div>
+          <div class="shrink-0">
+            <button (click)="login()"
+              class="px-6 py-3 rounded-full bg-rose-500 hover:bg-rose-600 text-white font-extrabold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2 cursor-pointer">
+              <span>View All Features</span>
+              <i class="pi pi-arrow-right text-[10px]"></i>
+            </button>
           </div>
         </div>
 
-        <!-- ESS Features -->
-        <div>
-          <h3
-            class="text-2xl font-black text-slate-800 dark:text-white mb-6 border-b border-slate-100 dark:border-slate-800 pb-2">
-            <i class="pi pi-user text-emerald-500 mr-2"></i> Employee Self Service (ESS)
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Monthly Calendar -->
-            <div (click)="openModuleDetails('calendar')"
-              class="cursor-pointer group border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-white dark:hover:bg-slate-950 rounded-3xl p-6 hover:shadow-xl transition-all duration-300">
-              <div
-                class="w-16 h-16 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <lord-icon src="https://cdn.lordicon.com/bgebyztw.json" trigger="loop" delay="3000"
-                  style="width:40px;height:40px" colors="primary:#059669,secondary:#34d399"></lord-icon>
-              </div>
-              <h4 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Monthly Attendance Calendar</h4>
-              <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
-                Employees can view their full month's attendance, including daily check-in times and present/absent
-                statuses.
-              </p>
+        <!-- 2-Column Features Showcase Grid (Matching Design Layout) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+
+          <!-- 1. Employee Directory & Profiles -->
+          <div (click)="openModuleDetails('profile')"
+            class="flex items-start gap-4 group cursor-pointer p-3.5 rounded-2xl hover:bg-white dark:hover:bg-slate-900 transition-all duration-300">
+            <div class="w-14 h-14 rounded-full bg-rose-100/80 dark:bg-rose-950/40 text-rose-500 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform shadow-xs">
+              <i class="pi pi-id-card"></i>
             </div>
-            <!-- GPS Swipe In -->
-            <div (click)="openModuleDetails('gps')"
-              class="cursor-pointer group border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-white dark:hover:bg-slate-950 rounded-3xl p-6 hover:shadow-xl transition-all duration-300">
-              <div
-                class="w-16 h-16 bg-blue-50 dark:bg-blue-950/20 text-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <lord-icon src="https://cdn.lordicon.com/zzcjjxew.json" trigger="loop" delay="2200"
-                  style="width:40px;height:40px" colors="primary:#2563eb,secondary:#60a5fa"></lord-icon>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <h3 class="text-base md:text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                  Employee Records & Profiles
+                </h3>
+                <i class="pi pi-chevron-right text-xs text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all"></i>
               </div>
-              <h4 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Live GPS Swipe In/Out</h4>
-              <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
-                Mark attendance securely with real-time location tracking and IP address logging to ensure authenticity.
-              </p>
-            </div>
-            <!-- Profile Management -->
-            <div (click)="openModuleDetails('profile')"
-              class="cursor-pointer group border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-white dark:hover:bg-slate-950 rounded-3xl p-6 hover:shadow-xl transition-all duration-300">
-              <div
-                class="w-16 h-16 bg-purple-50 dark:bg-purple-950/20 text-purple-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <lord-icon src="https://cdn.lordicon.com/bhfjfgqz.json" trigger="loop" delay="1800"
-                  style="width:40px;height:40px" colors="primary:#7c3aed,secondary:#a78bfa"></lord-icon>
-              </div>
-              <h4 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Employee Profile</h4>
-              <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
-                Employees can manage their personal details, view assigned assets, and track their shift schedules all
-                in one place.
+              <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-1 font-normal">
+                One accessible place to store contact data, documents, assigned assets, emergency details, and department hierarchies.
               </p>
             </div>
           </div>
+
+          <!-- 2. Attendance Swipe & Live GPS Geofencing -->
+          <div (click)="openModuleDetails('gps')"
+            class="flex items-start gap-4 group cursor-pointer p-3.5 rounded-2xl hover:bg-white dark:hover:bg-slate-900 transition-all duration-300">
+            <div class="w-14 h-14 rounded-full bg-sky-100/80 dark:bg-sky-950/40 text-sky-500 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform shadow-xs">
+              <i class="pi pi-map-marker"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <h3 class="text-base md:text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                  Attendance Swipe & Live GPS Geofencing
+                </h3>
+                <i class="pi pi-chevron-right text-xs text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all"></i>
+              </div>
+              <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-1 font-normal">
+                Real-time swipe in/out with live GPS location tracking, IP address validation, and automatic 4:00 AM swipe-out protection.
+              </p>
+            </div>
+          </div>
+
+          <!-- 3. Attendance Regularization & Missed Swipes -->
+          <div (click)="openModuleDetails('regularization')"
+            class="flex items-start gap-4 group cursor-pointer p-3.5 rounded-2xl hover:bg-white dark:hover:bg-slate-900 transition-all duration-300">
+            <div class="w-14 h-14 rounded-full bg-emerald-100/80 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform shadow-xs">
+              <i class="pi pi-clock"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <h3 class="text-base md:text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                  Attendance Regularization Requests
+                </h3>
+                <i class="pi pi-chevron-right text-xs text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all"></i>
+              </div>
+              <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-1 font-normal">
+                Apply for regularization for missing swipes or late marks with GPS verification, remark explanations, and manager approval queues.
+              </p>
+            </div>
+          </div>
+
+          <!-- 4. Leave Requests, Accruals & Calendar -->
+          <div (click)="openModuleDetails('leave')"
+            class="flex items-start gap-4 group cursor-pointer p-3.5 rounded-2xl hover:bg-white dark:hover:bg-slate-900 transition-all duration-300">
+            <div class="w-14 h-14 rounded-full bg-cyan-100/80 dark:bg-cyan-950/40 text-cyan-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform shadow-xs">
+              <i class="pi pi-calendar-plus"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <h3 class="text-base md:text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                  Leave Requests, Accruals & Approvals
+                </h3>
+                <i class="pi pi-chevron-right text-xs text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all"></i>
+              </div>
+              <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-1 font-normal">
+                Auto-credit 1.0 EL & 0.5 CL monthly balances. Submit leave applications with half-day/full-day options and track team attendance calendars.
+              </p>
+            </div>
+          </div>
+
+          <!-- 5. Probation & Confirmation Tracker -->
+          <div (click)="openModuleDetails('probation')"
+            class="flex items-start gap-4 group cursor-pointer p-3.5 rounded-2xl hover:bg-white dark:hover:bg-slate-900 transition-all duration-300">
+            <div class="w-14 h-14 rounded-full bg-amber-100/80 dark:bg-amber-950/40 text-amber-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform shadow-xs">
+              <i class="pi pi-user-check"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <h3 class="text-base md:text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                  Probation Reviews & Confirmation Tracker
+                </h3>
+                <i class="pi pi-chevron-right text-xs text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all"></i>
+              </div>
+              <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-1 font-normal">
+                Monitor 6-month employee probation evaluations, mid-term performance appraisals, manager ratings, and confirmation status decisions.
+              </p>
+            </div>
+          </div>
+
+          <!-- 6. Expense Reimbursements & Receipts -->
+          <div (click)="openModuleDetails('expense')"
+            class="flex items-start gap-4 group cursor-pointer p-3.5 rounded-2xl hover:bg-white dark:hover:bg-slate-900 transition-all duration-300">
+            <div class="w-14 h-14 rounded-full bg-rose-100/80 dark:bg-rose-950/40 text-rose-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform shadow-xs">
+              <i class="pi pi-receipt"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <h3 class="text-base md:text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                  Expense Claims & Receipt Attachments
+                </h3>
+                <i class="pi pi-chevron-right text-xs text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all"></i>
+              </div>
+              <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-1 font-normal">
+                Submit expense reimbursement claims with official travel location, dates, bill photos, itemized breakdown, and HR approval workflows.
+              </p>
+            </div>
+          </div>
+
+          <!-- 7. Support Ticket Helpdesk -->
+          <div (click)="openModuleDetails('ticket')"
+            class="flex items-start gap-4 group cursor-pointer p-3.5 rounded-2xl hover:bg-white dark:hover:bg-slate-900 transition-all duration-300">
+            <div class="w-14 h-14 rounded-full bg-purple-100/80 dark:bg-purple-950/40 text-purple-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform shadow-xs">
+              <i class="pi pi-ticket"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <h3 class="text-base md:text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                  Support Ticket Helpdesk
+                </h3>
+                <i class="pi pi-chevron-right text-xs text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all"></i>
+              </div>
+              <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-1 font-normal">
+                Raise and track support tickets for Administration, HR-CRG, and IT Helpdesk. CC team members and collaborate via comment timelines.
+              </p>
+            </div>
+          </div>
+
+          <!-- 8. Task Management & Work Collaboration -->
+          <div (click)="openModuleDetails('task')"
+            class="flex items-start gap-4 group cursor-pointer p-3.5 rounded-2xl hover:bg-white dark:hover:bg-slate-900 transition-all duration-300">
+            <div class="w-14 h-14 rounded-full bg-blue-100/80 dark:bg-blue-950/40 text-blue-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform shadow-xs">
+              <i class="pi pi-briefcase"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <h3 class="text-base md:text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                  Task Management & Kanban Boards
+                </h3>
+                <i class="pi pi-chevron-right text-xs text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all"></i>
+              </div>
+              <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-1 font-normal">
+                Assign and collaborate on team tasks with Kanban board & Table views, progress sliders, due dates, and real-time status updates.
+              </p>
+            </div>
+          </div>
+
+          <!-- 9. Automated Payroll & Salary Slips -->
+          <div (click)="openModuleDetails('payroll')"
+            class="flex items-start gap-4 group cursor-pointer p-3.5 rounded-2xl hover:bg-white dark:hover:bg-slate-900 transition-all duration-300">
+            <div class="w-14 h-14 rounded-full bg-teal-100/80 dark:bg-teal-950/40 text-teal-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform shadow-xs">
+              <i class="pi pi-calculator"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <h3 class="text-base md:text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                  Payroll Processing & Salary Slips
+                </h3>
+                <i class="pi pi-chevron-right text-xs text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all"></i>
+              </div>
+              <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-1 font-normal">
+                Automated monthly salary calculation based on verified attendance, deductions, allowances, and downloadable employee PDF salary slips.
+              </p>
+            </div>
+          </div>
+
+          <!-- 10. Resignation & Exit Interview Management -->
+          <div (click)="openModuleDetails('exit')"
+            class="flex items-start gap-4 group cursor-pointer p-3.5 rounded-2xl hover:bg-white dark:hover:bg-slate-900 transition-all duration-300">
+            <div class="w-14 h-14 rounded-full bg-indigo-100/80 dark:bg-indigo-950/40 text-indigo-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform shadow-xs">
+              <i class="pi pi-file-export"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <h3 class="text-base md:text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                  Resignation & Exit Interview Management
+                </h3>
+                <i class="pi pi-chevron-right text-xs text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all"></i>
+              </div>
+              <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-1 font-normal">
+                Submit digital resignation applications, track notice period countdowns, conduct exit interview surveys, and handle offboarding clearance.
+              </p>
+            </div>
+          </div>
+
         </div>
 
       </div>

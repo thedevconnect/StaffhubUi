@@ -46,6 +46,59 @@
 </div>
 
 <div class="bg-slate-50/50 min-h-screen p-0 space-y-6">
+
+    <!-- WELCOME TO OUR COMPANY HERO BANNER CARD (Pixel-Perfect Match to Screenshot) -->
+    <div class="relative bg-slate-900 rounded-2xl border border-slate-200 overflow-hidden shadow-lg group">
+        <!-- Background Team Image with Overlay -->
+        <div class="h-64 sm:h-80 md:h-96 w-full relative overflow-hidden flex items-center justify-center">
+            <img src="assets/img/welcome_company.png" alt="Welcome to Our Company"
+                class="w-full h-full object-cover object-center filter brightness-90 group-hover:scale-105 transition-transform duration-700">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-black/30 to-black/20"></div>
+
+            <!-- Central "Welcome to Our Company!" Pill Banner (Exactly as screenshot) -->
+            <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-11/12 max-w-lg text-center">
+                <div class="bg-white/95 backdrop-blur-md px-6 py-3 md:py-4 rounded-xl md:rounded-2xl shadow-2xl border border-white/80 inline-block transform hover:scale-105 transition-transform">
+                    <h2 class="text-xl sm:text-2xl md:text-3xl font-black text-sky-500 tracking-tight leading-tight">
+                        Welcome to Our Company!
+                    </h2>
+                </div>
+            </div>
+
+            <!-- Center Interactive Video Play Button (Exactly as screenshot) -->
+            <button (click)="openWelcomeVideo()" type="button"
+                class="absolute z-30 w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-sky-500/90 hover:bg-sky-500 text-white flex items-center justify-center shadow-2xl backdrop-blur-sm transition-all hover:scale-110 cursor-pointer group/btn">
+                <i class="pi pi-play text-xl sm:text-2xl md:text-3xl ml-1 text-white group-hover/btn:scale-110 transition-transform"></i>
+                <span class="absolute inset-0 rounded-full bg-sky-400 animate-ping opacity-30"></span>
+            </button>
+
+            <!-- Bottom Video Player Controls Bar (Exactly as screenshot) -->
+            <div class="absolute bottom-0 left-0 right-0 z-20 bg-slate-950/90 backdrop-blur-md px-4 py-2.5 flex items-center gap-3 border-t border-white/10 text-white text-xs font-mono">
+                <!-- Play Icon -->
+                <button (click)="openWelcomeVideo()" type="button" class="hover:text-sky-400 transition-colors cursor-pointer">
+                    <i class="pi pi-caret-right text-sm"></i>
+                </button>
+                
+                <!-- Timeline Scrub Bar -->
+                <div class="flex-1 h-1.5 bg-slate-700/80 rounded-full overflow-hidden relative cursor-pointer group/scrub" (click)="openWelcomeVideo()">
+                    <div class="w-1/3 h-full bg-sky-500 group-hover/scrub:bg-sky-400 transition-all rounded-full"></div>
+                </div>
+
+                <!-- Time Code -->
+                <span class="text-[11px] text-slate-300">00:00</span>
+
+                <!-- Volume Icon -->
+                <button type="button" class="hover:text-sky-400 transition-colors">
+                    <i class="pi pi-volume-up text-xs"></i>
+                </button>
+
+                <!-- Fullscreen Toggle Icon -->
+                <button (click)="openWelcomeVideo()" type="button" class="hover:text-sky-400 transition-colors cursor-pointer">
+                    <i class="pi pi-window-maximize text-xs"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Hero Header Section -->
     <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
         <!-- Cover Banner -->
@@ -707,4 +760,50 @@
             </form>
         </div>
     </p-drawer>
+
+    <!-- WELCOME VIDEO MODAL -->
+    <p-dialog [(visible)]="showWelcomeVideoModal" [modal]="true" [dismissableMask]="true" [header]="'Welcome to Our Company!'"
+      [style]="{ width: '90vw', maxWidth: '720px' }" styleClass="rounded-3xl overflow-hidden shadow-2xl bg-white">
+      
+      <div class="space-y-4 p-2 text-slate-700">
+        <div class="relative w-full rounded-2xl overflow-hidden shadow-md bg-slate-950 aspect-video flex items-center justify-center">
+          <img src="assets/img/welcome_company.png" alt="Company Welcome" class="w-full h-full object-cover opacity-85">
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-black/40 to-transparent flex flex-col justify-end p-6 text-white">
+            <span class="bg-sky-500 text-white font-black text-xs px-3 py-1 rounded-full uppercase tracking-wider self-start mb-2 shadow-xs">Company Orientation</span>
+            <h3 class="text-2xl font-black">Welcome to Our Company & Team!</h3>
+            <p class="text-xs text-slate-200 mt-1">We are excited to have you onboard. Please complete your onboarding profile, bank proof, and educational certificates to get verified by HR.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+          <div class="p-3 bg-blue-50/60 rounded-xl border border-blue-100 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-blue-500 text-white flex items-center justify-center font-bold shrink-0">
+              <i class="pi pi-id-card"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-slate-900">1. Fill Profile</h4>
+              <p class="text-[10px] text-slate-500">Personal & Financial details</p>
+            </div>
+          </div>
+          <div class="p-3 bg-emerald-50/60 rounded-xl border border-emerald-100 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold shrink-0">
+              <i class="pi pi-upload"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-slate-900">2. Upload Docs</h4>
+              <p class="text-[10px] text-slate-500">10th, 12th, Degree & Passbook</p>
+            </div>
+          </div>
+          <div class="p-3 bg-amber-50/60 rounded-xl border border-amber-100 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-amber-500 text-white flex items-center justify-center font-bold shrink-0">
+              <i class="pi pi-check-circle"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-slate-900">3. HR Approval</h4>
+              <p class="text-[10px] text-slate-500">Verification & locking</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </p-dialog>
 </div>
