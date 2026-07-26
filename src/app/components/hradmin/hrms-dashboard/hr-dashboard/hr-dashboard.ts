@@ -6,6 +6,7 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService, ConfirmationService, MenuItem } from 'primeng/api';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { ButtonModule } from 'primeng/button';
+import { DatePickerModule } from 'primeng/datepicker';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
 import { TableColumn, TableTemplate } from '../../../../shared/ui/table-template/table-template';
@@ -51,7 +52,18 @@ interface PendingRequestItem {
 
 @Component({
   selector: 'app-hr-dashboard',
-  imports: [CommonModule, FormsModule, ToastModule, BreadcrumbModule, ButtonModule, ConfirmDialogModule, DialogModule, TableTemplate],
+  standalone: true,
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    ToastModule, 
+    BreadcrumbModule, 
+    ButtonModule, 
+    DatePickerModule, 
+    ConfirmDialogModule, 
+    DialogModule, 
+    TableTemplate
+  ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './hr-dashboard.html',
   styleUrl: './hr-dashboard.scss',
@@ -59,6 +71,37 @@ interface PendingRequestItem {
 export class HrDashboard implements OnInit, OnDestroy {
   // Navigation tabs: 'dashboard' | 'pendency'
   activeTab: 'dashboard' | 'pendency' = 'dashboard';
+
+  // Date Filter
+  selectedDate: Date = new Date();
+  formattedSelectedDate: string = this.formatDate(new Date());
+
+  get isTodaySelected(): boolean {
+    const todayStr = this.formatDate(new Date());
+    return this.formattedSelectedDate === todayStr;
+  }
+
+  formatDate(d: Date): string {
+    if (!d) return '';
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  onDateChange(): void {
+    if (!this.selectedDate) {
+      this.selectedDate = new Date();
+    }
+    this.formattedSelectedDate = this.formatDate(new Date(this.selectedDate));
+    this.loadDashboardSummary(this.formattedSelectedDate);
+  }
+
+  resetToToday(): void {
+    this.selectedDate = new Date();
+    this.formattedSelectedDate = this.formatDate(this.selectedDate);
+    this.loadDashboardSummary(this.formattedSelectedDate);
+  }
 
   constructor(private router: Router) { }
 
@@ -159,12 +202,12 @@ export class HrDashboard implements OnInit, OnDestroy {
 
   // Pendency numbers
   pendingCounts = {
-    regularization: 2,
-    leave: 9,
-    attendance: 6,
-    expense: 5,
-    gatepass: 5,
-    total: 27
+    regularization: 0,
+    leave: 0,
+    attendance: 0,
+    expense: 0,
+    gatepass: 0,
+    total: 0
   };
 
   activePendencyTab: string = 'All';
@@ -214,7 +257,6 @@ export class HrDashboard implements OnInit, OnDestroy {
     { key: 'swipe_in', header: 'Swipe In', pipe: 'date', pipeArgs: 'mediumTime' },
     { key: 'swipe_out', header: 'Swipe Out', pipe: 'date', pipeArgs: 'mediumTime' },
     { key: 'total_time', header: 'Total Time', formatter: (val: any) => (val !== null && val !== undefined) ? (Number(val) >= 60 ? Math.floor(Number(val) / 60) + 'h ' + (Number(val) % 60) + 'm' : Number(val) + 'm') : '-' },
-
     { key: 'late_coming', header: 'Late Coming' },
     { key: 'early_going', header: 'Early Going' },
     { key: 'swipe_in_device', header: 'Swipe In Device' },
@@ -222,7 +264,6 @@ export class HrDashboard implements OnInit, OnDestroy {
     { key: 'department', header: 'Department' },
     { key: 'designation', header: 'Designation' },
     { key: 'location_address', header: 'Location / Status' },
-
   ];
 
   pendingRequestColumns: TableColumn[] = [
@@ -237,24 +278,21 @@ export class HrDashboard implements OnInit, OnDestroy {
   ];
 
   ngOnInit(): void {
-
     this.loadPendencyData();
-    this.loadDashboardSummary();
+    this.loadDashboardSummary(this.formattedSelectedDate);
     this.loadChartData();
 
     const user = this.authService.user();
     if (user?.companyId) {
       this.socketService.connect(user.companyId);
       this.socketSubscription = this.socketService.onAttendanceUpdated().subscribe(() => {
-        // Silently reload dashboard data on socket event
-        this.loadDashboardSummary();
+        this.loadDashboardSummary(this.formattedSelectedDate);
         this.loadPendencyData();
 
-        // If modal is open, reload modal data live
         if (this.isDetailsModalVisible && this.detailsCategoryLabel) {
           const matchingCard = this.attendanceCards.find(c => c.label === this.detailsCategoryLabel);
           if (matchingCard) {
-            this.attendanceService.getHRDashboardDetails(matchingCard.category).subscribe(res => {
+            this.attendanceService.getHRDashboardDetails(matchingCard.category, this.formattedSelectedDate).subscribe(res => {
               this.detailsTableData = res.data || [];
               this.cdr.detectChanges();
             });
@@ -273,11 +311,10 @@ export class HrDashboard implements OnInit, OnDestroy {
 
   onRefresh(): void {
     this.isLoading = true;
-    this.loadDashboardSummary();
+    this.loadDashboardSummary(this.formattedSelectedDate);
     this.loadPendencyData();
     this.loadChartData();
 
-    // Simulate slight delay for visual feedback if API is too fast
     setTimeout(() => {
       this.isLoading = false;
       this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Dashboard synchronized successfully' });
@@ -286,7 +323,7 @@ export class HrDashboard implements OnInit, OnDestroy {
 
   onCardClick(card: AttendanceCard): void {
     if (card.count === 0) {
-      this.messageService.add({ severity: 'info', summary: 'Info', detail: `No records found for ${card.label} today.` });
+      this.messageService.add({ severity: 'info', summary: 'Info', detail: `No records found for ${card.label} on ${this.formattedSelectedDate}.` });
       return;
     }
 
@@ -295,7 +332,7 @@ export class HrDashboard implements OnInit, OnDestroy {
     this.isLoadingDetails = true;
     this.detailsTableData = [];
 
-    this.attendanceService.getHRDashboardDetails(card.category).subscribe({
+    this.attendanceService.getHRDashboardDetails(card.category, this.formattedSelectedDate).subscribe({
       next: (res) => {
         this.detailsTableData = res.data || [];
         this.isLoadingDetails = false;
@@ -312,7 +349,7 @@ export class HrDashboard implements OnInit, OnDestroy {
 
   onSourceClick(source: any): void {
     if (source.count === 0) {
-      this.messageService.add({ severity: 'info', summary: 'Info', detail: `No records found for ${source.label} today.` });
+      this.messageService.add({ severity: 'info', summary: 'Info', detail: `No records found for ${source.label} on ${this.formattedSelectedDate}.` });
       return;
     }
 
@@ -321,7 +358,7 @@ export class HrDashboard implements OnInit, OnDestroy {
     this.isLoadingDetails = true;
     this.detailsTableData = [];
 
-    this.attendanceService.getHRDashboardDetails(source.category).subscribe({
+    this.attendanceService.getHRDashboardDetails(source.category, this.formattedSelectedDate).subscribe({
       next: (res) => {
         this.detailsTableData = res.data || [];
         this.isLoadingDetails = false;
@@ -338,7 +375,7 @@ export class HrDashboard implements OnInit, OnDestroy {
 
   onExceptionClick(ex: any): void {
     if (ex.count === 0) {
-      this.messageService.add({ severity: 'info', summary: 'Info', detail: `No records found for ${ex.label} today.` });
+      this.messageService.add({ severity: 'info', summary: 'Info', detail: `No records found for ${ex.label} on ${this.formattedSelectedDate}.` });
       return;
     }
 
@@ -347,7 +384,7 @@ export class HrDashboard implements OnInit, OnDestroy {
     this.isLoadingDetails = true;
     this.detailsTableData = [];
 
-    this.attendanceService.getHRDashboardDetails('swipe_in').subscribe({
+    this.attendanceService.getHRDashboardDetails('swipe_in', this.formattedSelectedDate).subscribe({
       next: (res) => {
         const data = res.data || [];
         if (ex.label.includes('Late')) {
@@ -366,16 +403,14 @@ export class HrDashboard implements OnInit, OnDestroy {
     });
   }
 
-  // Calculate SVG stroke parameters for the Donut Chart
   calculateDonutSegments(): void {
     const total = this.totalEmployees || 1;
     let currentOffset = 0;
-    const circumference = 314.16; // 2 * pi * r (r=50)
+    const circumference = 314.16;
 
     this.donutSegments = this.donutRawData.map((item) => {
       const percentage = item.value / total;
       const strokeLength = percentage * circumference;
-      // offset is calculated so segments follow each other
       const strokeOffset = circumference - strokeLength + currentOffset;
       currentOffset -= strokeLength;
 
@@ -400,9 +435,8 @@ export class HrDashboard implements OnInit, OnDestroy {
             total: item.total
           }));
 
-          // Calculate max bar value dynamically based on highest total
           const maxTotal = Math.max(...this.barChartData.map(d => Math.max(d.onTime, d.late)), 10);
-          this.maxBarValue = Math.ceil(maxTotal * 1.2); // Add 20% headroom
+          this.maxBarValue = Math.ceil(maxTotal * 1.2);
           this.cdr.detectChanges();
         }
       },
@@ -412,8 +446,9 @@ export class HrDashboard implements OnInit, OnDestroy {
     });
   }
 
-  loadDashboardSummary(): void {
-    this.attendanceService.getHRDashboardSummary().subscribe({
+  loadDashboardSummary(dateStr?: string): void {
+    const targetDate = dateStr || this.formattedSelectedDate;
+    this.attendanceService.getHRDashboardSummary(targetDate).subscribe({
       next: (res: any) => {
         if (res && res.data) {
           const s = res.data;
@@ -561,7 +596,6 @@ export class HrDashboard implements OnInit, OnDestroy {
 
         this.allPendencyRequests = [...mappedRegs, ...mappedLeaves];
 
-        // Update counts (only pending)
         const pendingRegs = mappedRegs.filter((r: any) => r.status === 'Pending Approval');
         const pendingLeaves = mappedLeaves.filter((r: any) => r.status === 'Pending Approval');
 
@@ -591,7 +625,7 @@ export class HrDashboard implements OnInit, OnDestroy {
             detail: 'Regularization request approved successfully.'
           });
           this.loadPendencyData();
-          this.loadDashboardSummary();
+          this.loadDashboardSummary(this.formattedSelectedDate);
         },
         error: (err) => {
           this.messageService.add({
@@ -618,7 +652,7 @@ export class HrDashboard implements OnInit, OnDestroy {
             detail: 'Leave request approved successfully.'
           });
           this.loadPendencyData();
-          this.loadDashboardSummary();
+          this.loadDashboardSummary(this.formattedSelectedDate);
         },
         error: (err) => {
           this.messageService.add({
@@ -645,7 +679,7 @@ export class HrDashboard implements OnInit, OnDestroy {
             detail: 'Regularization request rejected.'
           });
           this.loadPendencyData();
-          this.loadDashboardSummary();
+          this.loadDashboardSummary(this.formattedSelectedDate);
         },
         error: (err) => {
           this.messageService.add({
@@ -672,7 +706,7 @@ export class HrDashboard implements OnInit, OnDestroy {
             detail: 'Leave request rejected.'
           });
           this.loadPendencyData();
-          this.loadDashboardSummary();
+          this.loadDashboardSummary(this.formattedSelectedDate);
         },
         error: (err) => {
           this.messageService.add({
