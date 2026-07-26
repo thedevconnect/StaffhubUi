@@ -2,90 +2,136 @@
 <p-confirmDialog></p-confirmDialog>
 
 <!-- Page Header Inline with Breadcrumb -->
-<div
-  class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6">
+<div class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6 shadow-xs">
   <div class="flex-1 min-w-0">
-    <p-breadcrumb [model]="breadcrumbItems"
-      styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
+    <p-breadcrumb [model]="breadcrumbItems" styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
   </div>
 
   <div class="flex-none">
-    <p-button (click)="onRefresh()" icon="pi pi-sync" [loading]="isLoading"
-      styleClass="p-button-sm p-button-secondary rounded-lg" [raised]="true">
+    <p-button (click)="onRefresh()" icon="pi pi-sync" label="Refresh" [loading]="isLoading"
+      styleClass="p-button-sm p-button-secondary rounded-lg text-xs font-semibold px-3 py-1.5 shadow-xs" [raised]="true">
     </p-button>
   </div>
 </div>
 
-<!-- Title section with Quick Summary Badges -->
+<!-- Title section -->
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
   <div>
-    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-      <i class="pi pi-calendar text-indigo-600"></i>
+    <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2 tracking-tight">
+      <i class="pi pi-calendar text-indigo-600 text-xl"></i>
       Leave Approvals Center
     </h2>
     <p class="text-xs text-slate-500 mt-1">Review, approve, or reject employee leave applications in real time.</p>
   </div>
+</div>
 
-  <!-- Quick Stats Summary -->
-  <div class="flex flex-wrap items-center gap-2">
-    <div class="px-3 py-1.5 rounded-xl bg-amber-50/80 border border-amber-200/80 flex items-center gap-2 shadow-xs">
-      <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-      <span class="text-xs font-bold text-amber-800">Pending: {{ pendingCount }}</span>
+<!-- KPI Cards Summary Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+  <!-- Pending Card -->
+  <div class="bg-white p-4 rounded-2xl border border-amber-100/80 shadow-xs hover:shadow-md transition-all flex items-center justify-between group">
+    <div class="space-y-1">
+      <span class="text-xs font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5">
+        <span class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span> Pending Requests
+      </span>
+      <div class="text-2xl font-black text-slate-900">{{ pendingCount }}</div>
     </div>
-    <div class="px-3 py-1.5 rounded-xl bg-emerald-50/80 border border-emerald-200/80 flex items-center gap-2 shadow-xs">
-      <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-      <span class="text-xs font-bold text-emerald-800">Approved: {{ approvedCount }}</span>
+    <div class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg font-bold group-hover:scale-110 transition-transform">
+      <i class="pi pi-clock"></i>
     </div>
-    <div class="px-3 py-1.5 rounded-xl bg-rose-50/80 border border-rose-200/80 flex items-center gap-2 shadow-xs">
-      <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-      <span class="text-xs font-bold text-rose-800">Rejected: {{ rejectedCount }}</span>
+  </div>
+
+  <!-- Approved Card -->
+  <div class="bg-white p-4 rounded-2xl border border-emerald-100/80 shadow-xs hover:shadow-md transition-all flex items-center justify-between group">
+    <div class="space-y-1">
+      <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 flex items-center gap-1.5">
+        <span class="h-2 w-2 rounded-full bg-emerald-500"></span> Approved Leaves
+      </span>
+      <div class="text-2xl font-black text-slate-900">{{ approvedCount }}</div>
+    </div>
+    <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg font-bold group-hover:scale-110 transition-transform">
+      <i class="pi pi-check-circle"></i>
+    </div>
+  </div>
+
+  <!-- Rejected Card -->
+  <div class="bg-white p-4 rounded-2xl border border-rose-100/80 shadow-xs hover:shadow-md transition-all flex items-center justify-between group">
+    <div class="space-y-1">
+      <span class="text-xs font-bold uppercase tracking-wider text-rose-600 flex items-center gap-1.5">
+        <span class="h-2 w-2 rounded-full bg-rose-500"></span> Rejected Leaves
+      </span>
+      <div class="text-2xl font-black text-slate-900">{{ rejectedCount }}</div>
+    </div>
+    <div class="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg font-bold group-hover:scale-110 transition-transform">
+      <i class="pi pi-times-circle"></i>
+    </div>
+  </div>
+
+  <!-- Total Requests Card -->
+  <div class="bg-white p-4 rounded-2xl border border-indigo-100/80 shadow-xs hover:shadow-md transition-all flex items-center justify-between group">
+    <div class="space-y-1">
+      <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1.5">
+        <i class="pi pi-list"></i> Total Applications
+      </span>
+      <div class="text-2xl font-black text-slate-900">{{ totalCount }}</div>
+    </div>
+    <div class="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg font-bold group-hover:scale-110 transition-transform">
+      <i class="pi pi-folder"></i>
+    </div>
   </div>
 </div>
 
-<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mt-4">
+<div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
   <!-- Section Header -->
-  <div
-    class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
       <h3 class="text-base font-bold text-slate-900">Incoming Requests Queue</h3>
-      <p class="text-xs text-slate-500 mt-0.5">Manage leave applications submitted by the staff members.</p>
+      <p class="text-xs text-slate-500 mt-0.5">Manage leave applications submitted by staff members.</p>
     </div>
 
     <!-- Filter Badge -->
-    <span
-      class="self-start sm:self-auto text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100/80 px-3 py-1.5 rounded-full select-none">
+    <span class="self-start sm:self-auto text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full select-none">
       Showing {{ filteredLeaveRequests.length }} requests
     </span>
   </div>
 
   <!-- Table content using TableTemplate -->
-  <app-table-template [columns]="tableColumns" [data]="filteredLeaveRequests" [tabs]="tabs" [activeTab]="activeTab"
-    (tabChange)="onTabChange($event)" [showExport]="true" exportFileName="Leave_Approvals" (refresh)="onRefresh()"
+  <app-table-template 
+    [columns]="tableColumns" 
+    [data]="filteredLeaveRequests" 
+    [tabs]="tabs" 
+    [activeTab]="activeTab"
+    (tabChange)="onTabChange($event)" 
+    [showExport]="true" 
+    exportFileName="Leave_Approvals" 
+    (refresh)="onRefresh()"
     [cellTemplates]="{
-        'employeeName': customCellEmployeeTpl,
-        'type': customCellTypeTpl,
-        'duration': customCellDurationTpl,
-        'reason': customCellReasonTpl,
-        'status': customCellStatusTpl
-      }" [tableActions]="[]" [actionTemplate]="actionCellTpl">
+      'employeeName': customCellEmployeeTpl,
+      'type': customCellTypeTpl,
+      'duration': customCellDurationTpl,
+      'reason': customCellReasonTpl,
+      'status': customCellStatusTpl
+    }" 
+    [tableActions]="[]" 
+    [actionTemplate]="actionCellTpl">
 
-    <!-- Custom Cell Template for Rich Formatting -->
+    <!-- Custom Cell Template for Employee -->
     <ng-template #customCellEmployeeTpl let-row>
       <div class="flex items-center gap-3">
-        <div
-          class="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-100 to-indigo-50 text-indigo-700 flex items-center justify-center font-black border border-indigo-100 shadow-sm">
+        <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-100 to-indigo-50 text-indigo-700 flex items-center justify-center font-black border border-indigo-100 shadow-2xs">
           {{ row.employeeName.charAt(0) }}
         </div>
         <div>
-          <div class="font-bold text-slate-900">{{ row.employeeName }}</div>
-          <div class="text-[10px] text-slate-400 mt-0.5 font-medium">{{ row.employeeCode }}</div>
+          <div class="font-bold text-slate-900 text-xs">{{ row.employeeName }}</div>
+          <div class="text-[10px] text-slate-400 font-medium">{{ row.employeeCode }}</div>
         </div>
       </div>
     </ng-template>
 
+    <!-- Custom Cell Template for Type -->
     <ng-template #customCellTypeTpl let-row>
-      <span class="inline-flex items-center gap-1.5 font-bold text-slate-700">
-        <span class="h-1.5 w-1.5 rounded-full" [class.bg-indigo-500]="row.type.includes('Casual')"
+      <span class="inline-flex items-center gap-1.5 font-bold text-xs text-slate-700">
+        <span class="h-2 w-2 rounded-full" 
+          [class.bg-indigo-500]="row.type.includes('Casual')"
           [class.bg-rose-500]="row.type.includes('Sick') || row.type.includes('LOP')"
           [class.bg-emerald-500]="row.type.includes('Earned')"
           [class.bg-amber-500]="!row.type.includes('Casual') && !row.type.includes('Sick') && !row.type.includes('Earned') && !row.type.includes('LOP')">
@@ -94,61 +140,59 @@
       </span>
     </ng-template>
 
+    <!-- Custom Cell Template for Duration -->
     <ng-template #customCellDurationTpl let-row>
-      <div class="flex flex-col gap-0.5 font-medium text-slate-600">
-        <span>{{ row.duration }}</span>
-        <span class="text-[10px] text-slate-400 font-medium">Applied: {{ row.appliedDate }}</span>
+      <div class="flex flex-col gap-0.5 font-medium text-xs text-slate-600">
+        <span class="font-semibold text-slate-800">{{ row.duration }}</span>
+        <span class="text-[10px] text-slate-400">Applied: {{ row.appliedDate }}</span>
       </div>
     </ng-template>
 
+    <!-- Custom Cell Template for Reason -->
     <ng-template #customCellReasonTpl let-row>
-      <div class="text-slate-500 font-medium max-w-xs truncate" [title]="row.reason">
+      <div class="text-xs text-slate-500 font-medium max-w-xs truncate" [title]="row.reason">
         {{ row.reason }}
       </div>
     </ng-template>
 
+    <!-- Custom Cell Template for Status -->
     <ng-template #customCellStatusTpl let-row>
-      <span
-        class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black border uppercase tracking-wider"
-        [class.bg-amber-50]="row.status?.toLowerCase() === 'pending'"
-        [class.text-amber-700]="row.status?.toLowerCase() === 'pending'"
-        [class.border-amber-100]="row.status?.toLowerCase() === 'pending'"
-        [class.bg-emerald-50]="row.status?.toLowerCase() === 'approved'"
-        [class.text-emerald-700]="row.status?.toLowerCase() === 'approved'"
-        [class.border-emerald-100]="row.status?.toLowerCase() === 'approved'"
-        [class.bg-rose-50]="row.status?.toLowerCase() === 'rejected'"
-        [class.text-rose-700]="row.status?.toLowerCase() === 'rejected'"
-        [class.border-rose-100]="row.status?.toLowerCase() === 'rejected'">
-        {{ row.status }}
-      </span>
+      <p-tag [value]="row.status" [severity]="getStatusSeverity(row.status)"></p-tag>
     </ng-template>
 
     <!-- Action Cell Template for multiple action buttons -->
     <ng-template #actionCellTpl let-row>
-      <div class="flex items-center justify-end gap-2">
+      <div class="flex items-center justify-end gap-1.5">
         <!-- View Details Button -->
-        <button (click)="viewDetails(row)" type="button"
-          class="p-2 text-slate-500 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-100 rounded-lg transition duration-150 cursor-pointer"
+        <button 
+          (click)="viewDetails(row)" 
+          type="button"
+          class="p-1.5 text-slate-500 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-lg transition-colors cursor-pointer"
           title="View Full Details">
           <i class="pi pi-eye text-xs"></i>
         </button>
 
         <!-- Approve Button (Only visible if status is Pending) -->
-        <button *ngIf="row.status === 'Pending'" (click)="triggerAction(row, 'Approve')" type="button"
-          class="p-2 text-emerald-600 hover:text-white bg-emerald-50 hover:bg-emerald-600 border border-emerald-200 hover:border-emerald-600 rounded-lg transition duration-150 cursor-pointer"
+        <button 
+          *ngIf="(row.status || '').toUpperCase() === 'PENDING'" 
+          (click)="triggerAction(row, 'Approve')" 
+          type="button"
+          class="p-1.5 text-emerald-600 hover:text-white bg-emerald-50 hover:bg-emerald-600 border border-emerald-200 hover:border-emerald-600 rounded-lg transition-colors cursor-pointer"
           title="Approve Leave">
           <i class="pi pi-check text-xs"></i>
         </button>
 
         <!-- Reject Button (Only visible if status is Pending) -->
-        <button *ngIf="row.status === 'Pending'" (click)="triggerAction(row, 'Reject')" type="button"
-          class="p-2 text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 border border-rose-200 hover:border-rose-600 rounded-lg transition duration-150 cursor-pointer"
+        <button 
+          *ngIf="(row.status || '').toUpperCase() === 'PENDING'" 
+          (click)="triggerAction(row, 'Reject')" 
+          type="button"
+          class="p-1.5 text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 border border-rose-200 hover:border-rose-600 rounded-lg transition-colors cursor-pointer"
           title="Reject Leave">
           <i class="pi pi-times text-xs"></i>
         </button>
       </div>
     </ng-template>
-
   </app-table-template>
 </div>
 
@@ -159,12 +203,11 @@
   <ng-template pTemplate="header">
     <div class="flex items-center justify-between w-full pr-2">
       <div class="flex items-center gap-3">
-        <div
-          class="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-base shadow-sm">
+        <div class="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-base shadow-xs">
           <i class="pi pi-info-circle"></i>
         </div>
         <div>
-          <h3 class="text-sm font-black text-slate-900 uppercase tracking-wide">Leave Details</h3>
+          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide">Leave Details</h3>
           <p class="text-[10px] text-slate-400">Review request information</p>
         </div>
       </div>
@@ -175,11 +218,10 @@
     </div>
   </ng-template>
 
-  <div *ngIf="selectedRequest" class="p-6 flex flex-col gap-6 font-sans">
+  <div *ngIf="selectedRequest" class="p-5 flex flex-col gap-5 font-sans">
     <!-- Header Summary Card -->
-    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-4">
-      <div
-        class="h-12 w-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-extrabold text-lg shadow-md shadow-indigo-600/10">
+    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center gap-4">
+      <div class="h-12 w-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-extrabold text-lg shadow-md shadow-indigo-600/10">
         {{ selectedRequest.employeeName.charAt(0) }}
       </div>
       <div>
@@ -189,7 +231,7 @@
     </div>
 
     <!-- Details Grid -->
-    <div class="border border-slate-100 rounded-2xl p-4 bg-white flex flex-col gap-4 text-xs">
+    <div class="border border-slate-200/80 rounded-2xl p-4 bg-white flex flex-col gap-4 text-xs">
       <div class="grid grid-cols-2 gap-4 border-b border-slate-100 pb-3">
         <div>
           <span class="text-slate-400 font-bold uppercase tracking-wider text-[9px] block mb-1">Leave Category</span>
@@ -200,19 +242,7 @@
         </div>
         <div>
           <span class="text-slate-400 font-bold uppercase tracking-wider text-[9px] block mb-1">Status</span>
-          <span
-            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black border uppercase tracking-wider"
-            [class.bg-amber-50]="selectedRequest.status === 'Pending'"
-            [class.text-amber-700]="selectedRequest.status === 'Pending'"
-            [class.border-amber-100]="selectedRequest.status === 'Pending'"
-            [class.bg-emerald-50]="selectedRequest.status === 'Approved'"
-            [class.text-emerald-700]="selectedRequest.status === 'Approved'"
-            [class.border-emerald-100]="selectedRequest.status === 'Approved'"
-            [class.bg-rose-50]="selectedRequest.status === 'Rejected'"
-            [class.text-rose-700]="selectedRequest.status === 'Rejected'"
-            [class.border-rose-100]="selectedRequest.status === 'Rejected'">
-            {{ selectedRequest.status }}
-          </span>
+          <p-tag [value]="selectedRequest.status" [severity]="getStatusSeverity(selectedRequest.status)"></p-tag>
         </div>
       </div>
 
@@ -223,7 +253,7 @@
         </div>
         <div>
           <span class="text-slate-400 font-bold uppercase tracking-wider text-[9px] block mb-1">Request ID</span>
-          <span class="text-slate-800 font-semibold">{{ selectedRequest.id }}</span>
+          <span class="text-slate-800 font-semibold">#{{ selectedRequest.id }}</span>
         </div>
       </div>
 
@@ -234,26 +264,26 @@
 
       <div>
         <span class="text-slate-400 font-bold uppercase tracking-wider text-[9px] block mb-1">Reason for Leave</span>
-        <p class="text-slate-600 font-medium leading-relaxed bg-slate-50 rounded-xl p-3.5 border border-slate-100 mt-1">
+        <p class="text-slate-700 font-medium leading-relaxed bg-slate-50 rounded-xl p-3 border border-slate-200/80 mt-1">
           {{ selectedRequest.reason }}
         </p>
       </div>
     </div>
 
     <!-- Action Bar (Only visible if Pending) -->
-    <div *ngIf="selectedRequest.status === 'Pending'" class="flex gap-3 mt-4">
+    <div *ngIf="(selectedRequest.status || '').toUpperCase() === 'PENDING'" class="flex gap-3 mt-2">
       <button (click)="triggerAction(selectedRequest, 'Reject')" type="button"
-        class="flex-1 py-3 text-xs font-bold text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 border border-rose-200 hover:border-rose-600 rounded-xl transition duration-150 cursor-pointer">
+        class="flex-1 py-2.5 text-xs font-bold text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 border border-rose-200 hover:border-rose-600 rounded-xl transition duration-150 cursor-pointer">
         Reject Request
       </button>
       <button (click)="triggerAction(selectedRequest, 'Approve')" type="button"
-        class="flex-1 py-3 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-600/10 hover:shadow-emerald-600/20 transition duration-150 cursor-pointer">
+        class="flex-1 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-600/10 hover:shadow-emerald-600/20 transition duration-150 cursor-pointer">
         Approve Request
       </button>
     </div>
 
     <!-- History Timeline -->
-    <div class="border-t border-slate-100 pt-6 mt-2">
+    <div class="border-t border-slate-100 pt-5 mt-1">
       <h4 class="text-xs font-bold text-slate-800 mb-4 uppercase tracking-wide">Approval History</h4>
 
       <div *ngIf="isLoadingHistory" class="flex justify-center p-4">
@@ -266,7 +296,7 @@
       </div>
 
       <div *ngIf="!isLoadingHistory && leaveHistory.length > 0"
-        class="relative pl-4 space-y-6 before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-slate-200">
+        class="relative pl-4 space-y-5 before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-slate-200">
         <div *ngFor="let item of leaveHistory" class="relative">
           <div class="absolute -left-[21px] top-1 rounded-full p-1 border-2 border-white bg-slate-200"
             [class.bg-emerald-500]="item.status === 'APPROVED' || item.status === 'Approved'"
@@ -280,12 +310,10 @@
               <span class="text-[10px] font-medium text-slate-400">{{ item.created_at | date:'medium' }}</span>
             </div>
             <div class="text-[11px] text-slate-500 mb-1">
-              By <span class="font-semibold text-slate-700">{{ item.action_by_name || 'System' }}</span> <span
-                *ngIf="item.action_by_role" class="text-[9px] px-1.5 py-0.5 bg-slate-100 rounded text-slate-500 ml-1">{{
-                item.action_by_role }}</span>
+              By <span class="font-semibold text-slate-700">{{ item.action_by_name || 'System' }}</span> 
+              <span *ngIf="item.action_by_role" class="text-[9px] px-1.5 py-0.5 bg-slate-100 rounded text-slate-500 ml-1">{{ item.action_by_role }}</span>
             </div>
-            <div *ngIf="item.remarks"
-              class="text-[11px] text-slate-600 bg-slate-50 p-2 rounded border border-slate-100 mt-1.5">
+            <div *ngIf="item.remarks" class="text-[11px] text-slate-600 bg-slate-50 p-2 rounded border border-slate-100 mt-1.5">
               "{{ item.remarks }}"
             </div>
           </div>
@@ -298,15 +326,13 @@
 <!-- Dialog: Confirm Action -->
 <div *ngIf="showConfirmModal"
   class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in">
-  <div
-    class="bg-white rounded-2xl shadow-2xl border border-slate-100 max-w-md w-full p-6 relative overflow-hidden transform transition-all duration-300 scale-100">
+  <div class="bg-white rounded-2xl shadow-2xl border border-slate-100 max-w-md w-full p-6 relative overflow-hidden transform transition-all duration-300 scale-100">
     <!-- Top accent decoration -->
-    <div class="absolute top-0 left-0 w-full h-1.5" [class.bg-emerald-500]="actionType === 'Approve'"
-      [class.bg-rose-500]="actionType === 'Reject'"></div>
+    <div class="absolute top-0 left-0 w-full h-1.5" [class.bg-emerald-500]="actionType === 'Approve'" [class.bg-rose-500]="actionType === 'Reject'"></div>
 
     <!-- Icon & Header -->
     <div class="flex items-start gap-4 mb-5 font-sans">
-      <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-sm shrink-0 border"
+      <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-xs shrink-0 border"
         [class.bg-emerald-50]="actionType === 'Approve'" [class.border-emerald-100]="actionType === 'Approve'"
         [class.text-emerald-600]="actionType === 'Approve'" [class.bg-rose-50]="actionType === 'Reject'"
         [class.border-rose-100]="actionType === 'Reject'" [class.text-rose-600]="actionType === 'Reject'">
@@ -317,14 +343,13 @@
           {{ actionType === 'Approve' ? 'Approve Leave Application' : 'Reject Leave Application' }}
         </h3>
         <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-          Are you sure you want to <strong>{{ actionType | lowercase }}</strong> the leave request for <strong>{{
-            selectedRequest?.employeeName }}</strong>?
+          Are you sure you want to <strong>{{ actionType | lowercase }}</strong> the leave request for <strong>{{ selectedRequest?.employeeName }}</strong>?
         </p>
       </div>
     </div>
 
     <!-- Brief Detail Summary -->
-    <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-100 text-xs mb-4 flex flex-col gap-2 font-sans">
+    <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200/80 text-xs mb-4 flex flex-col gap-2 font-sans">
       <div class="flex justify-between">
         <span class="text-slate-400 font-medium">Employee:</span>
         <span class="text-slate-800 font-semibold">{{ selectedRequest?.employeeName }}</span>
@@ -350,11 +375,11 @@
     <!-- Yes and No Buttons -->
     <div class="flex gap-3 justify-end font-sans">
       <button type="button" (click)="confirmAction(false)"
-        class="px-4 py-2.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition duration-150 cursor-pointer">
+        class="px-4 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition duration-150 cursor-pointer">
         No, Cancel
       </button>
       <button type="button" (click)="confirmAction(true)"
-        class="px-5 py-2.5 text-xs font-bold text-white rounded-xl shadow-md transition duration-150 cursor-pointer"
+        class="px-5 py-2 text-xs font-bold text-white rounded-xl shadow-md transition duration-150 cursor-pointer"
         [class.bg-emerald-600]="actionType === 'Approve'" [class.hover:bg-emerald-700]="actionType === 'Approve'"
         [class.shadow-emerald-600/10]="actionType === 'Approve'"
         [class.hover:shadow-emerald-600/20]="actionType === 'Approve'" [class.bg-rose-600]="actionType === 'Reject'"

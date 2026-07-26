@@ -1,1 +1,14 @@
 /* Styles for ApplyShortLeave page component */
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.btn-add {
+  transition: all 0.2s ease-in-out;
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+  }
+}
