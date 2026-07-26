@@ -1,7 +1,6 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb';
 
 import { TicketService, TicketItem, TicketStats } from '../../../shared/services/ticket.service';
 import { EmployeeManagementService } from '../../../shared/services/employee-management.service';
@@ -18,8 +17,9 @@ import { ToastModule } from 'primeng/toast';
 import { TextareaModule } from 'primeng/textarea';
 import { CardModule } from 'primeng/card';
 import { BadgeModule } from 'primeng/badge';
-
 import { Breadcrumb } from 'primeng/breadcrumb';
+
+import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template';
 
 interface CategoryCard {
   name: 'ADMINISTRATION' | 'HUMAN RESOURCE - CRG' | 'IT HELPDESK';
@@ -48,7 +48,8 @@ interface CategoryCard {
     ToastModule,
     TextareaModule,
     CardModule,
-    BadgeModule
+    BadgeModule,
+    TableTemplate
   ],
   providers: [MessageService],
   templateUrl: './ticket.html',
@@ -60,7 +61,6 @@ export class Ticket implements OnInit {
     { label: 'Raise Ticket', icon: 'pi pi-ticket', routerLink: '/ess/ticket' }
   ];
 
-  // Restricted strictly to the 3 target categories as requested
   categories: CategoryCard[] = [
     {
       name: 'ADMINISTRATION',
@@ -127,6 +127,26 @@ export class Ticket implements OnInit {
     { label: 'Rejected', value: 'REJECTED' }
   ];
 
+  // TableTemplate Configurations
+  statusTabs = [
+    { label: 'All Tickets', value: 'ALL', icon: 'pi pi-list' },
+    { label: 'Under Process', value: 'UNDER_PROCESS', icon: 'pi pi-spin pi-spinner' },
+    { label: 'In Review', value: 'IN_REVIEW', icon: 'pi pi-eye' },
+    { label: 'Resolved', value: 'RESOLVED', icon: 'pi pi-check-circle' },
+    { label: 'Closed', value: 'CLOSED', icon: 'pi pi-lock' },
+    { label: 'Rejected', value: 'REJECTED', icon: 'pi pi-times-circle' }
+  ];
+
+  columns: TableColumn[] = [
+    { key: 'ticket_code', header: 'Ticket Code', isSortable: true },
+    { key: 'category', header: 'Category', isSortable: true },
+    { key: 'subject', header: 'Subject & Remark', isSortable: true },
+    { key: 'creator_name', header: 'Raised By', isSortable: true },
+    { key: 'created_at', header: 'Created Date', isSortable: true },
+    { key: 'status', header: 'Status', isSortable: true },
+    { key: 'actions', header: 'Actions' }
+  ];
+
   tickets: TicketItem[] = [];
   stats: TicketStats = {
     totalTickets: 0,
@@ -150,8 +170,12 @@ export class Ticket implements OnInit {
   selectedStatus = 'ALL';
   selectedCategoryFilter = 'ALL';
 
+  // Drawer Fullscreen Mode
+  isFormFullscreen = signal(false);
+
   // Raise Ticket Drawer State
   showRaiseDrawer = false;
+  editingTicketId: number | null = null;
   ticketForm!: FormGroup;
   submitting = false;
 
@@ -181,8 +205,19 @@ export class Ticket implements OnInit {
       subject: ['', [Validators.required, Validators.maxLength(255)]],
       priority: ['MEDIUM', Validators.required],
       cc_employees: [[]],
-      remark: ['', [Validators.required, Validators.minLength(5)]] // REMARK IS MANDATORY
+      remark: ['', [Validators.required, Validators.minLength(5)]]
     });
+  }
+
+  toggleFormFullscreen(): void {
+    this.isFormFullscreen.update(v => !v);
+    this.cdr.markForCheck();
+  }
+
+  onTabChange(tabValue: string): void {
+    this.selectedStatus = tabValue;
+    this.page = 1;
+    this.loadTickets();
   }
 
   applyQuickTemplate(category: string, subject: string, remark: string): void {
@@ -284,10 +319,10 @@ export class Ticket implements OnInit {
   }
 
   openRaiseDrawer(categoryName?: string): void {
+    this.editingTicketId = null;
     this.ticketForm.reset({
       category: categoryName || 'IT HELPDESK',
       subject: 'Laptop Hardware Change / Upgrade',
-      custom_subject: '',
       priority: 'MEDIUM',
       cc_employees: [],
       remark: ''
@@ -296,84 +331,125 @@ export class Ticket implements OnInit {
     this.cdr.markForCheck();
   }
 
-  submitTicket(): void {
-    if (this.ticketForm.invalid) {
-      this.ticketForm.markAllAsTouched();
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Form Validation Error',
-        detail: 'Please fill all mandatory fields including Remark.'
-      });
-      return;
-    }
-
-    const formRaw = this.ticketForm.getRawValue();
-    let finalSubject = formRaw.subject;
-    if (finalSubject === 'Other') {
-      finalSubject = (formRaw.custom_subject || '').trim();
-      if (!finalSubject) {
-        this.messageService.add({
-          severity: 'warn',
-          summary: 'Subject Required',
-          detail: 'Please enter custom subject / issue title.'
-        });
-        return;
-      }
-    }
-
-    this.submitting = true;
-    this.cdr.markForCheck();
-
-    const payload = {
-      category: formRaw.category,
-      subject: finalSubject,
-      priority: formRaw.priority,
-      cc_employees: formRaw.cc_employees || [],
-      remark: formRaw.remark
-    };
-
-    this.ticketService.createTicket(payload).subscribe({
+  editTicket(ticket: TicketItem): void {
+    this.ticketService.getTicketById(ticket.id).subscribe({
       next: (res) => {
-        this.submitting = false;
+        const item = res && res.success ? res.data : ticket;
+        this.editingTicketId = item.id;
+        const ccIds = (item.cc_employees || []).map((c: any) => Number(c.employee_id));
+
+        this.ticketForm.patchValue({
+          category: item.category || 'IT HELPDESK',
+          subject: item.subject || '',
+          priority: item.priority || 'MEDIUM',
+          cc_employees: ccIds,
+          remark: item.remark || ''
+        });
+
+        this.showRaiseDrawer = true;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch ticket details for edit' });
+      }
+    });
+  }
+
+  deleteTicket(ticketId: number): void {
+    this.ticketService.deleteTicket(ticketId).subscribe({
+      next: (res) => {
         if (res.success) {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Ticket Raised Successfully',
-            detail: `Ticket ${res.data?.ticket_code} has been created.`
-          });
-          this.showRaiseDrawer = false;
+          this.messageService.add({ severity: 'info', summary: 'Deleted', detail: 'Support ticket deleted successfully.' });
           this.loadStats();
           this.loadTickets();
-          
-          if (res.data) {
-            this.openWorkflowDrawer(res.data);
-          }
         }
         this.cdr.markForCheck();
       },
       error: (err) => {
-        this.submitting = false;
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Submission Failed',
-          detail: err?.error?.message || 'Failed to raise ticket'
-        });
-        this.cdr.markForCheck();
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.error?.message || 'Failed to delete ticket' });
       }
     });
+  }
+
+  submitTicket(): void {
+    if (this.ticketForm.invalid) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Form Invalid',
+        detail: 'Please fill all required fields, including remark description.'
+      });
+      return;
+    }
+
+    this.submitting = true;
+    const val = this.ticketForm.value;
+
+    if (this.editingTicketId) {
+      this.ticketService.updateTicket(this.editingTicketId, val).subscribe({
+        next: (res) => {
+          this.submitting = false;
+          if (res.success) {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Ticket Updated',
+              detail: `Ticket updated successfully!`
+            });
+            this.showRaiseDrawer = false;
+            this.editingTicketId = null;
+            this.loadStats();
+            this.loadTickets();
+          }
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          this.submitting = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Failed',
+            detail: err?.error?.message || 'Failed to update ticket'
+          });
+          this.cdr.markForCheck();
+        }
+      });
+    } else {
+      this.ticketService.createTicket(val).subscribe({
+        next: (res) => {
+          this.submitting = false;
+          if (res.success) {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Ticket Created',
+              detail: `Ticket ${res.data?.ticket_code || ''} created successfully!`
+            });
+            this.showRaiseDrawer = false;
+            this.loadStats();
+            this.loadTickets();
+          }
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          this.submitting = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Failed',
+            detail: err?.error?.message || 'Failed to create ticket'
+          });
+          this.cdr.markForCheck();
+        }
+      });
+    }
   }
 
   openWorkflowDrawer(ticket: TicketItem): void {
     this.ticketService.getTicketById(ticket.id).subscribe({
       next: (res) => {
-        if (res.success) {
+        if (res.success && res.data) {
           this.selectedTicket = res.data;
-          this.newCommentText = '';
           this.showWorkflowDrawer = true;
           this.cdr.markForCheck();
         }
       },
-      error: (err) => {
+      error: () => {
         this.selectedTicket = ticket;
         this.showWorkflowDrawer = true;
         this.cdr.markForCheck();
@@ -381,42 +457,66 @@ export class Ticket implements OnInit {
     });
   }
 
-  postComment(): void {
-    if (!this.selectedTicket || !this.newCommentText.trim()) return;
+  updateTicketStatus(newStatus: string): void {
+    if (!this.selectedTicket) return;
 
-    const ticketId = this.selectedTicket.id;
-    this.ticketService.addComment(ticketId, this.newCommentText.trim()).subscribe({
-      next: () => {
-        this.newCommentText = '';
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Update Posted',
-          detail: 'Your comment was added to the ticket history.'
-        });
-        // Reload ticket details
-        this.ticketService.getTicketById(ticketId).subscribe((res) => {
-          if (res.success) {
-            this.selectedTicket = res.data;
-            this.cdr.markForCheck();
+    this.ticketService.updateTicketStatus(this.selectedTicket.id, newStatus).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Status Updated',
+            detail: `Ticket status updated to ${newStatus}`
+          });
+          if (this.selectedTicket) {
+            this.selectedTicket.status = newStatus as any;
           }
-        });
+          this.loadStats();
+          this.loadTickets();
+        }
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: err?.error?.message || 'Failed to post update'
+          detail: err?.error?.message || 'Failed to update status'
         });
       }
     });
   }
 
-  onFilterChange(): void {
+  addComment(): void {
+    if (!this.selectedTicket || !this.newCommentText.trim()) return;
+
+    this.ticketService.addComment(this.selectedTicket.id, this.newCommentText.trim()).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Comment Added',
+            detail: 'Your remark has been posted'
+          });
+          this.newCommentText = '';
+          this.openWorkflowDrawer(this.selectedTicket!);
+        }
+      },
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err?.error?.message || 'Failed to add comment'
+        });
+      }
+    });
+  }
+
+  onSearch(): void {
     this.page = 1;
     this.loadTickets();
   }
 
-  onSearch(): void {
+  onFilterChange(): void {
     this.page = 1;
     this.loadTickets();
   }
@@ -425,56 +525,5 @@ export class Ticket implements OnInit {
     this.page = Math.floor(event.first / event.rows) + 1;
     this.limit = event.rows;
     this.loadTickets();
-  }
-
-  getStatusSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {
-    switch (status) {
-      case 'RESOLVED':
-      case 'CLOSED':
-        return 'success';
-      case 'IN_REVIEW':
-        return 'warn';
-      case 'UNDER_PROCESS':
-        return 'info';
-      case 'REJECTED':
-        return 'danger';
-      default:
-        return 'secondary';
-    }
-  }
-
-  getPrioritySeverity(priority: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {
-    switch (priority) {
-      case 'URGENT':
-        return 'danger';
-      case 'HIGH':
-        return 'warn';
-      case 'MEDIUM':
-        return 'info';
-      case 'LOW':
-      default:
-        return 'secondary';
-    }
-  }
-
-  getWorkflowStepIndex(status: string): number {
-    switch (status) {
-      case 'UNDER_PROCESS':
-        return 1;
-      case 'IN_REVIEW':
-        return 2;
-      case 'RESOLVED':
-      case 'CLOSED':
-        return 3;
-      case 'REJECTED':
-        return 0;
-      default:
-        return 1;
-    }
-  }
-
-  formatStatus(status: string | undefined): string {
-    if (!status) return '';
-    return status.replace(/_/g, ' ');
   }
 }

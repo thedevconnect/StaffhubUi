@@ -1,12 +1,13 @@
 <p-toast></p-toast>
 
+<!-- Top Breadcrumb & Action Header Bar -->
 <div
-  class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6">
+  class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6 shadow-xs">
   <div class="flex-1 min-w-0">
     <p-breadcrumb [model]="breadcrumbItems"
       styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
   </div>
-  <div class="shrink-0 py-1.5">
+  <div class="shrink-0 py-1.5 flex items-center gap-2">
     <p-button (onClick)="openRaiseDrawer()" label="Raise Ticket" icon="pi pi-plus"
       styleClass="p-button-sm p-button-info rounded-xl font-bold shadow-xs px-3.5 py-1.5 text-xs"></p-button>
   </div>
@@ -17,9 +18,10 @@
   <!-- PAGE TITLE & TOP ACTION -->
   <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
     <div class="flex items-center gap-2">
-      <h1 class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Employee Self Service - Raise Ticket</h1>
+      <h1 class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Employee Self Service - Support Tickets
+      </h1>
       <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-indigo-200">
-        E2E Ticket System
+        Live Helpdesk
       </span>
     </div>
     <p class="text-xs md:text-sm text-slate-500 mt-1">
@@ -27,213 +29,177 @@
     </p>
   </div>
 
-  <!-- DASHBOARD STATS CARDS -->
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+  <!-- DASHBOARD STATS CARDS (Ultra Compact & Sleek) -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5">
     <!-- Total Tickets -->
-    <div
-      class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
-      <div class="flex items-center justify-between text-slate-400 mb-2">
-        <span class="text-xs font-bold uppercase tracking-wider text-slate-600">Total Tickets</span>
-        <div class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
-          <i class="pi pi-ticket text-sm"></i>
-        </div>
+    <div class="bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-2xs flex items-center justify-between">
+      <div class="space-y-0.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Total Tickets</span>
+        <div class="text-lg font-black text-slate-900 leading-none">{{ stats.totalTickets }}</div>
       </div>
-      <div class="text-3xl font-black text-slate-900">{{ stats.totalTickets }}</div>
-      <div class="text-[11px] text-slate-500 mt-2 font-medium">All submitted requests</div>
+      <div class="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center text-slate-600 shrink-0">
+        <i class="pi pi-ticket text-[10px]"></i>
+      </div>
     </div>
 
     <!-- Under Process -->
-    <div
-      class="bg-white p-5 rounded-2xl border border-amber-100 bg-amber-50/20 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
-      <div class="flex items-center justify-between text-amber-600 mb-2">
-        <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Under Process</span>
-        <div class="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700">
-          <i class="pi pi-spin pi-spinner text-sm"></i>
-        </div>
+    <div class="bg-white px-3 py-2 rounded-lg border border-amber-200 bg-amber-50/20 shadow-2xs flex items-center justify-between">
+      <div class="space-y-0.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700 block">Under Process</span>
+        <div class="text-lg font-black text-amber-600 leading-none">{{ stats.underProcessCount }}</div>
       </div>
-      <div class="text-3xl font-black text-amber-600">{{ stats.underProcessCount }}</div>
-      <div class="text-[11px] text-amber-700 mt-2 font-semibold">Active & reviewing</div>
+      <div class="w-6 h-6 rounded-md bg-amber-100 flex items-center justify-center text-amber-700 shrink-0">
+        <i class="pi pi-spin pi-spinner text-[10px]"></i>
+      </div>
     </div>
 
     <!-- In Review -->
-    <div
-      class="bg-white p-5 rounded-2xl border border-sky-100 bg-sky-50/20 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
-      <div class="flex items-center justify-between text-sky-600 mb-2">
-        <span class="text-xs font-bold uppercase tracking-wider text-sky-700">In Review</span>
-        <div class="w-8 h-8 rounded-xl bg-sky-100 flex items-center justify-center text-sky-700">
-          <i class="pi pi-eye text-sm"></i>
-        </div>
+    <div class="bg-white px-3 py-2 rounded-lg border border-sky-200 bg-sky-50/20 shadow-2xs flex items-center justify-between">
+      <div class="space-y-0.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-sky-700 block">In Review</span>
+        <div class="text-lg font-black text-sky-600 leading-none">{{ stats.inReviewCount }}</div>
       </div>
-      <div class="text-3xl font-black text-sky-600">{{ stats.inReviewCount }}</div>
-      <div class="text-[11px] text-sky-700 mt-2 font-semibold">Pending resolution</div>
+      <div class="w-6 h-6 rounded-md bg-sky-100 flex items-center justify-center text-sky-700 shrink-0">
+        <i class="pi pi-eye text-[10px]"></i>
+      </div>
     </div>
 
     <!-- Resolved / Closed -->
-    <div
-      class="bg-white p-5 rounded-2xl border border-emerald-100 bg-emerald-50/20 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
-      <div class="flex items-center justify-between text-emerald-600 mb-2">
-        <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Resolved & Closed</span>
-        <div class="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700">
-          <i class="pi pi-check-circle text-sm"></i>
-        </div>
+    <div class="bg-white px-3 py-2 rounded-lg border border-emerald-200 bg-emerald-50/20 shadow-2xs flex items-center justify-between">
+      <div class="space-y-0.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">Resolved & Closed</span>
+        <div class="text-lg font-black text-emerald-600 leading-none">{{ stats.resolvedCount + stats.closedCount }}</div>
       </div>
-      <div class="text-3xl font-black text-emerald-600">{{ stats.resolvedCount + stats.closedCount }}</div>
-      <div class="text-[11px] text-emerald-700 mt-2 font-semibold">Completed requests</div>
-    </div>
-  </div>
-
-
-
-  <!-- FILTERS & SEARCH CONTROL BAR -->
-  <div
-    class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row gap-4 items-center justify-between">
-    <!-- Left Filter Group -->
-    <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-      <!-- Search Input -->
-      <div class="relative w-full sm:w-72">
-        <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-        <input pInputText type="text" placeholder="Search ticket code, subject, remark..." [(ngModel)]="searchQuery"
-          (keyup.enter)="onSearch()"
-          class="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border-slate-200 rounded-xl focus:bg-white" />
+      <div class="w-6 h-6 rounded-md bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
+        <i class="pi pi-check-circle text-[10px]"></i>
       </div>
-
-      <!-- Category Filter -->
-      <p-select [options]="categoryOptions" [(ngModel)]="selectedCategoryFilter" optionLabel="label" optionValue="value"
-        (onChange)="onFilterChange()" styleClass="w-full sm:w-56 bg-slate-50 border-slate-200 text-sm rounded-xl" />
-
-      <!-- Status Filter -->
-      <p-select [options]="statusOptions" [(ngModel)]="selectedStatus" optionLabel="label" optionValue="value"
-        (onChange)="onFilterChange()" styleClass="w-full sm:w-48 bg-slate-50 border-slate-200 text-sm rounded-xl" />
-    </div>
-
-    <div class="flex items-center gap-2 self-end sm:self-auto">
-      <p-button label="Refresh" icon="pi pi-refresh" (onClick)="loadTickets()" [outlined]="true"
-        styleClass="p-button-secondary p-button-sm rounded-xl"></p-button>
     </div>
   </div>
 
-  <!-- MAIN TICKETS DATA TABLE -->
-  <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-    <p-table [value]="tickets" [loading]="loading" [paginator]="true" [rows]="limit" [totalRecords]="totalRecords"
-      [lazy]="true" (onPage)="onPageChange($event)" styleClass="p-datatable-striped text-sm" responsiveLayout="scroll">
-
-      <ng-template pTemplate="header">
-        <tr class="bg-slate-50 text-slate-700 uppercase text-xs tracking-wider">
-          <th class="py-3.5 px-4 font-bold">Ticket Code</th>
-          <th class="py-3.5 px-4 font-bold">Category</th>
-          <th class="py-3.5 px-4 font-bold">Subject & Remark</th>
-          <th class="py-3.5 px-4 font-bold">Raised By</th>
-          <th class="py-3.5 px-4 font-bold">CC Employee(s)</th>
-          <th class="py-3.5 px-4 font-bold">Status</th>
-          <th class="py-3.5 px-4 font-bold">Date</th>
-          <th class="py-3.5 px-4 font-bold text-center">Action</th>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="body" let-ticket>
-        <tr class="hover:bg-slate-50/80 transition-all border-b border-slate-100">
-          <!-- Ticket Code -->
-          <td class="py-3.5 px-4">
-            <span
-              class="font-mono font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100 cursor-pointer hover:underline"
-              (click)="openWorkflowDrawer(ticket)">
-              {{ ticket.ticket_code }}
-            </span>
-          </td>
-
-          <!-- Category -->
-          <td class="py-3.5 px-4">
-            <span class="text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide" [ngClass]="{
-                'bg-red-50 text-red-700 border border-red-200': ticket.category === 'ADMINISTRATION',
-                'bg-emerald-50 text-emerald-700 border border-emerald-200': ticket.category === 'HUMAN RESOURCE - CRG',
-                'bg-sky-50 text-sky-700 border border-sky-200': ticket.category === 'IT HELPDESK'
-              }">
-              {{ ticket.category }}
-            </span>
-          </td>
-
-          <!-- Subject & Remark -->
-          <td class="py-3.5 px-4 max-w-xs">
-            <div class="font-bold text-slate-900 cursor-pointer hover:text-indigo-600 truncate"
-              (click)="openWorkflowDrawer(ticket)">
-              {{ ticket.subject }}
-            </div>
-            <div class="text-xs text-slate-500 truncate mt-0.5">
-              <span class="font-semibold text-slate-600">Remark:</span> {{ ticket.remark }}
-            </div>
-          </td>
-
-          <!-- Raised By -->
-          <td class="py-3.5 px-4">
-            <div class="flex items-center gap-2">
-              <div
-                class="w-7 h-7 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-xs">
-                {{ (ticket.creator_name || 'E').charAt(0).toUpperCase() }}
-              </div>
-              <div>
-                <div class="font-semibold text-slate-800 text-xs">{{ ticket.creator_name || 'Employee' }}</div>
-                <div class="text-[10px] text-slate-400">{{ ticket.creator_emp_id || '' }}</div>
-              </div>
-            </div>
-          </td>
-
-          <!-- CC Employee(s) -->
-          <td class="py-3.5 px-4">
-            <span *ngIf="ticket.cc_employee_names"
-              class="text-xs font-medium text-slate-700 bg-slate-100 px-2 py-1 rounded-md">
-              <i class="pi pi-user-plus mr-1 text-[10px]"></i> {{ ticket.cc_employee_names }}
-            </span>
-            <span *ngIf="!ticket.cc_employee_names" class="text-xs text-slate-400 italic">None</span>
-          </td>
-
-          <!-- Status Tag -->
-          <td class="py-3.5 px-4">
-            <p-tag [value]="formatStatus(ticket.status)" [severity]="getStatusSeverity(ticket.status)"
-              styleClass="text-xs font-bold uppercase px-2.5 py-1" />
-          </td>
-
-          <!-- Date -->
-          <td class="py-3.5 px-4 text-xs font-medium text-slate-500 whitespace-nowrap">
-            {{ ticket.created_at | date: 'dd MMM yyyy, hh:mm a' }}
-          </td>
-
-          <!-- Action -->
-          <td class="py-3.5 px-4 text-center">
-            <p-button (onClick)="openWorkflowDrawer(ticket)" label="View Status" icon="pi pi-eye"
-              styleClass="p-button-sm p-button-outlined p-button-info rounded-lg text-xs font-semibold px-2.5 py-1"></p-button>
-          </td>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="8" class="text-center py-12 text-slate-400">
-            <i class="pi pi-ticket text-4xl block mb-2 opacity-50"></i>
-            <p class="text-sm font-semibold">No tickets found.</p>
-            <p class="text-xs text-slate-400 mt-1">Click "Raise Ticket" or select a category card to create a new
-              ticket.</p>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
+  <!-- Shared TableTemplate Section -->
+  <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <app-table-template [data]="tickets" [columns]="columns" [tabs]="statusTabs" [activeTab]="selectedStatus"
+      (tabChange)="onTabChange($event)" [isLoading]="loading" exportFileName="Employee_Support_Tickets"
+      (refresh)="loadTickets()" [cellTemplates]="{
+        ticket_code: ticketCodeTpl,
+        category: categoryTpl,
+        subject: subjectTpl,
+        creator_name: creatorTpl,
+        created_at: dateTpl,
+        status: statusTpl,
+        actions: actionsTpl
+      }">
+    </app-table-template>
   </div>
+
+  <!-- Custom Cell Templates for TableTemplate -->
+  <ng-template #ticketCodeTpl let-ticket>
+    <span
+      class="font-mono font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100 cursor-pointer hover:underline text-xs"
+      (click)="openWorkflowDrawer(ticket)">
+      {{ ticket.ticket_code }}
+    </span>
+  </ng-template>
+
+  <ng-template #categoryTpl let-ticket>
+    <span class="text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide" [ngClass]="{
+        'bg-red-50 text-red-700 border border-red-200': ticket.category === 'ADMINISTRATION',
+        'bg-emerald-50 text-emerald-700 border border-emerald-200': ticket.category === 'HUMAN RESOURCE - CRG',
+        'bg-sky-50 text-sky-700 border border-sky-200': ticket.category === 'IT HELPDESK'
+      }">
+      {{ ticket.category }}
+    </span>
+  </ng-template>
+
+  <ng-template #subjectTpl let-ticket>
+    <div class="max-w-xs">
+      <div class="font-bold text-slate-900 cursor-pointer hover:text-indigo-600 truncate text-xs"
+        (click)="openWorkflowDrawer(ticket)">
+        {{ ticket.subject }}
+      </div>
+      <div class="text-[11px] text-slate-500 truncate mt-0.5" [title]="ticket.remark">
+        <span class="font-semibold text-slate-600">Remark:</span> {{ ticket.remark }}
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #creatorTpl let-ticket>
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-xs">
+        {{ (ticket.creator_name || 'E').charAt(0).toUpperCase() }}
+      </div>
+      <div>
+        <div class="font-semibold text-slate-800 text-xs">{{ ticket.creator_name || 'Employee' }}</div>
+        <div class="text-[10px] text-slate-400" *ngIf="ticket.creator_emp_id">{{ ticket.creator_emp_id }}</div>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #dateTpl let-ticket>
+    <span class="text-xs text-slate-500 font-medium whitespace-nowrap">
+      {{ ticket.created_at | date:'dd MMM yyyy, hh:mm a' }}
+    </span>
+  </ng-template>
+
+  <ng-template #statusTpl let-ticket>
+    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shadow-2xs" [ngClass]="{
+        'bg-amber-50 text-amber-700 border border-amber-200': ticket.status === 'UNDER_PROCESS',
+        'bg-sky-50 text-sky-700 border border-sky-200': ticket.status === 'IN_REVIEW',
+        'bg-emerald-50 text-emerald-700 border border-emerald-200': ticket.status === 'RESOLVED',
+        'bg-slate-100 text-slate-700 border border-slate-200': ticket.status === 'CLOSED',
+        'bg-rose-50 text-rose-700 border border-rose-200': ticket.status === 'REJECTED'
+      }">
+      <span class="h-1.5 w-1.5 rounded-full" [ngClass]="{
+          'bg-amber-500': ticket.status === 'UNDER_PROCESS',
+          'bg-sky-500': ticket.status === 'IN_REVIEW',
+          'bg-emerald-500': ticket.status === 'RESOLVED',
+          'bg-slate-500': ticket.status === 'CLOSED',
+          'bg-rose-500': ticket.status === 'REJECTED'
+        }"></span>
+      {{ (ticket.status || '').replace('_', ' ') }}
+    </span>
+  </ng-template>
+
+  <ng-template #actionsTpl let-ticket>
+    <div class="flex items-center justify-end gap-1">
+      <p-button (onClick)="openWorkflowDrawer(ticket)" icon="pi pi-eye"
+        styleClass="p-button-text p-button-sm p-button-info" pTooltip="View Workflow"></p-button>
+      <p-button (onClick)="editTicket(ticket)" icon="pi pi-pencil"
+        styleClass="p-button-text p-button-sm p-button-secondary" pTooltip="Edit Ticket"></p-button>
+      <p-button (onClick)="deleteTicket(ticket.id)" icon="pi pi-trash"
+        styleClass="p-button-text p-button-sm p-button-danger" pTooltip="Delete Ticket"></p-button>
+    </div>
+  </ng-template>
+
 </div>
 
 <!-- ========================================================================= -->
 <!-- 1. RAISE TICKET DRAWER FORM (p-drawer) -->
 <!-- ========================================================================= -->
-<p-drawer [(visible)]="showRaiseDrawer" position="right" [style]="{ width: '100%', maxWidth: '36rem' }"
+<p-drawer [(visible)]="showRaiseDrawer" position="right" [modal]="true"
+  [style]="isFormFullscreen() ? { width: '100vw', height: '100vh', maxWidth: '100vw', margin: '0', borderRadius: '0' } : { width: '100%', maxWidth: '36rem' }"
   styleClass="border-none shadow-2xl bg-white">
 
   <ng-template pTemplate="header">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
-        <i class="pi pi-ticket text-lg"></i>
+    <div class="flex items-center justify-between w-full pr-6 text-slate-800">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+          <i class="pi pi-ticket text-lg"></i>
+        </div>
+        <div>
+          <h2 class="text-lg font-black text-slate-900">{{ editingTicketId ? 'Edit Support Ticket' : 'Raise Support
+            Ticket' }}</h2>
+          <p class="text-xs text-slate-500">Select category, add employee in CC, and submit remark</p>
+        </div>
       </div>
-      <div>
-        <h2 class="text-lg font-black text-slate-900">Raise Support Ticket</h2>
-        <p class="text-xs text-slate-500">Select category, add employee in CC, and submit remark</p>
-      </div>
+
+      <!-- Fullscreen Mode Toggle Button -->
+      <button (click)="toggleFormFullscreen()" type="button"
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:text-indigo-600 text-xs font-bold transition cursor-pointer shadow-2xs">
+        <i
+          [class]="isFormFullscreen() ? 'pi pi-window-minimize text-rose-600' : 'pi pi-window-maximize text-indigo-600'"></i>
+        <span>{{ isFormFullscreen() ? ' ' : ' ' }}</span>
+      </button>
     </div>
   </ng-template>
 
@@ -288,229 +254,179 @@
         appendTo="body" />
       <small *ngIf="ticketForm.get('subject')?.touched && ticketForm.get('subject')?.invalid"
         class="text-rose-500 text-xs block mt-1">Subject title is required.</small>
-
-      <!-- Custom Subject Input when 'Other' is selected -->
-      <div *ngIf="ticketForm.get('subject')?.value === 'Other'" class="mt-3">
-        <label class="block text-xs font-bold text-indigo-700 uppercase tracking-wider mb-1.5">
-          Enter Custom Subject / Title *
-        </label>
-        <input pInputText formControlName="custom_subject" placeholder="Type your custom subject or issue title here..."
-          class="w-full text-sm rounded-xl p-3 border-indigo-300 bg-indigo-50/40 focus:bg-white focus:border-indigo-500" />
-      </div>
     </div>
 
-    <!-- Priority & CC Employee Selection -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <!-- Priority -->
-      <div>
-        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-          Priority *
-        </label>
-        <p-select [options]="priorityOptions" formControlName="priority" optionLabel="label" optionValue="value"
-          styleClass="w-full text-sm rounded-xl border-slate-300" appendTo="body" />
-      </div>
-
-      <!-- CC Employee(s) -->
-      <div>
-        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-          Add Employee in CC
-        </label>
-        <p-multiSelect [options]="employees" formControlName="cc_employees" optionLabel="label" optionValue="value"
-          placeholder="Select CC Employee(s)" display="chip" styleClass="w-full text-sm rounded-xl border-slate-300"
-          appendTo="body" />
-        <span class="text-[11px] text-slate-400 mt-1 block">Selected employee(s) will be notified</span>
-      </div>
-    </div>
-
-    <!-- MANDATORY REMARK / DESCRIPTION -->
+    <!-- Priority -->
     <div>
-      <div class="flex items-center justify-between mb-1.5">
-        <label class="block text-xs font-bold text-rose-700 uppercase tracking-wider">
-          Remark / Detailed Description * (Mandatory)
-        </label>
-        <span class="text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
-          Required Field
-        </span>
-      </div>
-      <textarea pTextarea formControlName="remark" rows="5"
-        placeholder="Fill detailed remark or description for the ticket. What issue are you facing?"
-        class="w-full text-sm rounded-xl p-3 border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-        [class.border-rose-500]="ticketForm.get('remark')?.touched && ticketForm.get('remark')?.invalid"></textarea>
-
-      <small *ngIf="ticketForm.get('remark')?.touched && ticketForm.get('remark')?.invalid"
-        class="text-rose-600 font-bold text-xs block mt-1">
-        <i class="pi pi-exclamation-triangle mr-1"></i> Remark field mandatory hai. Please enter ticket details/remark.
-      </small>
+      <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+        Priority *
+      </label>
+      <p-select [options]="priorityOptions" formControlName="priority" optionLabel="label" optionValue="value"
+        styleClass="w-full text-sm rounded-xl border-slate-300" appendTo="body" />
     </div>
 
-    <!-- Drawer Submit Actions -->
-    <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-      <p-button label="Cancel" [text]="true" (onClick)="showRaiseDrawer = false"
-        styleClass="text-slate-600 font-bold" />
-      <p-button [label]="submitting ? 'Submitting...' : 'Submit Ticket'" type="submit" [loading]="submitting"
-        icon="pi pi-send"
-        styleClass="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-xl border-none shadow-md" />
+    <!-- CC Employees Multi-Select -->
+    <div>
+      <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+        Add Employees in CC (Optional)
+      </label>
+      <p-multiselect [options]="employees" formControlName="cc_employees" optionLabel="label" optionValue="value"
+        placeholder="Select Team Members to CC" styleClass="w-full text-sm rounded-xl border-slate-300" [filter]="true"
+        appendTo="body" />
+      <small class="text-slate-400 text-xs block mt-1">Selected employees will be notified & can view this
+        ticket.</small>
+    </div>
+
+    <!-- Mandatory Remark Textarea -->
+    <div>
+      <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+        Detailed Remark / Issue Explanation *
+      </label>
+      <textarea pTextarea formControlName="remark" rows="4"
+        placeholder="Provide complete details regarding your request or problem..."
+        class="w-full text-sm rounded-xl p-3 border-slate-300 focus:border-indigo-500"></textarea>
+      <small *ngIf="ticketForm.get('remark')?.touched && ticketForm.get('remark')?.invalid"
+        class="text-rose-500 text-xs block mt-1">Remark explanation is mandatory (minimum 5 characters).</small>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
+      <p-button (onClick)="showRaiseDrawer = false" label="Cancel" [outlined]="true"
+        styleClass="p-button-secondary p-button-sm rounded-xl font-bold"></p-button>
+      <p-button type="submit" [label]="submitting ? 'Submitting...' : 'Submit Ticket'" icon="pi pi-send"
+        [loading]="submitting" styleClass="p-button-sm p-button-info rounded-xl font-bold shadow-xs px-5"></p-button>
     </div>
   </form>
 </p-drawer>
 
 <!-- ========================================================================= -->
-<!-- 2. DETAILED WORKFLOW & SHORT STATUS VIEW DRAWER (p-drawer) -->
+<!-- 2. TICKET WORKFLOW & STATUS DRAWER -->
 <!-- ========================================================================= -->
-<p-drawer [(visible)]="showWorkflowDrawer" position="right" [style]="{ width: '100%', maxWidth: '40rem' }"
+<p-drawer [(visible)]="showWorkflowDrawer" position="right" [style]="{ width: '100%', maxWidth: '38rem' }"
   styleClass="border-none shadow-2xl bg-white">
 
   <ng-template pTemplate="header">
     <div class="flex items-center gap-3">
       <span
-        class="font-mono font-black text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg text-sm border border-indigo-100">
+        class="font-mono font-black text-indigo-700 bg-indigo-50 px-3 py-1 rounded-xl border border-indigo-200 text-sm">
         {{ selectedTicket?.ticket_code }}
       </span>
-      <h2 class="text-lg font-black text-slate-900 truncate max-w-xs md:max-w-md">{{ selectedTicket?.subject }}</h2>
+      <div>
+        <h2 class="text-base font-bold text-slate-900">Ticket Details & Workflow</h2>
+        <p class="text-xs text-slate-500">Track real-time status and activity timeline</p>
+      </div>
     </div>
   </ng-template>
 
-  <div *ngIf="selectedTicket" class="space-y-6 pt-2">
-    <!-- EXACT SHORT STATUS VIEW NOTICE BANNER AS REQUESTED BY USER -->
-    <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
-      <div class="flex items-start gap-3">
-        <div
-          class="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold shrink-0">
-          <i class="pi pi-spin pi-spinner text-lg"></i>
-        </div>
-        <div>
-          <h3 class="text-base font-bold text-amber-900 leading-snug">
-            Aapka {{ selectedTicket.category }} ticket request under process me hai. Team isko review kar rahi hai.
-          </h3>
-          <p class="mt-1.5 text-xs text-amber-800 leading-relaxed">
-            Abhi yaha short status view dikh raha hai. Jaldi detailed workflow status update keya jayega.
-          </p>
-          <div class="mt-3 flex items-center gap-2">
-            <span
-              class="inline-flex rounded-full border border-amber-300 bg-amber-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-amber-900">
-              {{ formatStatus(selectedTicket.status) }}
-            </span>
-            <span class="text-xs text-amber-800 font-medium">Priority: <strong>{{ selectedTicket.priority
-                }}</strong></span>
-          </div>
-        </div>
+  <div *ngIf="selectedTicket" class="space-y-6 pt-2 pb-10">
+
+    <!-- Header Summary Box -->
+    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold px-2.5 py-1 rounded-md uppercase" [ngClass]="{
+            'bg-red-50 text-red-700 border border-red-200': selectedTicket.category === 'ADMINISTRATION',
+            'bg-emerald-50 text-emerald-700 border border-emerald-200': selectedTicket.category === 'HUMAN RESOURCE - CRG',
+            'bg-sky-50 text-sky-700 border border-sky-200': selectedTicket.category === 'IT HELPDESK'
+          }">
+          {{ selectedTicket.category }}
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shadow-2xs" [ngClass]="{
+            'bg-amber-50 text-amber-700 border border-amber-200': selectedTicket.status === 'UNDER_PROCESS',
+            'bg-sky-50 text-sky-700 border border-sky-200': selectedTicket.status === 'IN_REVIEW',
+            'bg-emerald-50 text-emerald-700 border border-emerald-200': selectedTicket.status === 'RESOLVED',
+            'bg-slate-100 text-slate-700 border border-slate-200': selectedTicket.status === 'CLOSED',
+            'bg-rose-50 text-rose-700 border border-rose-200': selectedTicket.status === 'REJECTED'
+          }">
+          <span class="h-1.5 w-1.5 rounded-full" [ngClass]="{
+              'bg-amber-500': selectedTicket.status === 'UNDER_PROCESS',
+              'bg-sky-500': selectedTicket.status === 'IN_REVIEW',
+              'bg-emerald-500': selectedTicket.status === 'RESOLVED',
+              'bg-slate-500': selectedTicket.status === 'CLOSED',
+              'bg-rose-500': selectedTicket.status === 'REJECTED'
+            }"></span>
+          {{ (selectedTicket.status || '').replace('_', ' ') }}
+        </span>
+      </div>
+
+      <h3 class="text-base font-bold text-slate-900 leading-snug">{{ selectedTicket.subject }}</h3>
+
+      <div class="text-xs text-slate-600 bg-white p-3 rounded-xl border border-slate-200 font-medium">
+        <span class="font-bold text-slate-800 block mb-0.5">Remark Description:</span>
+        {{ selectedTicket.remark }}
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-slate-200/60 text-slate-500">
+        <div><span class="font-bold text-slate-700">Raised By:</span> {{ selectedTicket.creator_name }}</div>
+        <div><span class="font-bold text-slate-700">Created:</span> {{ selectedTicket.created_at | date:'dd MMM, hh:mm
+          a' }}</div>
       </div>
     </div>
 
-    <!-- WORKFLOW PROGRESS TIMELINE -->
-    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-      <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ticket Workflow Timeline</h4>
-
-      <div class="grid grid-cols-4 gap-2 pt-2 text-center relative">
-        <!-- Connecting Bar -->
-        <div class="absolute top-4 left-6 right-6 h-1 bg-slate-200 z-0"></div>
-
-        <!-- Step 1: Raised -->
-        <div class="relative z-10 flex flex-col items-center">
-          <div
-            class="w-8 h-8 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-xs shadow-sm">
-            <i class="pi pi-check"></i>
-          </div>
-          <span class="text-[11px] font-bold text-slate-800 mt-2">Ticket Raised</span>
-          <span class="text-[10px] text-slate-400">Created</span>
-        </div>
-
-        <!-- Step 2: Under Process -->
-        <div class="relative z-10 flex flex-col items-center">
-          <div
-            [class]="getWorkflowStepIndex(selectedTicket.status) >= 1 ? 'w-8 h-8 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-xs shadow-sm ring-4 ring-indigo-100' : 'w-8 h-8 rounded-full bg-slate-200 text-slate-500 font-bold flex items-center justify-center text-xs'">
-            2
-          </div>
-          <span class="text-[11px] font-bold text-slate-800 mt-2">Under Process</span>
-          <span class="text-[10px] text-slate-400">Assigned Team</span>
-        </div>
-
-        <!-- Step 3: In Review -->
-        <div class="relative z-10 flex flex-col items-center">
-          <div
-            [class]="getWorkflowStepIndex(selectedTicket.status) >= 2 ? 'w-8 h-8 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-xs shadow-sm ring-4 ring-indigo-100' : 'w-8 h-8 rounded-full bg-slate-200 text-slate-500 font-bold flex items-center justify-center text-xs'">
-            3
-          </div>
-          <span class="text-[11px] font-bold text-slate-800 mt-2">In Review</span>
-          <span class="text-[10px] text-slate-400">Resolution</span>
-        </div>
-
-        <!-- Step 4: Resolved -->
-        <div class="relative z-10 flex flex-col items-center">
-          <div
-            [class]="getWorkflowStepIndex(selectedTicket.status) >= 3 ? 'w-8 h-8 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-xs shadow-sm' : 'w-8 h-8 rounded-full bg-slate-200 text-slate-500 font-bold flex items-center justify-center text-xs'">
-            4
-          </div>
-          <span class="text-[11px] font-bold text-slate-800 mt-2">Resolved</span>
-          <span class="text-[10px] text-slate-400">Completed</span>
-        </div>
+    <!-- Status Change Action Bar (For Admin/Support or Creator) -->
+    <div class="bg-indigo-50/50 border border-indigo-100 p-3.5 rounded-2xl space-y-2">
+      <label class="block text-xs font-bold text-indigo-900 uppercase tracking-wider">
+        Update Ticket Status Workflow
+      </label>
+      <div class="flex flex-wrap gap-2">
+        <button (click)="updateTicketStatus('UNDER_PROCESS')"
+          class="px-2.5 py-1 text-xs font-bold rounded-lg border transition cursor-pointer"
+          [ngClass]="selectedTicket.status === 'UNDER_PROCESS' ? 'bg-amber-600 text-white border-amber-600' : 'bg-white text-amber-800 border-amber-200 hover:bg-amber-50'">
+          Under Process
+        </button>
+        <button (click)="updateTicketStatus('IN_REVIEW')"
+          class="px-2.5 py-1 text-xs font-bold rounded-lg border transition cursor-pointer"
+          [ngClass]="selectedTicket.status === 'IN_REVIEW' ? 'bg-sky-600 text-white border-sky-600' : 'bg-white text-sky-800 border-sky-200 hover:bg-sky-50'">
+          In Review
+        </button>
+        <button (click)="updateTicketStatus('RESOLVED')"
+          class="px-2.5 py-1 text-xs font-bold rounded-lg border transition cursor-pointer"
+          [ngClass]="selectedTicket.status === 'RESOLVED' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-emerald-800 border-emerald-200 hover:bg-emerald-50'">
+          Resolved
+        </button>
+        <button (click)="updateTicketStatus('CLOSED')"
+          class="px-2.5 py-1 text-xs font-bold rounded-lg border transition cursor-pointer"
+          [ngClass]="selectedTicket.status === 'CLOSED' ? 'bg-slate-700 text-white border-slate-700' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'">
+          Closed
+        </button>
       </div>
     </div>
 
-    <!-- TICKET METADATA CARD -->
-    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-4 text-xs">
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <span class="font-bold text-slate-400 uppercase tracking-wider block mb-1">Category</span>
-          <span class="font-bold text-slate-800 text-sm">{{ selectedTicket.category }}</span>
-        </div>
-
-        <div>
-          <span class="font-bold text-slate-400 uppercase tracking-wider block mb-1">Raised By</span>
-          <span class="font-bold text-slate-800 text-sm">{{ selectedTicket.creator_name || 'Employee' }}</span>
-        </div>
-      </div>
-
-      <div *ngIf="selectedTicket.cc_employees && selectedTicket.cc_employees.length > 0">
-        <span class="font-bold text-slate-400 uppercase tracking-wider block mb-1">CC Employees</span>
-        <div class="flex flex-wrap gap-1.5 mt-1">
-          <span *ngFor="let cc of selectedTicket.cc_employees"
-            class="bg-white border border-slate-200 text-slate-700 font-semibold px-2.5 py-1 rounded-lg text-xs">
-            <i class="pi pi-user mr-1 text-[10px] text-indigo-500"></i> {{ cc.full_name }} ({{ cc.emp_id }})
-          </span>
-        </div>
-      </div>
-
-      <div>
-        <span class="font-bold text-slate-400 uppercase tracking-wider block mb-1">Mandatory Remark Submitted</span>
-        <p
-          class="bg-white p-3.5 rounded-xl border border-slate-200 text-slate-800 font-medium leading-relaxed text-sm whitespace-pre-line">
-          {{ selectedTicket.remark }}
-        </p>
-      </div>
-    </div>
-
-    <!-- COMMENTS & WORKFLOW UPDATES TIMELINE -->
-    <div class="space-y-4">
-      <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-        <i class="pi pi-comments text-indigo-600"></i> Discussion & Status Updates ({{ selectedTicket.comments?.length
-        || 0 }})
+    <!-- Activity & Comments History Timeline -->
+    <div class="space-y-3">
+      <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+        <i class="pi pi-comments text-indigo-600"></i> Comments & Updates Timeline
       </h4>
 
-      <!-- Add Comment Box -->
-      <div class="flex gap-3">
-        <textarea pTextarea [(ngModel)]="newCommentText" rows="2" placeholder="Add an update remark or question..."
-          class="w-full text-sm rounded-xl p-3 bg-slate-50 border-slate-200 focus:bg-white"></textarea>
-        <p-button label="Post" icon="pi pi-send" (onClick)="postComment()"
-          styleClass="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 rounded-xl border-none h-full" />
+      <div *ngIf="selectedTicket.comments && selectedTicket.comments.length > 0" class="space-y-3">
+        <div *ngFor="let comment of selectedTicket.comments"
+          class="bg-white p-3.5 rounded-xl border border-slate-200 space-y-1">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-slate-800">{{ comment.user_name }}</span>
+            <span class="text-slate-400 text-[10px]">{{ comment.created_at | date:'dd MMM, hh:mm a' }}</span>
+          </div>
+          <p class="text-xs text-slate-600 font-medium">{{ comment.comment }}</p>
+        </div>
       </div>
 
-      <!-- Comments Thread -->
-      <div class="space-y-3 max-h-60 overflow-y-auto pr-1">
-        <div *ngFor="let c of selectedTicket.comments"
-          class="bg-slate-50 p-3.5 rounded-xl border border-slate-100 space-y-1">
-          <div class="flex justify-between items-center text-xs">
-            <span class="font-bold text-slate-900">{{ c.user_name }}</span>
-            <span class="text-slate-400">{{ c.created_at | date: 'dd MMM, hh:mm a' }}</span>
-          </div>
-          <p class="text-sm text-slate-700 leading-relaxed">{{ c.comment }}</p>
-        </div>
-
-        <div *ngIf="!selectedTicket.comments || selectedTicket.comments.length === 0"
-          class="text-center text-xs text-slate-400 py-4">
-          No additional remarks posted yet.
-        </div>
+      <div *ngIf="!selectedTicket.comments || selectedTicket.comments.length === 0"
+        class="bg-white p-4 rounded-xl border border-slate-200 text-center text-slate-400 text-xs italic">
+        No comments or activity remarks posted yet.
       </div>
     </div>
+
+    <!-- Post New Comment Input Box -->
+    <div class="space-y-2 pt-2 border-t border-slate-100">
+      <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+        Add Remark / Response Comment
+      </label>
+      <textarea pTextarea [(ngModel)]="newCommentText" rows="3"
+        placeholder="Post a comment or update for this ticket..."
+        class="w-full text-xs rounded-xl p-3 border-slate-300 focus:border-indigo-500"></textarea>
+      <div class="flex justify-end">
+        <p-button (onClick)="addComment()" label="Post Comment" icon="pi pi-send"
+          styleClass="p-button-sm p-button-info rounded-xl font-bold text-xs shadow-xs px-4 py-1.5"></p-button>
+      </div>
+    </div>
+
   </div>
 </p-drawer>

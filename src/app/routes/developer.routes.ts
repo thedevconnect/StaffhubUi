@@ -9,4 +9,5 @@ export const developerRoutes: Routes = [
     { path: 'company-approval', loadComponent: () => import('../components/developer/company-approval/company-approval').then(c => c.CompanyApproval), title: 'Company Approval' },
     { path: 'task-management', loadComponent: () => import('../components/work-management/work-management').then(c => c.WorkManagementComponent), title: 'Task Management' },
     { path: 'work-management', redirectTo: 'task-management', pathMatch: 'full' },
+    { path: 'probation', loadComponent: () => import('../components/ess/probation/probation').then(c => c.Probation), title: 'Probation Tracker' },
 ];

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
@@ -19,6 +19,7 @@ import { ExpenseService } from '../../../shared/services/expense.service';
 import { AuthService } from '../../../shared/services/services/auth.service';
 import { UserService } from '../../../shared/services/user-service';
 import { EmployeeManagementService } from '../../../shared/services/employee-management.service';
+import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template';
 
 interface DetailRow {
   type: string;
@@ -51,13 +52,14 @@ interface DetailRow {
     TableModule,
     FloatLabelModule,
     InputTextModule,
-    TooltipModule
+    TooltipModule,
+    TableTemplate
   ],
   providers: [MessageService],
   templateUrl: './expense-management.html',
   styleUrl: './expense-management.scss'
 })
-export class ExpenseManagement implements OnInit {
+export class ExpenseManagement implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private messageService = inject(MessageService);
   private cdr = inject(ChangeDetectorRef);
@@ -74,6 +76,7 @@ export class ExpenseManagement implements OnInit {
   drawerVisible = false;
   viewDialogVisible = false;
   receiptModalVisible = false;
+  editingClaimId: number | null = null;
 
   expenseForm!: FormGroup;
   detailForm!: FormGroup;
@@ -194,226 +197,6 @@ export class ExpenseManagement implements OnInit {
       { label: 'Dhule', value: 'Dhule' },
       { label: 'Chandrapur', value: 'Chandrapur' },
       { label: 'Parbhani', value: 'Parbhani' }
-    ],
-    'Karnataka': [
-      { label: 'Bengaluru', value: 'Bengaluru' },
-      { label: 'Mysuru', value: 'Mysuru' },
-      { label: 'Hubballi', value: 'Hubballi' },
-      { label: 'Mangaluru', value: 'Mangaluru' },
-      { label: 'Belagavi', value: 'Belagavi' },
-      { label: 'Davanagere', value: 'Davanagere' },
-      { label: 'Ballari', value: 'Ballari' },
-      { label: 'Vijayapura', value: 'Vijayapura' },
-      { label: 'Shivamogga', value: 'Shivamogga' },
-      { label: 'Tumakuru', value: 'Tumakuru' },
-      { label: 'Kalaburagi', value: 'Kalaburagi' },
-      { label: 'Bidar', value: 'Bidar' },
-      { label: 'Kolar', value: 'Kolar' }
-    ],
-    'Tamil Nadu': [
-      { label: 'Chennai', value: 'Chennai' },
-      { label: 'Coimbatore', value: 'Coimbatore' },
-      { label: 'Madurai', value: 'Madurai' },
-      { label: 'Tiruchirappalli', value: 'Tiruchirappalli' },
-      { label: 'Salem', value: 'Salem' },
-      { label: 'Tiruppur', value: 'Tiruppur' },
-      { label: 'Erode', value: 'Erode' },
-      { label: 'Vellore', value: 'Vellore' },
-      { label: 'Tirunelveli', value: 'Tirunelveli' },
-      { label: 'Thanjavur', value: 'Thanjavur' },
-      { label: 'Kancheepuram', value: 'Kancheepuram' },
-      { label: 'Nagercoil', value: 'Nagercoil' },
-      { label: 'Dindigul', value: 'Dindigul' },
-      { label: 'Ooty', value: 'Ooty' }
-    ],
-    'Telangana': [
-      { label: 'Hyderabad', value: 'Hyderabad' },
-      { label: 'Warangal', value: 'Warangal' },
-      { label: 'Nizamabad', value: 'Nizamabad' },
-      { label: 'Karimnagar', value: 'Karimnagar' },
-      { label: 'Khammam', value: 'Khammam' },
-      { label: 'Ramagundam', value: 'Ramagundam' },
-      { label: 'Mahbubnagar', value: 'Mahbubnagar' },
-      { label: 'Nalgonda', value: 'Nalgonda' },
-      { label: 'Secunderabad', value: 'Secunderabad' }
-    ],
-    'Gujarat': [
-      { label: 'Ahmedabad', value: 'Ahmedabad' },
-      { label: 'Surat', value: 'Surat' },
-      { label: 'Vadodara', value: 'Vadodara' },
-      { label: 'Rajkot', value: 'Rajkot' },
-      { label: 'Bhavnagar', value: 'Bhavnagar' },
-      { label: 'Jamnagar', value: 'Jamnagar' },
-      { label: 'Gandhinagar', value: 'Gandhinagar' },
-      { label: 'Junagadh', value: 'Junagadh' },
-      { label: 'Gandhidham', value: 'Gandhidham' },
-      { label: 'Anand', value: 'Anand' },
-      { label: 'Navsari', value: 'Navsari' },
-      { label: 'Morbi', value: 'Morbi' },
-      { label: 'Bharuch', value: 'Bharuch' }
-    ],
-    'West Bengal': [
-      { label: 'Kolkata', value: 'Kolkata' },
-      { label: 'Howrah', value: 'Howrah' },
-      { label: 'Durgapur', value: 'Durgapur' },
-      { label: 'Asansol', value: 'Asansol' },
-      { label: 'Siliguri', value: 'Siliguri' },
-      { label: 'Bardhaman', value: 'Bardhaman' },
-      { label: 'Kharagpur', value: 'Kharagpur' },
-      { label: 'Haldia', value: 'Haldia' },
-      { label: 'Darjeeling', value: 'Darjeeling' },
-      { label: 'Bahrampur', value: 'Bahrampur' }
-    ],
-    'Rajasthan': [
-      { label: 'Jaipur', value: 'Jaipur' },
-      { label: 'Jodhpur', value: 'Jodhpur' },
-      { label: 'Udaipur', value: 'Udaipur' },
-      { label: 'Kota', value: 'Kota' },
-      { label: 'Bikaner', value: 'Bikaner' },
-      { label: 'Ajmer', value: 'Ajmer' },
-      { label: 'Bhilwara', value: 'Bhilwara' },
-      { label: 'Alwar', value: 'Alwar' },
-      { label: 'Sikar', value: 'Sikar' },
-      { label: 'Bharatpur', value: 'Bharatpur' },
-      { label: 'Pali', value: 'Pali' },
-      { label: 'Barmer', value: 'Barmer' },
-      { label: 'Chittorgarh', value: 'Chittorgarh' }
-    ],
-    'Punjab': [
-      { label: 'Ludhiana', value: 'Ludhiana' },
-      { label: 'Amritsar', value: 'Amritsar' },
-      { label: 'Jalandhar', value: 'Jalandhar' },
-      { label: 'Patiala', value: 'Patiala' },
-      { label: 'Bathinda', value: 'Bathinda' },
-      { label: 'Hoshiarpur', value: 'Hoshiarpur' },
-      { label: 'Mohali', value: 'Mohali' },
-      { label: 'Pathankot', value: 'Pathankot' },
-      { label: 'Moga', value: 'Moga' },
-      { label: 'Batala', value: 'Batala' },
-      { label: 'Barnala', value: 'Barnala' }
-    ],
-    'Kerala': [
-      { label: 'Kochi', value: 'Kochi' },
-      { label: 'Thiruvananthapuram', value: 'Thiruvananthapuram' },
-      { label: 'Kozhikode', value: 'Kozhikode' },
-      { label: 'Thrissur', value: 'Thrissur' },
-      { label: 'Kollam', value: 'Kollam' },
-      { label: 'Palakkad', value: 'Palakkad' },
-      { label: 'Alappuzha', value: 'Alappuzha' },
-      { label: 'Kottayam', value: 'Kottayam' },
-      { label: 'Kannur', value: 'Kannur' }
-    ],
-    'Madhya Pradesh': [
-      { label: 'Bhopal', value: 'Bhopal' },
-      { label: 'Indore', value: 'Indore' },
-      { label: 'Gwalior', value: 'Gwalior' },
-      { label: 'Jabalpur', value: 'Jabalpur' },
-      { label: 'Ujjain', value: 'Ujjain' },
-      { label: 'Sagar', value: 'Sagar' },
-      { label: 'Dewas', value: 'Dewas' },
-      { label: 'Satna', value: 'Satna' },
-      { label: 'Ratlam', value: 'Ratlam' },
-      { label: 'Rewa', value: 'Rewa' },
-      { label: 'Katni', value: 'Katni' },
-      { label: 'Singrauli', value: 'Singrauli' },
-      { label: 'Burhanpur', value: 'Burhanpur' }
-    ],
-    'Bihar': [
-      { label: 'Patna', value: 'Patna' },
-      { label: 'Gaya', value: 'Gaya' },
-      { label: 'Bhagalpur', value: 'Bhagalpur' },
-      { label: 'Muzaffarpur', value: 'Muzaffarpur' },
-      { label: 'Purnia', value: 'Purnia' },
-      { label: 'Darbhanga', value: 'Darbhanga' },
-      { label: 'Bihar Sharif', value: 'Bihar Sharif' },
-      { label: 'Arrah', value: 'Arrah' },
-      { label: 'Begusarai', value: 'Begusarai' },
-      { label: 'Katihar', value: 'Katihar' },
-      { label: 'Chapra', value: 'Chapra' }
-    ],
-    'Odisha': [
-      { label: 'Bhubaneswar', value: 'Bhubaneswar' },
-      { label: 'Cuttack', value: 'Cuttack' },
-      { label: 'Rourkela', value: 'Rourkela' },
-      { label: 'Puri', value: 'Puri' },
-      { label: 'Sambalpur', value: 'Sambalpur' },
-      { label: 'Berhampur', value: 'Berhampur' },
-      { label: 'Balasore', value: 'Balasore' },
-      { label: 'Bhadrak', value: 'Bhadrak' }
-    ],
-    'Assam': [
-      { label: 'Guwahati', value: 'Guwahati' },
-      { label: 'Silchar', value: 'Silchar' },
-      { label: 'Dibrugarh', value: 'Dibrugarh' },
-      { label: 'Jorhat', value: 'Jorhat' },
-      { label: 'Nagaon', value: 'Nagaon' },
-      { label: 'Tezpur', value: 'Tezpur' },
-      { label: 'Tinsukia', value: 'Tinsukia' },
-      { label: 'Bongaigaon', value: 'Bongaigaon' }
-    ],
-    'Andhra Pradesh': [
-      { label: 'Visakhapatnam', value: 'Visakhapatnam' },
-      { label: 'Vijayawada', value: 'Vijayawada' },
-      { label: 'Guntur', value: 'Guntur' },
-      { label: 'Nellore', value: 'Nellore' },
-      { label: 'Kurnool', value: 'Kurnool' },
-      { label: 'Kakinada', value: 'Kakinada' },
-      { label: 'Tirupati', value: 'Tirupati' },
-      { label: 'Rajahmundry', value: 'Rajahmundry' },
-      { label: 'Kadapa', value: 'Kadapa' },
-      { label: 'Anantapur', value: 'Anantapur' },
-      { label: 'Eluru', value: 'Eluru' },
-      { label: 'Vizianagaram', value: 'Vizianagaram' }
-    ],
-    'Uttarakhand': [
-      { label: 'Dehradun', value: 'Dehradun' },
-      { label: 'Haridwar', value: 'Haridwar' },
-      { label: 'Roorkee', value: 'Roorkee' },
-      { label: 'Rishikesh', value: 'Rishikesh' },
-      { label: 'Haldwani', value: 'Haldwani' },
-      { label: 'Kashipur', value: 'Kashipur' },
-      { label: 'Nainital', value: 'Nainital' }
-    ],
-    'Himachal Pradesh': [
-      { label: 'Shimla', value: 'Shimla' },
-      { label: 'Dharamshala', value: 'Dharamshala' },
-      { label: 'Manali', value: 'Manali' },
-      { label: 'Solan', value: 'Solan' },
-      { label: 'Mandi', value: 'Mandi' },
-      { label: 'Baddi', value: 'Baddi' }
-    ],
-    'Jharkhand': [
-      { label: 'Ranchi', value: 'Ranchi' },
-      { label: 'Jamshedpur', value: 'Jamshedpur' },
-      { label: 'Dhanbad', value: 'Dhanbad' },
-      { label: 'Bokaro', value: 'Bokaro' },
-      { label: 'Hazaribagh', value: 'Hazaribagh' },
-      { label: 'Deoghar', value: 'Deoghar' },
-      { label: 'Giridih', value: 'Giridih' }
-    ],
-    'Chhattisgarh': [
-      { label: 'Raipur', value: 'Raipur' },
-      { label: 'Bhilai', value: 'Bhilai' },
-      { label: 'Bilaspur', value: 'Bilaspur' },
-      { label: 'Korba', value: 'Korba' },
-      { label: 'Rajnandgaon', value: 'Rajnandgaon' },
-      { label: 'Jagdalpur', value: 'Jagdalpur' }
-    ],
-    'Goa': [
-      { label: 'Panaji', value: 'Panaji' },
-      { label: 'Margao', value: 'Margao' },
-      { label: 'Vasco da Gama', value: 'Vasco da Gama' },
-      { label: 'Mapusa', value: 'Mapusa' }
-    ],
-    'Jammu & Kashmir': [
-      { label: 'Srinagar', value: 'Srinagar' },
-      { label: 'Jammu', value: 'Jammu' },
-      { label: 'Anantnag', value: 'Anantnag' },
-      { label: 'Baramulla', value: 'Baramulla' },
-      { label: 'Udhampur', value: 'Udhampur' }
-    ],
-    'Chandigarh': [
-      { label: 'Chandigarh', value: 'Chandigarh' }
     ]
   };
 
@@ -443,12 +226,152 @@ export class ExpenseManagement implements OnInit {
   indiaLocations: any[] = [];
   isHR = false;
 
+  // Fullscreen Mode States
+  isFullscreen = signal(false);
+  isFormFullscreen = signal(false);
+
+  // TableTemplate Configuration
+  activeStatusTab = 'All';
+  searchQuery = '';
+
+  statusTabs = [
+    { label: 'All Claims', value: 'All', icon: 'pi pi-list' },
+    { label: 'Pending', value: 'PENDING', icon: 'pi pi-clock' },
+    { label: 'Approved', value: 'APPROVED', icon: 'pi pi-check-circle' },
+    { label: 'Rejected', value: 'REJECTED', icon: 'pi pi-times-circle' }
+  ];
+
+  columns: TableColumn[] = [
+    { key: 'requestNo', header: 'Request No', isSortable: true },
+    { key: 'employeeName', header: 'Employee', isSortable: true },
+    { key: 'submitFor', header: 'Expense For', isSortable: true },
+    { key: 'visitLocation', header: 'Visit Location', isSortable: true },
+    { key: 'dates', header: 'Dates', isSortable: true },
+    { key: 'purpose', header: 'Purpose' },
+    { key: 'totalAmount', header: 'Total Amount', isSortable: true },
+    { key: 'billPhoto', header: 'Bill Photo' },
+    { key: 'status', header: 'Status', isSortable: true },
+    { key: 'actions', header: 'Action' }
+  ];
+
+  summaryMetrics = {
+    totalCount: 0,
+    totalAmount: 0,
+    approvedCount: 0,
+    approvedAmount: 0,
+    pendingCount: 0,
+    pendingAmount: 0,
+    rejectedCount: 0,
+    rejectedAmount: 0
+  };
+
+  get filteredExpenseClaims(): any[] {
+    return this.expenseClaims.filter(claim => {
+      const status = (claim.status || '').toUpperCase();
+      if (this.activeStatusTab !== 'All' && status !== this.activeStatusTab) {
+        return false;
+      }
+      if (this.searchQuery && this.searchQuery.trim() !== '') {
+        const q = this.searchQuery.toLowerCase().trim();
+        const reqNo = (claim.request_no || claim.requestNo || '').toLowerCase();
+        const empName = (claim.employee_name || claim.emp_full_name || '').toLowerCase();
+        const purpose = (claim.purpose || '').toLowerCase();
+        const loc = (claim.visit_location || claim.visitLocation || '').toLowerCase();
+        const submitFor = (claim.submit_for || claim.submitFor || '').toLowerCase();
+
+        return reqNo.includes(q) || empName.includes(q) || purpose.includes(q) || loc.includes(q) || submitFor.includes(q);
+      }
+      return true;
+    });
+  }
+
   ngOnInit(): void {
     this.initForms();
     this.loadUserInfo();
     this.loadClaims();
     this.loadCompanyEmployees();
     this.loadIndiaLocations();
+
+    document.addEventListener('fullscreenchange', this.onFullscreenChange);
+  }
+
+  ngOnDestroy(): void {
+    document.removeEventListener('fullscreenchange', this.onFullscreenChange);
+  }
+
+  private onFullscreenChange = (): void => {
+    this.isFullscreen.set(!!document.fullscreenElement);
+    this.cdr.markForCheck();
+  };
+
+  toggleFullscreen(): void {
+    const elem = document.documentElement;
+    if (!document.fullscreenElement) {
+      elem.requestFullscreen().then(() => {
+        this.isFullscreen.set(true);
+        this.cdr.markForCheck();
+      }).catch(err => {
+        console.error('Error entering fullscreen mode:', err);
+      });
+    } else {
+      document.exitFullscreen().then(() => {
+        this.isFullscreen.set(false);
+        this.cdr.markForCheck();
+      }).catch(err => {
+        console.error('Error exiting fullscreen mode:', err);
+      });
+    }
+  }
+
+  toggleFormFullscreen(): void {
+    this.isFormFullscreen.update(v => !v);
+    this.cdr.markForCheck();
+  }
+
+  onStatusTabChange(tab: string): void {
+    this.activeStatusTab = tab;
+    this.cdr.markForCheck();
+  }
+
+  calculateSummaryMetrics(): void {
+    let totalCount = 0;
+    let totalAmount = 0;
+    let approvedCount = 0;
+    let approvedAmount = 0;
+    let pendingCount = 0;
+    let pendingAmount = 0;
+    let rejectedCount = 0;
+    let rejectedAmount = 0;
+
+    this.expenseClaims.forEach(claim => {
+      const amt = Number(claim.total_amount || claim.amount || 0);
+      const status = (claim.status || '').toUpperCase();
+
+      totalCount++;
+      totalAmount += amt;
+
+      if (status === 'APPROVED') {
+        approvedCount++;
+        approvedAmount += amt;
+      } else if (status === 'PENDING') {
+        pendingCount++;
+        pendingAmount += amt;
+      } else if (status === 'REJECTED') {
+        rejectedCount++;
+        rejectedAmount += amt;
+      }
+    });
+
+    this.summaryMetrics = {
+      totalCount,
+      totalAmount,
+      approvedCount,
+      approvedAmount,
+      pendingCount,
+      pendingAmount,
+      rejectedCount,
+      rejectedAmount
+    };
   }
 
   initForms(): void {
@@ -521,6 +444,11 @@ export class ExpenseManagement implements OnInit {
       const roles = (user.roles || []).map((r: any) => typeof r === 'string' ? r : r.roleId || r.roleName || '');
       const userRolesStr = roles.join(',').toUpperCase();
       this.isHR = userRolesStr.includes('HR_ADMIN') || userRolesStr.includes('ADMIN') || userRolesStr.includes('SUPER_ADMIN') || userRolesStr.includes('DEVELOPER');
+
+      // Set columns dynamically if not HR
+      if (!this.isHR) {
+        this.columns = this.columns.filter(c => c.key !== 'employeeName');
+      }
     }
 
     this.userService.getUserSidebar('').subscribe({
@@ -653,6 +581,7 @@ export class ExpenseManagement implements OnInit {
       next: (res: any) => {
         if (res && res.success) {
           this.expenseClaims = res.data || [];
+          this.calculateSummaryMetrics();
         }
         this.loading.set(false);
         this.cdr.markForCheck();
@@ -669,6 +598,7 @@ export class ExpenseManagement implements OnInit {
     const uName = this.currentUserSelfName || this.currentUser?.username || 'Employee';
     const uDesig = this.currentUserSelfDesignation || 'Team Member';
     this.selectedTargetEmployeeId = null;
+    this.editingClaimId = null;
 
     this.expenseForm.reset({
       transferType: 'Self',
@@ -706,8 +636,52 @@ export class ExpenseManagement implements OnInit {
     this.cdr.markForCheck();
   }
 
+  editClaim(row: any): void {
+    this.expenseService.getClaimById(row.id).subscribe({
+      next: (res: any) => {
+        const claim = res && res.success ? res.data : row;
+        this.editingClaimId = claim.id;
+
+        this.expenseForm.patchValue({
+          transferType: claim.transfer_type || claim.transferType || 'Self',
+          requestNo: claim.request_no || claim.requestNo,
+          submitFor: claim.submit_for || claim.submitFor || 'Tour Reimbursement',
+          visitLocation: claim.visit_location || claim.visitLocation || '',
+          name: claim.employee_name || claim.employeeName || this.currentUserSelfName,
+          designation: claim.designation || this.currentUserSelfDesignation,
+          fromDate: claim.from_date || claim.fromDate ? new Date(claim.from_date || claim.fromDate) : new Date(),
+          toDate: claim.to_date || claim.toDate ? new Date(claim.to_date || claim.toDate) : new Date(),
+          purpose: claim.purpose || ''
+        });
+
+        this.selectedFileBase64 = claim.receipt_url || claim.receiptUrl || '';
+        this.selectedFileName = this.selectedFileBase64 ? 'Attached Receipt' : '';
+
+        this.addedDetails = (claim.items || []).map((item: any) => ({
+          type: item.category || item.type || 'Conveyance',
+          travelBy: item.travel_by || item.travelBy || 'N/A',
+          from: item.travel_from || item.from || 'N/A',
+          to: item.travel_to || item.to || 'N/A',
+          fromDate: item.from_date ? new Date(item.from_date) : new Date(),
+          toDate: item.to_date ? new Date(item.to_date) : new Date(),
+          amount: Number(item.amount) || 0,
+          details: item.details || '',
+          attachmentUrl: item.attachment_url || item.attachmentUrl || undefined
+        }));
+
+        this.drawerVisible = true;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch claim details for edit' });
+      }
+    });
+  }
+
   onDrawerHide(): void {
     this.drawerVisible = false;
+    this.editingClaimId = null;
+    this.isFormFullscreen.set(false);
   }
 
   toggleDetails(): void {
@@ -851,25 +825,49 @@ export class ExpenseManagement implements OnInit {
     };
 
     this.submitting.set(true);
-    this.expenseService.createClaim(payload).subscribe({
-      next: (res: any) => {
-        this.submitting.set(false);
-        if (res && res.success) {
-          this.messageService.add({ severity: 'success', summary: 'Submitted', detail: 'Expense claim submitted successfully!' });
-          this.drawerVisible = false;
-          this.loadClaims();
-        } else {
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: res?.message || 'Failed to submit claim' });
+
+    if (this.editingClaimId) {
+      this.expenseService.updateClaim(this.editingClaimId, payload).subscribe({
+        next: (res: any) => {
+          this.submitting.set(false);
+          if (res && res.success) {
+            this.messageService.add({ severity: 'success', summary: 'Updated', detail: 'Expense claim updated successfully!' });
+            this.drawerVisible = false;
+            this.editingClaimId = null;
+            this.loadClaims();
+          } else {
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: res?.message || 'Failed to update claim' });
+          }
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          this.submitting.set(false);
+          console.error('Update error:', err);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to update claim' });
+          this.cdr.markForCheck();
         }
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        this.submitting.set(false);
-        console.error('Submit error:', err);
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to submit claim' });
-        this.cdr.markForCheck();
-      }
-    });
+      });
+    } else {
+      this.expenseService.createClaim(payload).subscribe({
+        next: (res: any) => {
+          this.submitting.set(false);
+          if (res && res.success) {
+            this.messageService.add({ severity: 'success', summary: 'Submitted', detail: 'Expense claim submitted successfully!' });
+            this.drawerVisible = false;
+            this.loadClaims();
+          } else {
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: res?.message || 'Failed to submit claim' });
+          }
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          this.submitting.set(false);
+          console.error('Submit error:', err);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to submit claim' });
+          this.cdr.markForCheck();
+        }
+      });
+    }
   }
 
   viewClaimDetails(row: any): void {
@@ -929,5 +927,6 @@ export class ExpenseManagement implements OnInit {
 
   onClose(): void {
     this.drawerVisible = false;
+    this.editingClaimId = null;
   }
 }

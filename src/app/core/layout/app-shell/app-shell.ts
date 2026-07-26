@@ -184,7 +184,7 @@ export class AppShell {
 
         if (pathLower.includes('approval') || pathLower.includes('exit')) {
           approvalSubmenus.push(item);
-        } else if (pathLower.includes('employee-management') || pathLower.includes('offboarding') || pathLower.includes('office-location') || pathLower.includes('device-management')) {
+        } else if (pathLower.includes('employee-management') || pathLower.includes('offboarding') || pathLower.includes('office-location') || pathLower.includes('device-management') || pathLower.includes('probation')) {
           empMgmtSubmenus.push(item);
         } else if (pathLower.includes('attendance') || pathLower.includes('leave') || pathLower.includes('calendar')) {
           attendanceSubmenus.push(item);

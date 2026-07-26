@@ -26,5 +26,10 @@ export const superadminRoutes: Routes = [
         path: 'work-management',
         redirectTo: 'task-management',
         pathMatch: 'full'
+    },
+    {
+        path: 'probation',
+        title: 'Probation Tracker',
+        loadComponent: () => import('../components/ess/probation/probation').then(m => m.Probation)
     }
 ];
