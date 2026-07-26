@@ -78,5 +78,10 @@ export const hradminRoutes: Routes = [
         path: 'work-management',
         redirectTo: 'task-management',
         pathMatch: 'full'
+    },
+    {
+        path: 'probation',
+        title: 'Probation Tracker',
+        loadComponent: () => import('../components/ess/probation/probation').then(c => c.Probation)
     }
 ];

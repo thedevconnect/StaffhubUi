@@ -95,6 +95,14 @@ export class TicketService {
     return this.http.patch<any>(`${this.apiUrl}/${id}/status`, { status });
   }
 
+  updateTicket(id: number, payload: any): Observable<{ success: boolean; data: TicketItem; message: string }> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, payload);
+  }
+
+  deleteTicket(id: number): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
+  }
+
   addComment(ticketId: number, comment: string): Observable<{ success: boolean; message: string }> {
     return this.http.post<any>(`${this.apiUrl}/${ticketId}/comments`, { comment });
   }

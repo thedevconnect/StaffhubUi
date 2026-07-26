@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TaskService, TaskStats, TaskItem, TaskDetailResponse } from '../../shared/services/task.service';
@@ -20,6 +20,7 @@ import { BadgeModule } from 'primeng/badge';
 import { TooltipModule } from 'primeng/tooltip';
 import { SliderModule } from 'primeng/slider';
 import { TextareaModule } from 'primeng/textarea';
+import { Breadcrumb } from 'primeng/breadcrumb';
 
 import { TableTemplate, TableColumn, TableAction } from '../../shared/ui/table-template/table-template';
 import { AppBreadcrumb } from '../../shared/ui/breadcrumb/breadcrumb';
@@ -32,6 +33,7 @@ import { AppBreadcrumb } from '../../shared/ui/breadcrumb/breadcrumb';
     FormsModule,
     ReactiveFormsModule,
     AppBreadcrumb,
+    Breadcrumb,
     TableModule,
     TableTemplate,
     ButtonModule,
@@ -58,6 +60,13 @@ export class WorkManagementComponent implements OnInit {
     { label: 'Employee Self Service', icon: 'pi pi-home', routerLink: '/ess' },
     { label: 'Task Management', icon: 'pi pi-briefcase', routerLink: '/ess/task-management' }
   ];
+
+  isFormFullscreen = signal(false);
+
+  toggleFormFullscreen(): void {
+    this.isFormFullscreen.update(v => !v);
+    this.cdr.markForCheck();
+  }
 
   columns: TableColumn[] = [
     { key: 'actions', header: 'Actions', isVisible: true },

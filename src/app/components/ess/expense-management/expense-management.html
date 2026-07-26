@@ -1,15 +1,18 @@
 <p-toast></p-toast>
 
-<!-- Top Breadcrumb & Add Header Bar -->
+<!-- Top Breadcrumb & Action Header Bar -->
 <div
-  class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6 shadow-sm">
+  class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6 shadow-xs">
   <div class="flex-1 min-w-0">
     <p-breadcrumb [model]="breadcrumbItems"
       styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
   </div>
   <div class="flex items-center gap-2">
-    <p-button (click)="loadClaims()" icon="pi pi-refresh"
-      styleClass="p-button-outlined p-button-secondary p-button-sm rounded-lg" pTooltip="Refresh List"></p-button>
+    <!-- Refresh Button -->
+    <!-- <p-button (click)="loadClaims()" icon="pi pi-refresh"
+      styleClass="p-button-outlined p-button-secondary p-button-sm rounded-lg" pTooltip="Refresh List"></p-button> -->
+
+    <!-- Add Claim Button -->
     <p-button (click)="showDialog()" label="Add Claim" icon="pi pi-plus"
       styleClass="p-button-sm rounded-lg btn-add text-xs font-semibold px-4 py-2 shadow-sm transition-all"
       [raised]="true">
@@ -17,122 +20,174 @@
   </div>
 </div>
 
-<div class="bg-white min-h-screen p-4 sm:p-6 lg:p-0">
-  <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-    <!-- List Header Section -->
-    <div
-      class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-slate-50/50 border-b border-slate-200 gap-3">
-      <div>
-        <h2 class="text-xl font-bold text-slate-800">Expense & Travel Reimbursement Requests</h2>
-        <p class="text-xs text-slate-500 mt-1">Manage official travel expenses, outstation visit locations, daily
-          conveyance & bill receipts.</p>
+<div class="bg-white min-h-screen space-y-6 p-1">
+
+  <!-- Top 4 Summary KPI Cards Grid (Ultra Compact & Sleek) -->
+  <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+    <!-- Card 1: Total Claims -->
+    <div class="rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-2xs flex items-center justify-between">
+      <div class="space-y-0.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Total Claims</span>
+        <div class="flex items-baseline gap-1.5">
+          <span class="text-lg font-black text-slate-900 leading-none">{{ summaryMetrics.totalCount }}</span>
+          <span class="text-xs font-bold text-blue-700">₹{{ summaryMetrics.totalAmount | number:'1.0-0' }}</span>
+        </div>
       </div>
-      <div class="flex items-center gap-3">
-        <span class="text-xs font-bold text-slate-500 bg-white px-3 py-1.5 rounded-lg border border-slate-200">
-          Total Claims: <span class="text-blue-600 font-extrabold">{{ expenseClaims.length }}</span>
-        </span>
+      <div class="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+        <i class="pi pi-wallet text-[10px]"></i>
       </div>
     </div>
 
-    <!-- Overview Table Section -->
-    <div class="overflow-x-auto">
-      <p-table [value]="expenseClaims" [loading]="loading()" styleClass="p-datatable-sm" responsiveLayout="scroll">
-        <ng-template pTemplate="header">
-          <tr class="text-xs uppercase bg-slate-100/70 text-slate-600 tracking-wider">
-            <th class="p-3 text-left">Request No</th>
-            <th class="p-3 text-left" *ngIf="isHR">Employee</th>
-            <th class="p-3 text-left">Expense For</th>
-            <th class="p-3 text-left">Visit Location</th>
-            <th class="p-3 text-center">Dates</th>
-            <th class="p-3 text-left">Purpose</th>
-            <th class="p-3 text-right">Total Amount</th>
-            <th class="p-3 text-center">Bill Photo</th>
-            <th class="p-3 text-center">Status</th>
-            <th class="p-3 text-center">Action</th>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-rowData>
-          <tr class="border-b border-slate-100 hover:bg-slate-50/60 text-sm transition-colors">
-            <td class="p-3 font-bold text-blue-600 cursor-pointer" (click)="viewClaimDetails(rowData)">
-              {{ rowData.request_no || rowData.requestNo }}
-            </td>
-            <td class="p-3 font-medium text-slate-800" *ngIf="isHR">
-              {{ rowData.employee_name || rowData.emp_full_name || 'Employee' }}
-            </td>
-            <td class="p-3 text-slate-700 font-medium">
-              {{ rowData.submit_for || rowData.submitFor }}
-            </td>
-            <td class="p-3 text-slate-700 font-semibold">
-              <span class="inline-flex items-center gap-1 text-slate-800">
-                <i class="pi pi-map-marker text-rose-500 text-xs"></i>
-                {{ rowData.visit_location || rowData.visitLocation || 'N/A' }}
-              </span>
-            </td>
-            <td class="p-3 text-center text-slate-500 text-xs whitespace-nowrap">
-              {{ rowData.from_date || rowData.fromDate | date: 'dd MMM yyyy' }}
-              <span *ngIf="rowData.to_date || rowData.toDate"> - {{ rowData.to_date || rowData.toDate | date: 'dd MMM
-                yyyy' }}</span>
-            </td>
-            <td class="p-3 text-slate-600 max-w-[220px] truncate" [title]="rowData.purpose">
-              {{ rowData.purpose || 'Official visit travel' }}
-            </td>
-            <td class="p-3 text-right font-extrabold text-emerald-700 text-base">
-              ₹{{ (rowData.total_amount || rowData.amount || 0) | number: '1.2-2' }}
-            </td>
-            <td class="p-3 text-center">
-              <button *ngIf="rowData.receipt_url || rowData.receiptUrl"
-                (click)="openReceiptModal(rowData.receipt_url || rowData.receiptUrl, rowData.request_no || rowData.requestNo)"
-                class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">
-                <i class="pi pi-image text-blue-600"></i> View Bill
-              </button>
-              <span *ngIf="!(rowData.receipt_url || rowData.receiptUrl)" class="text-xs text-slate-400 font-italic">No
-                Bill</span>
-            </td>
-            <td class="p-3 text-center">
-              <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold shadow-xs"
-                [ngClass]="{
-                  'bg-amber-50 text-amber-700 border border-amber-200': rowData.status === 'PENDING',
-                  'bg-emerald-50 text-emerald-700 border border-emerald-200': rowData.status === 'APPROVED',
-                  'bg-rose-50 text-rose-700 border border-rose-200': rowData.status === 'REJECTED'
-                }">
-                <span class="h-1.5 w-1.5 rounded-full" [ngClass]="{
-                    'bg-amber-500': rowData.status === 'PENDING',
-                    'bg-emerald-500': rowData.status === 'APPROVED',
-                    'bg-rose-500': rowData.status === 'REJECTED'
-                  }"></span>
-                {{ rowData.status }}
-              </span>
-            </td>
-            <td class="p-3 text-center">
-              <div class="flex items-center justify-center gap-1">
-                <p-button (onClick)="viewClaimDetails(rowData)" icon="pi pi-eye"
-                  styleClass="p-button-text p-button-sm p-button-info" pTooltip="View Details"></p-button>
-                <p-button *ngIf="isHR && rowData.status === 'PENDING'" (onClick)="updateStatus(rowData.id, 'APPROVED')"
-                  icon="pi pi-check" styleClass="p-button-text p-button-sm p-button-success"
-                  pTooltip="Approve"></p-button>
-                <p-button *ngIf="isHR && rowData.status === 'PENDING'" (onClick)="updateStatus(rowData.id, 'REJECTED')"
-                  icon="pi pi-times" styleClass="p-button-text p-button-sm p-button-danger"
-                  pTooltip="Reject"></p-button>
-                <p-button *ngIf="rowData.status === 'PENDING'" (onClick)="deleteClaim(rowData.id)" icon="pi pi-trash"
-                  styleClass="p-button-text p-button-sm p-button-danger" pTooltip="Delete"></p-button>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage">
-          <tr>
-            <td [attr.colspan]="isHR ? 10 : 9" class="p-8 text-center text-slate-500">
-              <i class="pi pi-wallet text-4xl text-slate-300 mb-2 block"></i>
-              No expense requests found. Click "Add Claim" to submit your first reimbursement.
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
+    <!-- Card 2: Pending Claims -->
+    <div class="rounded-lg border border-amber-200 bg-amber-50/20 px-3 py-2 shadow-2xs flex items-center justify-between">
+      <div class="space-y-0.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700 block">Pending Approval</span>
+        <div class="flex items-baseline gap-1.5">
+          <span class="text-lg font-black text-amber-900 leading-none">{{ summaryMetrics.pendingCount }}</span>
+          <span class="text-xs font-bold text-amber-800">₹{{ summaryMetrics.pendingAmount | number:'1.0-0' }}</span>
+        </div>
+      </div>
+      <div class="w-6 h-6 rounded-md bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+        <i class="pi pi-clock text-[10px]"></i>
+      </div>
+    </div>
+
+    <!-- Card 3: Approved Claims -->
+    <div class="rounded-lg border border-emerald-200 bg-emerald-50/20 px-3 py-2 shadow-2xs flex items-center justify-between">
+      <div class="space-y-0.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">Approved & Settled</span>
+        <div class="flex items-baseline gap-1.5">
+          <span class="text-lg font-black text-emerald-900 leading-none">{{ summaryMetrics.approvedCount }}</span>
+          <span class="text-xs font-bold text-emerald-800">₹{{ summaryMetrics.approvedAmount | number:'1.0-0' }}</span>
+        </div>
+      </div>
+      <div class="w-6 h-6 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+        <i class="pi pi-check-circle text-[10px]"></i>
+      </div>
+    </div>
+
+    <!-- Card 4: Rejected Claims -->
+    <div class="rounded-lg border border-rose-200 bg-rose-50/20 px-3 py-2 shadow-2xs flex items-center justify-between">
+      <div class="space-y-0.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-rose-700 block">Rejected Claims</span>
+        <div class="flex items-baseline gap-1.5">
+          <span class="text-lg font-black text-rose-900 leading-none">{{ summaryMetrics.rejectedCount }}</span>
+          <span class="text-xs font-bold text-rose-800">₹{{ summaryMetrics.rejectedAmount | number:'1.0-0' }}</span>
+        </div>
+      </div>
+      <div class="w-6 h-6 rounded-md bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
+        <i class="pi pi-times-circle text-[10px]"></i>
+      </div>
     </div>
   </div>
 
-  <!-- Expense Form Drawer -->
-  <p-drawer [(visible)]="drawerVisible" position="right" [modal]="true" [style]="{ width: '75vw', maxWidth: '1100px' }"
+  <!-- Shared TableTemplate Section -->
+  <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <app-table-template [data]="filteredExpenseClaims" [columns]="columns" [tabs]="statusTabs"
+      [activeTab]="activeStatusTab" (tabChange)="onStatusTabChange($event)" [isLoading]="loading()"
+      exportFileName="Expense_Claims" (refresh)="loadClaims()" [cellTemplates]="{
+        requestNo: requestNoTpl,
+        employeeName: empNameTpl,
+        submitFor: submitForTpl,
+        visitLocation: locationTpl,
+        dates: datesTpl,
+        purpose: purposeTpl,
+        totalAmount: totalAmountTpl,
+        billPhoto: billPhotoTpl,
+        status: statusTpl,
+        actions: actionsTpl
+      }">
+    </app-table-template>
+  </div>
+
+  <!-- Custom Cell Templates for TableTemplate -->
+  <ng-template #requestNoTpl let-item>
+    <span class="font-bold text-blue-600 hover:text-blue-800 cursor-pointer text-xs" (click)="viewClaimDetails(item)">
+      {{ item.request_no || item.requestNo }}
+    </span>
+  </ng-template>
+
+  <ng-template #empNameTpl let-item>
+    <span class="font-semibold text-xs text-slate-800">
+      {{ item.employee_name || item.emp_full_name || 'Employee' }}
+    </span>
+  </ng-template>
+
+  <ng-template #submitForTpl let-item>
+    <span class="text-xs text-slate-700 font-medium">
+      {{ item.submit_for || item.submitFor }}
+    </span>
+  </ng-template>
+
+  <ng-template #locationTpl let-item>
+    <span class="inline-flex items-center gap-1 text-xs font-semibold text-slate-800">
+      <i class="pi pi-map-marker text-rose-500 text-xs"></i>
+      {{ item.visit_location || item.visitLocation || 'N/A' }}
+    </span>
+  </ng-template>
+
+  <ng-template #datesTpl let-item>
+    <span class="text-xs text-slate-500 whitespace-nowrap">
+      {{ item.from_date || item.fromDate | date: 'dd MMM yyyy' }}
+      <span *ngIf="item.to_date || item.toDate"> - {{ item.to_date || item.toDate | date: 'dd MMM yyyy' }}</span>
+    </span>
+  </ng-template>
+
+  <ng-template #purposeTpl let-item>
+    <span class="text-xs text-slate-600 max-w-[200px] truncate block" [title]="item.purpose">
+      {{ item.purpose || 'Official visit travel' }}
+    </span>
+  </ng-template>
+
+  <ng-template #totalAmountTpl let-item>
+    <span class="font-extrabold text-emerald-700 text-xs">
+      ₹{{ (item.total_amount || item.amount || 0) | number: '1.2-2' }}
+    </span>
+  </ng-template>
+
+  <ng-template #billPhotoTpl let-item>
+    <button *ngIf="item.receipt_url || item.receiptUrl"
+      (click)="openReceiptModal(item.receipt_url || item.receiptUrl, item.request_no || item.requestNo)"
+      class="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors cursor-pointer border border-blue-100">
+      <i class="pi pi-image text-blue-600 text-[10px]"></i> View Bill
+    </button>
+    <span *ngIf="!(item.receipt_url || item.receiptUrl)" class="text-xs text-slate-400 italic">No Bill</span>
+  </ng-template>
+
+  <ng-template #statusTpl let-item>
+    <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-bold shadow-2xs"
+      [ngClass]="{
+        'bg-amber-50 text-amber-700 border border-amber-200': item.status === 'PENDING',
+        'bg-emerald-50 text-emerald-700 border border-emerald-200': item.status === 'APPROVED',
+        'bg-rose-50 text-rose-700 border border-rose-200': item.status === 'REJECTED'
+      }">
+      <span class="h-1.5 w-1.5 rounded-full" [ngClass]="{
+          'bg-amber-500': item.status === 'PENDING',
+          'bg-emerald-500': item.status === 'APPROVED',
+          'bg-rose-500': item.status === 'REJECTED'
+        }"></span>
+      {{ item.status }}
+    </span>
+  </ng-template>
+
+  <ng-template #actionsTpl let-item>
+    <div class="flex items-center justify-end gap-1">
+      <p-button (onClick)="viewClaimDetails(item)" icon="pi pi-eye" styleClass="p-button-text p-button-sm p-button-info"
+        pTooltip="View Details"></p-button>
+      <p-button *ngIf="item.status === 'PENDING' || isHR" (onClick)="editClaim(item)" icon="pi pi-pencil"
+        styleClass="p-button-text p-button-sm p-button-secondary" pTooltip="Edit Claim"></p-button>
+      <p-button *ngIf="isHR && item.status === 'PENDING'" (onClick)="updateStatus(item.id, 'APPROVED')"
+        icon="pi pi-check" styleClass="p-button-text p-button-sm p-button-success" pTooltip="Approve"></p-button>
+      <p-button *ngIf="isHR && item.status === 'PENDING'" (onClick)="updateStatus(item.id, 'REJECTED')"
+        icon="pi pi-times" styleClass="p-button-text p-button-sm p-button-danger" pTooltip="Reject"></p-button>
+      <p-button *ngIf="item.status === 'PENDING' || isHR" (onClick)="deleteClaim(item.id)" icon="pi pi-trash"
+        styleClass="p-button-text p-button-sm p-button-danger" pTooltip="Delete"></p-button>
+    </div>
+  </ng-template>
+
+  <!-- Expense Form Drawer with Form Fullscreen Mode Toggle -->
+  <p-drawer [(visible)]="drawerVisible" position="right" [modal]="true"
+    [style]="isFormFullscreen() ? { width: '100vw', height: '100vh', maxWidth: '100vw', margin: '0', borderRadius: '0' } : { width: '75vw', maxWidth: '1100px' }"
     (onHide)="onDrawerHide()" styleClass="modern-drawer">
 
     <ng-template pTemplate="header">
@@ -143,10 +198,18 @@
             <i class="pi pi-wallet"></i>
           </div>
           <div>
-            <h3 class="text-lg font-bold text-slate-900">New Expense Reimbursement Claim</h3>
+            <h3 class="text-lg font-bold text-slate-900">{{ editingClaimId ? 'Edit Expense Reimbursement Claim' : 'New Expense Reimbursement Claim' }}</h3>
             <p class="text-xs text-slate-500">Submit official travel location, dates, bill photo & expense breakdown</p>
           </div>
         </div>
+
+        <!-- Fullscreen Mode Button inside Form Header -->
+        <button (click)="toggleFormFullscreen()" type="button"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:text-indigo-600 text-xs font-bold transition cursor-pointer shadow-2xs">
+          <i
+            [class]="isFormFullscreen() ? 'pi pi-window-minimize text-rose-600' : 'pi pi-window-maximize text-indigo-600'"></i>
+          <span>{{ isFormFullscreen() ? 'Exit Fullscreen' : 'Fullscreen Mode' }}</span>
+        </button>
       </div>
     </ng-template>
 
@@ -200,416 +263,373 @@
                   class="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">Auto
                   Generated</span>
               </label>
-              <input pInputText type="text" formControlName="requestNo"
-                class="w-full bg-slate-50 font-bold text-blue-700 cursor-not-allowed" readonly>
+              <input type="text" pInputText formControlName="requestNo" readonly
+                class="w-full bg-slate-50 font-bold text-blue-600">
             </div>
 
-            <!-- Submit For -->
+            <!-- Submit For Purpose -->
             <div class="flex flex-col gap-1">
-              <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Expense For</label>
+              <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Submit For *</label>
               <p-select [options]="submitForOptions" formControlName="submitFor" optionLabel="label" optionValue="value"
-                placeholder="Select Purpose" styleClass="w-full"></p-select>
+                styleClass="w-full"></p-select>
             </div>
 
-            <!-- Destination State -->
+            <!-- Visit State -->
             <div class="flex flex-col gap-1">
-              <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Destination State</label>
+              <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Visit State</label>
               <p-select [options]="statesList" formControlName="visitState" optionLabel="label" optionValue="value"
-                placeholder="Select State" (onChange)="onVisitStateChange($event.value)" styleClass="w-full" [filter]="true"></p-select>
+                placeholder="Choose State" (onChange)="onVisitStateChange($event.value)" styleClass="w-full"
+                [filter]="true"></p-select>
             </div>
 
-            <!-- Destination City -->
+            <!-- Visit City -->
             <div class="flex flex-col gap-1">
-              <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Destination City</label>
+              <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Visit City</label>
               <p-select [options]="visitCitiesList" formControlName="visitCity" optionLabel="label" optionValue="value"
-                placeholder="Select City" (onChange)="onVisitCityChange($event.value)" styleClass="w-full" [filter]="true" [editable]="true"></p-select>
+                placeholder="Choose City" (onChange)="onVisitCityChange($event.value)" styleClass="w-full"
+                [filter]="true"></p-select>
             </div>
 
-            <!-- Name -->
+            <!-- Visit Location -->
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Visit Location / Venue</label>
+              <input type="text" pInputText formControlName="visitLocation"
+                placeholder="e.g. Client HQ, Cyber City, Sector 62">
+            </div>
+
+            <!-- Employee Name -->
             <div class="flex flex-col gap-1">
               <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Employee Name</label>
-              <input pInputText type="text" formControlName="name"
-                class="w-full bg-slate-50 font-semibold text-slate-700" readonly>
+              <input type="text" pInputText formControlName="name" readonly class="w-full bg-slate-50 font-semibold">
             </div>
 
             <!-- Designation -->
             <div class="flex flex-col gap-1">
               <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Designation</label>
-              <input pInputText type="text" formControlName="designation"
-                class="w-full bg-slate-50 font-semibold text-slate-700" readonly>
+              <input type="text" pInputText formControlName="designation" readonly
+                class="w-full bg-slate-50 font-semibold">
             </div>
 
             <!-- From Date -->
             <div class="flex flex-col gap-1">
-              <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">From Date</label>
-              <p-datepicker formControlName="fromDate" dateFormat="dd-mm-yy" [showIcon]="true"
+              <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Travel From Date *</label>
+              <p-datepicker formControlName="fromDate" [showIcon]="true" [dateFormat]="'dd/mm/yy'"
                 styleClass="w-full"></p-datepicker>
             </div>
 
             <!-- To Date -->
             <div class="flex flex-col gap-1">
-              <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">To Date</label>
-              <p-datepicker formControlName="toDate" dateFormat="dd-mm-yy" [showIcon]="true"
+              <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Travel To Date *</label>
+              <p-datepicker formControlName="toDate" [showIcon]="true" [dateFormat]="'dd/mm/yy'"
                 styleClass="w-full"></p-datepicker>
             </div>
 
-            <!-- Purpose Note -->
-            <div class="flex flex-col gap-1 md:col-span-2 lg:col-span-2">
-              <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Visit Purpose & Details</label>
-              <input pInputText type="text" formControlName="purpose"
-                placeholder="Brief explanation of company work visit..." class="w-full">
+            <!-- Purpose Description -->
+            <div class="flex flex-col gap-1 md:col-span-2 lg:col-span-3">
+              <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Expense / Visit Purpose</label>
+              <input type="text" pInputText formControlName="purpose"
+                placeholder="Describe the official reason or business requirement for this claim...">
             </div>
           </div>
         </div>
 
-        <!-- SECTION 2: EXPENSE BREAKDOWN TABS -->
+        <!-- SECTION 2: OTHER EXPENSE DETAILS BREAKDOWN -->
         <div class="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
           <button type="button" (click)="toggleOtherDetails()"
-            class="w-full bg-slate-50 hover:bg-slate-100 px-4 py-3 flex items-center justify-between border-b border-slate-200 text-left transition select-none">
+            class="w-full bg-slate-100/70 hover:bg-slate-100 px-4 py-3 flex items-center justify-between border-b border-slate-200 text-left transition select-none">
             <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-              <i class="pi pi-list text-blue-600"></i> Add Expense Line Items
+              <i class="pi pi-list text-indigo-600"></i> Add Expense Item Breakdown
             </span>
-            <i class="pi text-slate-600" [ngClass]="otherDetailsExpanded ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+            <i class="pi text-slate-700" [ngClass]="otherDetailsExpanded ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
           </button>
 
-          <div *ngIf="otherDetailsExpanded" class="p-5 bg-white">
-            <!-- Tabs Bar -->
-            <div class="flex items-center gap-2 border-b border-slate-200 pb-3 overflow-x-auto">
-              <button type="button" *ngFor="let tab of otherDetailsTabs" (click)="setTab(tab)"
-                class="px-4 py-2 text-xs font-bold rounded-lg transition-all whitespace-nowrap"
-                [ngClass]="activeTab === tab ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
+          <div *ngIf="otherDetailsExpanded" class="p-5 bg-white space-y-4">
+
+            <!-- Sub Category Tabs -->
+            <div class="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
+              <button *ngFor="let tab of otherDetailsTabs" type="button" (click)="setTab(tab)"
+                class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer select-none"
+                [ngClass]="activeTab === tab ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
                 {{ tab }}
               </button>
             </div>
 
-            <!-- TAB 1: Conveyance -->
-            <div *ngIf="activeTab === 'Fare/Conveyance'" [formGroup]="detailForm"
-              class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
-              <div>
-                <label class="text-xs font-semibold text-slate-700">Conveyance Type</label>
-                <p-select [options]="[{label:'Fare', value:'Fare'},{label:'Local', value:'Local'}]"
-                  formControlName="conveyanceType" styleClass="w-full"></p-select>
-              </div>
-              <div>
-                <label class="text-xs font-semibold text-slate-700">Travel By</label>
+            <!-- Tab 1: Fare / Conveyance -->
+            <form *ngIf="activeTab === 'Fare/Conveyance'" [formGroup]="detailForm"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-slate-600">Travel Mode</label>
                 <p-select [options]="travelByOptions" formControlName="travelBy" optionLabel="label" optionValue="value"
                   styleClass="w-full"></p-select>
               </div>
-              <!-- From State & City -->
-              <div>
-                <label class="text-xs font-semibold text-slate-700">From State (Origin)</label>
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-slate-600">From State</label>
                 <p-select [options]="statesList" formControlName="fromState" optionLabel="label" optionValue="value"
-                  placeholder="Select State" (onChange)="onFromStateChange($event.value)" styleClass="w-full" [filter]="true"></p-select>
+                  placeholder="Select State" (onChange)="onFromStateChange($event.value)" styleClass="w-full"
+                  [filter]="true"></p-select>
               </div>
-              <div>
-                <label class="text-xs font-semibold text-slate-700">From City (Origin)</label>
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-slate-600">From City</label>
                 <p-select [options]="fromCitiesList" formControlName="fromCity" optionLabel="label" optionValue="value"
-                  placeholder="Select City" (onChange)="onFromCityChange($event.value)" styleClass="w-full" [filter]="true" [editable]="true"></p-select>
+                  placeholder="Select City" (onChange)="onFromCityChange($event.value)" styleClass="w-full"
+                  [filter]="true"></p-select>
               </div>
-
-              <!-- To State & City -->
-              <div>
-                <label class="text-xs font-semibold text-slate-700">To State (Destination)</label>
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-slate-600">To State</label>
                 <p-select [options]="statesList" formControlName="toState" optionLabel="label" optionValue="value"
-                  placeholder="Select State" (onChange)="onToStateChange($event.value)" styleClass="w-full" [filter]="true"></p-select>
+                  placeholder="Select State" (onChange)="onToStateChange($event.value)" styleClass="w-full"
+                  [filter]="true"></p-select>
               </div>
-              <div>
-                <label class="text-xs font-semibold text-slate-700">To City (Destination)</label>
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-slate-600">To City</label>
                 <p-select [options]="toCitiesList" formControlName="toCity" optionLabel="label" optionValue="value"
-                  placeholder="Select City" (onChange)="onToCityChange($event.value)" styleClass="w-full" [filter]="true" [editable]="true"></p-select>
+                  placeholder="Select City" (onChange)="onToCityChange($event.value)" styleClass="w-full"
+                  [filter]="true"></p-select>
               </div>
-              <div>
-                <label class="text-xs font-semibold text-slate-700">Amount (₹)</label>
-                <input pInputText type="number" formControlName="amount" placeholder="0.00" class="w-full font-bold">
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-slate-600">Amount (₹) *</label>
+                <input type="number" pInputText formControlName="amount" placeholder="0.00"
+                  class="font-extrabold text-emerald-700">
               </div>
-              <div>
-                <label class="text-xs font-semibold text-slate-700">Notes</label>
-                <input pInputText type="text" formControlName="details" placeholder="Remarks..." class="w-full">
+              <div class="flex flex-col gap-1 sm:col-span-2 lg:col-span-3">
+                <label class="text-xs font-bold text-slate-600">Details / Remarks</label>
+                <input type="text" pInputText formControlName="details"
+                  placeholder="Ticket details, route, distance...">
               </div>
-            </div>
+            </form>
 
-            <!-- TAB 2: Lodging -->
-            <div *ngIf="activeTab === 'Lodging'" [formGroup]="lodgingForm"
-              class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
-              <div>
-                <label class="text-xs font-semibold text-slate-700">Hotel / Stay Name</label>
-                <input pInputText type="text" formControlName="hotelName" placeholder="Hotel Name" class="w-full">
+            <!-- Tab 2: Lodging -->
+            <form *ngIf="activeTab === 'Lodging'" [formGroup]="lodgingForm"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-slate-600">Hotel / Stay Name</label>
+                <input type="text" pInputText formControlName="hotelName"
+                  placeholder="e.g. Taj Hotel, Oyo, Guest House">
               </div>
-              <div>
-                <label class="text-xs font-semibold text-slate-700">Amount (₹)</label>
-                <input pInputText type="number" formControlName="amount" placeholder="0.00" class="w-full font-bold">
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-slate-600">Check In Date</label>
+                <p-datepicker formControlName="fromDate" [showIcon]="true" [dateFormat]="'dd/mm/yy'"
+                  styleClass="w-full"></p-datepicker>
               </div>
-              <div>
-                <label class="text-xs font-semibold text-slate-700">Notes</label>
-                <input pInputText type="text" formControlName="details" placeholder="Remarks..." class="w-full">
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-slate-600">Check Out Date</label>
+                <p-datepicker formControlName="toDate" [showIcon]="true" [dateFormat]="'dd/mm/yy'"
+                  styleClass="w-full"></p-datepicker>
               </div>
-            </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-slate-600">Amount (₹) *</label>
+                <input type="number" pInputText formControlName="amount" placeholder="0.00"
+                  class="font-extrabold text-emerald-700">
+              </div>
+              <div class="flex flex-col gap-1 sm:col-span-2">
+                <label class="text-xs font-bold text-slate-600">Details / Remarks</label>
+                <input type="text" pInputText formControlName="details" placeholder="Room type, booking details...">
+              </div>
+            </form>
 
-            <!-- TAB 3: Food -->
-            <div *ngIf="activeTab === 'Food'" [formGroup]="foodForm" class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
-              <div>
-                <label class="text-xs font-semibold text-slate-700">Vendor / Restaurant</label>
-                <input pInputText type="text" formControlName="vendor" placeholder="Restaurant Name" class="w-full">
+            <!-- Tab 3: Food -->
+            <form *ngIf="activeTab === 'Food'" [formGroup]="foodForm"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-slate-600">Bill No</label>
+                <input type="text" pInputText formControlName="billNo" placeholder="Invoice or Receipt number">
               </div>
-              <div>
-                <label class="text-xs font-semibold text-slate-700">Bill No</label>
-                <input pInputText type="text" formControlName="billNo" placeholder="Bill Reference" class="w-full">
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-slate-600">Restaurant / Vendor</label>
+                <input type="text" pInputText formControlName="vendor"
+                  placeholder="e.g. Swiggy, Zomato, Restaurant name">
               </div>
-              <div>
-                <label class="text-xs font-semibold text-slate-700">Amount (₹)</label>
-                <input pInputText type="number" formControlName="amount" placeholder="0.00" class="w-full font-bold">
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-slate-600">Amount (₹) *</label>
+                <input type="number" pInputText formControlName="amount" placeholder="0.00"
+                  class="font-extrabold text-emerald-700">
               </div>
-            </div>
+            </form>
 
-            <!-- TAB 4: Laundry -->
-            <div *ngIf="activeTab === 'Laundry'" [formGroup]="laundryForm"
-              class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
-              <div>
-                <label class="text-xs font-semibold text-slate-700">Laundry Vendor</label>
-                <input pInputText type="text" formControlName="vendor" placeholder="Vendor Name" class="w-full">
+            <!-- Tab 4: Laundry -->
+            <form *ngIf="activeTab === 'Laundry'" [formGroup]="laundryForm"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-slate-600">Vendor Name</label>
+                <input type="text" pInputText formControlName="vendor" placeholder="Hotel Laundry / Dry Cleaner">
               </div>
-              <div>
-                <label class="text-xs font-semibold text-slate-700">Amount (₹)</label>
-                <input pInputText type="number" formControlName="amount" placeholder="0.00" class="w-full font-bold">
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-slate-600">Amount (₹) *</label>
+                <input type="number" pInputText formControlName="amount" placeholder="0.00"
+                  class="font-extrabold text-emerald-700">
               </div>
-            </div>
+            </form>
 
-            <!-- TAB 5: Other -->
-            <div *ngIf="activeTab === 'Other'" [formGroup]="otherForm"
-              class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
-              <div>
-                <label class="text-xs font-semibold text-slate-700">Expense Type</label>
-                <input pInputText type="text" formControlName="expenseType" placeholder="Type of Expense"
-                  class="w-full">
+            <!-- Tab 5: Other -->
+            <form *ngIf="activeTab === 'Other'" [formGroup]="otherForm"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-slate-600">Expense Type</label>
+                <input type="text" pInputText formControlName="expenseType"
+                  placeholder="General Expense, Stationery, Client Refreshment">
               </div>
-              <div>
-                <label class="text-xs font-semibold text-slate-700">Amount (₹)</label>
-                <input pInputText type="number" formControlName="amount" placeholder="0.00" class="w-full font-bold">
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-slate-600">Amount (₹) *</label>
+                <input type="number" pInputText formControlName="amount" placeholder="0.00"
+                  class="font-extrabold text-emerald-700">
               </div>
-            </div>
+            </form>
 
-            <!-- Bill Photo / Receipt Upload Field -->
-            <div
-              class="mt-4 p-3 bg-slate-50 border border-dashed border-slate-300 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div class="flex items-center gap-3">
-                <i class="pi pi-upload text-blue-600 text-xl"></i>
-                <div>
-                  <p class="text-xs font-bold text-slate-700">Upload Bill Receipt / Photo</p>
-                  <p class="text-[11px] text-slate-500">Attach photo of payment receipt or invoice bill</p>
-                </div>
-              </div>
-              <div class="flex items-center gap-3">
-                <input type="file" (change)="onFileSelected($event)" accept="image/*,.pdf" id="billFileInput"
-                  class="hidden">
-                <label for="billFileInput"
-                  class="cursor-pointer text-xs font-bold px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
-                  <i class="pi pi-camera mr-1"></i> Choose Bill Image
+            <!-- File Upload & Add Item Button Bar -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+              <div class="flex items-center gap-3 w-full sm:w-auto">
+                <label
+                  class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold bg-white text-slate-700 border border-slate-300 rounded-lg hover:bg-slate-50 cursor-pointer transition shadow-2xs">
+                  <i class="pi pi-upload text-blue-600"></i> Attach Bill Receipt
+                  <input type="file" (change)="onFileSelected($event)" accept="image/*,.pdf" class="hidden">
                 </label>
-                <span *ngIf="selectedFileName" class="text-xs font-bold text-emerald-600 max-w-[150px] truncate"
-                  [title]="selectedFileName">
+                <span *ngIf="selectedFileName"
+                  class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200 truncate max-w-[200px]">
                   ✓ {{ selectedFileName }}
                 </span>
               </div>
+
+              <button type="button" (click)="addDetail()"
+                class="w-full sm:w-auto px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition shadow-xs cursor-pointer flex items-center justify-center gap-1.5">
+                <i class="pi pi-plus"></i> Add Item to Breakdown
+              </button>
             </div>
 
-            <div class="mt-4 flex justify-end">
-              <p-button type="button" (onClick)="addDetail()" label="Add Line Item" icon="pi pi-plus"
-                styleClass="p-button-sm p-button-outlined p-button-primary"></p-button>
+            <!-- Added Items Table -->
+            <div *ngIf="addedDetails.length > 0" class="mt-4 border border-slate-200 rounded-xl overflow-hidden">
+              <p-table [value]="addedDetails" styleClass="p-datatable-sm">
+                <ng-template pTemplate="header">
+                  <tr class="text-xs bg-slate-100 text-slate-600 uppercase">
+                    <th class="p-2.5 text-left">Type</th>
+                    <th class="p-2.5 text-left">Travel/Vendor</th>
+                    <th class="p-2.5 text-left">From -> To</th>
+                    <th class="p-2.5 text-right">Amount (₹)</th>
+                    <th class="p-2.5 text-center">Receipt</th>
+                    <th class="p-2.5 text-center">Action</th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-item let-i="rowIndex">
+                  <tr class="border-b border-slate-100 text-xs">
+                    <td class="p-2.5 font-bold text-slate-800">{{ item.type }}</td>
+                    <td class="p-2.5 text-slate-700">{{ item.travelBy }}</td>
+                    <td class="p-2.5 text-slate-600">{{ item.from }} -> {{ item.to }}</td>
+                    <td class="p-2.5 text-right font-extrabold text-emerald-700">₹{{ item.amount | number:'1.2-2' }}
+                    </td>
+                    <td class="p-2.5 text-center">
+                      <span *ngIf="item.attachmentName" class="text-emerald-600 font-bold">✓ Attached</span>
+                      <span *ngIf="!item.attachmentName" class="text-slate-400">-</span>
+                    </td>
+                    <td class="p-2.5 text-center">
+                      <button type="button" (click)="removeDetail(i)"
+                        class="text-rose-600 hover:text-rose-800 font-bold p-1 cursor-pointer">
+                        <i class="pi pi-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </ng-template>
+              </p-table>
+              <div
+                class="p-3 bg-slate-50 flex items-center justify-between border-t border-slate-200 font-bold text-sm text-slate-800">
+                <span>Total Items: {{ addedDetails.length }}</span>
+                <span class="text-emerald-700 text-base">Grand Total: ₹{{ overallTotalAmount | number:'1.2-2' }}</span>
+              </div>
             </div>
+
           </div>
         </div>
 
-        <!-- SECTION 3: ADDED ITEMS TABLE -->
-        <div *ngIf="addedDetails.length > 0" class="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
-          <div class="p-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-800 uppercase">Expense Items Summary</span>
-            <span class="text-xs text-blue-700 font-extrabold">Total Items: {{ addedDetails.length }}</span>
-          </div>
-
-          <table class="w-full text-left text-sm text-slate-700">
-            <thead class="text-xs bg-slate-100 text-slate-600 uppercase">
-              <tr>
-                <th class="p-2.5">Category</th>
-                <th class="p-2.5">Travel/Vendor</th>
-                <th class="p-2.5">Route (From - To)</th>
-                <th class="p-2.5 text-right">Amount</th>
-                <th class="p-2.5">Attachment</th>
-                <th class="p-2.5 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-              <tr *ngFor="let item of addedDetails; let i = index">
-                <td class="p-2.5 font-bold text-slate-800">{{ item.type }}</td>
-                <td class="p-2.5">{{ item.travelBy }}</td>
-                <td class="p-2.5 text-xs text-slate-500">{{ item.from }} &rarr; {{ item.to }}</td>
-                <td class="p-2.5 text-right font-extrabold text-emerald-700">₹{{ item.amount | number:'1.2-2' }}</td>
-                <td class="p-2.5 text-xs">
-                  <span *ngIf="item.attachmentUrl" (click)="openReceiptModal(item.attachmentUrl, 'Line Item Bill')"
-                    class="text-blue-600 font-bold cursor-pointer underline">
-                    <i class="pi pi-image mr-1"></i>View
-                  </span>
-                  <span *ngIf="!item.attachmentUrl" class="text-slate-400">-</span>
-                </td>
-                <td class="p-2.5 text-center">
-                  <button type="button" (click)="removeDetail(i)"
-                    class="text-rose-500 hover:text-rose-700 text-xs font-bold p-1">
-                    <i class="pi pi-trash"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- Submit Button Footer -->
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+          <button type="button" (click)="onClose()"
+            class="px-5 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition cursor-pointer">
+            Cancel
+          </button>
+          <button type="submit" [disabled]="submitting()"
+            class="px-6 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition shadow-md cursor-pointer flex items-center gap-2">
+            <i class="pi pi-send" *ngIf="!submitting()"></i>
+            <i class="pi pi-spin pi-spinner" *ngIf="submitting()"></i>
+            <span>{{ submitting() ? 'Submitting...' : 'Submit Claim Request' }}</span>
+          </button>
         </div>
 
-        <!-- ACTIONS -->
-        <div class="flex items-center justify-between border-t border-slate-200 pt-4">
-          <div class="text-sm font-bold text-slate-800">
-            Overall Total Amount:
-            <span class="text-lg font-black text-emerald-700 ml-1">
-              ₹{{ overallTotalAmount | number:'1.2-2' }}
-            </span>
-          </div>
-          <div class="flex items-center gap-3">
-            <p-button type="button" (onClick)="onClose()" label="Cancel"
-              styleClass="p-button-text p-button-secondary p-button-sm"></p-button>
-            <p-button type="submit" label="Submit Expense Claim" icon="pi pi-send" [loading]="submitting()"
-              styleClass="p-button-primary p-button-sm font-bold px-5"></p-button>
-          </div>
-        </div>
       </form>
     </ng-template>
   </p-drawer>
 
-  <!-- VIEW CLAIM DETAILS FULL DIALOG -->
-  <p-dialog [(visible)]="viewDialogVisible" [modal]="true" [maximizable]="true"
-    [style]="{ width: '65vw', maxWidth: '900px' }" header="Expense Claim Details" styleClass="rounded-xl shadow-lg">
-
-    <div *ngIf="selectedClaim" class="space-y-5">
-      <!-- Status & Header -->
-      <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+  <!-- View Claim Details Modal -->
+  <p-dialog [(visible)]="viewDialogVisible" [modal]="true" [style]="{ width: '600px' }" header="Expense Claim Details"
+    styleClass="custom-dialog">
+    <div *ngIf="selectedClaim" class="space-y-4 text-sm text-slate-700 p-2">
+      <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-200">
         <div>
-          <span class="text-xs font-bold uppercase text-slate-500">Request Number</span>
-          <h3 class="text-xl font-black text-blue-700">{{ selectedClaim.request_no || selectedClaim.requestNo }}</h3>
-          <p class="text-xs text-slate-500 mt-0.5">Submitted by: <strong class="text-slate-800">{{
-              selectedClaim.employee_name || selectedClaim.emp_full_name || selectedClaim.name || 'Employee' }}</strong>
-          </p>
+          <span class="text-xs font-bold text-slate-400 uppercase block">Request No</span>
+          <span class="text-lg font-black text-blue-600">{{ selectedClaim.request_no || selectedClaim.requestNo
+            }}</span>
         </div>
-        <div class="text-right">
-          <span class="text-xs font-bold uppercase text-slate-500 block">Status</span>
-          <span class="inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold shadow-xs" [ngClass]="{
+        <span class="px-3 py-1 text-xs font-bold rounded-full" [ngClass]="{
             'bg-amber-100 text-amber-800': selectedClaim.status === 'PENDING',
             'bg-emerald-100 text-emerald-800': selectedClaim.status === 'APPROVED',
             'bg-rose-100 text-rose-800': selectedClaim.status === 'REJECTED'
           }">
-            {{ selectedClaim.status }}
-          </span>
-        </div>
+          {{ selectedClaim.status }}
+        </span>
       </div>
 
-      <!-- Overview Cards -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-        <div class="p-3 bg-white border border-slate-200 rounded-lg">
-          <span class="text-[11px] font-bold text-slate-400 uppercase block">Visit Location</span>
-          <span class="font-bold text-slate-800 inline-flex items-center gap-1 mt-0.5">
-            <i class="pi pi-map-marker text-rose-500 text-xs"></i>
-            {{ selectedClaim.visit_location || selectedClaim.visitLocation || 'N/A' }}
-          </span>
+      <div class="grid grid-cols-2 gap-3 text-xs">
+        <div><span class="text-slate-400 font-semibold">Employee:</span> <span class="font-bold text-slate-800 block">{{
+            selectedClaim.employee_name || selectedClaim.emp_full_name || 'N/A' }}</span></div>
+        <div><span class="text-slate-400 font-semibold">Submit For:</span> <span
+            class="font-bold text-slate-800 block">{{ selectedClaim.submit_for || selectedClaim.submitFor }}</span>
         </div>
-
-        <div class="p-3 bg-white border border-slate-200 rounded-lg">
-          <span class="text-[11px] font-bold text-slate-400 uppercase block">Expense Purpose</span>
-          <span class="font-bold text-slate-800 mt-0.5 block">{{ selectedClaim.submit_for || selectedClaim.submitFor
-            }}</span>
-        </div>
-
-        <div class="p-3 bg-white border border-slate-200 rounded-lg">
-          <span class="text-[11px] font-bold text-slate-400 uppercase block">Travel Dates</span>
-          <span class="font-semibold text-slate-700 text-xs mt-0.5 block">
-            {{ (selectedClaim.from_date || selectedClaim.fromDate) | date:'dd MMM yyyy' }} -
-            {{ (selectedClaim.to_date || selectedClaim.toDate) | date:'dd MMM yyyy' }}
-          </span>
-        </div>
-
-        <div class="p-3 bg-white border border-slate-200 rounded-lg bg-emerald-50/40">
-          <span class="text-[11px] font-bold text-slate-500 uppercase block">Total Claim Amount</span>
-          <span class="text-base font-black text-emerald-700 mt-0.5 block">
-            ₹{{ (selectedClaim.total_amount || selectedClaim.amount || 0) | number:'1.2-2' }}
-          </span>
-        </div>
+        <div><span class="text-slate-400 font-semibold">Visit Location:</span> <span
+            class="font-bold text-slate-800 block">{{ selectedClaim.visit_location || selectedClaim.visitLocation
+            }}</span></div>
+        <div><span class="text-slate-400 font-semibold">Total Amount:</span> <span
+            class="font-extrabold text-emerald-700 text-sm block">₹{{ (selectedClaim.total_amount ||
+            selectedClaim.amount || 0) | number:'1.2-2' }}</span></div>
       </div>
 
-      <!-- Purpose Notes -->
-      <div *ngIf="selectedClaim.purpose"
-        class="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-700">
-        <strong class="text-slate-900">Purpose Description:</strong> {{ selectedClaim.purpose }}
+      <div class="text-xs bg-slate-50 p-3 rounded-xl border border-slate-200">
+        <span class="text-slate-400 font-semibold block mb-1">Purpose:</span>
+        <p class="font-medium text-slate-800">{{ selectedClaim.purpose || 'No purpose description provided.' }}</p>
       </div>
 
-      <!-- Line Items Breakdown Table -->
+      <!-- Item Breakdown list if present -->
       <div *ngIf="selectedClaim.items && selectedClaim.items.length > 0"
-        class="border border-slate-200 rounded-lg overflow-hidden">
-        <div class="p-2.5 bg-slate-100 font-bold text-xs text-slate-700 uppercase">Line Items Breakdown</div>
-        <table class="w-full text-xs text-slate-700">
-          <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
-            <tr>
-              <th class="p-2 text-left">Category</th>
-              <th class="p-2 text-left">Travel/Vendor</th>
-              <th class="p-2 text-left">Route</th>
-              <th class="p-2 text-right">Amount</th>
-              <th class="p-2 text-left">Notes</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            <tr *ngFor="let item of selectedClaim.items">
-              <td class="p-2 font-bold">{{ item.category }}</td>
-              <td class="p-2">{{ item.travel_by || '-' }}</td>
-              <td class="p-2">{{ item.travel_from || '' }} &rarr; {{ item.travel_to || '' }}</td>
-              <td class="p-2 text-right font-bold text-emerald-700">₹{{ item.amount | number:'1.2-2' }}</td>
-              <td class="p-2 text-slate-500">{{ item.details || '-' }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Bill Receipt Photo Preview -->
-      <div *ngIf="selectedClaim.receipt_url || selectedClaim.receiptUrl"
-        class="p-4 bg-slate-50 rounded-xl border border-slate-200">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-bold text-slate-800 uppercase flex items-center gap-1.5">
-            <i class="pi pi-image text-blue-600"></i> Attached Bill Receipt Photo
-          </span>
-          <button (click)="openReceiptModal(selectedClaim.receipt_url || selectedClaim.receiptUrl, 'Receipt Photo')"
-            class="text-xs font-bold text-blue-600 hover:underline">
-            <i class="pi pi-search-plus mr-1"></i> Full Size Photo
-          </button>
-        </div>
-        <div
-          class="flex items-center justify-center bg-white p-2 rounded-lg border border-slate-200 max-h-60 overflow-hidden cursor-pointer"
-          (click)="openReceiptModal(selectedClaim.receipt_url || selectedClaim.receiptUrl, 'Receipt Photo')">
-          <img [src]="selectedClaim.receipt_url || selectedClaim.receiptUrl" alt="Bill Receipt Photo"
-            class="max-h-56 object-contain rounded">
+        class="border border-slate-200 rounded-xl overflow-hidden">
+        <div class="bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700">Expense Items Breakdown</div>
+        <div class="p-2 space-y-1.5 max-h-48 overflow-y-auto">
+          <div *ngFor="let item of selectedClaim.items"
+            class="flex items-center justify-between text-xs bg-slate-50 p-2 rounded">
+            <div>
+              <span class="font-bold text-slate-800">{{ item.expense_type || item.type }}</span>
+              <span class="text-slate-500 block text-[11px]">{{ item.details }}</span>
+            </div>
+            <span class="font-extrabold text-emerald-700">₹{{ item.amount | number:'1.2-2' }}</span>
+          </div>
         </div>
       </div>
 
-      <!-- Actions -->
-      <div class="flex items-center justify-end gap-3 border-t border-slate-200 pt-3">
-        <p-button *ngIf="isHR && selectedClaim.status === 'PENDING'"
-          (onClick)="updateStatus(selectedClaim.id, 'APPROVED')" label="Approve Claim" icon="pi pi-check"
-          styleClass="p-button-success p-button-sm font-bold"></p-button>
-        <p-button *ngIf="isHR && selectedClaim.status === 'PENDING'"
-          (onClick)="updateStatus(selectedClaim.id, 'REJECTED')" label="Reject Claim" icon="pi pi-times"
-          styleClass="p-button-danger p-button-sm font-bold"></p-button>
-        <p-button *ngIf="selectedClaim.status === 'PENDING'" (onClick)="deleteClaim(selectedClaim.id)"
-          label="Delete Claim" icon="pi pi-trash" styleClass="p-button-outlined p-button-danger p-button-sm"></p-button>
+      <!-- Bill Receipt Link -->
+      <div *ngIf="selectedClaim.receipt_url || selectedClaim.receiptUrl" class="pt-2">
+        <button
+          (click)="openReceiptModal(selectedClaim.receipt_url || selectedClaim.receiptUrl, selectedClaim.request_no || selectedClaim.requestNo)"
+          class="w-full flex items-center justify-center gap-2 py-2 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-xl border border-blue-200 transition cursor-pointer">
+          <i class="pi pi-image"></i> View Bill Receipt Image / File
+        </button>
       </div>
     </div>
   </p-dialog>
 
-  <!-- RECEIPT PHOTO MODAL (FULL SIZE IMAGE VIEW) -->
-  <p-dialog [(visible)]="receiptModalVisible" [modal]="true" [maximizable]="true"
-    [style]="{ width: '55vw', maxWidth: '800px' }" [header]="activeReceiptTitle" styleClass="rounded-xl shadow-2xl">
-    <div class="flex flex-col items-center justify-center p-4 bg-slate-900 rounded-xl overflow-hidden min-h-[300px]">
-      <img *ngIf="activeReceiptUrl" [src]="activeReceiptUrl" alt="Receipt Full Photo"
-        class="max-w-full max-h-[70vh] object-contain rounded shadow-lg">
+  <!-- Bill Receipt Preview Dialog -->
+  <p-dialog [(visible)]="receiptModalVisible" [modal]="true" [header]="activeReceiptTitle + ' - Receipt Preview'"
+    [style]="{ width: '700px' }" styleClass="custom-dialog">
+    <div class="p-2 flex flex-col items-center justify-center">
+      <img *ngIf="activeReceiptUrl && !activeReceiptUrl.includes('application/pdf')" [src]="activeReceiptUrl"
+        alt="Receipt" class="max-h-[500px] w-auto rounded-lg object-contain border border-slate-200 shadow-md">
+      <iframe *ngIf="activeReceiptUrl && activeReceiptUrl.includes('application/pdf')" [src]="activeReceiptUrl"
+        class="w-full h-[500px] rounded-lg border border-slate-200"></iframe>
     </div>
   </p-dialog>
+
 </div>

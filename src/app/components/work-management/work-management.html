@@ -1,95 +1,107 @@
 <p-toast></p-toast>
 <p-confirmDialog></p-confirmDialog>
 
-<br>
-<app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
 
-<div class="p-4 md:p-6 space-y-6 bg-slate-50 min-h-screen font-sans">
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-    <div>
+<!-- Top Breadcrumb & Action Header Bar (Matching Support Ticket) -->
+<div
+  class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6 shadow-xs">
+  <div class="flex-1 min-w-0">
+    <p-breadcrumb [model]="breadcrumbItems"
+      styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
+  </div>
+  <div class="shrink-0 py-1.5 flex items-center gap-2">
+    <p-button (onClick)="openCreateTaskModal()" label="Create New Task" icon="pi pi-plus"
+      styleClass="p-button-sm p-button-info rounded-xl font-bold shadow-xs px-3.5 py-1.5 text-xs"></p-button>
+  </div>
+</div>
+
+<div class="p-0 space-y-6 bg-slate-50 min-h-screen font-sans">
+
+  <!-- PAGE TITLE CARD -->
+  <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+    <div class="flex items-center gap-2">
       <h1 class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Task Management</h1>
-      <p class="text-xs md:text-sm text-slate-500 mt-0.5">Manage, track, and collaborate on team tasks</p>
+      <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-indigo-200">
+        Work & Collaboration
+      </span>
     </div>
-    <div class="flex items-center gap-3">
-      <p-button (onClick)="openCreateTaskModal()" label="Create New Task" icon="pi pi-plus"
-        styleClass="p-button-sm p-button-info rounded-lg font-semibold shadow-sm" [raised]="true"></p-button>
-    </div>
+    <p class="text-xs md:text-sm text-slate-500 mt-1">
+      Manage, track, and collaborate on team tasks across projects.
+    </p>
   </div>
 
 
 
-  <!-- DASHBOARD STATS CARDS -->
-  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+  <!-- DASHBOARD STATS CARDS (Ultra Compact & Sleek) -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
     <!-- Total Tasks -->
-    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
-      <div class="flex items-center justify-between text-slate-400 mb-2">
-        <span class="text-xs font-bold uppercase tracking-wider">Total Tasks</span>
-        <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
-          <i class="pi pi-bars text-sm"></i>
-        </div>
+    <div class="bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-2xs flex items-center justify-between">
+      <div class="space-y-0.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Total Tasks</span>
+        <div class="text-lg font-black text-slate-900 leading-none">{{ stats.totalTasks }}</div>
       </div>
-      <div class="text-3xl font-black text-slate-900">{{ stats.totalTasks }}</div>
-      <div class="text-[11px] text-slate-500 mt-2 font-medium">Across all projects</div>
+      <div class="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center text-slate-600 shrink-0">
+        <i class="pi pi-bars text-[10px]"></i>
+      </div>
     </div>
 
     <!-- To Do -->
-    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
-      <div class="flex items-center justify-between text-slate-400 mb-2">
-        <span class="text-xs font-bold uppercase tracking-wider text-slate-600">To Do</span>
-        <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
-          <i class="pi pi-clock text-sm"></i>
-        </div>
+    <div class="bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-2xs flex items-center justify-between">
+      <div class="space-y-0.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-600 block">To Do</span>
+        <div class="text-lg font-black text-slate-700 leading-none">{{ stats.todoCount }}</div>
       </div>
-      <div class="text-3xl font-black text-slate-700">{{ stats.todoCount }}</div>
-      <div class="text-[11px] text-slate-500 mt-2 font-medium">Pending start</div>
+      <div class="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center text-slate-600 shrink-0">
+        <i class="pi pi-clock text-[10px]"></i>
+      </div>
     </div>
 
     <!-- In Progress -->
-    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
-      <div class="flex items-center justify-between text-indigo-600 mb-2">
-        <span class="text-xs font-bold uppercase tracking-wider text-indigo-700">In Progress</span>
-        <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-          <i class="pi pi-spin pi-spinner text-sm"></i>
-        </div>
+    <div
+      class="bg-white px-3 py-2 rounded-lg border border-indigo-200 bg-indigo-50/20 shadow-2xs flex items-center justify-between">
+      <div class="space-y-0.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-700 block">In Progress</span>
+        <div class="text-lg font-black text-indigo-600 leading-none">{{ stats.inProgressCount }}</div>
       </div>
-      <div class="text-3xl font-black text-indigo-600">{{ stats.inProgressCount }}</div>
-      <div class="text-[11px] text-indigo-600/80 mt-2 font-semibold">Active tasks</div>
+      <div class="w-6 h-6 rounded-md bg-indigo-100 flex items-center justify-center text-indigo-700 shrink-0">
+        <i class="pi pi-spin pi-spinner text-[10px]"></i>
+      </div>
     </div>
 
     <!-- In Review -->
-    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
-      <div class="flex items-center justify-between text-amber-600 mb-2">
-        <span class="text-xs font-bold uppercase tracking-wider text-amber-700">In Review</span>
-        <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
-          <i class="pi pi-eye text-sm"></i>
-        </div>
+    <div
+      class="bg-white px-3 py-2 rounded-lg border border-amber-200 bg-amber-50/20 shadow-2xs flex items-center justify-between">
+      <div class="space-y-0.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700 block">In Review</span>
+        <div class="text-lg font-black text-amber-600 leading-none">{{ stats.inReviewCount }}</div>
       </div>
-      <div class="text-3xl font-black text-amber-600">{{ stats.inReviewCount }}</div>
-      <div class="text-[11px] text-amber-600/80 mt-2 font-semibold">Awaiting review</div>
+      <div class="w-6 h-6 rounded-md bg-amber-100 flex items-center justify-center text-amber-700 shrink-0">
+        <i class="pi pi-eye text-[10px]"></i>
+      </div>
     </div>
 
     <!-- Completed -->
-    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
-      <div class="flex items-center justify-between text-emerald-600 mb-2">
-        <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Completed</span>
-        <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-          <i class="pi pi-check-circle text-sm"></i>
-        </div>
+    <div
+      class="bg-white px-3 py-2 rounded-lg border border-emerald-200 bg-emerald-50/20 shadow-2xs flex items-center justify-between">
+      <div class="space-y-0.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">Completed</span>
+        <div class="text-lg font-black text-emerald-600 leading-none">{{ stats.completedCount }}</div>
       </div>
-      <div class="text-3xl font-black text-emerald-600">{{ stats.completedCount }}</div>
-      <div class="text-[11px] text-emerald-600/80 mt-2 font-semibold">Finished tasks</div>
+      <div class="w-6 h-6 rounded-md bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
+        <i class="pi pi-check-circle text-[10px]"></i>
+      </div>
     </div>
 
     <!-- Overdue -->
-    <div class="bg-white p-5 rounded-2xl border border-rose-100 bg-rose-50/20 shadow-sm flex flex-col justify-between">
-      <div class="flex items-center justify-between text-rose-600 mb-2">
-        <span class="text-xs font-bold uppercase tracking-wider text-rose-700">Overdue</span>
-        <div class="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center">
-          <i class="pi pi-exclamation-triangle text-sm"></i>
-        </div>
+    <div
+      class="bg-white px-3 py-2 rounded-lg border border-rose-200 bg-rose-50/20 shadow-2xs flex items-center justify-between">
+      <div class="space-y-0.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-rose-700 block">Overdue</span>
+        <div class="text-lg font-black text-rose-600 leading-none">{{ stats.overdueCount }}</div>
       </div>
-      <div class="text-3xl font-black text-rose-600">{{ stats.overdueCount }}</div>
-      <div class="text-[11px] text-rose-600/80 mt-2 font-semibold">Passed due date</div>
+      <div class="w-6 h-6 rounded-md bg-rose-100 flex items-center justify-center text-rose-700 shrink-0">
+        <i class="pi pi-exclamation-triangle text-[10px]"></i>
+      </div>
     </div>
   </div>
 
@@ -355,16 +367,39 @@
 
 </div>
 
-<!-- CREATE / EDIT TASK DIALOG -->
-<p-dialog [(visible)]="showTaskModal" [header]="isEditMode ? 'Edit Task' : 'Create New Task'" [modal]="true"
-  [style]="{ width: '600px' }" styleClass="p-dialog-rounded">
+<!-- CREATE / EDIT TASK DRAWER FORM -->
+<p-drawer [(visible)]="showTaskModal" position="right" [modal]="true"
+  [style]="isFormFullscreen() ? { width: '100vw', height: '100vh', maxWidth: '100vw', margin: '0', borderRadius: '0' } : { width: '100%', maxWidth: '36rem' }"
+  styleClass="border-none shadow-2xl bg-white">
+
+  <ng-template pTemplate="header">
+    <div class="flex items-center justify-between w-full pr-6 text-slate-800">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+          <i class="pi pi-briefcase text-lg"></i>
+        </div>
+        <div>
+          <h2 class="text-lg font-black text-slate-900">{{ isEditMode ? 'Edit Task' : 'Create New Task' }}</h2>
+          <p class="text-xs text-slate-500">Set title, assignee, category, priority & due date</p>
+        </div>
+      </div>
+
+      <!-- Fullscreen Mode Toggle Button -->
+      <button (click)="toggleFormFullscreen()" type="button"
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:text-indigo-600 text-xs font-bold transition cursor-pointer shadow-2xs">
+        <i
+          [class]="isFormFullscreen() ? 'pi pi-window-minimize text-rose-600' : 'pi pi-window-maximize text-indigo-600'"></i>
+        <span>{{ isFormFullscreen() ? 'Exit Fullscreen' : 'Fullscreen Mode' }}</span>
+      </button>
+    </div>
+  </ng-template>
 
   <form [formGroup]="taskForm" (ngSubmit)="saveTask()" class="space-y-4 pt-2">
     <!-- Task Title -->
     <div>
       <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Task Title *</label>
       <input pInputText formControlName="title" placeholder="Enter concise task title"
-        class="w-full text-sm rounded-xl" />
+        class="w-full text-sm rounded-xl border-slate-300" />
       <small *ngIf="taskForm.get('title')?.touched && taskForm.get('title')?.invalid"
         class="text-rose-500 text-xs block mt-1">Title is required.</small>
     </div>
@@ -374,13 +409,13 @@
       <div>
         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Category</label>
         <p-select [options]="categoryOptions" formControlName="category" optionLabel="label" optionValue="value"
-          styleClass="w-full text-sm rounded-xl" />
+          styleClass="w-full text-sm rounded-xl border-slate-300" appendTo="body" />
       </div>
 
       <div>
         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Priority</label>
         <p-select [options]="priorityOptions" formControlName="priority" optionLabel="label" optionValue="value"
-          styleClass="w-full text-sm rounded-xl" />
+          styleClass="w-full text-sm rounded-xl border-slate-300" appendTo="body" />
       </div>
     </div>
 
@@ -389,13 +424,13 @@
       <div>
         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Status</label>
         <p-select [options]="statusOptions" formControlName="status" optionLabel="label" optionValue="value"
-          styleClass="w-full text-sm rounded-xl" />
+          styleClass="w-full text-sm rounded-xl border-slate-300" appendTo="body" />
       </div>
 
       <div>
         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Assign To *</label>
         <p-select [options]="employees" formControlName="assigned_to" optionLabel="label" optionValue="value"
-          placeholder="Select Employee" styleClass="w-full text-sm rounded-xl" />
+          placeholder="Select Employee" styleClass="w-full text-sm rounded-xl border-slate-300" appendTo="body" />
       </div>
     </div>
 
@@ -403,13 +438,13 @@
     <div class="grid grid-cols-2 gap-4">
       <div>
         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Due Date</label>
-        <input pInputText type="date" formControlName="due_date" class="w-full text-sm rounded-xl" />
+        <input pInputText type="date" formControlName="due_date" class="w-full text-sm rounded-xl border-slate-300" />
       </div>
 
       <div>
         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Estimated Hours</label>
         <input pInputText type="number" formControlName="estimated_hours" placeholder="e.g. 8"
-          class="w-full text-sm rounded-xl" />
+          class="w-full text-sm rounded-xl border-slate-300" />
       </div>
     </div>
 
@@ -426,17 +461,18 @@
         Requirements</label>
       <textarea pTextarea formControlName="description" rows="4"
         placeholder="Add detailed instructions, specs, or task checklist..."
-        class="w-full text-sm rounded-xl"></textarea>
+        class="w-full text-sm rounded-xl p-3 border-slate-300"></textarea>
     </div>
 
-    <!-- Dialog Actions -->
-    <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
-      <p-button label="Cancel" [text]="true" (onClick)="showTaskModal = false" styleClass="text-slate-600 font-bold" />
-      <p-button [label]="isEditMode ? 'Update Task' : 'Create Task'" type="submit"
-        styleClass="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl border-none" />
+    <!-- Drawer Actions -->
+    <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+      <p-button (onClick)="showTaskModal = false" label="Cancel" [outlined]="true"
+        styleClass="p-button-secondary p-button-sm rounded-xl font-bold"></p-button>
+      <p-button type="submit" [label]="isEditMode ? 'Update Task' : 'Create Task'" icon="pi pi-check"
+        styleClass="p-button-sm p-button-info rounded-xl font-bold shadow-xs px-5"></p-button>
     </div>
   </form>
-</p-dialog>
+</p-drawer>
 
 <!-- TASK DETAIL & ACTIVITY DRAWER -->
 <p-drawer [(visible)]="showDetailModal" position="right" [style]="{ width: '100%', maxWidth: '38rem' }"

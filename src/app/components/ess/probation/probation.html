@@ -1,24 +1,250 @@
-<app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
-<section class="flex flex-col items-center justify-center min-h-[400px] text-center p-8 bg-white border border-slate-200 rounded-xl space-y-6 relative overflow-hidden">
-  <!-- Decorative Background Glow -->
-  <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-blue-400/5 blur-2xl"></div>
-  <div class="absolute -left-16 -bottom-16 w-48 h-48 rounded-full bg-indigo-400/5 blur-2xl"></div>
+<p-toast></p-toast>
 
-  <!-- Animated Orb -->
-  <div class="relative flex items-center justify-center">
-    <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 opacity-20 blur-xl animate-pulse"></div>
-    <div class="relative h-20 w-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-3xl shadow-sm border border-blue-100/50 transition duration-300 hover:scale-105">
-      <i class="pi pi-user-minus"></i>
+<!-- Top Breadcrumb Bar -->
+<div class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6 shadow-xs">
+  <div class="flex-1 min-w-0">
+    <p-breadcrumb [model]="breadcrumbItems"
+      styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
+  </div>
+</div>
+
+<div class="p-0 space-y-6 bg-slate-50 min-h-screen font-sans">
+
+  <!-- PAGE TITLE CARD -->
+  <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+    <div class="flex items-center gap-2">
+      <h1 class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Probation & Confirmation Tracker</h1>
+      <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-blue-200">
+        ESS & Manager Module
+      </span>
+    </div>
+    <p class="text-xs md:text-sm text-slate-500 mt-1">
+      Track employee probation evaluation, mid-term reviews, confirmation dates, and feedback status.
+    </p>
+  </div>
+
+  <!-- DASHBOARD KPI CARDS (Ultra Compact & Sleek) -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+    <!-- Total Under Review -->
+    <div class="bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-2xs flex items-center justify-between">
+      <div class="space-y-0.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Total Tracked</span>
+        <div class="text-lg font-black text-slate-900 leading-none">{{ stats.total }}</div>
+      </div>
+      <div class="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center text-slate-600 shrink-0">
+        <i class="pi pi-users text-[10px]"></i>
+      </div>
+    </div>
+
+    <!-- Under Probation -->
+    <div class="bg-white px-3 py-2 rounded-lg border border-amber-200 bg-amber-50/20 shadow-2xs flex items-center justify-between">
+      <div class="space-y-0.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700 block">Under Probation</span>
+        <div class="text-lg font-black text-amber-600 leading-none">{{ stats.underProbation }}</div>
+      </div>
+      <div class="w-6 h-6 rounded-md bg-amber-100 flex items-center justify-center text-amber-700 shrink-0">
+        <i class="pi pi-clock text-[10px]"></i>
+      </div>
+    </div>
+
+    <!-- Confirmed -->
+    <div class="bg-white px-3 py-2 rounded-lg border border-emerald-200 bg-emerald-50/20 shadow-2xs flex items-center justify-between">
+      <div class="space-y-0.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">Confirmed</span>
+        <div class="text-lg font-black text-emerald-600 leading-none">{{ stats.confirmed }}</div>
+      </div>
+      <div class="w-6 h-6 rounded-md bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
+        <i class="pi pi-check-circle text-[10px]"></i>
+      </div>
+    </div>
+
+    <!-- Extended -->
+    <div class="bg-white px-3 py-2 rounded-lg border border-rose-200 bg-rose-50/20 shadow-2xs flex items-center justify-between">
+      <div class="space-y-0.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-rose-700 block">Extended</span>
+        <div class="text-lg font-black text-rose-600 leading-none">{{ stats.extended }}</div>
+      </div>
+      <div class="w-6 h-6 rounded-md bg-rose-100 flex items-center justify-center text-rose-700 shrink-0">
+        <i class="pi pi-exclamation-triangle text-[10px]"></i>
+      </div>
     </div>
   </div>
 
-  <div class="space-y-2 max-w-md">
-    <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Probation Tracker</h2>
-    <p class="text-slate-500 text-sm leading-relaxed">Track induction checklist items, mid-probation reviews, and confirmation status details.</p>
+  <!-- TABLE TEMPLATE SECTION -->
+  <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <app-table-template
+      [data]="filteredRecords"
+      [columns]="columns"
+      [tabs]="statusTabs"
+      [activeTab]="activeTab"
+      (tabChange)="onTabChange($event)"
+      [isLoading]="loading"
+      exportFileName="Employee_Probation_Tracker"
+      (refresh)="loadProbations()"
+      [cellTemplates]="{
+        employee_name: empTpl,
+        department: deptTpl,
+        joining_date: jDateTpl,
+        probation_end_date: pDateTpl,
+        review_rating: ratingTpl,
+        confirmation_status: statusTpl,
+        actions: actionsTpl
+      }">
+    </app-table-template>
   </div>
 
-  <span class="inline-flex items-center gap-2 rounded-full bg-blue-50/80 px-4 py-1.5 text-xs font-semibold text-blue-700 border border-blue-100 shadow-sm">
-    <span class="h-2 w-2 rounded-full bg-blue-500 animate-ping"></span>
-    Under Development
-  </span>
-</section>
+  <!-- Custom Cell Templates -->
+  <ng-template #empTpl let-item>
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-xs shadow-xs">
+        {{ (item.employee_name || 'E').charAt(0).toUpperCase() }}
+      </div>
+      <div>
+        <div class="font-bold text-slate-900 text-xs">{{ item.employee_name }}</div>
+        <div class="text-[10px] text-slate-400 font-medium">{{ item.employee_code || item.employee_email || '' }}</div>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #deptTpl let-item>
+    <div>
+      <div class="font-semibold text-slate-800 text-xs">{{ item.designation || 'Team Member' }}</div>
+      <div class="text-[11px] text-slate-500">{{ item.department || 'General' }}</div>
+    </div>
+  </ng-template>
+
+  <ng-template #jDateTpl let-item>
+    <span class="text-xs text-slate-600 font-medium whitespace-nowrap">
+      {{ item.joining_date | date:'dd MMM yyyy' }}
+    </span>
+  </ng-template>
+
+  <ng-template #pDateTpl let-item>
+    <span class="text-xs font-semibold text-slate-700 whitespace-nowrap">
+      {{ item.probation_end_date | date:'dd MMM yyyy' }}
+      <span class="text-[10px] text-slate-400 block font-normal">({{ item.probation_period_months || 6 }} Months)</span>
+    </span>
+  </ng-template>
+
+  <ng-template #ratingTpl let-item>
+    <span class="px-2.5 py-1 text-xs font-bold rounded-lg border bg-slate-50 text-slate-700 border-slate-200">
+      {{ item.review_rating || 'Meets Expectations' }}
+    </span>
+  </ng-template>
+
+  <ng-template #statusTpl let-item>
+    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shadow-2xs" [ngClass]="{
+        'bg-amber-50 text-amber-700 border border-amber-200': item.confirmation_status === 'UNDER_PROBATION',
+        'bg-emerald-50 text-emerald-700 border border-emerald-200': item.confirmation_status === 'CONFIRMED',
+        'bg-rose-50 text-rose-700 border border-rose-200': item.confirmation_status === 'EXTENDED',
+        'bg-slate-100 text-slate-700 border border-slate-200': item.confirmation_status === 'TERMINATED'
+      }">
+      <span class="h-1.5 w-1.5 rounded-full" [ngClass]="{
+          'bg-amber-500': item.confirmation_status === 'UNDER_PROBATION',
+          'bg-emerald-500': item.confirmation_status === 'CONFIRMED',
+          'bg-rose-500': item.confirmation_status === 'EXTENDED',
+          'bg-slate-500': item.confirmation_status === 'TERMINATED'
+        }"></span>
+      {{ (item.confirmation_status || '').replace('_', ' ') }}
+    </span>
+  </ng-template>
+
+  <ng-template #actionsTpl let-item>
+    <div class="flex items-center justify-end gap-1">
+      <p-button (onClick)="openReviewDrawer(item)" icon="pi pi-file-edit" styleClass="p-button-text p-button-sm p-button-info"
+        pTooltip="Review & Update Confirmation"></p-button>
+    </div>
+  </ng-template>
+
+</div>
+
+<!-- PROBATION REVIEW & CONFIRMATION DRAWER -->
+<p-drawer [(visible)]="showReviewDrawer" position="right" [modal]="true"
+  [style]="isFormFullscreen() ? { width: '100vw', height: '100vh', maxWidth: '100vw', margin: '0', borderRadius: '0' } : { width: '100%', maxWidth: '34rem' }"
+  styleClass="border-none shadow-2xl bg-white">
+
+  <ng-template pTemplate="header">
+    <div class="flex items-center justify-between w-full pr-6 text-slate-800">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+          <i class="pi pi-user-check text-lg"></i>
+        </div>
+        <div>
+          <h2 class="text-lg font-black text-slate-900">Probation Confirmation Review</h2>
+          <p class="text-xs text-slate-500">Evaluate employee performance and update confirmation decision</p>
+        </div>
+      </div>
+
+      <!-- Fullscreen Mode Toggle -->
+      <button (click)="toggleFormFullscreen()" type="button"
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:text-blue-600 text-xs font-bold transition cursor-pointer shadow-2xs">
+        <i [class]="isFormFullscreen() ? 'pi pi-window-minimize text-rose-600' : 'pi pi-window-maximize text-blue-600'"></i>
+        <span>{{ isFormFullscreen() ? 'Exit Fullscreen' : 'Fullscreen Mode' }}</span>
+      </button>
+    </div>
+  </ng-template>
+
+  <div *ngIf="selectedRecord" class="space-y-5 pt-2">
+    <!-- Selected Employee Card Summary -->
+    <div class="bg-blue-50/60 p-4 rounded-2xl border border-blue-100 space-y-2">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900">{{ selectedRecord.employee_name }}</h3>
+        <span class="text-xs font-bold px-2.5 py-0.5 rounded-md bg-blue-100 text-blue-800">
+          {{ selectedRecord.designation }}
+        </span>
+      </div>
+      <div class="grid grid-cols-2 gap-2 text-xs text-slate-600 pt-1">
+        <div><span class="font-bold text-slate-700">Department:</span> {{ selectedRecord.department }}</div>
+        <div><span class="font-bold text-slate-700">Joining Date:</span> {{ selectedRecord.joining_date | date:'dd MMM yyyy' }}</div>
+        <div><span class="font-bold text-slate-700">Probation End:</span> {{ selectedRecord.probation_end_date | date:'dd MMM yyyy' }}</div>
+        <div><span class="font-bold text-slate-700">Current Status:</span> {{ selectedRecord.confirmation_status }}</div>
+      </div>
+    </div>
+
+    <form [formGroup]="reviewForm" (ngSubmit)="submitReview()" class="space-y-4">
+      <!-- Confirmation Decision -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+          Confirmation Decision *
+        </label>
+        <p-select [options]="statusOptions" formControlName="confirmationStatus" optionLabel="label" optionValue="value"
+          styleClass="w-full text-sm rounded-xl border-slate-300" appendTo="body" />
+      </div>
+
+      <!-- Extension Months (If Extended selected) -->
+      <div *ngIf="reviewForm.get('confirmationStatus')?.value === 'EXTENDED'">
+        <label class="block text-xs font-bold text-amber-800 uppercase tracking-wider mb-1.5">
+          Extension Duration (Months) *
+        </label>
+        <input pInputText type="number" formControlName="extensionMonths" min="1" max="6"
+          class="w-full text-sm rounded-xl p-3 border-amber-300 bg-amber-50/40" />
+      </div>
+
+      <!-- Review Rating -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+          Performance Rating *
+        </label>
+        <p-select [options]="ratingOptions" formControlName="reviewRating" optionLabel="label" optionValue="value"
+          styleClass="w-full text-sm rounded-xl border-slate-300" appendTo="body" />
+      </div>
+
+      <!-- Manager Feedback & Remarks -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+          Evaluation Remarks / Manager Feedback *
+        </label>
+        <textarea pTextarea formControlName="remarks" rows="4"
+          placeholder="Provide detailed feedback regarding performance during probation period..."
+          class="w-full text-sm rounded-xl p-3 border-slate-300 focus:border-blue-500"></textarea>
+      </div>
+
+      <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
+        <p-button (onClick)="showReviewDrawer = false" label="Cancel" [outlined]="true"
+          styleClass="p-button-secondary p-button-sm rounded-xl font-bold"></p-button>
+        <p-button type="submit" [label]="submitting ? 'Saving...' : 'Save Decision'" icon="pi pi-check"
+          [loading]="submitting" styleClass="p-button-sm p-button-info rounded-xl font-bold shadow-xs px-5"></p-button>
+      </div>
+    </form>
+  </div>
+</p-drawer>

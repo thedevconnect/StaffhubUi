@@ -30,6 +30,10 @@ export class ExpenseService {
     return this.http.post(`${this.apiUrl}`, payload);
   }
 
+  updateClaim(id: number, payload: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, payload);
+  }
+
   getClaims(): Observable<any> {
     return this.http.get(`${this.apiUrl}`);
   }

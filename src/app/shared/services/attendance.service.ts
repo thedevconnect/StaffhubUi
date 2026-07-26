@@ -143,20 +143,22 @@ export class AttendanceService {
     return this.http.get<any>(`${this.apiBase}/api/attendance-regularization/${id}/history`);
   }
 
-  getHRDashboardSummary(): Observable<ApiResponse<any>> {
-    return this.http.get<ApiResponse<any>>(`${this.apiBase}/api/attendance/hr-dashboard-summary`);
+  getHRDashboardSummary(date?: string): Observable<ApiResponse<any>> {
+    const query = date ? `?date=${date}` : '';
+    return this.http.get<ApiResponse<any>>(`${this.apiBase}/api/attendance/hr-dashboard-summary${query}`);
   }
 
-  getHRDashboardDetails(category: string): Observable<ApiResponse<any[]>> {
-    return this.http.get<ApiResponse<any[]>>(`${this.apiBase}/api/attendance/hr-dashboard-details?category=${category}`);
+  getHRDashboardDetails(category: string, date?: string): Observable<ApiResponse<any[]>> {
+    let query = `?category=${category}`;
+    if (date) {
+      query += `&date=${date}`;
+    }
+    return this.http.get<ApiResponse<any[]>>(`${this.apiBase}/api/attendance/hr-dashboard-details${query}`);
   }
 
   getHRDashboardChart(): Observable<ApiResponse<any[]>> {
     return this.http.get<ApiResponse<any[]>>(`${this.apiBase}/api/attendance/hr-dashboard-chart`);
   }
-  // getEmployeeHistory(employeeId: number | string): Observable<ApiResponse<AttendanceRecord[]>> {
-  //   return this.http.get<ApiResponse<AttendanceRecord[]>>(`${this.apiBase}/api/attendance/employee-history/${employeeId}`);
-  // }
 
   getOfficeLocation(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(`${this.apiBase}/api/attendance/office-location`);
@@ -164,5 +166,10 @@ export class AttendanceService {
 
   updateDailyAttendance(data: any): Observable<ApiResponse<any>> {
     return this.http.put<ApiResponse<any>>(`${this.apiBase}/api/attendance/update-daily`, data);
+  }
+
+  getTeamReportingsAttendance(date?: string): Observable<ApiResponse<any[]>> {
+    const query = date ? `?date=${date}` : '';
+    return this.http.get<ApiResponse<any[]>>(`${this.apiBase}/api/attendance/team-reportings${query}`);
   }
 }
