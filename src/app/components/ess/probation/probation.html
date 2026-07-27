@@ -88,6 +88,7 @@
         probation_end_date: pDateTpl,
         review_rating: ratingTpl,
         confirmation_status: statusTpl,
+        remarks: remarksTpl,
         actions: actionsTpl
       }">
     </app-table-template>
@@ -127,7 +128,8 @@
   </ng-template>
 
   <ng-template #ratingTpl let-item>
-    <span class="px-2.5 py-1 text-xs font-bold rounded-lg border bg-slate-50 text-slate-700 border-slate-200">
+    <span class="px-2.5 py-1 text-xs font-bold rounded-lg border bg-blue-50 text-blue-700 border-blue-200 inline-flex items-center gap-1">
+      <i class="pi pi-star-fill text-[10px] text-amber-500"></i>
       {{ item.review_rating || 'Meets Expectations' }}
     </span>
   </ng-template>
@@ -149,8 +151,20 @@
     </span>
   </ng-template>
 
+  <ng-template #remarksTpl let-item>
+    <div class="max-w-xs space-y-0.5">
+      <p class="text-xs text-slate-700 font-medium line-clamp-2" [title]="item.remarks">
+        {{ item.remarks || 'Standard probation evaluation.' }}
+      </p>
+      <span *ngIf="item.confirmation_status === 'EXTENDED' && item.extension_months"
+        class="text-[10px] font-bold text-rose-600 block bg-rose-50 px-2 py-0.5 rounded border border-rose-100 w-fit">
+        <i class="pi pi-clock text-[9px] mr-1"></i>Extended by {{ item.extension_months }} Month(s)
+      </span>
+    </div>
+  </ng-template>
+
   <ng-template #actionsTpl let-item>
-    <div class="flex items-center justify-end gap-1">
+    <div *ngIf="isHrAdmin" class="flex items-center justify-end gap-1">
       <p-button (onClick)="openReviewDrawer(item)" icon="pi pi-file-edit" styleClass="p-button-text p-button-sm p-button-info"
         pTooltip="Review & Update Confirmation"></p-button>
     </div>

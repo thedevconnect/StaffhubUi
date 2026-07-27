@@ -23,7 +23,6 @@ import { TextareaModule } from 'primeng/textarea';
 import { Breadcrumb } from 'primeng/breadcrumb';
 
 import { TableTemplate, TableColumn, TableAction } from '../../shared/ui/table-template/table-template';
-import { AppBreadcrumb } from '../../shared/ui/breadcrumb/breadcrumb';
 
 @Component({
   selector: 'app-work-management',
@@ -32,7 +31,6 @@ import { AppBreadcrumb } from '../../shared/ui/breadcrumb/breadcrumb';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    AppBreadcrumb,
     Breadcrumb,
     TableModule,
     TableTemplate,

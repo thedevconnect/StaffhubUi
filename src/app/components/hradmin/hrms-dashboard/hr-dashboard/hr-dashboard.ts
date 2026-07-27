@@ -280,7 +280,6 @@ export class HrDashboard implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadPendencyData();
     this.loadDashboardSummary(this.formattedSelectedDate);
-    this.loadChartData();
 
     const user = this.authService.user();
     if (user?.companyId) {
@@ -313,7 +312,6 @@ export class HrDashboard implements OnInit, OnDestroy {
     this.isLoading = true;
     this.loadDashboardSummary(this.formattedSelectedDate);
     this.loadPendencyData();
-    this.loadChartData();
 
     setTimeout(() => {
       this.isLoading = false;

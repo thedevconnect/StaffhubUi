@@ -21,6 +21,9 @@ import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/ta
 import { EmployeeManagementService } from '../../../shared/services/employee-management.service';
 import { LeaveService, LeaveRequest } from '../../../shared/services/leave.service';
 
+import { AuthService } from '../../../shared/services/services/auth.service';
+import { inject } from '@angular/core';
+
 @Component({
   selector: 'app-leave-application',
   standalone: true,
@@ -47,6 +50,18 @@ import { LeaveService, LeaveRequest } from '../../../shared/services/leave.servi
   styleUrl: './leave-application.scss'
 })
 export class LeaveApplication {
+  authService = inject(AuthService);
+
+  get isHrAdmin(): boolean {
+    const user = this.authService.user();
+    if (!user) return false;
+    const roleStr = user.role || '';
+    const roles = roleStr.split(',').map((r: string) => r.trim().toUpperCase());
+    const roleObjs = (user.roles || []).map(r => (r.roleId || r.rolDes || '').toUpperCase());
+    const privileged = ['HR_ADMIN', 'ADMIN', 'SUPER_ADMIN', 'SUPERADMIN', 'DEVELOPER', 'HRADMIN', 'HR'];
+    return roles.some((r: string) => privileged.includes(r)) || roleObjs.some((r: string) => privileged.includes(r));
+  }
+
   visible: boolean = false;
   header: string = '';
   headerIcon: string = '';
@@ -72,7 +87,6 @@ export class LeaveApplication {
   leaveSummary: any = null;
   employeeList: any[] = [];
   selectedEmployeeId: any = null;
-  isHrAdmin: boolean = false;
   requestedDays: number = 1;
 
   constructor(
@@ -109,15 +123,6 @@ export class LeaveApplication {
       let paramjs = JSON.parse(this.param);
       this.menulabel = paramjs.menu;
       this.formlable = paramjs.formName;
-    }
-
-    const userDataStr = sessionStorage.getItem('user') || localStorage.getItem('user');
-    if (userDataStr) {
-      try {
-        const user = JSON.parse(userDataStr);
-        const roles = (user.role || '').toUpperCase();
-        this.isHrAdmin = roles.includes('ADMIN') || roles.includes('SUPER_ADMIN') || roles.includes('HR') || roles.includes('DEVELOPER');
-      } catch (e) {}
     }
 
     this.breadcrumbItems = [

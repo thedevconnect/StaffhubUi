@@ -279,4 +279,8 @@ export class LoginComponent implements OnInit {
       }
     });
   }
+
+  goToLandingPage() {
+    this.router.navigate(['/landing']);
+  }
 }
