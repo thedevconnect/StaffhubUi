@@ -31,5 +31,6 @@ export const superadminRoutes: Routes = [
         path: 'probation',
         title: 'Probation Tracker',
         loadComponent: () => import('../components/ess/probation/probation').then(m => m.Probation)
-    }
+    },
+
 ];

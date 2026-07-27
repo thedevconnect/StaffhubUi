@@ -1,6 +1,5 @@
-import { Component, ChangeDetectorRef, signal } from '@angular/core';
+import { Component, ChangeDetectorRef, signal, OnInit } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
-import { Popover } from 'primeng/popover';
 import { Tooltip } from "primeng/tooltip";
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -13,18 +12,18 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { ProgressSpinner } from 'primeng/progressspinner';
 import { Toast } from 'primeng/toast';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template';
 import { UserService } from '../../../shared/services/user-service';
 
-
 @Component({
   selector: 'app-activity-master',
+  standalone: true,
   imports: [
     TableTemplate,
     CardModule,
     ButtonModule,
     DrawerModule,
-    Popover,
     FormsModule,
     CommonModule,
     ReactiveFormsModule,
@@ -34,7 +33,8 @@ import { UserService } from '../../../shared/services/user-service';
     ProgressSpinner,
     Toast,
     Tooltip,
-    BreadcrumbModule
+    BreadcrumbModule,
+    ToggleSwitchModule
   ],
   providers: [
     ConfirmationService,
@@ -43,222 +43,208 @@ import { UserService } from '../../../shared/services/user-service';
   templateUrl: './activity-master.html',
   styleUrl: './activity-master.scss'
 })
-export class ActivityMaster {
-
+export class ActivityMaster implements OnInit {
   isLoading = true;
   visible: boolean = false;
   postType: string = '';
   header: any = '';
-  selectedIndex: any = [];
+  selectedIndex: any = null;
   headerIcon: string = 'pi pi-plus';
-  paramvaluedata: string = '';
   isFormLoading: boolean = false;
   data: any[] = [];
+  activeMenus: any[] = [];
   activityMaster: FormGroup;
 
-
   columns: TableColumn[] = [
-    { key: 'actions', header: '⚙️', isVisible: true, isSortable: false, isCustom: true },
-    { key: 'activity_name', header: 'Activity', isVisible: true, isSortable: false },
-    { key: 'form_value', header: 'Form Value', isVisible: true, isSortable: false },
-    { key: 'calling_page', header: 'Form Type', isVisible: true, isSortable: false },
+    { key: 'activity_name', header: 'Activity Name', isVisible: true, isSortable: true },
+    { key: 'menuName', header: 'Parent Menu', isVisible: true, isSortable: true },
+    { key: 'form_value', header: 'Form Value', isVisible: true, isSortable: true },
+    { key: 'calling_page', header: 'Calling Page', isVisible: true, isSortable: true },
+    { key: 'actions', header: 'Actions', isVisible: true, isSortable: false, isCustom: true }
   ];
+
   pageNo = 1;
-  pageSize = 5;
+  pageSize = 10;
   searchText = '';
   totalCount = 0;
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
 
-  constructor(private fb: FormBuilder,
+  menulabel: string = 'Developer';
+  breadcrumbItems: any[] = [];
+  FormName: string = 'Activity Master';
+
+  constructor(
+    private fb: FormBuilder,
     private userService: UserService,
     private confirmationService: ConfirmationService,
     private message: MessageService,
     private cdr: ChangeDetectorRef,
   ) {
     this.activityMaster = this.fb.group({
+      menuId: ['', Validators.required],
       activity: ['', Validators.required],
       formValue: ['', Validators.required],
-      formType: ['', Validators.required]
+      callingPage: [''],
+      menuFlag: ['Y'],
+      iconClass: ['pi pi-cog'],
+      isActive: [true]
     });
   }
 
-
-  get f() { return this.activityMaster.controls }
-
-
-  menulabel: string = '';
-  breadcrumbItems: any[] = [];
-  FormName: string = '';
-
+  get f() { return this.activityMaster.controls; }
 
   ngOnInit(): void {
+    this.loadActiveMenus();
     this.getTableData(true);
 
     const paramStr = sessionStorage.getItem('menuItem');
+    if (paramStr) {
+      try {
+        const p = JSON.parse(paramStr);
+        this.menulabel = p.menu || 'Developer';
+        this.FormName = p.formName || 'Activity Master';
+      } catch (e) {}
+    }
 
-    const p = JSON.parse(paramStr || '{}');
-    this.menulabel = p.menu;
-    this.FormName = p.formName;
     this.breadcrumbItems = [
-      { label: 'Home', icon: 'pi pi-home', routerLink: '/home' },
-      { label: this.menulabel },
-      { label: this.FormName }
+      { label: 'Developer', icon: 'pi pi-code', routerLink: '/developer' },
+      { label: this.FormName || 'Activity Master' }
     ];
   }
 
+  loadActiveMenus(): void {
+    this.userService.getActiveMenus().subscribe({
+      next: (res: any) => {
+        const rawMenus = Array.isArray(res) ? res : (res.data || res.data || []);
+        this.activeMenus = rawMenus.map((m: any) => ({
+          label: m.menuName || m.menu_name || m.title,
+          value: m.id || m.menu_id
+        }));
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Failed to load active menus:', err);
+      }
+    });
+  }
 
-
-  getTableData(isTrue: boolean) {
+  getTableData(isTrue: boolean): void {
     if (isTrue) {
       this.isLoading = true;
     } else {
       this.pageNo = 1;
     }
+    this.cdr.markForCheck();
+
     this.userService.getActivities(this.pageNo, this.pageSize, this.searchText).subscribe({
       next: (res: any) => {
         this.data = res.data || [];
-        this.totalCount = res.meta?.total || 0;
-        setTimeout(() => {
-          this.isLoading = false;
-          this.cdr.detectChanges();
-        }, 500);
+        this.totalCount = res.total || (res.data ? res.data.length : 0);
+        this.isLoading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('API call failed:', err);
         this.isLoading = false;
         this.data = [];
         this.totalCount = 0;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
-  onPageChange(newPage: number) {
+
+  onPageChange(newPage: number): void {
     this.pageNo = newPage;
     this.getTableData(true);
   }
 
-  onPageSizeChange(newSize: number) {
+  onPageSizeChange(newSize: number): void {
     this.pageSize = newSize;
-    this.pageNo = 1; // reset to first page
-    this.getTableData(true); // fetch data from API again
+    this.pageNo = 1;
+    this.getTableData(true);
   }
 
-  onSearchChange(search: string) {
+  onSearchChange(search: string): void {
     this.searchText = search;
     this.pageNo = 1;
     this.getTableData(false);
   }
 
-  onSortChange(event: { column: string, direction: 'asc' | 'desc' }) {
+  onSortChange(event: { column: string, direction: 'asc' | 'desc' }): void {
     this.sortColumn = event.column;
     this.sortDirection = event.direction;
     this.getTableData(true);
   }
 
-  onDrawerHide() {
-    document.body.style.overflow = 'visible'; // restore scroll
-    this.activityMaster.enable()
+  onDrawerHide(): void {
+    document.body.style.overflow = 'visible';
+    this.activityMaster.enable();
     this.visible = false;
-    this.onClear()
-  }
-  onClear() {
-    this.activityMaster.reset()
-
+    this.onClear();
   }
 
-  showDialog(view: string, data: any) {
-    this.isFormLoading = true
-    if (view == 'add') {
-      this.visible = true;
-      this.postType = view;
-      this.headerIcon = view === 'add' ? 'pi pi-plus' : (view === 'update' ? 'pi pi-pencil' : 'pi pi-eye');
-      this.header = view === 'add' ? 'Add ' + this.FormName : (view === 'update' ? 'Update ' + this.FormName : 'View ' + this.FormName);
+  onClear(): void {
+    this.activityMaster.reset({
+      menuId: '',
+      activity: '',
+      formValue: '',
+      callingPage: '',
+      menuFlag: 'Y',
+      iconClass: 'pi pi-cog',
+      isActive: true
+    });
+  }
+
+  showDialog(view: string, data: any): void {
+    this.isFormLoading = true;
+    this.visible = true;
+    this.postType = view;
+    this.headerIcon = view === 'add' ? 'pi pi-plus' : (view === 'update' ? 'pi pi-pencil' : 'pi pi-eye');
+    this.header = view === 'add' ? 'Add Activity' : (view === 'update' ? 'Edit Activity' : 'View Activity Details');
+
+    if (view === 'add') {
+      this.activityMaster.enable();
+      this.onClear();
       setTimeout(() => {
-        this.isFormLoading = false
-        this.cdr.detectChanges();
-      }, 1000);
+        this.isFormLoading = false;
+        this.cdr.markForCheck();
+      }, 200);
     } else {
-      this.visible = true;
-      this.postType = view;
-      this.headerIcon = view === 'add' ? 'pi pi-plus' : (view === 'update' ? 'pi pi-pencil' : 'pi pi-eye');
-      this.header = view === 'add' ? 'Add ' + this.FormName : (view === 'update' ? 'Update ' + this.FormName : 'View ' + this.FormName);
       this.selectedIndex = data;
       if (view === 'view') {
         this.activityMaster.disable();
-        setTimeout(() => {
-          this.isFormLoading = false
-          this.cdr.detectChanges();
-        }, 1000);
-      }
-      this.activityMaster.patchValue({
-        activity: data.activity_name ? data.activity_name : '',
-        formValue: data.form_value ? data.form_value : '',
-        formType: data.calling_page ? data.calling_page : '',
-      })
-      setTimeout(() => {
-        this.isFormLoading = false
-        this.cdr.detectChanges();
-      }, 1000);
-    }
-  }
-
-  onSubmit(event: any) {
-    if (!this.activityMaster.valid) {
-      this.activityMaster.markAllAsTouched();
-      return;
-    }
-    this.openConfirmation('Confirm?', "Are you sure you want to proceed?", '1', '1', event);
-  }
-
-  newGetTableData(isTrue: boolean) {
-    try {
-      if (isTrue) {
-        this.isLoading = true;
       } else {
-        this.pageNo = 1;
+        this.activityMaster.enable();
       }
 
-      const currentRole = JSON.parse(sessionStorage.getItem('currentRole') || '{}');
-      const roleId = currentRole?.roleId || '';
-      const userId = sessionStorage.getItem('userId') || '';
-      const districtId = sessionStorage.getItem('District') || '';
-
-      const query = `appUserId=${userId}|appUserRole=${roleId}|districtId=${districtId}|searchText=${this.searchText}|pageIndex=${this.pageNo}|size=${this.pageSize}|activity=header`;
-      this.userService.getQuestionPaper(`uspGetActivityMaster|${query}`).subscribe({
-        next: (res: any) => {
-          try {
-            this.data = res?.table1 || [];
-            this.totalCount = res?.table?.[0]?.totalCnt || this.data.length;
-          } catch (innerErr) {
-            console.error('Error processing response:', innerErr);
-            this.data = [];
-            this.totalCount = 0;
-          } finally {
-            setTimeout(() => {
-              this.isLoading = false;
-              this.cdr.detectChanges();
-            }, 1000);
-          }
-        },
-        error: (err) => {
-          console.error('API call failed:', err);
-          this.isLoading = false;
-          if (err.status === 403) {
-          } else {
-            this.data = [];
-            this.totalCount = 0;
-          }
-        }
+      this.activityMaster.patchValue({
+        menuId: data.menu_id ? Number(data.menu_id) : '',
+        activity: data.activity_name || '',
+        formValue: data.form_value || '',
+        callingPage: data.calling_page || '',
+        menuFlag: data.menu_flag || 'Y',
+        iconClass: data.icon_class || 'pi pi-cog',
+        isActive: data.is_active !== undefined ? !!data.is_active : true
       });
 
-    } catch (error) {
-      console.error('Unexpected error in getTableData():', error);
-      this.isLoading = false;
+      setTimeout(() => {
+        this.isFormLoading = false;
+        this.cdr.markForCheck();
+      }, 200);
     }
   }
 
-  openConfirmation(title: string, msg: string, id: any, option?: string, event?: any) {
+  onSubmit(event: any): void {
+    if (!this.activityMaster.valid) {
+      this.activityMaster.markAllAsTouched();
+      this.message.add({ severity: 'warn', summary: 'Validation', detail: 'Please fill all required fields.' });
+      return;
+    }
+    this.openConfirmation('Confirm Action', `Are you sure you want to ${this.postType === 'add' ? 'create' : 'update'} this activity?`, '1', '1', event);
+  }
+
+  openConfirmation(title: string, msg: string, id: any, option?: string, event?: any): void {
     this.confirmationService.confirm({
       target: event?.target as EventTarget,
       message: msg,
@@ -271,38 +257,30 @@ export class ActivityMaster {
       accept: () => {
         if (option === '1') {
           this.submitcall();
-        }
-        else if (option === '2') {
+        } else if (option === '2') {
           this.deleteData();
-        } else if (option === '4') {
-
-        } else if (option === '5') {
-
-        }
-      },
-      reject: () => {
-        if (option === '4') {
-          // this.inputTypeData.patchValue({
-          //   groupType: this.previousGroupType
-          // })
         }
       }
     });
   }
 
-  deleteItem(item: any) {
+  deleteItem(item: any): void {
     this.selectedIndex = item;
-    this.openConfirmation("Confirm", "Are you sure want to delete?", '1', '2');
+    this.openConfirmation("Delete Activity", `Are you sure you want to delete "${item.activity_name}"?`, '1', '2');
   }
 
-  submitcall() {
+  submitcall(): void {
     this.isFormLoading = true;
+    const val = this.activityMaster.value;
 
     const payload = {
-      activity_name: this.activityMaster.get('activity')?.value,
-      form_value: this.activityMaster.get('formValue')?.value,
-      calling_page: this.activityMaster.get('formType')?.value,
-      is_active: 1
+      menu_id: Number(val.menuId),
+      activity_name: val.activity,
+      form_value: val.formValue,
+      calling_page: val.callingPage || val.formValue,
+      menu_flag: val.menuFlag || 'Y',
+      icon_class: val.iconClass || 'pi pi-cog',
+      is_active: val.isActive ? 1 : 0
     };
 
     if (this.postType === 'update') {
@@ -310,12 +288,12 @@ export class ActivityMaster {
         next: (res: any) => {
           this.isFormLoading = false;
           this.getTableData(false);
-          this.message.add({ severity: 'success', summary: 'Success', detail: 'Data Updated Successfully.' });
+          this.message.add({ severity: 'success', summary: 'Success', detail: 'Activity Updated Successfully.' });
           this.onDrawerHide();
         },
         error: (err) => {
           this.isFormLoading = false;
-          this.message.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to update' });
+          this.message.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to update activity' });
         }
       });
     } else {
@@ -323,35 +301,30 @@ export class ActivityMaster {
         next: (res: any) => {
           this.isFormLoading = false;
           this.getTableData(false);
-          this.message.add({ severity: 'success', summary: 'Success', detail: 'Data Saved Successfully.' });
+          this.message.add({ severity: 'success', summary: 'Success', detail: 'Activity Created Successfully.' });
           this.onDrawerHide();
         },
         error: (err) => {
           this.isFormLoading = false;
-          this.message.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to save' });
+          this.message.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to create activity' });
         }
       });
     }
   }
 
-  deleteData() {
+  deleteData(): void {
+    if (!this.selectedIndex?.id) return;
     this.userService.deleteActivity(this.selectedIndex.id).subscribe({
       next: (res: any) => {
         this.getTableData(true);
-        this.message.add({ severity: 'success', summary: 'Success', detail: 'Data deleted' });
+        this.message.add({ severity: 'success', summary: 'Success', detail: 'Activity deleted successfully' });
         this.onDrawerHide();
       },
       error: (err) => {
-        this.message.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to delete' });
+        this.message.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to delete activity' });
       }
     });
   }
-
-
-
-
-
-
 
   isInvalid(field: string): boolean {
     const control = this.activityMaster.get(field);
