@@ -3,6 +3,27 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
+export interface TaskSubtask {
+  id: number;
+  task_id: number;
+  title: string;
+  is_completed: number | boolean;
+  assigned_to?: number;
+  assignee_name?: string;
+  created_at?: string;
+}
+
+export interface TaskWorklog {
+  id: number;
+  task_id: number;
+  user_id: number;
+  hours_logged: number;
+  work_date: string;
+  description?: string;
+  created_at?: string;
+  user_name?: string;
+}
+
 export interface TaskItem {
   id: number;
   company_id: number;
@@ -10,10 +31,13 @@ export interface TaskItem {
   title: string;
   description?: string;
   category: string;
+  issue_type?: 'TASK' | 'BUG' | 'STORY' | 'FEATURE' | 'EPIC' | 'SUBTASK';
+  labels?: string;
   status: 'TODO' | 'IN_PROGRESS' | 'IN_REVIEW' | 'COMPLETED' | 'CANCELLED';
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
   assigned_to: number;
   created_by: number;
+  start_date?: string;
   due_date?: string;
   estimated_hours?: number;
   logged_hours?: number;
@@ -27,6 +51,8 @@ export interface TaskItem {
   creator_email?: string;
   comments_count?: number;
   attachments_count?: number;
+  subtask_total?: number;
+  subtask_completed?: number;
 }
 
 export interface TaskComment {
@@ -62,6 +88,8 @@ export interface TaskActivityLog {
 }
 
 export interface TaskDetailResponse extends TaskItem {
+  subtasks?: TaskSubtask[];
+  worklogs?: TaskWorklog[];
   comments: TaskComment[];
   attachments: TaskAttachment[];
   activityLogs: TaskActivityLog[];
@@ -90,6 +118,7 @@ export class TaskService {
     status?: string;
     priority?: string;
     category?: string;
+    issueType?: string;
     scope?: string;
     page?: number;
     limit?: number;
@@ -127,6 +156,26 @@ export class TaskService {
 
   deleteTask(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
+  }
+
+  addSubtask(taskId: number, title: string, assignedTo?: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${taskId}/subtasks`, { title, assigned_to: assignedTo });
+  }
+
+  toggleSubtask(subtaskId: number, isCompleted: boolean): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/subtasks/${subtaskId}`, { is_completed: isCompleted });
+  }
+
+  deleteSubtask(subtaskId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/subtasks/${subtaskId}`);
+  }
+
+  logWork(taskId: number, payload: { hours_logged: number; work_date: string; description?: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${taskId}/worklogs`, payload);
+  }
+
+  getWorklogs(taskId: number): Observable<{ success: boolean; data: TaskWorklog[] }> {
+    return this.http.get<{ success: boolean; data: TaskWorklog[] }>(`${this.apiUrl}/${taskId}/worklogs`);
   }
 
   addComment(taskId: number, comment: string): Observable<any> {
