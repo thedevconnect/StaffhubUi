@@ -73,7 +73,13 @@ export class Onboarding implements OnInit {
   approvedBy: string = '';
   approvedAt: string = '';
   showDrawer: boolean = false;
+  showWelcomeVideoModal: boolean = false;
   onboardingForm: FormGroup;
+
+  openWelcomeVideo(): void {
+    this.showWelcomeVideoModal = true;
+    this.cdr.markForCheck();
+  }
   employeeId: string | number | null = null;
   companyId: string | number | null = null;
   loading: boolean = false;

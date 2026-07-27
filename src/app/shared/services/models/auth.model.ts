@@ -36,6 +36,7 @@ export interface AuthUser {
   username: string;
   employeeName: string;
   companyId?: number;
+  role?: string;
   roles: RoleOption[];
 }
 

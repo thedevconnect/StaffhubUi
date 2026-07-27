@@ -2,317 +2,313 @@
 <p-confirmDialog></p-confirmDialog>
 
 <div class="min-h-screen w-full flex bg-slate-50 font-sans">
-    <!-- Left Column: Branding (hidden on mobile) -->
+  <!-- Left Column: Branding (hidden on mobile) -->
+  <div
+    class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white flex-col justify-between p-16 relative overflow-hidden">
+    <!-- Animated Background Blur Blobs -->
     <div
-        class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white flex-col justify-between p-16 relative overflow-hidden">
-        <!-- Animated Background Blur Blobs -->
-        <div
-            class="absolute -top-12 -left-12 w-96 h-96 bg-indigo-500 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-blob">
-        </div>
-        <div
-            class="absolute bottom-12 right-12 w-96 h-96 bg-emerald-500 rounded-full mix-blend-screen filter blur-3xl opacity-15 animate-blob animation-delay-2000">
-        </div>
-
-        <!-- Top Branding Section -->
-        <div class="flex items-center gap-3 z-10 select-none">
-            <svg class="w-10 h-10 text-emerald-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="3" y="3" width="8" height="8" rx="2" fill="currentColor" />
-                <rect x="13" y="3" width="8" height="8" rx="2" fill="currentColor" opacity="0.7" />
-                <rect x="3" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.8" />
-                <rect x="13" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.4" />
-            </svg>
-            <span
-                class="text-2xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-100 to-emerald-300">STAFFHUB</span>
-        </div>
-
-        <!-- Center Highlight Message -->
-        <div class="my-auto z-10 max-w-lg">
-            <h1 class="text-4xl font-extrabold leading-tight mb-4 tracking-tight">
-                Manage Your Workforce <br>
-                <span
-                    class="text-emerald-400 bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-indigo-300">Effortlessly
-                    & Smartly.</span>
-            </h1>
-            <p class="text-slate-300 text-base leading-relaxed mb-10">
-                The all-in-one HRMS solution to streamline employee tracking, attendance, real-time collaboration, and
-                payroll management.
-            </p>
-
-            <!-- Feature Checklist -->
-            <div class="flex flex-col gap-6">
-                <div class="flex items-center gap-4">
-                    <div
-                        class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 text-xl border border-white/10 shadow-lg">
-                        <i class="pi pi-shield"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-white text-base">Enterprise Security</h4>
-                        <p class="text-xs text-slate-400">Strict data access control and secure authentication.</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div
-                        class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 text-xl border border-white/10 shadow-lg">
-                        <i class="pi pi-chart-line"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-white text-base">Real-time Analytics</h4>
-                        <p class="text-xs text-slate-400">Monitor employee engagement and attendance trends.</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div
-                        class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 text-xl border border-white/10 shadow-lg">
-                        <i class="pi pi-bolt"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-white text-base">Automated Workflows</h4>
-                        <p class="text-xs text-slate-400">Reduce operational overhead with smart integrations.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer Note -->
-        <div class="z-10 text-xs text-slate-400 select-none">
-            &copy; 2026 StaffHub. Powered by StaffHub. All Rights Reserved.
-        </div>
+      class="absolute -top-12 -left-12 w-96 h-96 bg-indigo-500 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-blob">
+    </div>
+    <div
+      class="absolute bottom-12 right-12 w-96 h-96 bg-emerald-500 rounded-full mix-blend-screen filter blur-3xl opacity-15 animate-blob animation-delay-2000">
     </div>
 
-    <!-- Right Column: Interactive Forms -->
-    <div class="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 md:p-12 relative overflow-y-auto">
-        <!-- Floating Mobile Logo (only visible on mobile/tablet) -->
-        <div class="lg:hidden flex items-center gap-2 mb-8 select-none">
-            <svg class="w-8 h-8 text-indigo-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="3" y="3" width="8" height="8" rx="2" fill="currentColor" />
-                <rect x="13" y="3" width="8" height="8" rx="2" fill="currentColor" opacity="0.7" />
-                <rect x="3" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.8" />
-                <rect x="13" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.4" />
-            </svg>
-            <span class="text-xl font-black tracking-wider text-slate-900">STAFFHUB</span>
-        </div>
-
-        <!-- Card Outer Wrapper -->
-        <div class="w-full max-w-xl bg-white rounded-2xl shadow-xl border border-slate-100 p-8 md:p-10 relative">
-
-            <!-- Navigation header -->
-            <div class="flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
-                <span class="text-slate-400 text-sm font-semibold uppercase tracking-wider select-none">
-                    {{ formType === 'login' ? 'Login' : formType === 'forgotpassword' ? 'Reset Password' : 'New
-                    Password' }}
-                </span>
-
-                <div *ngIf="formType !== 'createPassword'">
-                    <div class="flex items-center gap-2 text-xs">
-                        <span class="text-slate-500">Need an account?</span>
-                        <p-button label=" Register Now" [text]="true" size="small"
-                            styleClass="text-indigo-600 font-bold p-0 hover:underline"
-                            (onClick)="redirectForm('signup', 3)" />
-                    </div>
-                </div>
-            </div>
-
-            <!-- LOGIN STATE -->
-            <div *ngIf="formType === 'login'" class="animate-fade-in">
-                <h2 class="text-2xl font-black text-slate-950 mb-1">Welcome back!</h2>
-                <p class="text-sm text-slate-400 mb-8 font-medium">Log in to manage your StaffHub portal account.</p>
-
-                <form [formGroup]="loginForm" class="flex flex-col gap-6">
-                    <!-- Username Input -->
-                    <div>
-                        <p-floatlabel>
-                            <input pInputText id="username" type="text" formControlName="username" class="w-full bg-white"
-                                (input)="onEmailInput($event, 'username')"
-                                [class.ng-invalid]="f['username'].invalid && f['username'].touched"
-                                [class.ng-dirty]="f['username'].invalid && f['username'].touched" />
-                            <label for="username"><i class="pi pi-user mr-2 text-slate-400"></i>Username</label>
-                        </p-floatlabel>
-                        <small *ngIf="f['username'].touched && f['username'].errors?.['required']"
-                            class="text-rose-500 text-xs mt-1.5 block font-medium">
-                            <i class="pi pi-exclamation-circle mr-1"></i>Username is required.
-                        </small>
-                    </div>
-
-                    <!-- Password Input -->
-                    <div>
-                        <p-floatlabel>
-                            <p-password id="password" formControlName="password" [toggleMask]="true" [feedback]="false"
-                                styleClass="w-full" inputStyleClass="w-full bg-white"
-                                [class.ng-invalid]="f['password'].invalid && f['password'].touched"
-                                [class.ng-dirty]="f['password'].invalid && f['password'].touched" />
-                            <label for="password"><i class="pi pi-lock mr-2 text-slate-400"></i>Password</label>
-                        </p-floatlabel>
-                        <small *ngIf="f['password'].touched && f['password'].errors?.['required']"
-                            class="text-rose-500 text-xs mt-1.5 block font-medium">
-                            <i class="pi pi-exclamation-circle mr-1"></i>Password is required.
-                        </small>
-                    </div>
-
-                    <!-- Remember Me & Forgot Password -->
-                    <div class="flex items-center justify-between my-2">
-                        <div class="flex items-center gap-2">
-                            <p-checkbox formControlName="rememberMe" [binary]="true" inputId="rememberMe" />
-                            <label class="text-sm font-semibold text-slate-600 cursor-pointer select-none">Remember
-                                Me</label>
-                        </div>
-                        <a (click)="redirectForm('forgotpassword', 2)"
-                            class="text-sm font-bold text-indigo-600 hover:text-indigo-700 hover:underline cursor-pointer">
-                            Forgot Password?
-                        </a>
-                    </div>
-
-                    <!-- Submit -->
-                    <p-button label="Login" type="submit" [loading]="isProccess"
-                        styleClass="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border-none shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/30 transition-all duration-200"
-                        (onClick)="submitLoginForm()" />
-                </form>
-            </div>
-
-            <!-- FORGOT PASSWORD STATE -->
-            <div *ngIf="formType === 'forgotpassword'" class="animate-fade-in">
-                <h2 class="text-2xl font-black text-slate-950 mb-1">Forgot password?</h2>
-                <p class="text-sm text-slate-400 mb-8 font-medium">No worries! Enter your email and we'll send you reset
-                    details.</p>
-
-                <form [formGroup]="forgateForm" class="flex flex-col gap-6">
-                    <!-- Email Input -->
-                    <div>
-                        <p-floatlabel>
-                            <input pInputText id="fpEmail" type="email" formControlName="email" class="w-full"
-                                (input)="onEmailInput($event, 'email')"
-                                [class.ng-invalid]="f1['email'].invalid && f1['email'].touched"
-                                [class.ng-dirty]="f1['email'].invalid && f1['email'].touched" />
-                            <label for="fpEmail"><i class="pi pi-envelope mr-2 text-slate-400"></i>Email Address</label>
-                        </p-floatlabel>
-
-                        <small *ngIf="f1['email'].touched && f1['email'].errors"
-                            class="text-rose-500 text-xs mt-1.5 block font-medium">
-                            <span *ngIf="f1['email'].errors?.['required']"><i
-                                    class="pi pi-exclamation-circle mr-1"></i>Email is required.</span>
-                            <span *ngIf="f1['email'].errors?.['pattern']"><i
-                                    class="pi pi-exclamation-circle mr-1"></i>Please enter a valid email address.</span>
-                        </small>
-                    </div>
-
-                    <!-- Submit Actions -->
-                    <div class="flex flex-col gap-3 mt-4">
-                        <p-button label="Send Recovery Link" type="submit" [loading]="isProccess"
-                            styleClass="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border-none shadow-md shadow-indigo-600/20"
-                            (onClick)="submitForgatePasswordForm()" />
-                        <p-button label="Back to Login" [link]="true"
-                            styleClass="w-full py-2 text-slate-500 hover:text-indigo-600 font-bold hover:underline"
-                            (onClick)="redirectForm('login', 1)" />
-                    </div>
-                </form>
-            </div>
-
-            <!-- CREATE PASSWORD STATE -->
-            <div *ngIf="formType === 'createPassword'" class="animate-fade-in">
-                <h2 class="text-2xl font-black text-slate-950 mb-1">Set Account Password</h2>
-                <p class="text-sm text-slate-400 mb-8 font-medium">Please choose a password to finalize your StaffHub
-                    access.</p>
-
-                <form [formGroup]="createPassForm" class="flex flex-col gap-6">
-                    <!-- User details: Readonly -->
-                    <div>
-                        <p-floatlabel>
-                            <input pInputText id="cpName" formControlName="name" readonly
-                                class="w-full bg-slate-50 cursor-not-allowed text-slate-500 font-medium" />
-                            <label for="cpName">Name</label>
-                        </p-floatlabel>
-                    </div>
-
-                    <div>
-                        <p-floatlabel>
-                            <input pInputText id="cpEmail" formControlName="email" readonly
-                                class="w-full bg-slate-50 cursor-not-allowed text-slate-500 font-medium" />
-                            <label for="cpEmail">Email Address</label>
-                        </p-floatlabel>
-                    </div>
-
-                    <!-- Passwords -->
-                    <div>
-                        <p-floatlabel>
-                            <p-password id="cpPassword" formControlName="password" [toggleMask]="true"
-                                styleClass="w-full" inputStyleClass="w-full"
-                                [class.ng-invalid]="f3['password'].invalid && f3['password'].touched"
-                                [class.ng-dirty]="f3['password'].invalid && f3['password'].touched" />
-                            <label for="cpPassword">Password</label>
-                        </p-floatlabel>
-                        <small *ngIf="f3['password'].touched && f3['password'].invalid"
-                            class="text-rose-500 text-xs mt-1.5 block font-medium">
-                            <span *ngIf="f3['password'].errors?.['required']"><i
-                                    class="pi pi-exclamation-circle mr-1"></i>Password is required.</span>
-                            <span *ngIf="f3['password'].errors?.['minlength']"><i
-                                    class="pi pi-exclamation-circle mr-1"></i>Must be at least 6 characters.</span>
-                        </small>
-                    </div>
-
-                    <div>
-                        <p-floatlabel>
-                            <p-password id="cpConfirmPassword" formControlName="confirmPassword" [toggleMask]="true"
-                                [feedback]="false" styleClass="w-full" inputStyleClass="w-full"
-                                [class.ng-invalid]="f3['confirmPassword'].invalid && f3['confirmPassword'].touched"
-                                [class.ng-dirty]="f3['confirmPassword'].invalid && f3['confirmPassword'].touched" />
-                            <label for="cpConfirmPassword">Confirm Password</label>
-                        </p-floatlabel>
-                        <small *ngIf="f3['confirmPassword'].touched && f3['confirmPassword'].invalid"
-                            class="text-rose-500 text-xs mt-1.5 block font-medium">
-                            <span *ngIf="f3['confirmPassword'].errors?.['required']"><i
-                                    class="pi pi-exclamation-circle mr-1"></i>Confirm password is required.</span>
-                            <span *ngIf="f3['confirmPassword'].errors?.['confirmPasswordValidator']"><i
-                                    class="pi pi-exclamation-circle mr-1"></i>Passwords do not match.</span>
-                        </small>
-                    </div>
-
-                    <!-- Submit -->
-                    <p-button label="Submit" type="submit" [loading]="isProccess"
-                        styleClass="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border-none shadow-md shadow-indigo-600/20"
-                        (onClick)="submitCreatePassForm()" />
-                </form>
-            </div>
-
-        </div>
+    <!-- Top Branding Section -->
+    <div class="flex items-center gap-3 z-10 select-none">
+      <svg class="w-10 h-10 text-emerald-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="3" width="8" height="8" rx="2" fill="currentColor" />
+        <rect x="13" y="3" width="8" height="8" rx="2" fill="currentColor" opacity="0.7" />
+        <rect x="3" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.8" />
+        <rect x="13" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.4" />
+      </svg>
+      <span
+        class="text-2xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-100 to-emerald-300">STAFFHUB</span>
     </div>
+
+    <!-- Center Highlight Message -->
+    <div class="my-auto z-10 max-w-lg">
+      <h1 class="text-4xl font-extrabold leading-tight mb-4 tracking-tight">
+        Manage Your Workforce <br>
+        <span
+          class="text-emerald-400 bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-indigo-300">Effortlessly
+          & Smartly.</span>
+      </h1>
+      <p class="text-slate-300 text-base leading-relaxed mb-10">
+        The all-in-one HRMS solution to streamline employee tracking, attendance, real-time collaboration, and
+        payroll management.
+      </p>
+
+      <!-- Feature Checklist -->
+      <div class="flex flex-col gap-6">
+        <div class="flex items-center gap-4">
+          <div
+            class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 text-xl border border-white/10 shadow-lg">
+            <i class="pi pi-shield"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-white text-base">Enterprise Security</h4>
+            <p class="text-xs text-slate-400">Strict data access control and secure authentication.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div
+            class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 text-xl border border-white/10 shadow-lg">
+            <i class="pi pi-chart-line"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-white text-base">Real-time Analytics</h4>
+            <p class="text-xs text-slate-400">Monitor employee engagement and attendance trends.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div
+            class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 text-xl border border-white/10 shadow-lg">
+            <i class="pi pi-bolt"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-white text-base">Automated Workflows</h4>
+            <p class="text-xs text-slate-400">Reduce operational overhead with smart integrations.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Note -->
+    <div class="z-10 text-xs text-slate-400 select-none">
+      &copy; 2026 StaffHub. Powered by StaffHub. All Rights Reserved.
+    </div>
+  </div>
+
+  <!-- Right Column: Interactive Forms -->
+  <div class="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 md:p-12 relative overflow-y-auto">
+    <!-- Floating Mobile Logo (only visible on mobile/tablet) -->
+    <div class="lg:hidden flex items-center gap-2 mb-8 select-none">
+      <svg class="w-8 h-8 text-indigo-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="3" width="8" height="8" rx="2" fill="currentColor" />
+        <rect x="13" y="3" width="8" height="8" rx="2" fill="currentColor" opacity="0.7" />
+        <rect x="3" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.8" />
+        <rect x="13" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.4" />
+      </svg>
+      <span class="text-xl font-black tracking-wider text-slate-900">STAFFHUB</span>
+    </div>
+
+    <!-- Card Outer Wrapper -->
+    <div class="w-full max-w-xl bg-white rounded-2xl shadow-xl border border-slate-100 p-8 md:p-10 relative">
+
+      <!-- Navigation header -->
+      <div class="flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
+        <span class="text-slate-400 text-sm font-semibold uppercase tracking-wider select-none">
+          {{ formType === 'login' ? 'Login' : formType === 'forgotpassword' ? 'Reset Password' : 'New Password' }}
+        </span>
+
+        <div>
+          <button (click)="goToLandingPage()"
+            class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 transition-colors cursor-pointer bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-700">
+            <i class="pi pi-arrow-left text-[11px]"></i>
+            <span>Back to Home</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- LOGIN STATE -->
+      <div *ngIf="formType === 'login'" class="animate-fade-in">
+        <h2 class="text-2xl font-black text-slate-950 mb-1">Welcome back!</h2>
+        <p class="text-sm text-slate-400 mb-8 font-medium">Log in to manage your StaffHub portal account.</p>
+
+        <form [formGroup]="loginForm" class="flex flex-col gap-6">
+          <!-- Username Input -->
+          <div>
+            <p-floatlabel>
+              <input pInputText id="username" type="text" formControlName="username" class="w-full bg-white"
+                (input)="onEmailInput($event, 'username')"
+                [class.ng-invalid]="f['username'].invalid && f['username'].touched"
+                [class.ng-dirty]="f['username'].invalid && f['username'].touched" />
+              <label for="username"><i class="pi pi-user mr-2 text-slate-400"></i>Username/Email </label>
+            </p-floatlabel>
+            <small *ngIf="f['username'].touched && f['username'].errors?.['required']"
+              class="text-rose-500 text-xs mt-1.5 block font-medium">
+              <i class="pi pi-exclamation-circle mr-1"></i>Username is required.
+            </small>
+          </div>
+
+          <!-- Password Input -->
+          <div>
+            <p-floatlabel>
+              <p-password id="password" formControlName="password" [toggleMask]="true" [feedback]="false"
+                styleClass="w-full" inputStyleClass="w-full bg-white"
+                [class.ng-invalid]="f['password'].invalid && f['password'].touched"
+                [class.ng-dirty]="f['password'].invalid && f['password'].touched" />
+              <label for="password"><i class="pi pi-lock mr-2 text-slate-400"></i>Password</label>
+            </p-floatlabel>
+            <small *ngIf="f['password'].touched && f['password'].errors?.['required']"
+              class="text-rose-500 text-xs mt-1.5 block font-medium">
+              <i class="pi pi-exclamation-circle mr-1"></i>Password is required.
+            </small>
+          </div>
+
+          <!-- Remember Me & Forgot Password -->
+          <div class="flex items-center justify-between my-2">
+            <div class="flex items-center gap-2">
+              <p-checkbox formControlName="rememberMe" [binary]="true" inputId="rememberMe" />
+              <label class="text-sm font-semibold text-slate-600 cursor-pointer select-none">Remember
+                Me</label>
+            </div>
+            <a (click)="redirectForm('forgotpassword', 2)"
+              class="text-sm font-bold text-indigo-600 hover:text-indigo-700 hover:underline cursor-pointer">
+              Forgot Password?
+            </a>
+          </div>
+
+          <!-- Submit -->
+          <p-button label="Login" type="submit" [loading]="isProccess"
+            styleClass="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border-none shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/30 transition-all duration-200"
+            (onClick)="submitLoginForm()" />
+        </form>
+      </div>
+
+      <!-- FORGOT PASSWORD STATE -->
+      <div *ngIf="formType === 'forgotpassword'" class="animate-fade-in">
+        <h2 class="text-2xl font-black text-slate-950 mb-1">Forgot password?</h2>
+        <p class="text-sm text-slate-400 mb-8 font-medium">No worries! Enter your email and we'll send you reset
+          details.</p>
+
+        <form [formGroup]="forgateForm" class="flex flex-col gap-6">
+          <!-- Email Input -->
+          <div>
+            <p-floatlabel>
+              <input pInputText id="fpEmail" type="email" formControlName="email" class="w-full"
+                (input)="onEmailInput($event, 'email')" [class.ng-invalid]="f1['email'].invalid && f1['email'].touched"
+                [class.ng-dirty]="f1['email'].invalid && f1['email'].touched" />
+              <label for="fpEmail"><i class="pi pi-envelope mr-2 text-slate-400"></i>Email Address</label>
+            </p-floatlabel>
+
+            <small *ngIf="f1['email'].touched && f1['email'].errors"
+              class="text-rose-500 text-xs mt-1.5 block font-medium">
+              <span *ngIf="f1['email'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Email is
+                required.</span>
+              <span *ngIf="f1['email'].errors?.['pattern']"><i class="pi pi-exclamation-circle mr-1"></i>Please enter a
+                valid email address.</span>
+            </small>
+          </div>
+
+          <!-- Submit Actions -->
+          <div class="flex flex-col gap-3 mt-4">
+            <p-button label="Send Recovery Link" type="submit" [loading]="isProccess"
+              styleClass="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border-none shadow-md shadow-indigo-600/20"
+              (onClick)="submitForgatePasswordForm()" />
+            <p-button label="Back to Login" [link]="true"
+              styleClass="w-full py-2 text-slate-500 hover:text-indigo-600 font-bold hover:underline"
+              (onClick)="redirectForm('login', 1)" />
+          </div>
+        </form>
+      </div>
+
+      <!-- CREATE PASSWORD STATE -->
+      <div *ngIf="formType === 'createPassword'" class="animate-fade-in">
+        <h2 class="text-2xl font-black text-slate-950 mb-1">Set Account Password</h2>
+        <p class="text-sm text-slate-400 mb-8 font-medium">Please choose a password to finalize your StaffHub
+          access.</p>
+
+        <form [formGroup]="createPassForm" class="flex flex-col gap-6">
+          <!-- User details: Readonly -->
+          <div>
+            <p-floatlabel>
+              <input pInputText id="cpName" formControlName="name" readonly
+                class="w-full bg-slate-50 cursor-not-allowed text-slate-500 font-medium" />
+              <label for="cpName">Name</label>
+            </p-floatlabel>
+          </div>
+
+          <div>
+            <p-floatlabel>
+              <input pInputText id="cpEmail" formControlName="email" readonly
+                class="w-full bg-slate-50 cursor-not-allowed text-slate-500 font-medium" />
+              <label for="cpEmail">Email Address</label>
+            </p-floatlabel>
+          </div>
+
+          <!-- Passwords -->
+          <div>
+            <p-floatlabel>
+              <p-password id="cpPassword" formControlName="password" [toggleMask]="true" styleClass="w-full"
+                inputStyleClass="w-full" [class.ng-invalid]="f3['password'].invalid && f3['password'].touched"
+                [class.ng-dirty]="f3['password'].invalid && f3['password'].touched" />
+              <label for="cpPassword">Password</label>
+            </p-floatlabel>
+            <small *ngIf="f3['password'].touched && f3['password'].invalid"
+              class="text-rose-500 text-xs mt-1.5 block font-medium">
+              <span *ngIf="f3['password'].errors?.['required']"><i class="pi pi-exclamation-circle mr-1"></i>Password is
+                required.</span>
+              <span *ngIf="f3['password'].errors?.['minlength']"><i class="pi pi-exclamation-circle mr-1"></i>Must be at
+                least 6 characters.</span>
+            </small>
+          </div>
+
+          <div>
+            <p-floatlabel>
+              <p-password id="cpConfirmPassword" formControlName="confirmPassword" [toggleMask]="true"
+                [feedback]="false" styleClass="w-full" inputStyleClass="w-full"
+                [class.ng-invalid]="f3['confirmPassword'].invalid && f3['confirmPassword'].touched"
+                [class.ng-dirty]="f3['confirmPassword'].invalid && f3['confirmPassword'].touched" />
+              <label for="cpConfirmPassword">Confirm Password</label>
+            </p-floatlabel>
+            <small *ngIf="f3['confirmPassword'].touched && f3['confirmPassword'].invalid"
+              class="text-rose-500 text-xs mt-1.5 block font-medium">
+              <span *ngIf="f3['confirmPassword'].errors?.['required']"><i
+                  class="pi pi-exclamation-circle mr-1"></i>Confirm password is required.</span>
+              <span *ngIf="f3['confirmPassword'].errors?.['confirmPasswordValidator']"><i
+                  class="pi pi-exclamation-circle mr-1"></i>Passwords do not match.</span>
+            </small>
+          </div>
+
+          <!-- Submit -->
+          <p-button label="Submit" type="submit" [loading]="isProccess"
+            styleClass="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border-none shadow-md shadow-indigo-600/20"
+            (onClick)="submitCreatePassForm()" />
+        </form>
+      </div>
+
+    </div>
+  </div>
 </div>
 
 <!-- COMPATIBILITY BACKDROP ALERT -->
 <div *ngIf="display === 'block'"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-100 flex flex-col">
-        <div class="bg-indigo-600 p-4 text-white flex justify-between items-center select-none">
-            <h4 class="font-bold text-base flex items-center gap-2"><i class="pi pi-info-circle"></i> Notification</h4>
-            <button (click)="display = 'none'"
-                class="text-white hover:text-slate-100 text-2xl font-bold leading-none">&times;</button>
-        </div>
-        <div class="p-6">
-            <p class="text-slate-600 font-semibold text-sm">Hi there !</p>
-        </div>
-        <div class="bg-slate-50 px-6 py-4 flex justify-end">
-            <p-button label="OK" size="small" (onClick)="display='none'"
-                styleClass="bg-indigo-600 hover:bg-indigo-700 text-white border-none font-bold px-4 py-2 rounded-lg" />
-        </div>
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-100 flex flex-col">
+    <div class="bg-indigo-600 p-4 text-white flex justify-between items-center select-none">
+      <h4 class="font-bold text-base flex items-center gap-2"><i class="pi pi-info-circle"></i> Notification</h4>
+      <button (click)="display = 'none'"
+        class="text-white hover:text-slate-100 text-2xl font-bold leading-none">&times;</button>
     </div>
+    <div class="p-6">
+      <p class="text-slate-600 font-semibold text-sm">Hi there !</p>
+    </div>
+    <div class="bg-slate-50 px-6 py-4 flex justify-end">
+      <p-button label="OK" size="small" (onClick)="display='none'"
+        styleClass="bg-indigo-600 hover:bg-indigo-700 text-white border-none font-bold px-4 py-2 rounded-lg" />
+    </div>
+  </div>
 </div>
 
 <!-- COMPATIBILITY BACKDROP CONFIRM -->
 <div id="LoginModal"
-    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-    <div
-        class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-100 flex flex-col animate-scale-up">
-        <div class="bg-indigo-600 p-4 text-white flex justify-between items-center select-none">
-            <h4 class="font-bold text-base flex items-center gap-2"><i class="pi pi-question-circle"></i> Confirm Action
-            </h4>
-        </div>
-        <div class="p-6">
-            <p class="text-slate-600 text-sm font-semibold leading-relaxed">You are already logged in to the system. Do
-                you want to proceed?</p>
-        </div>
-        <div class="bg-slate-50 px-6 py-4 flex justify-end gap-3 border-t border-slate-100">
-            <p-button label="No" size="small" (onClick)="onCloseHandled()"
-                styleClass="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-4 py-2 rounded-lg" />
-            <p-button label="Yes" size="small" (onClick)="OnSubmitModal()"
-                styleClass="bg-indigo-600 hover:bg-indigo-700 text-white border-none font-bold px-4 py-2 rounded-lg" />
-        </div>
+  class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+  <div
+    class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-100 flex flex-col animate-scale-up">
+    <div class="bg-indigo-600 p-4 text-white flex justify-between items-center select-none">
+      <h4 class="font-bold text-base flex items-center gap-2"><i class="pi pi-question-circle"></i> Confirm Action
+      </h4>
     </div>
+    <div class="p-6">
+      <p class="text-slate-600 text-sm font-semibold leading-relaxed">You are already logged in to the system. Do
+        you want to proceed?</p>
+    </div>
+    <div class="bg-slate-50 px-6 py-4 flex justify-end gap-3 border-t border-slate-100">
+      <p-button label="No" size="small" (onClick)="onCloseHandled()"
+        styleClass="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-4 py-2 rounded-lg" />
+      <p-button label="Yes" size="small" (onClick)="OnSubmitModal()"
+        styleClass="bg-indigo-600 hover:bg-indigo-700 text-white border-none font-bold px-4 py-2 rounded-lg" />
+    </div>
+  </div>
 </div>

@@ -56,23 +56,23 @@
 </div>
 
 <div class="bg-[#FFFFFF] min-h-screen">
-  <!-- Leave Summary KPI Section -->
-  <div class="px-4 py-4 bg-gradient-to-r from-slate-50 via-blue-50/20 to-slate-50 border-b border-gray-200">
+  <!-- Leave Summary KPI Section (Compact & Sleek) -->
+  <div class="px-4 py-3 bg-slate-50/80 border-b border-gray-200">
 
     <!-- Header & Admin Controls -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
       <div>
-        <h2 class="text-xl font-extrabold text-gray-800 flex items-center gap-2 tracking-tight">
-          <i class="pi pi-calendar-check text-blue-600 text-xl"></i>
-          Leave Applications & Balance Overview
+        <h2 class="text-lg font-extrabold text-slate-800 flex items-center gap-2 tracking-tight">
+          <i class="pi pi-calendar-check text-blue-600 text-lg"></i>
+          My Leave Applications & Balance Summary
         </h2>
         <p class="text-xs text-slate-500 mt-0.5">
-          Real-time employee leave balance metrics (+1.0 EL/month & +0.5 CL/month auto-credited).
+          View your leave balance summary and manage your leave requests.
         </p>
       </div>
 
       <div class="flex flex-wrap items-center gap-2" *ngIf="isHrAdmin">
-        <div class="w-64" *ngIf="employeeList && employeeList.length > 0">
+        <div class="w-60" *ngIf="employeeList && employeeList.length > 0">
           <p-select [options]="employeeList" [(ngModel)]="selectedEmployeeId" optionLabel="drpOption" [filter]="true" filterBy="drpOption"
                     placeholder="Filter Employee Balance..." (onChange)="onEmployeeSelectChange()" styleClass="w-full text-xs rounded-xl" appendTo="body">
           </p-select>
@@ -84,82 +84,70 @@
       </div>
     </div>
 
-    <!-- KPI Cards Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Compact 4 KPI Cards Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5">
       
-      <!-- Earned Leave (EL) Card -->
-      <div class="bg-white p-4 rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden group">
-        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-emerald-50 rounded-full group-hover:scale-125 transition-all opacity-70"></div>
-        <div class="flex items-center justify-between z-10">
-          <span class="text-[11px] font-black uppercase text-emerald-600 tracking-wider flex items-center gap-1.5">
-            <i class="pi pi-briefcase"></i> Earned Leave (EL)
-          </span>
-          <span class="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">+1.0 / mo</span>
+      <!-- Available Leaves Card -->
+      <div class="bg-white px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-emerald-50/20 shadow-2xs flex items-center justify-between">
+        <div class="space-y-0.5">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">Available Balance</span>
+          <div class="text-xl font-black text-emerald-800 leading-none">
+            {{ (leaveSummary?.casualLeave?.remaining || 0) + (leaveSummary?.earnedLeave?.remaining || 0) + (leaveSummary?.sickLeave?.remaining || 0) }} <span class="text-xs font-bold text-emerald-600">Days</span>
+          </div>
+          <div class="text-[10px] font-medium text-slate-500">
+            CL: {{ leaveSummary?.casualLeave?.remaining || 0 }} | EL: {{ leaveSummary?.earnedLeave?.remaining || 0 }} | SL: {{ leaveSummary?.sickLeave?.remaining || 0 }}
+          </div>
         </div>
-        <div class="mt-3 mb-2 z-10 flex items-baseline gap-2">
-          <span class="text-3xl font-black text-gray-900">{{ leaveSummary?.earnedLeave?.remaining || 0 }}</span>
-          <span class="text-xs font-bold text-gray-500">Days Available</span>
-        </div>
-        <div class="flex items-center justify-between text-[11px] text-gray-500 pt-2 border-t border-emerald-50 z-10">
-          <span>Credited: <strong class="text-gray-800">{{ leaveSummary?.earnedLeave?.credited || 0 }}</strong></span>
-          <span>Taken: <strong class="text-gray-800">{{ leaveSummary?.earnedLeave?.taken || 0 }}</strong></span>
+        <div class="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
+          <i class="pi pi-briefcase text-xs"></i>
         </div>
       </div>
 
-      <!-- Casual Leave (CL) Card -->
-      <div class="bg-white p-4 rounded-2xl border border-blue-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden group">
-        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-blue-50 rounded-full group-hover:scale-125 transition-all opacity-70"></div>
-        <div class="flex items-center justify-between z-10">
-          <span class="text-[11px] font-black uppercase text-blue-600 tracking-wider flex items-center gap-1.5">
-            <i class="pi pi-user text-blue-600"></i> Casual Leave (CL)
-          </span>
-          <span class="bg-blue-100 text-blue-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">+0.5 / mo</span>
+      <!-- Pending Leaves Card -->
+      <div class="bg-white px-3.5 py-2.5 rounded-xl border border-amber-200 bg-amber-50/20 shadow-2xs flex items-center justify-between">
+        <div class="space-y-0.5">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700 block">Pending Requests</span>
+          <div class="text-xl font-black text-amber-800 leading-none">
+            {{ leaveSummary?.totals?.totalPending || 0 }} <span class="text-xs font-bold text-amber-600">Days</span>
+          </div>
+          <div class="text-[10px] font-medium text-slate-500">
+            Awaiting Approval
+          </div>
         </div>
-        <div class="mt-3 mb-2 z-10 flex items-baseline gap-2">
-          <span class="text-3xl font-black text-gray-900">{{ leaveSummary?.casualLeave?.remaining || 0 }}</span>
-          <span class="text-xs font-bold text-gray-500">Days Available</span>
-        </div>
-        <div class="flex items-center justify-between text-[11px] text-gray-500 pt-2 border-t border-blue-50 z-10">
-          <span>Credited: <strong class="text-gray-800">{{ leaveSummary?.casualLeave?.credited || 0 }}</strong></span>
-          <span>Taken: <strong class="text-gray-800">{{ leaveSummary?.casualLeave?.taken || 0 }}</strong></span>
+        <div class="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center text-amber-700 shrink-0">
+          <i class="pi pi-clock text-xs"></i>
         </div>
       </div>
 
-      <!-- Pending Requests Card -->
-      <div class="bg-white p-4 rounded-2xl border border-amber-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden group">
-        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-amber-50 rounded-full group-hover:scale-125 transition-all opacity-70"></div>
-        <div class="flex items-center justify-between z-10">
-          <span class="text-[11px] font-black uppercase text-amber-600 tracking-wider flex items-center gap-1.5">
-            <i class="pi pi-clock"></i> Pending Requests
-          </span>
-          <span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">Awaiting HR</span>
+      <!-- Approved / Taken Leaves Card -->
+      <div class="bg-white px-3.5 py-2.5 rounded-xl border border-blue-200 bg-blue-50/20 shadow-2xs flex items-center justify-between">
+        <div class="space-y-0.5">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-blue-700 block">Approved / Taken</span>
+          <div class="text-xl font-black text-blue-800 leading-none">
+            {{ leaveSummary?.totals?.totalTaken || 0 }} <span class="text-xs font-bold text-blue-600">Days</span>
+          </div>
+          <div class="text-[10px] font-medium text-slate-500">
+            Leaves Availed
+          </div>
         </div>
-        <div class="mt-3 mb-2 z-10 flex items-baseline gap-2">
-          <span class="text-3xl font-black text-gray-900">{{ leaveSummary?.totals?.totalPending || 0 }}</span>
-          <span class="text-xs font-bold text-gray-500">Days Pending</span>
-        </div>
-        <div class="flex items-center justify-between text-[11px] text-gray-500 pt-2 border-t border-amber-50 z-10">
-          <span>Sick Leave (SL): <strong class="text-gray-800">{{ leaveSummary?.sickLeave?.remaining || 0 }} bal</strong></span>
-          <span>LOP: <strong class="text-gray-800">{{ leaveSummary?.lossOfPay?.taken || 0 }} days</strong></span>
+        <div class="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 shrink-0">
+          <i class="pi pi-check-circle text-xs"></i>
         </div>
       </div>
 
-      <!-- Total Taken Leaves Card -->
-      <div class="bg-white p-4 rounded-2xl border border-purple-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden group">
-        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-purple-50 rounded-full group-hover:scale-125 transition-all opacity-70"></div>
-        <div class="flex items-center justify-between z-10">
-          <span class="text-[11px] font-black uppercase text-purple-600 tracking-wider flex items-center gap-1.5">
-            <i class="pi pi-check-circle"></i> Total Approved
-          </span>
-          <span class="bg-purple-100 text-purple-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">Used</span>
+      <!-- Loss of Pay (LOP) Card -->
+      <div class="bg-white px-3.5 py-2.5 rounded-xl border border-rose-200 bg-rose-50/20 shadow-2xs flex items-center justify-between">
+        <div class="space-y-0.5">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-rose-700 block">Loss of Pay (LOP)</span>
+          <div class="text-xl font-black text-rose-800 leading-none">
+            {{ leaveSummary?.lossOfPay?.taken || 0 }} <span class="text-xs font-bold text-rose-600">Days</span>
+          </div>
+          <div class="text-[10px] font-medium text-slate-500">
+            Unpaid Leave Taken
+          </div>
         </div>
-        <div class="mt-3 mb-2 z-10 flex items-baseline gap-2">
-          <span class="text-3xl font-black text-gray-900">{{ leaveSummary?.totals?.totalTaken || 0 }}</span>
-          <span class="text-xs font-bold text-gray-500">Days Taken</span>
-        </div>
-        <div class="flex items-center justify-between text-[11px] text-gray-500 pt-2 border-t border-purple-50 z-10">
-          <span>Total Credited: <strong class="text-gray-800">{{ leaveSummary?.totals?.totalCredited || 0 }}</strong></span>
-          <span>Remaining: <strong class="text-gray-800">{{ leaveSummary?.totals?.totalRemaining || 0 }}</strong></span>
+        <div class="w-7 h-7 rounded-lg bg-rose-100 flex items-center justify-center text-rose-700 shrink-0">
+          <i class="pi pi-exclamation-triangle text-xs"></i>
         </div>
       </div>
 

@@ -18,6 +18,9 @@ import { Breadcrumb } from 'primeng/breadcrumb';
 
 import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template';
 
+import { AuthService } from '../../../shared/services/services/auth.service';
+import { inject } from '@angular/core';
+
 @Component({
   selector: 'app-probation',
   standalone: true,
@@ -41,13 +44,25 @@ import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/ta
   styleUrl: './probation.scss',
 })
 export class Probation implements OnInit {
+  authService = inject(AuthService);
+
+  get isHrAdmin(): boolean {
+    const user = this.authService.user();
+    if (!user) return false;
+    const roleStr = user.role || '';
+    const roles = roleStr.split(',').map((r: string) => r.trim().toUpperCase());
+    const roleObjs = (user.roles || []).map(r => (r.roleId || r.rolDes || '').toUpperCase());
+    const privileged = ['HR_ADMIN', 'ADMIN', 'SUPER_ADMIN', 'SUPERADMIN', 'DEVELOPER', 'HRADMIN'];
+    return roles.some((r: string) => privileged.includes(r)) || roleObjs.some((r: string) => privileged.includes(r));
+  }
+
   breadcrumbItems: any[] = [
     { label: 'Employee Self Service', icon: 'pi pi-home', routerLink: '/ess' },
     { label: 'Probation & Confirmation', icon: 'pi pi-user-minus', routerLink: '/ess/probation' }
   ];
 
   statusTabs = [
-    { label: 'All Employees', value: 'ALL', icon: 'pi pi-list' },
+    { label: 'All Records', value: 'ALL', icon: 'pi pi-list' },
     { label: 'Under Probation', value: 'UNDER_PROBATION', icon: 'pi pi-clock' },
     { label: 'Confirmed', value: 'CONFIRMED', icon: 'pi pi-check-circle' },
     { label: 'Extended', value: 'EXTENDED', icon: 'pi pi-exclamation-triangle' }
@@ -60,6 +75,7 @@ export class Probation implements OnInit {
     { key: 'probation_end_date', header: 'Probation End Date', isSortable: true },
     { key: 'review_rating', header: 'Rating', isSortable: true },
     { key: 'confirmation_status', header: 'Status', isSortable: true },
+    { key: 'remarks', header: 'Evaluation Remarks / Reason' },
     { key: 'actions', header: 'Actions' }
   ];
 
@@ -106,6 +122,10 @@ export class Probation implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    if (!this.isHrAdmin) {
+      this.columns = this.columns.filter(c => c.key !== 'actions');
+      this.statusTabs[0].label = 'My Probation Record';
+    }
     this.initForm();
     this.loadProbations();
   }
@@ -181,7 +201,7 @@ export class Probation implements OnInit {
       this.messageService.add({
         severity: 'warn',
         summary: 'Invalid Form',
-        detail: 'Please fill all required fields and manager feedback remarks.'
+        detail: 'Please fill all required fields and review remarks.'
       });
       return;
     }
@@ -189,14 +209,26 @@ export class Probation implements OnInit {
     this.submitting = true;
     const val = this.reviewForm.value;
 
-    this.probationService.updateStatus(this.selectedRecord.id, val).subscribe({
+    const payload = {
+      confirmationStatus: val.confirmationStatus,
+      extensionMonths: val.extensionMonths,
+      reviewRating: val.reviewRating,
+      remarks: val.remarks,
+      employeeId: this.selectedRecord.employee_id,
+      employeeName: this.selectedRecord.employee_name,
+      designation: this.selectedRecord.designation,
+      department: this.selectedRecord.department,
+      joiningDate: this.selectedRecord.joining_date
+    };
+
+    this.probationService.updateStatus(this.selectedRecord.id, payload).subscribe({
       next: (res) => {
         this.submitting = false;
         if (res.success) {
           this.messageService.add({
             severity: 'success',
             summary: 'Review Submitted',
-            detail: 'Probation confirmation review updated successfully.'
+            detail: `Probation evaluation status updated to ${val.confirmationStatus} successfully.`
           });
           this.showReviewDrawer = false;
           this.loadProbations();

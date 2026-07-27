@@ -136,6 +136,7 @@ export class AuthService {
       username: data.username || data.userName || '',
       employeeName: data.employeeName || data.userName || data.username || 'User',
       companyId: companyId ? Number(companyId) : undefined,
+      role: typeof data.role === 'string' ? data.role : decoded?.role || '',
       roles: normalizedRoles.length ? normalizedRoles : [{ rolDes: 'HR Admin', roleId: 'hradmin' }],
     };
   }
@@ -190,6 +191,7 @@ export class AuthService {
       username: username,
       employeeName: res.userName || username,
       companyId: decoded?.companyId,
+      role: res.role || decoded?.role || '',
       roles: normalizedRoles.length ? normalizedRoles : [{ rolDes: 'HR Admin', roleId: 'hradmin' }]
     };
     this._user.set(user);
