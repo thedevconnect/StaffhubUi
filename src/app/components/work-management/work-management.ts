@@ -68,6 +68,7 @@ export class WorkManagementComponent implements OnInit {
 
   columns: TableColumn[] = [
     { key: 'actions', header: 'Actions', isVisible: true },
+    { key: 'issue_type', header: 'Type', isSortable: true, isCustom: true },
     { key: 'task_code', header: 'Task Code', isSortable: true, isCustom: true },
     { key: 'title', header: 'Title & Category', isSortable: true, isCustom: true },
     { key: 'assignee_name', header: 'Assignee', isSortable: true, isCustom: true },
@@ -118,8 +119,19 @@ export class WorkManagementComponent implements OnInit {
   selectedStatus = 'ALL';
   selectedPriority = 'ALL';
   selectedCategory = 'ALL';
+  selectedIssueType = 'ALL';
   selectedScope = 'all';
   viewMode: 'table' | 'kanban' = 'table';
+
+  issueTypeOptions = [
+    { label: 'All Types', value: 'ALL', icon: 'pi pi-filter', color: 'text-slate-500', badgeClass: 'bg-slate-100 text-slate-700' },
+    { label: 'Task', value: 'TASK', icon: 'pi pi-check-square', color: 'text-blue-600', badgeClass: 'bg-blue-100 text-blue-700 border-blue-200' },
+    { label: 'Bug / Defect', value: 'BUG', icon: 'pi pi-exclamation-circle', color: 'text-rose-600', badgeClass: 'bg-rose-100 text-rose-700 border-rose-200' },
+    { label: 'User Story', value: 'STORY', icon: 'pi pi-book', color: 'text-emerald-600', badgeClass: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+    { label: 'Feature', value: 'FEATURE', icon: 'pi pi-star', color: 'text-purple-600', badgeClass: 'bg-purple-100 text-purple-700 border-purple-200' },
+    { label: 'Epic', value: 'EPIC', icon: 'pi pi-bolt', color: 'text-amber-600', badgeClass: 'bg-amber-100 text-amber-700 border-amber-200' },
+    { label: 'Sub-task', value: 'SUBTASK', icon: 'pi pi-paperclip', color: 'text-indigo-600', badgeClass: 'bg-indigo-100 text-indigo-700 border-indigo-200' }
+  ];
 
   statusOptions = [
     { label: 'All Statuses', value: 'ALL' },
@@ -161,12 +173,25 @@ export class WorkManagementComponent implements OnInit {
   editingTaskId: number | null = null;
   taskForm!: FormGroup;
 
-  // Task Detail Modal
+  // Subtask & Label builder in Create modal
+  newInitialSubtaskInput = '';
+  initialSubtasksList: string[] = [];
+  formTagInput = '';
+  formLabelsList: string[] = [];
+
+  // Task Detail Modal / Jira Drawer
   showDetailModal = false;
   selectedTask: TaskDetailResponse | null = null;
   activeDetailTab = 0;
   newCommentText = '';
   uploadingFile = false;
+  newSubtaskInput = '';
+
+  // Worklog Modal
+  showWorklogModal = false;
+  worklogHours = 1;
+  worklogDate = new Date().toISOString().split('T')[0];
+  worklogDescription = '';
 
   currentUserId = 0;
   userRole = '';
@@ -220,9 +245,11 @@ export class WorkManagementComponent implements OnInit {
       title: ['', [Validators.required, Validators.maxLength(255)]],
       description: [''],
       category: ['GENERAL', Validators.required],
+      issue_type: ['TASK', Validators.required],
       priority: ['MEDIUM', Validators.required],
       status: ['TODO', Validators.required],
       assigned_to: [this.currentUserId || '', Validators.required],
+      start_date: [''],
       due_date: [''],
       estimated_hours: [0],
       logged_hours: [0],
@@ -266,6 +293,7 @@ export class WorkManagementComponent implements OnInit {
         status: this.selectedStatus,
         priority: this.selectedPriority,
         category: this.selectedCategory,
+        issueType: this.selectedIssueType,
         scope: this.selectedScope,
         page: this.page,
         limit: this.limit
@@ -310,13 +338,19 @@ export class WorkManagementComponent implements OnInit {
   openCreateTaskModal(): void {
     this.isEditMode = false;
     this.editingTaskId = null;
+    this.initialSubtasksList = [];
+    this.newInitialSubtaskInput = '';
+    this.formLabelsList = [];
+    this.formTagInput = '';
     this.taskForm.reset({
       title: '',
       description: '',
       category: 'GENERAL',
+      issue_type: 'TASK',
       priority: 'MEDIUM',
       status: 'TODO',
       assigned_to: this.currentUserId || (this.employees[0]?.value ?? ''),
+      start_date: '',
       due_date: '',
       estimated_hours: 0,
       logged_hours: 0,
@@ -328,13 +362,19 @@ export class WorkManagementComponent implements OnInit {
   openEditTaskModal(task: TaskItem): void {
     this.isEditMode = true;
     this.editingTaskId = task.id;
+    this.initialSubtasksList = [];
+    this.newInitialSubtaskInput = '';
+    this.formLabelsList = this.getLabelsArray(task.labels);
+    this.formTagInput = '';
     this.taskForm.patchValue({
       title: task.title,
       description: task.description || '',
       category: task.category || 'GENERAL',
+      issue_type: task.issue_type || 'TASK',
       priority: task.priority || 'MEDIUM',
       status: task.status || 'TODO',
       assigned_to: task.assigned_to,
+      start_date: task.start_date ? task.start_date.split('T')[0] : '',
       due_date: task.due_date ? task.due_date.split('T')[0] : '',
       estimated_hours: task.estimated_hours || 0,
       logged_hours: task.logged_hours || 0,
@@ -343,13 +383,44 @@ export class WorkManagementComponent implements OnInit {
     this.showTaskModal = true;
   }
 
+  // Tag / Label Helpers
+  addFormTag(): void {
+    const tag = this.formTagInput.trim().replace(/^#/, '');
+    if (tag && !this.formLabelsList.includes(tag)) {
+      this.formLabelsList.push(tag);
+    }
+    this.formTagInput = '';
+  }
+
+  removeFormTag(index: number): void {
+    this.formLabelsList.splice(index, 1);
+  }
+
+  // Initial Subtask Helpers in Create modal
+  addInitialSubtask(): void {
+    const title = this.newInitialSubtaskInput.trim();
+    if (title) {
+      this.initialSubtasksList.push(title);
+      this.newInitialSubtaskInput = '';
+    }
+  }
+
+  removeInitialSubtask(index: number): void {
+    this.initialSubtasksList.splice(index, 1);
+  }
+
   saveTask(): void {
     if (this.taskForm.invalid) {
       this.taskForm.markAllAsTouched();
       return;
     }
 
-    const payload = this.taskForm.value;
+    const formVal = this.taskForm.value;
+    const payload = {
+      ...formVal,
+      labels: this.formLabelsList.join(','),
+      initialSubtasks: this.initialSubtasksList
+    };
 
     if (this.isEditMode && this.editingTaskId) {
       this.taskService.updateTask(this.editingTaskId, payload).subscribe({
@@ -357,7 +428,7 @@ export class WorkManagementComponent implements OnInit {
           this.messageService.add({
             severity: 'success',
             summary: 'Task Updated',
-            detail: 'Task has been updated successfully.'
+            detail: 'Task updated successfully.'
           });
           this.showTaskModal = false;
           this.loadStats();
@@ -479,6 +550,112 @@ export class WorkManagementComponent implements OnInit {
     });
   }
 
+  // Interactive Subtasks in Drawer
+  addSubtaskToSelectedTask(): void {
+    if (!this.selectedTask || !this.newSubtaskInput.trim()) return;
+    const title = this.newSubtaskInput.trim();
+    this.taskService.addSubtask(this.selectedTask.id, title, this.selectedTask.assigned_to).subscribe({
+      next: () => {
+        this.newSubtaskInput = '';
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Subtask Added',
+          detail: 'New subtask created.'
+        });
+        this.refreshTaskDetail();
+      },
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err?.error?.message || 'Failed to add subtask'
+        });
+      }
+    });
+  }
+
+  toggleSubtaskStatus(subtask: any): void {
+    const nextState = !subtask.is_completed;
+    this.taskService.toggleSubtask(subtask.id, nextState).subscribe({
+      next: () => {
+        subtask.is_completed = nextState;
+        this.refreshTaskDetail();
+      },
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err?.error?.message || 'Failed to update subtask'
+        });
+      }
+    });
+  }
+
+  deleteSubtask(subtask: any): void {
+    this.taskService.deleteSubtask(subtask.id).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'info',
+          summary: 'Subtask Deleted',
+          detail: 'Subtask removed.'
+        });
+        this.refreshTaskDetail();
+      },
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err?.error?.message || 'Failed to delete subtask'
+        });
+      }
+    });
+  }
+
+  // Worklog Modal Actions
+  openWorklogModal(): void {
+    this.worklogHours = 1;
+    this.worklogDate = new Date().toISOString().split('T')[0];
+    this.worklogDescription = '';
+    this.showWorklogModal = true;
+  }
+
+  saveWorklog(): void {
+    if (!this.selectedTask || !this.worklogHours || this.worklogHours <= 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Invalid Input',
+        detail: 'Please enter valid work hours.'
+      });
+      return;
+    }
+
+    this.taskService
+      .logWork(this.selectedTask.id, {
+        hours_logged: this.worklogHours,
+        work_date: this.worklogDate,
+        description: this.worklogDescription
+      })
+      .subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Work Logged',
+            detail: `Logged ${this.worklogHours} hours on task.`
+          });
+          this.showWorklogModal = false;
+          this.refreshTaskDetail();
+          this.loadTasks();
+        },
+        error: (err) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err?.error?.message || 'Failed to log work'
+          });
+        }
+      });
+  }
+
   postComment(): void {
     if (!this.selectedTask || !this.newCommentText.trim()) return;
 
@@ -563,6 +740,33 @@ export class WorkManagementComponent implements OnInit {
         });
       }
     });
+  }
+
+  // Issue Type & Tag Helpers
+  getIssueTypeDetails(typeStr?: string) {
+    const found = this.issueTypeOptions.find((opt) => opt.value === typeStr);
+    if (found && found.value !== 'ALL') return found;
+    return {
+      label: 'Task',
+      value: 'TASK',
+      icon: 'pi pi-check-square',
+      color: 'text-blue-600',
+      badgeClass: 'bg-blue-100 text-blue-700 border-blue-200'
+    };
+  }
+
+  getLabelsArray(labelsStr?: string): string[] {
+    if (!labelsStr) return [];
+    return labelsStr
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+  }
+
+  getSubtaskProgressPercent(subtasks?: any[]): number {
+    if (!subtasks || subtasks.length === 0) return 0;
+    const done = subtasks.filter((st) => st.is_completed).length;
+    return Math.round((done / subtasks.length) * 100);
   }
 
   getStatusSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {
