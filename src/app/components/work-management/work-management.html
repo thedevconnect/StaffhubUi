@@ -22,13 +22,14 @@
     <div class="flex items-center gap-2">
       <h1 class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Task Management</h1>
       <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-indigo-200">
-        Jira & Zoho Flow
+        StaffHub Task Engine
       </span>
     </div>
     <p class="text-xs md:text-sm text-slate-500 mt-1">
-      Create, track, log work, and manage subtasks across projects with enterprise Jira & Zoho workflows.
+      Create, track, log work, attach screenshots, and manage subtasks across project workflows.
     </p>
   </div>
+
 
 
   <!-- DASHBOARD STATS CARDS (Ultra Compact & Sleek) -->
@@ -119,7 +120,8 @@
 
       <!-- Issue Type Filter (Jira standard) -->
       <p-select [options]="issueTypeOptions" [(ngModel)]="selectedIssueType" optionLabel="label" optionValue="value"
-        (onChange)="onFilterChange()" styleClass="w-full sm:w-40 bg-slate-50 border-slate-200 text-sm rounded-xl font-semibold" />
+        (onChange)="onFilterChange()"
+        styleClass="w-full sm:w-40 bg-slate-50 border-slate-200 text-sm rounded-xl font-semibold" />
 
       <!-- Status Filter -->
       <p-select [options]="statusOptions" [(ngModel)]="selectedStatus" optionLabel="label" optionValue="value"
@@ -184,7 +186,8 @@
     </ng-template>
 
     <ng-template #taskCodeCol let-row>
-      <span class="font-mono font-bold text-indigo-600 cursor-pointer hover:underline text-xs" (click)="openTaskDetail(row)">
+      <span class="font-mono font-bold text-indigo-600 cursor-pointer hover:underline text-xs"
+        (click)="openTaskDetail(row)">
         {{ row.task_code }}
       </span>
     </ng-template>
@@ -196,15 +199,18 @@
           {{ row.title }}
         </div>
         <div class="flex flex-wrap items-center gap-1.5">
-          <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded uppercase">{{ row.category }}</span>
-          
+          <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded uppercase">{{
+            row.category }}</span>
+
           <!-- Subtasks Badge -->
-          <span *ngIf="row.subtask_total" class="text-[10px] bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded font-bold border border-indigo-100 flex items-center gap-1">
+          <span *ngIf="row.subtask_total"
+            class="text-[10px] bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded font-bold border border-indigo-100 flex items-center gap-1">
             <i class="pi pi-check-square text-[9px]"></i> {{ row.subtask_completed || 0 }}/{{ row.subtask_total }}
           </span>
 
           <!-- Tag chips -->
-          <span *ngFor="let tag of getLabelsArray(row.labels)" class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-mono">
+          <span *ngFor="let tag of getLabelsArray(row.labels)"
+            class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-mono">
             #{{ tag }}
           </span>
         </div>
@@ -268,7 +274,7 @@
 
       <div *ngFor="let task of getKanbanTasksByStatus('TODO')"
         class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col gap-2.5 hover:shadow-md transition-all">
-        
+
         <div class="flex items-center justify-between">
           <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black uppercase border"
             [ngClass]="getIssueTypeDetails(task.issue_type).badgeClass">
@@ -286,19 +292,22 @@
         <p class="text-xs text-slate-500 line-clamp-2">{{ task.description || 'No description' }}</p>
 
         <!-- Subtasks summary if available -->
-        <div *ngIf="task.subtask_total" class="flex items-center gap-2 text-[11px] text-slate-500 font-semibold bg-slate-50 p-1.5 rounded-lg">
+        <div *ngIf="task.subtask_total"
+          class="flex items-center gap-2 text-[11px] text-slate-500 font-semibold bg-slate-50 p-1.5 rounded-lg">
           <i class="pi pi-check-square text-indigo-600"></i>
           <span>Subtasks: {{ task.subtask_completed || 0 }}/{{ task.subtask_total }}</span>
         </div>
 
         <div class="flex items-center justify-between pt-2 border-t border-slate-50 text-xs text-slate-500">
           <div class="flex items-center gap-1.5">
-            <div class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px] flex items-center justify-center">
+            <div
+              class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px] flex items-center justify-center">
               {{ (task.assignee_name || 'U').charAt(0) }}
             </div>
             <span class="font-semibold text-[11px]">{{ task.assignee_name || 'Unassigned' }}</span>
           </div>
-          <button (click)="quickStatusChange(task, 'IN_PROGRESS')" class="text-indigo-600 font-bold text-xs hover:underline">
+          <button (click)="quickStatusChange(task, 'IN_PROGRESS')"
+            class="text-indigo-600 font-bold text-xs hover:underline">
             Start &rarr;
           </button>
         </div>
@@ -336,12 +345,14 @@
 
         <div class="flex items-center justify-between pt-2 border-t border-slate-50 text-xs text-slate-500">
           <div class="flex items-center gap-1.5">
-            <div class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 font-bold text-[10px] flex items-center justify-center">
+            <div
+              class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 font-bold text-[10px] flex items-center justify-center">
               {{ (task.assignee_name || 'U').charAt(0) }}
             </div>
             <span class="font-semibold text-[11px]">{{ task.assignee_name || 'Unassigned' }}</span>
           </div>
-          <button (click)="quickStatusChange(task, 'IN_REVIEW')" class="text-indigo-600 font-bold text-xs hover:underline">
+          <button (click)="quickStatusChange(task, 'IN_REVIEW')"
+            class="text-indigo-600 font-bold text-xs hover:underline">
             Review &rarr;
           </button>
         </div>
@@ -377,12 +388,14 @@
 
         <div class="flex items-center justify-between pt-2 border-t border-slate-50 text-xs text-slate-500">
           <div class="flex items-center gap-1.5">
-            <div class="w-5 h-5 rounded-full bg-amber-100 text-amber-700 font-bold text-[10px] flex items-center justify-center">
+            <div
+              class="w-5 h-5 rounded-full bg-amber-100 text-amber-700 font-bold text-[10px] flex items-center justify-center">
               {{ (task.assignee_name || 'U').charAt(0) }}
             </div>
             <span class="font-semibold text-[11px]">{{ task.assignee_name || 'Unassigned' }}</span>
           </div>
-          <button (click)="quickStatusChange(task, 'COMPLETED')" class="text-emerald-600 font-bold text-xs hover:underline">
+          <button (click)="quickStatusChange(task, 'COMPLETED')"
+            class="text-emerald-600 font-bold text-xs hover:underline">
             Complete &check;
           </button>
         </div>
@@ -425,7 +438,7 @@
 
 </div>
 
-<!-- CREATE / EDIT TASK DRAWER FORM (Jira & Zoho Style) -->
+<!-- CREATE / EDIT TASK DRAWER FORM -->
 <p-drawer [(visible)]="showTaskModal" position="right" [modal]="true"
   [style]="isFormFullscreen() ? { width: '100vw', height: '100vh', maxWidth: '100vw', margin: '0', borderRadius: '0' } : { width: '100%', maxWidth: '40rem' }"
   styleClass="border-none shadow-2xl bg-white">
@@ -437,8 +450,9 @@
           <i class="pi pi-plus text-lg"></i>
         </div>
         <div>
-          <h2 class="text-lg font-black text-slate-900">{{ isEditMode ? 'Edit Task / Issue' : 'Create Task / Issue' }}</h2>
-          <p class="text-xs text-slate-500">Jira & Zoho Projects enterprise task creation workflow</p>
+          <h2 class="text-lg font-black text-slate-900">{{ isEditMode ? 'Edit Task / Issue' : 'Create Task / Issue' }}
+          </h2>
+          <p class="text-xs text-slate-500">StaffHub HRMS enterprise task creation workflow</p>
         </div>
       </div>
 
@@ -453,7 +467,8 @@
   </ng-template>
 
   <form [formGroup]="taskForm" (ngSubmit)="saveTask()" class="space-y-5 pt-2">
-    <!-- Jira Issue Type Selector -->
+    <!-- Issue Type Selector -->
+
     <div>
       <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Issue Type *</label>
       <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
@@ -534,7 +549,8 @@
         <input pInputText type="text" [(ngModel)]="formTagInput" [ngModelOptions]="{standalone: true}"
           (keyup.enter)="addFormTag()" placeholder="Type tag & press enter (e.g. frontend, auth)"
           class="flex-1 text-xs rounded-xl border-slate-300" />
-        <button type="button" (click)="addFormTag()" class="px-3 py-1.5 bg-slate-800 text-white rounded-xl font-bold text-xs">Add</button>
+        <button type="button" (click)="addFormTag()"
+          class="px-3 py-1.5 bg-slate-800 text-white rounded-xl font-bold text-xs">Add</button>
       </div>
       <div class="flex flex-wrap gap-1.5 min-h-[28px]">
         <span *ngFor="let tag of formLabelsList; let i = index"
@@ -547,28 +563,91 @@
 
     <!-- Initial Subtasks Checklist Builder (if creation mode) -->
     <div *ngIf="!isEditMode">
-      <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Initial Subtasks / Checklist</label>
+      <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Initial Subtasks /
+        Checklist</label>
       <div class="flex items-center gap-2 mb-2">
         <input pInputText type="text" [(ngModel)]="newInitialSubtaskInput" [ngModelOptions]="{standalone: true}"
           (keyup.enter)="addInitialSubtask()" placeholder="Add checklist item..."
           class="flex-1 text-xs rounded-xl border-slate-300" />
-        <button type="button" (click)="addInitialSubtask()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl font-bold text-xs">+ Add Subtask</button>
+        <button type="button" (click)="addInitialSubtask()"
+          class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl font-bold text-xs">+ Add Subtask</button>
       </div>
       <div class="space-y-1.5 max-h-36 overflow-y-auto">
-        <div *ngFor="let st of initialSubtasksList; let i = index" class="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200 text-xs">
+        <div *ngFor="let st of initialSubtasksList; let i = index"
+          class="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200 text-xs">
           <span class="font-medium text-slate-700">&bull; {{ st }}</span>
-          <i (click)="removeInitialSubtask(i)" class="pi pi-trash text-rose-500 cursor-pointer hover:text-rose-700 text-xs"></i>
+          <i (click)="removeInitialSubtask(i)"
+            class="pi pi-trash text-rose-500 cursor-pointer hover:text-rose-700 text-xs"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Screenshots & File Attachments (Multiple Upload) -->
+    <div>
+      <div class="flex items-center justify-between mb-1.5">
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+          <i class="pi pi-images text-indigo-600 mr-1"></i> Attach Screenshots / Files
+        </label>
+        <span class="text-[11px] text-slate-400 font-medium">Multiple upload or paste (Ctrl+V)</span>
+      </div>
+
+      <div (paste)="onPasteScreenshot($event)"
+        class="border-2 border-dashed border-indigo-200 hover:border-indigo-400 bg-indigo-50/20 hover:bg-indigo-50/40 rounded-2xl p-4 text-center transition-all cursor-pointer group"
+        (click)="formScreenshotInput.click()">
+        <input type="file" #formScreenshotInput (change)="onFormScreenshotsSelected($event)" multiple
+          accept="image/*,.pdf,.doc,.docx" class="hidden" />
+        <div class="flex flex-col items-center justify-center gap-1.5">
+          <div
+            class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm group-hover:scale-110 transition-transform shadow-xs">
+            <i class="pi pi-cloud-upload text-lg"></i>
+          </div>
+          <div class="text-xs font-bold text-slate-800">
+            <span class="text-indigo-600 underline">Click to browse screenshots</span> or drag & drop / paste (Ctrl+V)
+          </div>
+          <div class="text-[11px] text-slate-400">PNG, JPG, WEBP, GIF, PDF (Multiple files allowed)</div>
+        </div>
+      </div>
+
+      <!-- Multiple Screenshots Previews Grid -->
+      <div *ngIf="initialScreenshots.length > 0" class="grid grid-cols-3 gap-2.5 mt-3 max-h-48 overflow-y-auto pr-1">
+        <div *ngFor="let sc of initialScreenshots; let i = index"
+          class="relative group rounded-xl border border-slate-200 bg-slate-50 overflow-hidden shadow-xs">
+          <!-- Image Thumbnail -->
+          <div *ngIf="sc.isImage" class="h-20 w-full bg-slate-900 flex items-center justify-center overflow-hidden">
+            <img [src]="sc.fileUrl" [alt]="sc.fileName"
+              class="h-full w-full object-cover group-hover:scale-105 transition-transform" />
+          </div>
+          <!-- File Thumbnail -->
+          <div *ngIf="!sc.isImage"
+            class="h-20 w-full bg-slate-100 flex flex-col items-center justify-center p-2 text-slate-600 text-center">
+            <i class="pi pi-file text-xl mb-1 text-indigo-600"></i>
+            <span class="text-[10px] font-bold truncate w-full">{{ sc.fileName }}</span>
+          </div>
+
+          <!-- File Overlay Label & Remove Button -->
+          <div class="p-1.5 bg-white border-t border-slate-100 flex items-center justify-between text-[10px]">
+            <span class="font-bold text-slate-700 truncate max-w-[80px]" [title]="sc.fileName">{{ sc.fileName }}</span>
+            <span class="text-slate-400 font-mono">{{ sc.fileSize }}</span>
+          </div>
+
+          <!-- Delete Badge Button -->
+          <button type="button" (click)="removeInitialScreenshot(i); $event.stopPropagation()"
+            class="absolute top-1 right-1 w-6 h-6 rounded-full bg-rose-600 text-white flex items-center justify-center text-[10px] shadow-md hover:bg-rose-700 transition">
+            <i class="pi pi-times"></i>
+          </button>
         </div>
       </div>
     </div>
 
     <!-- Description -->
     <div>
-      <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Description / Acceptance Criteria</label>
+      <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Description / Acceptance
+        Criteria</label>
       <textarea pTextarea formControlName="description" rows="4"
         placeholder="Detailed explanation, user story description, or bug steps to reproduce..."
         class="w-full text-sm rounded-xl p-3 border-slate-300"></textarea>
     </div>
+
 
     <!-- Drawer Actions -->
     <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
@@ -597,10 +676,12 @@
 
       <!-- Quick Action Buttons -->
       <div class="flex items-center gap-2">
-        <button (click)="openWorklogModal()" type="button" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold flex items-center gap-1.5 hover:bg-indigo-100 transition">
+        <button (click)="openWorklogModal()" type="button"
+          class="px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold flex items-center gap-1.5 hover:bg-indigo-100 transition">
           <i class="pi pi-stopwatch"></i> Log Work
         </button>
-        <button (click)="openEditTaskModal(selectedTask!)" type="button" class="px-3 py-1.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold flex items-center gap-1.5 hover:bg-slate-200 transition">
+        <button (click)="openEditTaskModal(selectedTask!)" type="button"
+          class="px-3 py-1.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold flex items-center gap-1.5 hover:bg-slate-200 transition">
           <i class="pi pi-pencil"></i> Edit
         </button>
       </div>
@@ -620,7 +701,8 @@
         <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
           <i class="pi pi-align-left text-slate-400"></i> Description
         </h4>
-        <p class="text-sm text-slate-800 leading-relaxed whitespace-pre-line font-normal">{{ selectedTask.description || 'No detailed description provided.' }}</p>
+        <p class="text-sm text-slate-800 leading-relaxed whitespace-pre-line font-normal">{{ selectedTask.description ||
+          'No detailed description provided.' }}</p>
       </div>
 
       <!-- Interactive Sub-tasks / Checklist (Jira standard feature) -->
@@ -638,22 +720,26 @@
         </div>
 
         <!-- Progress Bar -->
-        <p-progressbar [value]="getSubtaskProgressPercent(selectedTask.subtasks)" [showValue]="false" styleClass="h-2 rounded-full" />
+        <p-progressbar [value]="getSubtaskProgressPercent(selectedTask.subtasks)" [showValue]="false"
+          styleClass="h-2 rounded-full" />
 
         <!-- Add Subtask Input -->
         <div class="flex items-center gap-2">
           <input pInputText type="text" [(ngModel)]="newSubtaskInput" (keyup.enter)="addSubtaskToSelectedTask()"
             placeholder="Add subtask title & press enter..." class="w-full text-xs rounded-xl border-slate-300 p-2" />
-          <button (click)="addSubtaskToSelectedTask()" type="button" class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-bold shrink-0">+ Add</button>
+          <button (click)="addSubtaskToSelectedTask()" type="button"
+            class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-bold shrink-0">+ Add</button>
         </div>
 
         <!-- Subtasks List -->
         <div class="space-y-1.5 max-h-48 overflow-y-auto pt-1">
-          <div *ngFor="let st of selectedTask.subtasks" class="flex items-center justify-between p-2 rounded-lg border border-slate-100 hover:bg-slate-50 transition-all">
+          <div *ngFor="let st of selectedTask.subtasks"
+            class="flex items-center justify-between p-2 rounded-lg border border-slate-100 hover:bg-slate-50 transition-all">
             <div class="flex items-center gap-2.5 min-w-0">
               <input type="checkbox" [checked]="st.is_completed" (change)="toggleSubtaskStatus(st)"
                 class="w-4 h-4 text-indigo-600 rounded cursor-pointer accent-indigo-600" />
-              <span [class.line-through]="st.is_completed" [class.text-slate-400]="st.is_completed" class="text-xs font-medium text-slate-800 truncate">
+              <span [class.line-through]="st.is_completed" [class.text-slate-400]="st.is_completed"
+                class="text-xs font-medium text-slate-800 truncate">
                 {{ st.title }}
               </span>
             </div>
@@ -662,7 +748,8 @@
             </button>
           </div>
 
-          <div *ngIf="!selectedTask.subtasks || selectedTask.subtasks.length === 0" class="text-center text-xs text-slate-400 py-2">
+          <div *ngIf="!selectedTask.subtasks || selectedTask.subtasks.length === 0"
+            class="text-center text-xs text-slate-400 py-2">
             No subtasks yet. Add items above to break down work.
           </div>
         </div>
@@ -726,21 +813,25 @@
         <div *ngIf="activeDetailTab === 1" class="space-y-3">
           <div class="flex justify-between items-center pb-2">
             <span class="text-xs font-bold text-slate-700">Time Logging History</span>
-            <button (click)="openWorklogModal()" class="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1">
+            <button (click)="openWorklogModal()"
+              class="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1">
               + Log Work Hours
             </button>
           </div>
 
           <div class="space-y-2 max-h-60 overflow-y-auto">
-            <div *ngFor="let wl of selectedTask.worklogs" class="flex items-center justify-between bg-indigo-50/50 p-3 rounded-xl border border-indigo-100 text-xs">
+            <div *ngFor="let wl of selectedTask.worklogs"
+              class="flex items-center justify-between bg-indigo-50/50 p-3 rounded-xl border border-indigo-100 text-xs">
               <div class="space-y-0.5">
-                <div class="font-bold text-slate-800">{{ wl.user_name }} logged <span class="text-indigo-700 font-extrabold">{{ wl.hours_logged }} hrs</span></div>
+                <div class="font-bold text-slate-800">{{ wl.user_name }} logged <span
+                    class="text-indigo-700 font-extrabold">{{ wl.hours_logged }} hrs</span></div>
                 <div class="text-slate-500 text-[11px]">{{ wl.description || 'No work description provided' }}</div>
               </div>
               <span class="text-[10px] text-slate-400 font-semibold">{{ wl.work_date | date: 'dd MMM yyyy' }}</span>
             </div>
 
-            <div *ngIf="!selectedTask.worklogs || selectedTask.worklogs.length === 0" class="text-center text-xs text-slate-400 py-4">
+            <div *ngIf="!selectedTask.worklogs || selectedTask.worklogs.length === 0"
+              class="text-center text-xs text-slate-400 py-4">
               No time logs recorded for this task.
             </div>
           </div>
@@ -770,7 +861,8 @@
                     class="font-bold text-xs text-indigo-600 hover:underline block truncate max-w-xs">
                     {{ att.file_name }}
                   </a>
-                  <div class="text-[10px] text-slate-400">{{ att.file_size || 'File' }} &bull; Uploaded by {{ att.user_name }}</div>
+                  <div class="text-[10px] text-slate-400">{{ att.file_size || 'File' }} &bull; Uploaded by {{
+                    att.user_name }}</div>
                 </div>
               </div>
 
@@ -793,9 +885,11 @@
             class="flex items-start gap-3 border-l-2 border-indigo-200 pl-3 py-1">
             <div class="w-2 h-2 rounded-full bg-indigo-600 mt-1.5 -ml-4"></div>
             <div>
-              <div class="text-xs font-bold text-slate-800">{{ log.user_name }} &bull; <span class="text-indigo-600">{{ log.action }}</span></div>
+              <div class="text-xs font-bold text-slate-800">{{ log.user_name }} &bull; <span class="text-indigo-600">{{
+                  log.action }}</span></div>
               <p class="text-xs text-slate-600 mt-0.5">{{ log.description }}</p>
-              <span class="text-[10px] text-slate-400 block mt-0.5">{{ log.created_at | date: 'dd MMM yyyy, hh:mm a' }}</span>
+              <span class="text-[10px] text-slate-400 block mt-0.5">{{ log.created_at | date: 'dd MMM yyyy, hh:mm a'
+                }}</span>
             </div>
           </div>
         </div>
@@ -808,8 +902,7 @@
       <div>
         <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Status</label>
         <p-select [options]="statusOptions.slice(1)" [(ngModel)]="selectedTask.status"
-          (onChange)="quickStatusChange(selectedTask, selectedTask.status)"
-          optionLabel="label" optionValue="value"
+          (onChange)="quickStatusChange(selectedTask, selectedTask.status)" optionLabel="label" optionValue="value"
           styleClass="w-full text-xs rounded-xl font-extrabold uppercase border-slate-300" />
       </div>
 
@@ -817,11 +910,13 @@
       <div>
         <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Assignee</label>
         <div class="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-200">
-          <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs shrink-0">
+          <div
+            class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs shrink-0">
             {{ (selectedTask.assignee_name || 'U').charAt(0) }}
           </div>
           <div class="min-w-0">
-            <div class="font-bold text-xs text-slate-800 truncate">{{ selectedTask.assignee_name || 'Unassigned' }}</div>
+            <div class="font-bold text-xs text-slate-800 truncate">{{ selectedTask.assignee_name || 'Unassigned' }}
+            </div>
             <div class="text-[10px] text-slate-400 truncate">{{ selectedTask.assignee_email || 'No email' }}</div>
           </div>
         </div>
@@ -844,11 +939,13 @@
       <div class="grid grid-cols-2 gap-2 text-xs">
         <div>
           <span class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Start Date</span>
-          <span class="font-semibold text-slate-800">{{ (selectedTask.start_date | date: 'dd MMM yyyy') || 'Not set' }}</span>
+          <span class="font-semibold text-slate-800">{{ (selectedTask.start_date | date: 'dd MMM yyyy') || 'Not set'
+            }}</span>
         </div>
         <div>
           <span class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Due Date</span>
-          <span class="font-semibold" [class.text-rose-600]="selectedTask.status !== 'COMPLETED' && selectedTask.due_date && selectedTask.due_date < '2026-07-27'">
+          <span class="font-semibold"
+            [class.text-rose-600]="selectedTask.status !== 'COMPLETED' && selectedTask.due_date && selectedTask.due_date < '2026-07-27'">
             {{ (selectedTask.due_date | date: 'dd MMM yyyy') || 'Not set' }}
           </span>
         </div>
@@ -858,20 +955,23 @@
       <div class="bg-white p-3.5 rounded-xl border border-slate-200 space-y-2">
         <div class="flex justify-between items-center text-xs">
           <span class="font-bold text-slate-700 uppercase tracking-wider text-[10px]">Time Tracking</span>
-          <button (click)="openWorklogModal()" class="text-indigo-600 font-bold hover:underline text-[11px]">+ Log</button>
+          <button (click)="openWorklogModal()" class="text-indigo-600 font-bold hover:underline text-[11px]">+
+            Log</button>
         </div>
         <div class="flex justify-between text-xs font-extrabold text-slate-800">
           <span>Logged: {{ selectedTask.logged_hours || 0 }}h</span>
           <span>Est: {{ selectedTask.estimated_hours || 0 }}h</span>
         </div>
-        <p-progressbar [value]="((selectedTask.logged_hours || 0) / (selectedTask.estimated_hours || 1)) * 100" [showValue]="false" styleClass="h-2 rounded-full" />
+        <p-progressbar [value]="((selectedTask.logged_hours || 0) / (selectedTask.estimated_hours || 1)) * 100"
+          [showValue]="false" styleClass="h-2 rounded-full" />
       </div>
 
       <!-- Labels / Tags -->
       <div>
         <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Labels</label>
         <div class="flex flex-wrap gap-1">
-          <span *ngFor="let tag of getLabelsArray(selectedTask.labels)" class="bg-slate-200 text-slate-700 text-[11px] font-mono px-2 py-0.5 rounded font-semibold">
+          <span *ngFor="let tag of getLabelsArray(selectedTask.labels)"
+            class="bg-slate-200 text-slate-700 text-[11px] font-mono px-2 py-0.5 rounded font-semibold">
             #{{ tag }}
           </span>
           <span *ngIf="!selectedTask.labels" class="text-xs text-slate-400">None</span>
@@ -883,7 +983,8 @@
 </p-drawer>
 
 <!-- WORKLOG LOG WORK DIALOG (Jira Feature) -->
-<p-dialog [(visible)]="showWorklogModal" header="Log Work Hours" [modal]="true" [style]="{ width: '28rem' }" styleClass="rounded-2xl">
+<p-dialog [(visible)]="showWorklogModal" header="Log Work Hours" [modal]="true" [style]="{ width: '28rem' }"
+  styleClass="rounded-2xl">
   <div class="space-y-4 pt-2">
     <div>
       <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Time Spent (Hours) *</label>
@@ -897,7 +998,8 @@
     </div>
 
     <div>
-      <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Work Description / Log Note</label>
+      <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Work Description / Log
+        Note</label>
       <textarea pTextarea [(ngModel)]="worklogDescription" rows="3" placeholder="Describe work accomplished..."
         class="w-full text-sm rounded-xl p-3 border-slate-300"></textarea>
     </div>
@@ -905,8 +1007,10 @@
 
   <ng-template pTemplate="footer">
     <div class="flex justify-end gap-2 pt-2">
-      <p-button (onClick)="showWorklogModal = false" label="Cancel" [outlined]="true" styleClass="p-button-secondary p-button-sm rounded-xl"></p-button>
-      <p-button (onClick)="saveWorklog()" label="Save Log" icon="pi pi-check" styleClass="p-button-info p-button-sm rounded-xl font-bold px-4"></p-button>
+      <p-button (onClick)="showWorklogModal = false" label="Cancel" [outlined]="true"
+        styleClass="p-button-secondary p-button-sm rounded-xl"></p-button>
+      <p-button (onClick)="saveWorklog()" label="Save Log" icon="pi pi-check"
+        styleClass="p-button-info p-button-sm rounded-xl font-bold px-4"></p-button>
     </div>
   </ng-template>
-</p-dialog>
+</p-dialog>
