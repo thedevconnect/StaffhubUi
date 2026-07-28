@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ChangeDetectorRef, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ChangeDetectorRef, OnInit, inject, signal } from '@angular/core';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
@@ -11,7 +11,9 @@ import { DrawerModule } from 'primeng/drawer';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 import { MonthlyAttendanceService } from '../../../shared/services/monthly-attendance.service';
+import { EmployeeManagementService } from '../../../shared/services/employee-management.service';
 import { AuthService } from '../../../shared/services/services/auth.service';
+import { Employee } from '../../../shared/services/models/employee.model';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -37,15 +39,15 @@ import { FormsModule } from '@angular/forms';
 export class FinalAttendance implements OnInit {
   private readonly router = inject(Router);
   private readonly monthlyService = inject(MonthlyAttendanceService);
+  private readonly employeeService = inject(EmployeeManagementService);
   private readonly authService = inject(AuthService);
   private readonly confirmationService = inject(ConfirmationService);
   private readonly messageService = inject(MessageService);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  breadcrumbItems: any[] = [
-    { label: 'Employee Self Service', icon: 'pi pi-home', routerLink: '/ess' },
-    { label: 'Final Attendance Summary', icon: 'pi pi-check-square', routerLink: '/ess/final-attendance' }
-  ];
+  isHrView = signal<boolean>(false);
+
+  breadcrumbItems: any[] = [];
 
   selectedYear: number = new Date().getFullYear();
   years = [
@@ -62,6 +64,10 @@ export class FinalAttendance implements OnInit {
   records: any[] = [];
   loading: boolean = false;
 
+  // HR Admin Employee Selection
+  employees = signal<Employee[]>([]);
+  selectedEmployeeId = signal<number | null>(null);
+
   // Detail drawer variables
   detailDrawerVisible: boolean = false;
   selectedMonthRecord: any = null;
@@ -69,6 +75,61 @@ export class FinalAttendance implements OnInit {
   loadingDetails: boolean = false;
 
   ngOnInit(): void {
+    const currentUrl = this.router.url;
+    const isHrRoute = currentUrl.includes('/hradmin');
+    this.isHrView.set(isHrRoute);
+
+    if (isHrRoute) {
+      this.breadcrumbItems = [
+        { label: 'HR Administration', icon: 'pi pi-home', routerLink: '/hradmin' },
+        { label: 'Final Attendance Summary', icon: 'pi pi-check-square', routerLink: '/hradmin/final-attendance' }
+      ];
+      this.loadEmployeeList();
+    } else {
+      this.breadcrumbItems = [
+        { label: 'Employee Self Service', icon: 'pi pi-home', routerLink: '/ess' },
+        { label: 'Final Attendance Summary', icon: 'pi pi-check-square', routerLink: '/ess/final-attendance' }
+      ];
+      this.loadYearlyRecords();
+    }
+  }
+
+  loadEmployeeList(): void {
+    this.employeeService.getEmployees().subscribe({
+      next: (res) => {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const activeEmployees = (res || []).filter(e => {
+          const statusUpper = String(e.status || '').toUpperCase();
+          const lwdVal = e.last_working_day || e.lastWorkingDay;
+          if (statusUpper === 'INACTIVE') {
+            if (lwdVal) {
+              const lwdStr = new Date(lwdVal).toISOString().split('T')[0];
+              return todayStr <= lwdStr;
+            }
+            return false;
+          }
+          if (lwdVal) {
+            const lwdStr = new Date(lwdVal).toISOString().split('T')[0];
+            return todayStr <= lwdStr;
+          }
+          return true;
+        });
+
+        this.employees.set(activeEmployees);
+
+        if (activeEmployees.length > 0) {
+          const firstEmpId = activeEmployees[0].id || (activeEmployees[0] as any).user_id || null;
+          this.selectedEmployeeId.set(firstEmpId);
+          this.loadYearlyRecords();
+        }
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load employee list' });
+      }
+    });
+  }
+
+  onEmployeeSelect(): void {
     this.loadYearlyRecords();
   }
 
@@ -95,10 +156,17 @@ export class FinalAttendance implements OnInit {
 
   loadYearlyRecords(): void {
     this.loading = true;
-    const user = this.authService.user();
-    const employeeId = user?.id;
+    let employeeId: number | null = null;
+
+    if (this.isHrView()) {
+      employeeId = this.selectedEmployeeId();
+    } else {
+      const user = this.authService.user();
+      employeeId = user?.id || null;
+    }
 
     if (!employeeId) {
+      this.records = [];
       this.loading = false;
       this.cdr.markForCheck();
       return;
@@ -209,7 +277,8 @@ export class FinalAttendance implements OnInit {
   }
 
   navigateToMonthlyAttendance(record: any): void {
-    this.router.navigate(['/ess/monthly-attendance'], {
+    const routePrefix = this.isHrView() ? '/hradmin' : '/ess';
+    this.router.navigate([`${routePrefix}/monthly-attendance`], {
       queryParams: { month: record.monthNumber, year: this.selectedYear }
     });
   }

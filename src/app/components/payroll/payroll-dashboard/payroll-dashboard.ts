@@ -35,6 +35,37 @@ export class PayrollDashboard {
     { label: 'Tax & PF Contributions', value: '₹8,42,100', icon: 'pi pi-shield', color: 'bg-indigo-50 text-indigo-600' }
   ];
 
+  integratedFeatures = [
+    {
+      title: 'Seamless Workforce Sync',
+      desc: 'Seamlessly sync employee details—like name, designation, date of joining, department, and custom fields—directly from StaffHub HRMS into the payroll engine.',
+      icon: 'pi pi-sync',
+      badge: 'Real-time Sync',
+      color: 'text-blue-600 bg-blue-50 border-blue-100'
+    },
+    {
+      title: 'Faster Payroll & LOP Calculation',
+      desc: 'Enjoy quick, error-free payroll processing by auto-fetching exact days worked, Loss of Pay (LOP), and overtime details directly from StaffHub Attendance.',
+      icon: 'pi pi-bolt',
+      badge: 'Auto LOP & Overtime',
+      color: 'text-emerald-600 bg-emerald-50 border-emerald-100'
+    },
+    {
+      title: 'Statutory Law & Tax Compliance',
+      desc: 'Keep your payroll aligned with evolving labor laws for Provident Fund (PF), ESI, Professional Tax (PT), and TDS income tax wage calculations.',
+      icon: 'pi pi-shield',
+      badge: '100% Compliant',
+      color: 'text-indigo-600 bg-indigo-50 border-indigo-100'
+    },
+    {
+      title: 'Centralized Employee Portal (ESS)',
+      desc: 'Provide your employees with a self-service portal to download monthly payslips, submit reimbursement claims, and track investment declarations.',
+      icon: 'pi pi-user-edit',
+      badge: 'Self-Service Portal',
+      color: 'text-purple-600 bg-purple-50 border-purple-100'
+    }
+  ];
+
   payrollHistory = [
     { month: 'June 2026', gross: '₹48,50,200', deductions: '₹5,64,600', net: '₹42,85,600', count: '148', status: 'Disbursed' },
     { month: 'May 2026', gross: '₹46,20,500', deductions: '₹5,10,200', net: '₹41,10,300', count: '142', status: 'Disbursed' },
