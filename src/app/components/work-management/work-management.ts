@@ -173,19 +173,21 @@ export class WorkManagementComponent implements OnInit {
   editingTaskId: number | null = null;
   taskForm!: FormGroup;
 
-  // Subtask & Label builder in Create modal
+  // Subtask, Label & Screenshot builder in Create/Edit modal
   newInitialSubtaskInput = '';
   initialSubtasksList: string[] = [];
   formTagInput = '';
   formLabelsList: string[] = [];
+  initialScreenshots: Array<{ fileName: string; fileUrl: string; fileType: string; fileSize: string; isImage: boolean }> = [];
 
-  // Task Detail Modal / Jira Drawer
+  // Task Detail Modal / Drawer Panel
   showDetailModal = false;
   selectedTask: TaskDetailResponse | null = null;
   activeDetailTab = 0;
   newCommentText = '';
   uploadingFile = false;
   newSubtaskInput = '';
+
 
   // Worklog Modal
   showWorklogModal = false;
@@ -342,6 +344,7 @@ export class WorkManagementComponent implements OnInit {
     this.newInitialSubtaskInput = '';
     this.formLabelsList = [];
     this.formTagInput = '';
+    this.initialScreenshots = [];
     this.taskForm.reset({
       title: '',
       description: '',
@@ -366,6 +369,7 @@ export class WorkManagementComponent implements OnInit {
     this.newInitialSubtaskInput = '';
     this.formLabelsList = this.getLabelsArray(task.labels);
     this.formTagInput = '';
+    this.initialScreenshots = [];
     this.taskForm.patchValue({
       title: task.title,
       description: task.description || '',
@@ -381,6 +385,74 @@ export class WorkManagementComponent implements OnInit {
       progress: task.progress || 0
     });
     this.showTaskModal = true;
+  }
+
+  // Screenshots & Attachments in Task Creator
+  onFormScreenshotsSelected(event: any): void {
+    const files: FileList = event.target.files;
+    if (!files || files.length === 0) return;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        const fileUrl = e.target.result;
+        const fileSizeStr = this.formatFileSize(file.size);
+        const isImage = file.type.startsWith('image/');
+
+        this.initialScreenshots.push({
+          fileName: file.name,
+          fileUrl,
+          fileType: file.type,
+          fileSize: fileSizeStr,
+          isImage
+        });
+        this.cdr.markForCheck();
+      };
+      reader.readAsDataURL(file);
+    }
+    event.target.value = '';
+  }
+
+  removeInitialScreenshot(index: number): void {
+    this.initialScreenshots.splice(index, 1);
+    this.cdr.markForCheck();
+  }
+
+  onPasteScreenshot(event: ClipboardEvent): void {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.indexOf('image') !== -1) {
+        const file = item.getAsFile();
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e: any) => {
+            const fileName = `Screenshot_${new Date().getTime()}.png`;
+            this.initialScreenshots.push({
+              fileName,
+              fileUrl: e.target.result,
+              fileType: file.type,
+              fileSize: this.formatFileSize(file.size),
+              isImage: true
+            });
+            this.messageService.add({ severity: 'info', summary: 'Screenshot Pasted', detail: `${fileName} attached from clipboard` });
+            this.cdr.markForCheck();
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+    }
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   }
 
   // Tag / Label Helpers
@@ -419,8 +491,10 @@ export class WorkManagementComponent implements OnInit {
     const payload = {
       ...formVal,
       labels: this.formLabelsList.join(','),
-      initialSubtasks: this.initialSubtasksList
+      initialSubtasks: this.initialSubtasksList,
+      screenshots: this.initialScreenshots
     };
+
 
     if (this.isEditMode && this.editingTaskId) {
       this.taskService.updateTask(this.editingTaskId, payload).subscribe({
