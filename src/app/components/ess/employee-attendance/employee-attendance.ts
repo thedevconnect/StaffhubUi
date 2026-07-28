@@ -253,7 +253,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
         this.isActionLoading = false;
 
         if (res.success) {
-          const now = new Date().toISOString();
+          const now = this.getLocalDateTimeISOString();
 
           const newRecord: any = {
             id: res.data?.id || res.data?.attendanceId,
@@ -385,7 +385,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
 
         if (res.success) {
           const current = this.activeRecord();
-          const now = new Date().toISOString();
+          const now = this.getLocalDateTimeISOString();
 
           if (current) {
             const updatedRecord: any = {
@@ -505,11 +505,23 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     })));
   }
 
+  private getLocalDateTimeISOString(date = new Date()): string {
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    const seconds = pad(date.getSeconds());
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+  }
+
   private parseDbDate(dateStr: string | null): Date | null {
     if (!dateStr) return null;
-    const normalized = dateStr.replace(' ', 'T');
+    const cleanStr = dateStr.replace('Z', '');
+    const normalized = cleanStr.replace(' ', 'T');
     const parsed = new Date(normalized);
-    return isNaN(parsed.getTime()) ? new Date(dateStr) : parsed;
+    return isNaN(parsed.getTime()) ? new Date(cleanStr) : parsed;
   }
 
   private formatMsToHMS(ms: number): string {
