@@ -9,6 +9,9 @@ import { ToastModule } from 'primeng/toast';
 import { TableModule } from 'primeng/table';
 import { TooltipModule } from 'primeng/tooltip';
 import { PayrollService } from '../../../shared/services/payroll.service';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
 
 @Component({
   selector: 'app-monthly-salary',
@@ -191,4 +194,61 @@ export class MonthlySalary implements OnInit {
       }
     });
   }
+
+  downloadSalarySlip(emp: any): void {
+    const doc = new jsPDF();
+    const targetMonth = this.selectedMonth;
+    const targetYear = this.selectedYear;
+    const monthName = this.months.find(m => m.value === Number(targetMonth))?.label || '';
+
+    const empName = emp.first_name || emp.full_name || 'Employee';
+    const empCode = emp.emp_code || `EMP-${emp.id || emp.employee_id}`;
+    const baseSalary = Number(emp.master_base_salary || emp.base_salary || 0);
+    const totalDays = Number(emp.total_days || this.daysInSelectedMonth);
+    const payableDays = Number(emp.payable_days || 0);
+    const calculatedSalary = Number(emp.calculated_salary || 0);
+
+    // Header
+    doc.setFontSize(20);
+    doc.text('Salary Slip', 105, 20, { align: 'center' });
+    doc.setFontSize(12);
+    doc.text(`For the month of ${monthName} ${targetYear}`, 105, 30, { align: 'center' });
+
+    doc.line(14, 35, 196, 35);
+
+    // Employee Details
+    doc.setFontSize(10);
+    doc.text(`Employee Name: ${empName}`, 14, 45);
+    doc.text(`Employee Code: ${empCode}`, 14, 52);
+    if (emp.company_name) {
+      doc.text(`Company: ${emp.company_name}`, 14, 59);
+    }
+
+    doc.text(`Total Days: ${totalDays}`, 140, 45);
+    doc.text(`Payable Days: ${payableDays}`, 140, 52);
+    doc.text(`Status: ${emp.status || 'Draft'}`, 140, 59);
+
+    // Salary Details Table
+    const tableData = [
+      ['Monthly Base Salary', `Rs. ${baseSalary.toFixed(2)}`],
+      ['Total Days in Month', `${totalDays} Days`],
+      ['Final Attendance Paid Days', `${payableDays} Days`],
+      ['Net Calculated Salary', `Rs. ${calculatedSalary.toFixed(2)}`]
+    ];
+
+    autoTable(doc, {
+      startY: 68,
+      head: [['Salary Component / Parameter', 'Value']],
+      body: tableData,
+      theme: 'grid',
+      styles: { fontSize: 10, cellPadding: 5 }
+    });
+
+    const finalY = (doc as any).lastAutoTable.finalY || 110;
+    doc.setFontSize(11);
+    doc.text(`Net Salary Payable: Rs. ${calculatedSalary.toFixed(2)}`, 14, finalY + 15);
+
+    doc.save(`Salary_Slip_${empName.replace(/\s+/g, '_')}_${monthName}_${targetYear}.pdf`);
+  }
 }
+

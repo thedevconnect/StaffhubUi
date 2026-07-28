@@ -4,7 +4,7 @@
 <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
 
 <section class="space-y-6">
-  <!-- Header with Year Selector -->
+  <!-- Header with Employee Selector & Year Selector -->
   <header class="rounded-xl border border-slate-200 bg-white p-4 md:p-5 shadow-sm">
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div>
@@ -12,12 +12,20 @@
         <p class="mt-1 text-xs text-slate-500">Track final monthly attendance & payable days used for employee payroll & monthly salary calculation.
         </p>
       </div>
-      <div class="flex items-center gap-3">
-        <label class="text-xs font-semibold text-slate-700">Select Year:</label>
-        <p-select [options]="years" [(ngModel)]="selectedYear" (onChange)="onYearChange()" placeholder="Select Year"
-          styleClass="w-36 text-sm"></p-select>
-        <p-button label="Refresh" icon="pi pi-refresh" (onClick)="loadYearlyRecords()" [loading]="loading"
-          styleClass="p-button-outlined p-button-sm"></p-button>
+
+      <div class="flex items-center flex-wrap gap-3">
+        <!-- HR Admin Employee Selector -->
+        <div *ngIf="isHrView()" class="flex items-center gap-2">
+          <label class="text-xs font-semibold text-slate-700">Select Employee:</label>
+          <p-select [options]="employees()" [(ngModel)]="selectedEmployeeId" (onChange)="onEmployeeSelect()" optionLabel="full_name" optionValue="id" [filter]="true" filterBy="full_name,employee_code,emp_id" placeholder="Select Employee" styleClass="w-56 text-sm"></p-select>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <label class="text-xs font-semibold text-slate-700">Year:</label>
+          <p-select [options]="years" [(ngModel)]="selectedYear" (onChange)="onYearChange()" placeholder="Select Year" styleClass="w-32 text-sm"></p-select>
+        </div>
+
+        <p-button label="Refresh" icon="pi pi-refresh" (onClick)="loadYearlyRecords()" [loading]="loading" styleClass="p-button-outlined p-button-sm"></p-button>
       </div>
     </div>
   </header>

@@ -155,13 +155,21 @@
               </span>
             </td>
             <td class="py-3 px-4 text-center">
-              <button (click)="saveEmployeeSalary(emp)" 
-                      [disabled]="emp.saving"
-                      class="px-3 py-1.5 rounded-lg bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 transition flex items-center justify-center gap-1.5 mx-auto shadow-xs disabled:opacity-50">
-                <i class="pi" [ngClass]="emp.saving ? 'pi-spin pi-spinner' : 'pi-save'"></i>
-                <span>Save</span>
-              </button>
+              <div class="flex items-center justify-center gap-2">
+                <button (click)="saveEmployeeSalary(emp)" 
+                        [disabled]="emp.saving"
+                        class="px-3 py-1.5 rounded-lg bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 transition flex items-center justify-center gap-1.5 shadow-xs disabled:opacity-50">
+                  <i class="pi" [ngClass]="emp.saving ? 'pi-spin pi-spinner' : 'pi-save'"></i>
+                  <span>Save</span>
+                </button>
+                <button (click)="downloadSalarySlip(emp)" 
+                        class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition font-bold text-xs flex items-center justify-center gap-1 shadow-xs"
+                        title="Download Salary Slip PDF">
+                  <i class="pi pi-download text-blue-600"></i>
+                </button>
+              </div>
             </td>
+
           </tr>
         </ng-template>
 

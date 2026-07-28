@@ -83,5 +83,10 @@ export const hradminRoutes: Routes = [
         path: 'probation',
         title: 'Probation Tracker',
         loadComponent: () => import('../components/ess/probation/probation').then(c => c.Probation)
+    },
+    {
+        path: 'final-attendance',
+        title: 'Final Attendance Summary',
+        loadComponent: () => import('../components/ess/final-attendance/final-attendance').then(c => c.FinalAttendance)
     }
 ];
