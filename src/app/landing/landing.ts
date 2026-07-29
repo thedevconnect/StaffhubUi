@@ -5,6 +5,8 @@ import { RippleModule } from 'primeng/ripple';
 import { DialogModule } from 'primeng/dialog';
 import { Router } from '@angular/router';
 
+import { ThemeService, AccentColor, ThemeMode } from '../shared/services/theme.service';
+
 @Component({
   selector: 'app-landing',
   standalone: true,
@@ -21,12 +23,46 @@ import { Router } from '@angular/router';
 export class Landing implements OnInit, OnDestroy {
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  public themeService = inject(ThemeService);
 
   // Theme configuration states
-  selectedColor = 'indigo';
-  isDarkMode = false;
   isColorMenuOpen = false;
+  isThemeMenuOpen = false;
   isRolesMenuOpen = false;
+
+  get selectedColor(): string {
+    return this.themeService.accentColor();
+  }
+
+  get isDarkMode(): boolean {
+    return this.themeService.isDarkModeActive();
+  }
+
+  toggleDarkMode() {
+    const nextMode: ThemeMode = this.isDarkMode ? 'light' : 'dark';
+    this.themeService.setThemeMode(nextMode);
+  }
+
+  toggleThemeMenu() {
+    this.isThemeMenuOpen = !this.isThemeMenuOpen;
+    if (this.isThemeMenuOpen) this.isColorMenuOpen = false;
+  }
+
+  selectThemeMode(mode: ThemeMode) {
+    this.themeService.setThemeMode(mode);
+    this.isThemeMenuOpen = false;
+  }
+
+  selectColor(color: string) {
+    this.themeService.setAccentColor(color as AccentColor);
+    this.isColorMenuOpen = false;
+  }
+
+  toggleColorMenu() {
+    this.isColorMenuOpen = !this.isColorMenuOpen;
+    if (this.isColorMenuOpen) this.isThemeMenuOpen = false;
+  }
+
 
   isModuleDialogVisible = false;
   selectedModule: any = null;
@@ -229,25 +265,8 @@ export class Landing implements OnInit, OnDestroy {
     }
   ];
 
-  toggleDarkMode() {
-    const hasDark = document.documentElement.classList.contains('dark');
-    if (hasDark) {
-      document.documentElement.classList.remove('dark');
-      this.isDarkMode = false;
-    } else {
-      document.documentElement.classList.add('dark');
-      this.isDarkMode = true;
-    }
-  }
+  
 
-  selectColor(color: string) {
-    this.selectedColor = color;
-    this.isColorMenuOpen = false;
-  }
-
-  toggleColorMenu() {
-    this.isColorMenuOpen = !this.isColorMenuOpen;
-  }
 
   get textColor() {
     const map: any = {

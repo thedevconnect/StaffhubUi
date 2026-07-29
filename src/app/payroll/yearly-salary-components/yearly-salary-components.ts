@@ -1,7 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
@@ -20,7 +19,6 @@ import { PayrollService } from '../../shared/services/payroll.service';
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink,
     BreadcrumbModule,
     ButtonModule,
     TableModule,

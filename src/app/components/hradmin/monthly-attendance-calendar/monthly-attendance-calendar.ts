@@ -52,7 +52,8 @@ export class HRMonthlyAttendanceCalendar implements OnInit {
     { label: 'Present', value: 'PRESENT' },
     { label: 'Half Day', value: 'HALF_DAY' },
     { label: 'Absent', value: 'ABSENT' },
-    { label: 'On Leave', value: 'ON_LEAVE' }
+    { label: 'On Leave', value: 'ON_LEAVE' },
+    { label: 'Weekly Off (WO)', value: 'WO' }
   ];
 
   constructor(
@@ -85,7 +86,7 @@ export class HRMonthlyAttendanceCalendar implements OnInit {
   }
 
   onStatusChange(newStatus: string) {
-    if (newStatus === 'ABSENT' || newStatus === 'ON_LEAVE') {
+    if (newStatus === 'ABSENT' || newStatus === 'ON_LEAVE' || newStatus === 'WO' || newStatus === 'WEEKLY_OFF') {
       this.editForm.swipe_in = '';
       this.editForm.swipe_out = '';
     }
@@ -253,13 +254,22 @@ export class HRMonthlyAttendanceCalendar implements OnInit {
             } else if (status === 'HALF_DAY') {
               day.type = 'HD';
               day.colorClass = 'bg-amber-500 text-white';
+            } else if (status === 'WO' || status === 'WEEKLY_OFF') {
+              day.type = 'WO';
+              day.colorClass = 'bg-slate-400 text-white';
             } else {
               day.type = status.substring(0, 2).toUpperCase();
               day.colorClass = 'bg-blue-500 text-white';
             }
           } else {
-            day.rawStatus = 'ABSENT';
-            if (day.type === '' && new Date(day.dateString) < new Date(new Date().setHours(0, 0, 0, 0))) {
+            const dayDate = new Date(day.dateString);
+            const isSunday = dayDate.getDay() === 0;
+
+            if (isSunday) {
+              day.type = 'WO';
+              day.colorClass = 'bg-slate-400 text-white';
+              day.rawStatus = 'WO';
+            } else if (dayDate < new Date(new Date().setHours(0, 0, 0, 0))) {
               if (dayLeave) {
                 const code = dayLeave.leave_type;
                 if (code === 'Casual Leave') day.type = 'CL';
@@ -272,7 +282,10 @@ export class HRMonthlyAttendanceCalendar implements OnInit {
               } else {
                 day.type = 'A';
                 day.colorClass = 'bg-rose-500 text-white';
+                day.rawStatus = 'ABSENT';
               }
+            } else {
+              day.rawStatus = 'PRESENT';
             }
           }
           return day;
@@ -283,6 +296,7 @@ export class HRMonthlyAttendanceCalendar implements OnInit {
       }
     });
   }
+
 
   openEditDialog(day: any) {
     if (!day.dayNum || !this.selectedEmployeeId()) return;
@@ -298,7 +312,7 @@ export class HRMonthlyAttendanceCalendar implements OnInit {
     this.selectedDay.set(day);
     
     const status = day.rawStatus || 'PRESENT';
-    const isTimeHidden = status === 'ABSENT' || status === 'ON_LEAVE';
+    const isTimeHidden = status === 'ABSENT' || status === 'ON_LEAVE' || status === 'WO' || status === 'WEEKLY_OFF';
 
     // Prepare form
     this.editForm = {
@@ -316,7 +330,8 @@ export class HRMonthlyAttendanceCalendar implements OnInit {
     const empId = this.selectedEmployeeId();
     if (!day || !empId) return;
 
-    const isTimeHidden = this.editForm.attendance_status === 'ABSENT' || this.editForm.attendance_status === 'ON_LEAVE';
+    const isTimeHidden = this.editForm.attendance_status === 'ABSENT' || this.editForm.attendance_status === 'ON_LEAVE' || this.editForm.attendance_status === 'WO' || this.editForm.attendance_status === 'WEEKLY_OFF';
+
 
     let swipeInISO = (!isTimeHidden && this.editForm.swipe_in) ? new Date(this.editForm.swipe_in).toISOString() : null;
     let swipeOutISO = (!isTimeHidden && this.editForm.swipe_out) ? new Date(this.editForm.swipe_out).toISOString() : null;

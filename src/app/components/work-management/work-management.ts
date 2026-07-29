@@ -21,6 +21,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { SliderModule } from 'primeng/slider';
 import { TextareaModule } from 'primeng/textarea';
 import { Breadcrumb } from 'primeng/breadcrumb';
+import { DatePickerModule } from 'primeng/datepicker';
 
 import { TableTemplate, TableColumn, TableAction } from '../../shared/ui/table-template/table-template';
 
@@ -47,8 +48,10 @@ import { TableTemplate, TableColumn, TableAction } from '../../shared/ui/table-t
     BadgeModule,
     TooltipModule,
     SliderModule,
-    TextareaModule
+    TextareaModule,
+    DatePickerModule
   ],
+
   providers: [MessageService, ConfirmationService],
   templateUrl: './work-management.html',
   styleUrls: ['./work-management.scss']
@@ -66,6 +69,12 @@ export class WorkManagementComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
+  // Section Minimize / Maximize states
+  isHeaderSectionMinimized = false;
+  isStatsMinimized = false;
+  isTableSectionMinimized = false;
+
+
   columns: TableColumn[] = [
     { key: 'actions', header: 'Actions', isVisible: true },
     { key: 'issue_type', header: 'Type', isSortable: true, isCustom: true },
@@ -75,8 +84,12 @@ export class WorkManagementComponent implements OnInit {
     { key: 'priority', header: 'Priority', isSortable: true, isCustom: true },
     { key: 'status', header: 'Status', isSortable: true, isCustom: true },
     { key: 'progress', header: 'Progress', isCustom: true },
+    { key: 'start_date', header: 'Start Date', isSortable: true, isCustom: true },
     { key: 'due_date', header: 'Due Date', isSortable: true, isCustom: true },
+    { key: 'hours_logged', header: 'Logged / Est', isCustom: true },
+    { key: 'created_at', header: 'Created Date', isSortable: true, isCustom: true }
   ];
+
 
   tableActions: TableAction[] = [
     { id: 'view', label: 'View Details', icon: 'pi pi-eye' },
@@ -242,7 +255,30 @@ export class WorkManagementComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
+  getTodayDateString(): string {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  formatDateForBackend(val: any): string | null {
+    if (!val) return null;
+    if (val instanceof Date) {
+      const yyyy = val.getFullYear();
+      const mm = String(val.getMonth() + 1).padStart(2, '0');
+      const dd = String(val.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    if (typeof val === 'string') {
+      return val.split('T')[0];
+    }
+    return null;
+  }
+
   initForm(): void {
+    const today = this.getTodayDateString();
     this.taskForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(255)]],
       description: [''],
@@ -251,13 +287,14 @@ export class WorkManagementComponent implements OnInit {
       priority: ['MEDIUM', Validators.required],
       status: ['TODO', Validators.required],
       assigned_to: [this.currentUserId || '', Validators.required],
-      start_date: [''],
-      due_date: [''],
+      start_date: [today],
+      due_date: [today],
       estimated_hours: [0],
       logged_hours: [0],
       progress: [0]
     });
   }
+
 
   loadEmployees(): void {
     this.taskService.getEmployees().subscribe({
@@ -337,6 +374,18 @@ export class WorkManagementComponent implements OnInit {
     this.loadTasks();
   }
 
+  // Full Image Preview Modal Dialog
+  previewImageUrl: string | null = null;
+  previewImageTitle: string | null = null;
+  showImagePreviewModal = false;
+
+  openImagePreview(url: string, title?: string): void {
+    this.previewImageUrl = url;
+    this.previewImageTitle = title || 'Screenshot Preview';
+    this.showImagePreviewModal = true;
+    this.cdr.markForCheck();
+  }
+
   openCreateTaskModal(): void {
     this.isEditMode = false;
     this.editingTaskId = null;
@@ -345,6 +394,7 @@ export class WorkManagementComponent implements OnInit {
     this.formLabelsList = [];
     this.formTagInput = '';
     this.initialScreenshots = [];
+    const today = this.getTodayDateString();
     this.taskForm.reset({
       title: '',
       description: '',
@@ -353,8 +403,8 @@ export class WorkManagementComponent implements OnInit {
       priority: 'MEDIUM',
       status: 'TODO',
       assigned_to: this.currentUserId || (this.employees[0]?.value ?? ''),
-      start_date: '',
-      due_date: '',
+      start_date: today,
+      due_date: today,
       estimated_hours: 0,
       logged_hours: 0,
       progress: 0
@@ -490,10 +540,13 @@ export class WorkManagementComponent implements OnInit {
     const formVal = this.taskForm.value;
     const payload = {
       ...formVal,
+      start_date: this.formatDateForBackend(formVal.start_date),
+      due_date: this.formatDateForBackend(formVal.due_date),
       labels: this.formLabelsList.join(','),
       initialSubtasks: this.initialSubtasksList,
       screenshots: this.initialScreenshots
     };
+
 
 
     if (this.isEditMode && this.editingTaskId) {
