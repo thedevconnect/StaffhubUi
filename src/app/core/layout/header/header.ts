@@ -1,8 +1,10 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   computed,
   effect,
+  inject,
   input,
   output,
   OnInit
@@ -21,6 +23,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../shared/services/services/auth.service';
 import { UserProfileService } from '../../../shared/services/user-profile.service';
 import { NotificationComponent } from '../notification/notification';
+import { ThemeService, ThemeMode, AccentColor } from '../../../shared/services/theme.service';
 
 interface UserDetails {
   name: string;
@@ -54,15 +57,60 @@ interface RoleOption {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppHeader implements OnInit {
+  public themeService = inject(ThemeService);
+  private readonly cdr = inject(ChangeDetectorRef);
+
   changePasswordVisible = false;
   changePasswordForm!: FormGroup;
   savingPassword = false;
+
+  isThemeMenuOpen = false;
+  isColorMenuOpen = false;
+
+  toggleThemeMenu(): void {
+    this.isThemeMenuOpen = !this.isThemeMenuOpen;
+    if (this.isThemeMenuOpen) this.isColorMenuOpen = false;
+    this.cdr.markForCheck();
+  }
+
+  toggleColorMenu(): void {
+    this.isColorMenuOpen = !this.isColorMenuOpen;
+    if (this.isColorMenuOpen) this.isThemeMenuOpen = false;
+    this.cdr.markForCheck();
+  }
+
+  selectThemeMode(mode: ThemeMode): void {
+    this.themeService.setThemeMode(mode);
+    this.isThemeMenuOpen = false;
+    this.cdr.markForCheck();
+  }
+
+  selectAccentColor(color: AccentColor): void {
+    this.accentColorSelect(color);
+  }
+
+  accentColorSelect(color: AccentColor): void {
+    this.themeService.setAccentColor(color);
+    this.isColorMenuOpen = false;
+    this.cdr.markForCheck();
+  }
+
+  onCustomColorPicked(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input && input.value) {
+      this.themeService.setCustomAccentColor(input.value);
+      this.cdr.markForCheck();
+    }
+  }
+
+
 
   constructor(
     private readonly router: Router,
     private readonly authService: AuthService,
     private readonly userProfileService: UserProfileService,
     private readonly confirmationService: ConfirmationService,
+
     private readonly messageService: MessageService,
     private readonly fb: FormBuilder
   ) {

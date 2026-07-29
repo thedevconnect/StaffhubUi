@@ -82,29 +82,221 @@ app-table-template {
   min-width: 250px !important;
 }
 
-/* Custom Button utility classes for project theme management */
+/* Global Dynamic Accent Color Palette System */
+[data-accent="staffhub"] {
+  --primary-600: #1976D2;
+  --primary-700: #1565C0;
+  --primary-500: #2196F3;
+  --primary-100: #e3f2fd;
+  --primary-50: #f4fafe;
+  --primary-200: #bbdefb;
+}
+
+[data-accent="indigo"] {
+  --primary-600: #4f46e5;
+  --primary-700: #4338ca;
+  --primary-500: #6366f1;
+  --primary-100: #e0e7ff;
+  --primary-50: #eef2ff;
+  --primary-200: #c7d2fe;
+}
+
+[data-accent="emerald"] {
+  --primary-600: #059669;
+  --primary-700: #047857;
+  --primary-500: #10b981;
+  --primary-100: #d1fae5;
+  --primary-50: #ecfdf5;
+  --primary-200: #a7f3d0;
+}
+
+[data-accent="violet"] {
+  --primary-600: #7c3aed;
+  --primary-700: #6d28d9;
+  --primary-500: #8b5cf6;
+  --primary-100: #ede9fe;
+  --primary-50: #f5f3ff;
+  --primary-200: #ddd6fe;
+}
+
+[data-accent="orange"] {
+  --primary-600: #ea580c;
+  --primary-700: #c2410c;
+  --primary-500: #f97316;
+  --primary-100: #ffedd5;
+  --primary-50: #fff7ed;
+  --primary-200: #fed7aa;
+}
+
+[data-accent="amber"] {
+  --primary-600: #d97706;
+  --primary-700: #b45309;
+  --primary-500: #f59e0b;
+  --primary-100: #fef3c7;
+  --primary-50: #fffbeb;
+  --primary-200: #fde68a;
+}
+
+[data-accent="rose"] {
+  --primary-600: #e11d48;
+  --primary-700: #be123c;
+  --primary-500: #f43f5e;
+  --primary-100: #ffe4e6;
+  --primary-50: #fff1f2;
+  --primary-200: #fecdd3;
+}
+
+[data-accent="red"] {
+  --primary-600: #dc2626;
+  --primary-700: #b91c1c;
+  --primary-500: #ef4444;
+  --primary-100: #fee2e2;
+  --primary-50: #fef2f2;
+  --primary-200: #fecaca;
+}
+
+/* Map Tailwind primary utility classes & buttons dynamically to selected theme accent */
+html[data-accent] {
+  --accent-color: var(--primary-600);
+  --accent-hover: var(--primary-700);
+  --accent-light-bg: var(--primary-50);
+  --color-add: var(--primary-600);
+  --color-add-hover: var(--primary-700);
+  --color-submit: var(--primary-600);
+  --color-submit-hover: var(--primary-700);
+
+  .bg-indigo-600, .bg-blue-600, .bg-indigo-700 { background-color: var(--primary-600) !important; }
+  .bg-indigo-500, .bg-blue-500 { background-color: var(--primary-500) !important; }
+  .bg-indigo-100, .bg-blue-100 { background-color: var(--primary-100) !important; }
+  .bg-indigo-50, .bg-blue-50 { background-color: var(--primary-50) !important; }
+
+  .text-indigo-600, .text-blue-600 { color: var(--primary-600) !important; }
+  .text-indigo-700, .text-blue-700, .text-indigo-800 { color: var(--primary-700) !important; }
+  .text-indigo-500, .text-blue-500 { color: var(--primary-500) !important; }
+
+  .border-indigo-600, .border-blue-600 { border-color: var(--primary-600) !important; }
+  .border-indigo-200, .border-blue-200 { border-color: var(--primary-200) !important; }
+  .border-indigo-100, .border-blue-100 { border-color: var(--primary-100) !important; }
+
+  .hover\:bg-indigo-700:hover, .hover\:bg-blue-700:hover { background-color: var(--primary-700) !important; }
+  .hover\:bg-indigo-600:hover, .hover\:bg-blue-600:hover { background-color: var(--primary-600) !important; }
+  .hover\:bg-indigo-50:hover, .hover\:bg-blue-50:hover { background-color: var(--primary-50) !important; }
+  .hover\:text-indigo-600:hover, .hover\:text-blue-600:hover { color: var(--primary-600) !important; }
+
+  /* PrimeNG Button, Badge & Progressbar Overrides */
+  .p-button, button.p-button {
+    &:not(.p-button-outlined):not(.p-button-text):not(.p-button-secondary):not(.p-button-danger):not(.p-button-success) {
+      background-color: var(--primary-600) !important;
+      border-color: var(--primary-600) !important;
+      &:hover {
+        background-color: var(--primary-700) !important;
+        border-color: var(--primary-700) !important;
+      }
+    }
+  }
+
+  .p-progressbar .p-progressbar-value {
+    background-color: var(--primary-600) !important;
+  }
+
+  /* Table Header Dynamic Accent Styling */
+  app-table-template th,
+  .table-wrapper th,
+  table thead th,
+  thead th,
+  .p-datatable thead th {
+    background-color: var(--primary-50) !important;
+    color: var(--primary-700) !important;
+    border-bottom: 2px solid var(--primary-200) !important;
+    font-weight: 800 !important;
+  }
+
+  /* Table Pagination Dynamic Accent Styling */
+  app-table-template .sticky.bottom-0 {
+    background-color: var(--primary-50) !important;
+    border-top: 2px solid var(--primary-200) !important;
+  }
+
+  app-table-template .sticky.bottom-0 select {
+    border-color: var(--primary-200) !important;
+    color: var(--primary-700) !important;
+    background-color: #ffffff !important;
+    font-weight: 700 !important;
+    &:focus {
+      outline: 2px solid var(--primary-600) !important;
+    }
+  }
+
+  /* PrimeNG Paginator Overrides */
+  .p-paginator {
+    background-color: var(--primary-50) !important;
+    border-top: 1px solid var(--primary-200) !important;
+
+    .p-paginator-page.p-highlight,
+    .p-paginator-page:hover {
+      background-color: var(--primary-600) !important;
+      color: #ffffff !important;
+    }
+
+    .p-paginator-first:not(.p-disabled):hover,
+    .p-paginator-prev:not(.p-disabled):hover,
+    .p-paginator-next:not(.p-disabled):hover,
+    .p-paginator-last:not(.p-disabled):hover {
+      background-color: var(--primary-100) !important;
+      color: var(--primary-700) !important;
+    }
+  }
+}
+
+
+
+.bg-accent {
+  background-color: var(--accent-color, #1976D2) !important;
+}
+
+.bg-accent-hover:hover {
+  background-color: var(--accent-hover, #1565C0) !important;
+}
+
+.text-accent {
+  color: var(--accent-color, #1976D2) !important;
+}
+
+.border-accent {
+  border-color: var(--accent-color, #1976D2) !important;
+}
+
+.bg-accent-light {
+  background-color: var(--accent-light-bg, #e3f2fd) !important;
+}
+
 .btn-add {
-  background-color: var(--color-add, #4f46e5) !important;
-  /* default indigo-600 */
-  border-color: var(--color-add, #4f46e5) !important;
+  background-color: var(--color-add, #1976D2) !important;
+  border-color: var(--color-add, #1976D2) !important;
   color: #ffffff !important;
 
   &:hover {
-    background-color: var(--color-add-hover, #4338ca) !important;
-    /* default indigo-700 */
-    border-color: var(--color-add-hover, #4338ca) !important;
+    background-color: var(--color-add-hover, #1565C0) !important;
+    border-color: var(--color-add-hover, #1565C0) !important;
   }
 }
 
 .btn-submit {
-  background-color: var(--color-submit, #4f46e5) !important;
-  /* default indigo-600 */
-  border-color: var(--color-submit, #4f46e5) !important;
+  background-color: var(--color-submit, #1976D2) !important;
+  border-color: var(--color-submit, #1976D2) !important;
   color: #ffffff !important;
 
   &:hover {
-    background-color: var(--color-submit-hover, #4338ca) !important;
-    /* default indigo-700 */
-    border-color: var(--color-submit-hover, #4338ca) !important;
+    background-color: var(--color-submit-hover, #1565C0) !important;
+    border-color: var(--color-submit-hover, #1565C0) !important;
   }
 }
+
+/* Active Sidebar Navigation Item Indicator */
+.sidebar-nav-container a.router-link-active,
+.sidebar-nav-container a.active {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  border-left: 3.5px solid #ffffff !important;
+  font-weight: 700 !important;
+}
+

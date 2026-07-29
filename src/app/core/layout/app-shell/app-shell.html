@@ -1,13 +1,14 @@
-<div class="flex h-screen bg-slate-100 overflow-hidden w-full relative">
+<div class="flex h-screen bg-slate-100 dark:bg-slate-950 overflow-hidden w-full relative">
   <!-- Mobile Sidebar Backdrop Overlay -->
   <div *ngIf="isMobileView() && sidebarOpen()" (click)="toggleSidebar()"
     class="fixed inset-0 z-20 bg-slate-900/40 backdrop-blur-[1px] md:hidden"></div>
 
   <aside
-    class="fixed left-0 top-0 z-30 h-screen border-r border-slate-200 bg-[#1976D2] text-white transition-all duration-300 max-md:-translate-x-full flex flex-col"
+    [style.background-color]="'var(--accent-color, #1976D2)'"
+    class="fixed left-0 top-0 z-30 h-screen border-r border-slate-200 dark:border-slate-800 text-white transition-all duration-300 max-md:-translate-x-full flex flex-col shadow-lg"
     [class.w-64]="sidebarOpen() || isMobileView()" [class.w-16]="!sidebarOpen() && !isMobileView()"
     [class.!translate-x-0]="sidebarOpen()">
-    <div class="flex h-[56px] items-center justify-center border-b border-slate-200 bg-white px-2 flex-none">
+    <div class="flex h-[56px] items-center justify-center border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 flex-none">
       <a [routerLink]="getDashboardRoute()" class="flex w-full items-center justify-center">
         <img src="assets/stubhub-com-banner-2.jpg" alt="StaffHub Logo"
           class="max-h-[44px] w-auto max-w-[90%] object-contain" />
@@ -101,12 +102,13 @@
   <div class="flex h-screen flex-1 flex-col transition-all duration-300 relative min-w-0"
     [class.md:ml-64]="sidebarOpen()" [class.md:ml-16]="!sidebarOpen()">
     @if (userDetails(); as user) {
-    <header class="flex-none sticky top-0 z-20 border-b border-slate-200 bg-white shadow-sm w-full">
+    <header class="flex-none sticky top-0 z-20 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm w-full transition-colors">
       <app-app-header [user]="user" [sidebarOpen]="sidebarOpen()" [selectedRoleId]="selectedRoleId()"
         [roleOptions]="roleOptions()" (onLogout)="onHeaderLogout()" (onRoleChange)="onRoleChange($event)"
         (onToggleSidebar)="toggleSidebar()" />
     </header>
     }
+
 
     <main class="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-6 w-full">
       <router-outlet />

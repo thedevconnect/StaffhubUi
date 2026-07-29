@@ -16,6 +16,7 @@
         [filter]="true" 
         filterBy="fullName,employeeCode"
         placeholder="Select an Employee"
+        appendTo="body"
         styleClass="w-full md:w-72">
       </p-select>
     </div>
@@ -111,17 +112,18 @@
     <!-- Status -->
     <div class="flex flex-col gap-2">
       <label class="text-sm font-semibold text-slate-700">Attendance Status</label>
-      <p-select [options]="statusOptions" [(ngModel)]="editForm.attendance_status" (onChange)="onStatusChange($event.value)" optionLabel="label" optionValue="value" styleClass="w-full"></p-select>
+      <p-select [options]="statusOptions" [(ngModel)]="editForm.attendance_status" (onChange)="onStatusChange($event.value)" optionLabel="label" optionValue="value" appendTo="body" styleClass="w-full"></p-select>
     </div>
 
-    <!-- Swipe In (Hidden for ABSENT and ON_LEAVE) -->
-    <div *ngIf="editForm.attendance_status !== 'ABSENT' && editForm.attendance_status !== 'ON_LEAVE'" class="flex flex-col gap-2">
+
+    <!-- Swipe In (Hidden for ABSENT, ON_LEAVE, WO) -->
+    <div *ngIf="editForm.attendance_status !== 'ABSENT' && editForm.attendance_status !== 'ON_LEAVE' && editForm.attendance_status !== 'WO' && editForm.attendance_status !== 'WEEKLY_OFF'" class="flex flex-col gap-2">
       <label class="text-sm font-semibold text-slate-700">Swipe In</label>
       <input type="datetime-local" pInputText [(ngModel)]="editForm.swipe_in" class="w-full" />
     </div>
 
-    <!-- Swipe Out (Hidden for ABSENT and ON_LEAVE) -->
-    <div *ngIf="editForm.attendance_status !== 'ABSENT' && editForm.attendance_status !== 'ON_LEAVE'" class="flex flex-col gap-2">
+    <!-- Swipe Out (Hidden for ABSENT, ON_LEAVE, WO) -->
+    <div *ngIf="editForm.attendance_status !== 'ABSENT' && editForm.attendance_status !== 'ON_LEAVE' && editForm.attendance_status !== 'WO' && editForm.attendance_status !== 'WEEKLY_OFF'" class="flex flex-col gap-2">
       <label class="text-sm font-semibold text-slate-700">Swipe Out</label>
       <input type="datetime-local" pInputText [(ngModel)]="editForm.swipe_out" class="w-full" />
     </div>
