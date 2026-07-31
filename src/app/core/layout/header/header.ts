@@ -108,7 +108,7 @@ export class AppHeader implements OnInit {
   constructor(
     private readonly router: Router,
     private readonly authService: AuthService,
-    private readonly userProfileService: UserProfileService,
+    public readonly userProfileService: UserProfileService,
     private readonly confirmationService: ConfirmationService,
 
     private readonly messageService: MessageService,
@@ -156,6 +156,10 @@ export class AppHeader implements OnInit {
     if (!this.internalSelectedRoleId) {
       this.internalSelectedRoleId = this.selectedRoleId() || this.roleOptions()[0]?.roleId || '';
     }
+
+    this.userProfileService.getUserProfile().subscribe({
+      error: () => {}
+    });
   }
 
   getUserInitial(): string {

@@ -3,6 +3,13 @@
   width: 100%;
 }
 
+:host ::ng-deep p-avatar img {
+  object-fit: cover !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 50% !important;
+}
+
 :host ::ng-deep .user-profile-menu.p-menu-overlay {
   right: 0 !important;
   left: auto !important;

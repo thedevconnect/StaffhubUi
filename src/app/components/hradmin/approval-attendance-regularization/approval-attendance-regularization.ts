@@ -123,6 +123,20 @@ export class ApprovalAttendanceRegularization implements OnInit {
     });
   }
 
+  parseDatetime(val: any): Date | null {
+    if (!val) return null;
+    if (val instanceof Date) return val;
+    let str = String(val).trim();
+    if (!str) return null;
+
+    if (str.includes(' ') && !str.includes('Z') && !str.includes('+')) {
+      str = str.replace(' ', 'T') + 'Z';
+    } else if (str.includes('T') && !str.endsWith('Z') && !str.includes('+')) {
+      str = str + 'Z';
+    }
+    return new Date(str);
+  }
+
   ngOnInit() {
     this.loadCompanyRequests();
   }
@@ -138,10 +152,10 @@ export class ApprovalAttendanceRegularization implements OnInit {
             id: item.id || item.regularizationId || 'REG-ID',
             employeeName: item.employee_name || item.employeeName || 'Employee',
             department: item.department_name || item.department || 'Staff',
-            attendanceDate: item.attendanceDate ? new Date(item.attendanceDate) : (item.attendance_date ? new Date(item.attendance_date) : new Date()),
+            attendanceDate: item.attendanceDate || item.attendance_date,
             correctionType: item.correctionType || 'Punch Correction',
-            checkIn: item.checkIn ? new Date(item.checkIn) : null,
-            checkOut: item.checkOut ? new Date(item.checkOut) : null,
+            checkIn: this.parseDatetime(item.checkIn),
+            checkOut: this.parseDatetime(item.checkOut),
             reason: item.reason || '',
             status: item.status || 'Pending',
             submittedOn: item.submittedOn || item.createdAt || new Date(),
