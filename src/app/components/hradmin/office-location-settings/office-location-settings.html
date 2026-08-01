@@ -447,6 +447,17 @@
                 </small>
               </div>
 
+              <!-- Quick Duration Preset Dropdown -->
+              <div class="flex flex-col gap-1.5 bg-indigo-50/50 p-3 rounded-xl border border-indigo-100/80">
+                <label class="text-xs font-bold text-indigo-900 flex items-center justify-between">
+                  <span>Quick Duration Preset</span>
+                  <span class="text-[10px] text-indigo-600 font-normal">Auto-configures Start & End dates</span>
+                </label>
+                <p-select [options]="durationPresetOptions" optionLabel="label" optionValue="value"
+                  placeholder="Select Preset (1 Week, 15 Days, 1 Month, All Time...)" styleClass="w-full text-xs" appendTo="body"
+                  (onChange)="applyDurationPreset($event.value)"></p-select>
+              </div>
+
               <!-- Validity Window (Start & End Date/Time) -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="flex flex-col gap-1.5">

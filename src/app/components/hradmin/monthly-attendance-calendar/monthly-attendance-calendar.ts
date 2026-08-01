@@ -86,7 +86,16 @@ export class HRMonthlyAttendanceCalendar implements OnInit {
   }
 
   onStatusChange(newStatus: string) {
-    if (newStatus === 'ABSENT' || newStatus === 'ON_LEAVE' || newStatus === 'WO' || newStatus === 'WEEKLY_OFF') {
+    const day = this.selectedDay();
+    const dateStr = day?.dateString || new Date().toISOString().split('T')[0];
+
+    if (newStatus === 'PRESENT') {
+      this.editForm.swipe_in = `${dateStr}T10:00`;
+      this.editForm.swipe_out = `${dateStr}T19:00`;
+    } else if (newStatus === 'HALF_DAY') {
+      this.editForm.swipe_in = `${dateStr}T10:00`;
+      this.editForm.swipe_out = `${dateStr}T14:30`;
+    } else if (newStatus === 'ABSENT' || newStatus === 'ON_LEAVE' || newStatus === 'WO' || newStatus === 'WEEKLY_OFF') {
       this.editForm.swipe_in = '';
       this.editForm.swipe_out = '';
     }
@@ -314,11 +323,22 @@ export class HRMonthlyAttendanceCalendar implements OnInit {
     const status = day.rawStatus || 'PRESENT';
     const isTimeHidden = status === 'ABSENT' || status === 'ON_LEAVE' || status === 'WO' || status === 'WEEKLY_OFF';
 
+    let swipeIn = isTimeHidden ? '' : this.formatTimeForInput(day.rawSwipeIn);
+    let swipeOut = isTimeHidden ? '' : this.formatTimeForInput(day.rawSwipeOut);
+
+    if (status === 'PRESENT') {
+      if (!swipeIn) swipeIn = `${day.dateString}T10:00`;
+      if (!swipeOut) swipeOut = `${day.dateString}T19:00`;
+    } else if (status === 'HALF_DAY') {
+      if (!swipeIn) swipeIn = `${day.dateString}T10:00`;
+      if (!swipeOut) swipeOut = `${day.dateString}T14:30`;
+    }
+
     // Prepare form
     this.editForm = {
       attendance_status: status,
-      swipe_in: isTimeHidden ? '' : this.formatTimeForInput(day.rawSwipeIn),
-      swipe_out: isTimeHidden ? '' : this.formatTimeForInput(day.rawSwipeOut),
+      swipe_in: swipeIn,
+      swipe_out: swipeOut,
       notes: day.notes || ''
     };
     

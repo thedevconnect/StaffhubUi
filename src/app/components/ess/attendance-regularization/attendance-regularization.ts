@@ -68,7 +68,9 @@ export class AttendanceRegularization implements OnInit {
   
   tabs = [
     { label: 'Pending', value: 'Pending', icon: 'pi pi-clock' },
-    { label: 'Processed', value: 'Processed', icon: 'pi pi-check-circle' },
+    { label: 'Approved', value: 'Approved', icon: 'pi pi-check-circle' },
+    { label: 'Rejected', value: 'Rejected', icon: 'pi pi-times-circle' },
+    { label: 'Processed', value: 'Processed', icon: 'pi pi-check' },
     { label: 'All', value: 'All', icon: 'pi pi-list' }
   ];
 
@@ -185,31 +187,22 @@ export class AttendanceRegularization implements OnInit {
     this.attendanceService.getMyRegularizations().subscribe({
       next: (res) => {
         if (res && res.data) {
-          const currentMonth = new Date().getMonth();
-          const currentYear = new Date().getFullYear();
-
-          this.requests = res.data
-            .map((req: any) => ({
-              ...req,
-              id: req.id,
-              attendanceDate: req.attendanceDate || req.attendance_date,
-              correctionType: req.correctionType,
-              checkIn: this.parseDatetime(req.checkIn),
-              checkOut: this.parseDatetime(req.checkOut),
-              reason: req.reason,
-              status: req.status,
-              submittedOn: req.createdAt ? new Date(req.createdAt) : null,
-              managerRemarks: req.managerRemarks,
-              hrRemarks: req.hrRemarks,
-              approvedBy: req.approvedBy,
-              approvedByName: req.approvedByName,
-              employeeName: req.employeeName
-            }))
-            .filter((req: any) => {
-              if (!req.attendanceDate) return false;
-              const dt = new Date(req.attendanceDate);
-              return dt.getMonth() === currentMonth && dt.getFullYear() === currentYear;
-            });
+          this.requests = res.data.map((req: any) => ({
+            ...req,
+            id: req.id,
+            attendanceDate: req.attendanceDate || req.attendance_date,
+            correctionType: req.correctionType,
+            checkIn: this.parseDatetime(req.checkIn),
+            checkOut: this.parseDatetime(req.checkOut),
+            reason: req.reason,
+            status: req.status,
+            submittedOn: req.createdAt ? new Date(req.createdAt) : null,
+            managerRemarks: req.managerRemarks,
+            hrRemarks: req.hrRemarks,
+            approvedBy: req.approvedBy,
+            approvedByName: req.approvedByName,
+            employeeName: req.employeeName
+          }));
         } else {
           this.requests = [];
         }
@@ -245,14 +238,23 @@ export class AttendanceRegularization implements OnInit {
   get filteredRequests(): any[] {
     return this.requests.filter(req => {
       let matchesTab = true;
-      if (this.activeTab !== 'All') {
-        matchesTab = this.activeTab === 'Pending' 
-          ? (req.status === 'Pending' || req.status === 'PENDING')
-          : (req.status !== 'Pending' && req.status !== 'PENDING');
+      const statusUpper = (req.status || '').toUpperCase();
+
+      if (this.activeTab === 'Pending') {
+        matchesTab = statusUpper === 'PENDING';
+      } else if (this.activeTab === 'Approved') {
+        matchesTab = statusUpper === 'APPROVED';
+      } else if (this.activeTab === 'Rejected') {
+        matchesTab = statusUpper === 'REJECTED';
+      } else if (this.activeTab === 'Processed') {
+        matchesTab = statusUpper !== 'PENDING';
       }
 
-      const matchesMonth = this.monthFilter !== 'All' ?
-        req.attendanceDate.getMonth().toString() === this.monthFilter : true;
+      let matchesMonth = true;
+      if (this.monthFilter !== 'All' && req.attendanceDate) {
+        const dt = new Date(req.attendanceDate);
+        matchesMonth = !isNaN(dt.getTime()) && (dt.getMonth() + 1).toString() === this.monthFilter;
+      }
 
       return matchesTab && matchesMonth;
     });

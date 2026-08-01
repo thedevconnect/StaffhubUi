@@ -67,8 +67,10 @@ export class MonthlyAttendance implements OnInit {
   ];
 
   statusOptions = [
+    { label: 'Select', value: '' },
     { label: 'Present', value: 'Present' },
     { label: 'Absent', value: 'Absent' },
+    { label: 'Lost Of Pay', value: 'Lost Of Pay' },
     { label: 'Weekly Off', value: 'Weekly Off' },
     { label: 'Holiday', value: 'Holiday' },
     { label: 'Casual Leave', value: 'CL' },
@@ -80,7 +82,6 @@ export class MonthlyAttendance implements OnInit {
     { label: 'Sick Leave/2', value: 'SL/2' },
     { label: 'Work From Home', value: 'WFH' },
     { label: 'Other Duty', value: 'OD' },
-    { label: 'Leave Without Pay', value: 'LWP' }
   ];
 
   filterForm: FormGroup;
@@ -215,16 +216,37 @@ export class MonthlyAttendance implements OnInit {
       });
   }
 
+  getLocalDateString(val: any): string {
+    if (!val) return '';
+    const d = new Date(val);
+    if (isNaN(d.getTime())) return '';
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  isFutureDate(dateVal: any): boolean {
+    if (!dateVal) return false;
+    const itemDateStr = this.getLocalDateString(dateVal);
+    const todayStr = this.getLocalDateString(new Date());
+    return itemDateStr > todayStr;
+  }
+
   buildForm(details: any[]) {
     this.detailsArray.clear();
     const editable = this.isEditable();
+
     details.forEach(d => {
+      const isFuture = this.isFutureDate(d.date);
+      const isRowEditable = editable && !isFuture;
+
       this.detailsArray.push(this.fb.group({
         id: [d.id],
         date: [d.date],
         day: [d.day],
-        attendance_status: [{ value: d.attendance_status || (d.day === 'Sunday' ? 'Weekly Off' : 'Present'), disabled: !editable }],
-        remarks: [{ value: d.remarks || '', disabled: !editable }]
+        attendance_status: [{ value: d.attendance_status || (d.day === 'Sunday' ? 'Weekly Off' : 'Present'), disabled: !isRowEditable }],
+        remarks: [{ value: d.remarks || '', disabled: !isRowEditable }]
       }));
     });
   }
@@ -240,8 +262,11 @@ export class MonthlyAttendance implements OnInit {
     };
 
     details.forEach(d => {
-      if (sum[d.attendance_status] !== undefined) {
-        sum[d.attendance_status] += 1;
+      const st = d.attendance_status;
+      if (st === 'Lost Of Pay' || st === 'Loss Of Pay') {
+        sum['LWP'] = (sum['LWP'] || 0) + 1;
+      } else if (sum[st] !== undefined) {
+        sum[st] += 1;
       }
     });
 
@@ -329,6 +354,9 @@ export class MonthlyAttendance implements OnInit {
   applyBulkStatus(status: string) {
     if (!status || !this.isEditable()) return;
     this.detailsArray.controls.forEach(ctrl => {
+      if (this.isFutureDate(ctrl.get('date')?.value)) {
+        return; // Do not apply bulk status to future dates
+      }
       if (this.isWeekend(ctrl.get('day')?.value)) {
         ctrl.get('attendance_status')?.setValue('Weekly Off');
       } else {

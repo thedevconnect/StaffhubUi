@@ -123,9 +123,13 @@
           <tbody formArrayName="details" class="divide-y divide-slate-100">
             <tr *ngFor="let ctrl of detailsArray.controls; let i = index" [formGroupName]="i"
               class="hover:bg-slate-50 transition-colors"
-              [ngClass]="{'bg-slate-50': isWeekend(ctrl.get('day')?.value)}">
+              [ngClass]="{
+                'bg-slate-50': isWeekend(ctrl.get('day')?.value),
+                'opacity-60 bg-slate-50/50': isFutureDate(ctrl.get('date')?.value)
+              }">
               <td class="px-4 py-3 font-medium text-slate-700">
-                {{ ctrl.get('date')?.value | date:'mediumDate' }}
+                <span>{{ ctrl.get('date')?.value | date:'mediumDate' }}</span>
+                <span *ngIf="isFutureDate(ctrl.get('date')?.value)" class="ml-2 text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">Future</span>
               </td>
               <td class="px-4 py-3">
                 <span [ngClass]="{'text-red-500 font-bold': isWeekend(ctrl.get('day')?.value)}">

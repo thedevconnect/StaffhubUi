@@ -1,406 +1,422 @@
 <p-toast></p-toast>
 
-<!-- Top Breadcrumb & Action Header Bar -->
-<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-6 px-4 md:px-6 py-2.5 shadow-xs gap-3">
+<!-- Top Breadcrumb & Page Header Bar -->
+<div
+  class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6 shadow-sm">
   <div class="flex-1 min-w-0">
-    <p-breadcrumb [model]="breadcrumbItems" styleClass="!border-0 !rounded-none !bg-transparent !p-0 text-xs md:text-sm" />
+    <p-breadcrumb [model]="breadcrumbItems"
+      styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
   </div>
-  <div class="shrink-0 flex items-center gap-2 w-full sm:w-auto justify-end">
-    <button (click)="openAddGoalModal()" type="button" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-xs transition">
-      <i class="pi pi-plus text-xs"></i>
-      <span>Create Goal</span>
-    </button>
-    <button (click)="submitSelfAppraisal()" type="button" [disabled]="currentCycleStatus() === 'SUBMITTED'" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-xs transition">
-      <i class="pi pi-send text-xs"></i>
-      <span>{{ currentCycleStatus() === 'SUBMITTED' ? 'Appraisal Submitted' : 'Submit Evaluation' }}</span>
-    </button>
+  <div class="flex items-center gap-2">
+    <p-select [options]="yearOptions" [(ngModel)]="selectedYear" (onChange)="loadRatings()" appendTo="body"
+      optionLabel="label" optionValue="value" styleClass="p-inputtext-sm text-xs font-bold w-36"></p-select>
+
+    <p-button (onClick)="openSubmitDrawer()" label="Submit Monthly Self-Rating" icon="pi pi-plus"
+      styleClass="p-button-sm rounded-lg btn-add text-xs font-semibold px-3 py-2 shadow-sm transition-all"
+      [raised]="true"></p-button>
   </div>
 </div>
 
-<div class="space-y-6 font-sans">
+<section class="space-y-4">
 
-  <!-- HERO PERFORMANCE SUMMARY CARD -->
-  <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 rounded-3xl shadow-xl relative overflow-hidden">
+  <!-- HERO PERFORMANCE SUMMARY BANNER -->
+  <div
+    class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-5 md:p-6 rounded-2xl shadow-xl relative overflow-hidden">
     <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-indigo-500/10 blur-3xl"></div>
     <div class="absolute -left-16 -bottom-16 w-64 h-64 rounded-full bg-blue-500/10 blur-3xl"></div>
 
     <div class="relative z-10 grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
-      <!-- Overall Rating Display -->
-      <div class="md:col-span-1 flex flex-col items-center md:items-start text-center md:text-left border-b md:border-b-0 md:border-r border-white/10 pb-4 md:pb-0 md:pr-6">
-        <span class="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-1">Overall Rating</span>
+      <!-- Cumulative Appraisal Score -->
+      <div
+        class="md:col-span-1 flex flex-col items-center md:items-start text-center md:text-left border-b md:border-b-0 md:border-r border-white/10 pb-4 md:pb-0 md:pr-6">
+        <span class="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-1">Cumulative Appraisal Score</span>
         <div class="flex items-baseline gap-2">
-          <span class="text-4xl md:text-5xl font-black text-white tracking-tight">{{ overallRating() }}</span>
+          <span class="text-4xl md:text-5xl font-black text-white tracking-tight">{{ summary.cumulativeAppraisalScore || '0.0' }}</span>
           <span class="text-lg text-slate-400 font-bold">/ 5.0</span>
         </div>
-
         <div class="mt-2 flex items-center gap-1">
-          <p-rating [ngModel]="overallRating()" [readonly]="true" styleClass="text-amber-400" />
+          <p-rating [ngModel]="summary.cumulativeAppraisalScore" [readonly]="true" styleClass="text-amber-400" />
         </div>
-        <span class="mt-1 text-[11px] font-semibold text-emerald-400 flex items-center gap-1">
-          <i class="pi pi-arrow-up-right"></i> Exceeds Expectations
+        <span class="mt-1.5 text-[11px] font-semibold text-emerald-400 flex items-center gap-1">
+          <i class="pi pi-chart-line"></i> Year {{ selectedYear }} Performance Assessment
         </span>
       </div>
 
       <!-- Quick Metrics Grid -->
-      <div class="md:col-span-3 grid grid-cols-2 sm:grid-cols-3 gap-4">
+      <div class="md:col-span-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
         <!-- Self Rating Card -->
-        <div class="bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10 space-y-1">
-          <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">Self Score</span>
-          <div class="flex items-center gap-2">
-            <span class="text-2xl font-black text-white">{{ selfAverageRating() }}</span>
-            <p-rating [ngModel]="selfAverageRating()" [readonly]="true" styleClass="text-amber-300 transform scale-75 origin-left" />
+        <div class="bg-white/10 backdrop-blur-md p-3.5 rounded-xl border border-white/15 space-y-1">
+          <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">Self Avg Score</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-2xl font-black text-white">{{ summary.avgSelfRating || '0.0' }}</span>
+            <span class="text-xs text-amber-300 font-bold"><i class="pi pi-star-fill"></i></span>
           </div>
-          <span class="text-[10px] text-slate-400 block">5 Competencies Evaluated</span>
+          <span class="text-[10px] text-slate-400 block">Employee Rating</span>
         </div>
 
         <!-- Manager Rating Card -->
-        <div class="bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10 space-y-1">
-          <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">Manager Score</span>
-          <div class="flex items-center gap-2">
-            <span class="text-2xl font-black text-white">{{ managerAverageRating() }}</span>
-            <p-rating [ngModel]="managerAverageRating()" [readonly]="true" styleClass="text-amber-300 transform scale-75 origin-left" />
+        <div class="bg-white/10 backdrop-blur-md p-3.5 rounded-xl border border-white/15 space-y-1">
+          <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">Manager Avg Score</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-2xl font-black text-white">{{ summary.avgManagerRating || '0.0' }}</span>
+            <span class="text-xs text-amber-300 font-bold"><i class="pi pi-star-fill"></i></span>
           </div>
-          <span class="text-[10px] text-indigo-300 font-semibold block">Official Grade</span>
+          <span class="text-[10px] text-indigo-300 font-semibold block">Manager Evaluation</span>
         </div>
 
-        <!-- OKRs Completed Card -->
-        <div class="col-span-2 sm:col-span-1 bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10 space-y-1">
-          <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">Goals / OKRs</span>
-          <div class="text-2xl font-black text-white">
-            {{ completedGoalsCount() }} <span class="text-sm font-bold text-slate-400">/ {{ totalGoalsCount() }}</span>
+        <!-- HR Rating Card -->
+        <div class="bg-white/10 backdrop-blur-md p-3.5 rounded-xl border border-white/15 space-y-1">
+          <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">HR Avg Score</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-2xl font-black text-white">{{ summary.avgHrRating || '0.0' }}</span>
+            <span class="text-xs text-amber-300 font-bold"><i class="pi pi-star-fill"></i></span>
           </div>
-          <p-progressbar [value]="(completedGoalsCount() / totalGoalsCount()) * 100" [showValue]="false" styleClass="h-1.5 rounded-full bg-white/10" />
+          <span class="text-[10px] text-emerald-300 font-semibold block">HR Appraisal Grade</span>
+        </div>
+
+        <!-- Submissions Count Card -->
+        <div class="bg-white/10 backdrop-blur-md p-3.5 rounded-xl border border-white/15 space-y-1">
+          <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">Months Evaluated</span>
+          <div class="text-2xl font-black text-white">
+            {{ summary.totalMonthsSubmitted }} <span class="text-xs font-bold text-slate-400">/ 12</span>
+          </div>
+          <span class="text-[10px] text-slate-300 block">Monthly Entries</span>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Review Cycle Status Banner -->
-    <div class="mt-6 pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-      <div class="flex items-center gap-2 text-slate-300">
-        <i class="pi pi-calendar text-indigo-400"></i>
-        <span class="font-semibold">{{ currentCycleName() }}</span>
-      </div>
-      <span class="px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider border"
-        [class.bg-indigo-500\/20]="currentCycleStatus() === 'IN_PROGRESS'"
-        [class.text-indigo-300]="currentCycleStatus() === 'IN_PROGRESS'"
-        [class.border-indigo-500\/30]="currentCycleStatus() === 'IN_PROGRESS'"
-        [class.bg-emerald-500\/20]="currentCycleStatus() === 'SUBMITTED'"
-        [class.text-emerald-300]="currentCycleStatus() === 'SUBMITTED'"
-        [class.border-emerald-500\/30]="currentCycleStatus() === 'SUBMITTED'">
-        <i class="pi pi-spin pi-spinner text-[10px] mr-1" *ngIf="currentCycleStatus() === 'IN_PROGRESS'"></i>
-        Status: {{ currentCycleStatus() }}
+  <!-- TABLE CARD -->
+  <p-card styleClass="shadow-sm border border-slate-200 rounded-xl overflow-hidden">
+    <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <span class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+        <i class="pi pi-calendar-text text-indigo-600"></i> Monthly Self & Manager Rating Breakdowns ({{ selectedYear }})
+      </span>
+      <span class="text-xs font-semibold text-slate-500">
+        Total Submissions: <strong class="text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">{{ ratings.length }}</strong>
       </span>
     </div>
-  </div>
 
-  <!-- NAVIGATION TABS -->
-  <div class="flex items-center gap-2 border-b border-slate-200 overflow-x-auto pb-1 text-xs font-bold text-slate-500">
-    <button (click)="setTab('OVERVIEW')" [class.text-indigo-600]="activeTab() === 'OVERVIEW'" [class.border-indigo-600]="activeTab() === 'OVERVIEW'"
-      class="pb-3 border-b-2 transition-all flex items-center gap-2 shrink-0 px-2">
-      <i class="pi pi-th-large"></i> Dashboard Overview
-    </button>
-    <button (click)="setTab('COMPETENCIES')" [class.text-indigo-600]="activeTab() === 'COMPETENCIES'" [class.border-indigo-600]="activeTab() === 'COMPETENCIES'"
-      class="pb-3 border-b-2 transition-all flex items-center gap-2 shrink-0 px-2">
-      <i class="pi pi-star"></i> Self & Manager Ratings ({{ competencies().length }})
-    </button>
-    <button (click)="setTab('GOALS')" [class.text-indigo-600]="activeTab() === 'GOALS'" [class.border-indigo-600]="activeTab() === 'GOALS'"
-      class="pb-3 border-b-2 transition-all flex items-center gap-2 shrink-0 px-2">
-      <i class="pi pi-target"></i> Goals & OKRs ({{ goals().length }})
-    </button>
-    <button (click)="setTab('REVIEWS')" [class.text-indigo-600]="activeTab() === 'REVIEWS'" [class.border-indigo-600]="activeTab() === 'REVIEWS'"
-      class="pb-3 border-b-2 transition-all flex items-center gap-2 shrink-0 px-2">
-      <i class="pi pi-history"></i> Review History
-    </button>
-    <button (click)="setTab('FEEDBACK')" [class.text-indigo-600]="activeTab() === 'FEEDBACK'" [class.border-indigo-600]="activeTab() === 'FEEDBACK'"
-      class="pb-3 border-b-2 transition-all flex items-center gap-2 shrink-0 px-2">
-      <i class="pi pi-comments"></i> 360 Feedback ({{ feedbacks().length }})
-    </button>
-  </div>
+    <div class="p-3">
+      <app-table-template [columns]="columns" [data]="ratings" [showExport]="true" exportFileName="Monthly_Performance_Ratings"
+        [cellTemplates]="{
+          'monthName': monthTpl,
+          'employeeName': empTpl,
+          'selfRating': selfTpl,
+          'managerRating': mgrTpl,
+          'hrRating': hrTpl,
+          'finalScore': scoreTpl,
+          'status': statusTpl
+        }" [tableActions]="[]" [actionTemplate]="actionTpl">
 
-  <!-- TAB 1: DASHBOARD OVERVIEW -->
-  <div *ngIf="activeTab() === 'OVERVIEW'" class="space-y-6">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      
-      <!-- Competencies Summary -->
-      <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-          <div>
-            <h3 class="text-base font-black text-slate-800">Core Competencies Evaluation</h3>
-            <p class="text-xs text-slate-500">Rate your technical and behavioral skills for Q2 review</p>
-          </div>
-          <button (click)="setTab('COMPETENCIES')" class="text-xs font-bold text-indigo-600 hover:underline">View All &rarr;</button>
-        </div>
-
-        <div class="space-y-4">
-          <div *ngFor="let comp of competencies()" class="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div class="space-y-1 max-w-md">
-              <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 border border-indigo-200">{{ comp.category }}</span>
-              <h4 class="text-xs font-bold text-slate-900">{{ comp.title }}</h4>
-              <p class="text-xs text-slate-500 line-clamp-1">{{ comp.description }}</p>
+        <!-- Month & Year -->
+        <ng-template #monthTpl let-item>
+          <div class="flex items-center gap-2.5 font-bold text-slate-900 text-xs">
+            <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
+              <i class="pi pi-calendar"></i>
             </div>
-
-            <div class="flex items-center gap-4 bg-white p-2.5 rounded-xl border border-slate-200 shrink-0">
-              <div class="text-center">
-                <span class="text-[10px] font-bold text-slate-400 uppercase block">Self Rating</span>
-                <p-rating [(ngModel)]="comp.selfRating" (ngModelChange)="onSelfRatingChange(comp, $event)" styleClass="text-amber-400" />
-              </div>
-              <div class="border-l border-slate-200 pl-3 text-center" *ngIf="comp.managerRating">
-                <span class="text-[10px] font-bold text-slate-400 uppercase block">Manager</span>
-                <span class="text-xs font-black text-indigo-600">{{ comp.managerRating }} / 5</span>
-              </div>
+            <div>
+              <div class="font-extrabold text-slate-900 text-xs">{{ item.month_name || ('Month ' + item.month) }}</div>
+              <div class="text-[10px] text-slate-400 font-mono">{{ item.year }}</div>
             </div>
           </div>
-        </div>
-      </div>
+        </ng-template>
 
-      <!-- Quick OKRs & Action Panel -->
-      <div class="space-y-6">
-        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
-          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h3 class="text-base font-black text-slate-800">Current Goals</h3>
-            <button (click)="openAddGoalModal()" class="text-xs font-bold text-indigo-600 hover:underline">+ New Goal</button>
-          </div>
+        <!-- Employee -->
+        <ng-template #empTpl let-item>
+          <span class="font-semibold text-slate-800 text-xs">{{ item.employee_name || item.employeeName || 'Self' }}</span>
+        </ng-template>
 
-          <div class="space-y-3">
-            <div *ngFor="let goal of goals().slice(0, 3)" class="p-3 rounded-xl border border-slate-100 space-y-2">
-              <div class="flex justify-between items-start">
-                <h4 class="text-xs font-bold text-slate-800 line-clamp-1">{{ goal.title }}</h4>
-                <p-tag [value]="goal.status" [severity]="getStatusSeverity(goal.status)" styleClass="text-[9px] font-bold uppercase" />
-              </div>
-              <div class="flex justify-between items-center text-[11px] font-semibold text-slate-500">
-                <span>Progress: {{ goal.progress }}%</span>
-                <span>Due: {{ goal.targetDate | date:'dd MMM' }}</span>
-              </div>
-              <p-progressbar [value]="goal.progress" [showValue]="false" styleClass="h-1.5 rounded-full" />
+        <!-- Self Rating -->
+        <ng-template #selfTpl let-item>
+          <div class="flex flex-col gap-0.5">
+            <div class="flex items-center gap-1 font-bold text-amber-500 text-xs">
+              <span>{{ item.self_rating || item.selfRating || 0 }}</span>
+              <p-rating [ngModel]="item.self_rating || item.selfRating || 0" [readonly]="true" styleClass="text-amber-400 scale-75 origin-left" />
             </div>
-          </div>
-        </div>
-
-        <!-- 360 Feedback Callout -->
-        <div class="bg-indigo-50/70 p-5 rounded-2xl border border-indigo-100 space-y-3">
-          <div class="flex items-center gap-2">
-            <i class="pi pi-comments text-indigo-600 text-lg"></i>
-            <h4 class="text-xs font-black text-indigo-900 uppercase tracking-wider">Manager Feedback</h4>
-          </div>
-          <p class="text-xs text-indigo-950 italic leading-relaxed">
-            "Demonstrates outstanding ownership in architecting core backend features. Consistently dependable under tight deadlines."
-          </p>
-          <span class="text-[11px] font-bold text-indigo-700 block">&mdash; Rajesh Sharma (Engineering Manager)</span>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- TAB 2: COMPETENCIES & RATINGS -->
-  <div *ngIf="activeTab() === 'COMPETENCIES'" class="space-y-6">
-    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-2">
-      <h3 class="text-base font-black text-slate-800">Self & Manager Competency Evaluation</h3>
-      <p class="text-xs text-slate-500">Rate your performance on each key competency scale from 1 (Needs Improvement) to 5 (Exceeds Expectations).</p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div *ngFor="let comp of competencies()" class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4 flex flex-col justify-between">
-        <div class="space-y-2">
-          <div class="flex justify-between items-center">
-            <span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
-              {{ comp.category }}
+            <span *ngIf="item.achievements" class="text-[10px] text-slate-500 line-clamp-1 max-w-xs" [pTooltip]="item.achievements">
+              {{ item.achievements }}
             </span>
-            <span class="text-xs font-bold text-slate-400">ID: {{ comp.id }}</span>
           </div>
+        </ng-template>
 
-          <h4 class="text-sm font-black text-slate-900">{{ comp.title }}</h4>
-          <p class="text-xs text-slate-600 leading-relaxed">{{ comp.description }}</p>
-        </div>
-
-        <div class="pt-3 border-t border-slate-100 space-y-3">
-          <!-- Interactive Self Rating -->
-          <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
-            <div>
-              <span class="text-xs font-bold text-slate-800 block">Your Rating (Self)</span>
-              <span class="text-[11px] text-slate-500">Click stars to rate</span>
+        <!-- Manager Rating -->
+        <ng-template #mgrTpl let-item>
+          <div *ngIf="item.manager_rating; else noMgr">
+            <div class="flex items-center gap-1 font-bold text-indigo-600 text-xs">
+              <span>{{ item.manager_rating }}</span>
+              <p-rating [ngModel]="item.manager_rating" [readonly]="true" styleClass="text-indigo-500 scale-75 origin-left" />
             </div>
-            <div class="flex items-center gap-2">
-              <p-rating [(ngModel)]="comp.selfRating" (ngModelChange)="onSelfRatingChange(comp, $event)" styleClass="text-amber-400" />
-              <span class="text-xs font-black text-slate-800 w-5 text-right">{{ comp.selfRating }}</span>
-            </div>
+            <span class="text-[10px] text-slate-400 block" *ngIf="item.manager_name">By {{ item.manager_name }}</span>
           </div>
+          <ng-template #noMgr>
+            <span class="text-xs text-slate-400 italic">Pending</span>
+          </ng-template>
+        </ng-template>
 
-          <!-- Manager Rating -->
-          <div class="flex items-center justify-between bg-indigo-50/50 p-3 rounded-xl border border-indigo-100">
-            <div>
-              <span class="text-xs font-bold text-indigo-900 block">Manager Rating</span>
-              <span class="text-[11px] text-indigo-700">Official Manager Grade</span>
+        <!-- HR Rating -->
+        <ng-template #hrTpl let-item>
+          <div *ngIf="item.hr_rating; else noHr">
+            <div class="flex items-center gap-1 font-bold text-emerald-600 text-xs">
+              <span>{{ item.hr_rating }}</span>
+              <p-rating [ngModel]="item.hr_rating" [readonly]="true" styleClass="text-emerald-500 scale-75 origin-left" />
             </div>
-            <div class="flex items-center gap-2">
-              <p-rating [ngModel]="comp.managerRating || 0" [readonly]="true" styleClass="text-amber-400 transform scale-90" />
-              <span class="text-xs font-black text-indigo-900">{{ comp.managerRating || '-' }} / 5</span>
-            </div>
+            <span class="text-[10px] text-slate-400 block" *ngIf="item.hr_name">By {{ item.hr_name }}</span>
           </div>
+          <ng-template #noHr>
+            <span class="text-xs text-slate-400 italic">Pending</span>
+          </ng-template>
+        </ng-template>
 
-          <!-- Manager Feedback comment -->
-          <div *ngIf="comp.comments" class="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-lg italic border border-slate-100">
-            <span class="font-bold not-italic text-slate-700">Manager Comment:</span> "{{ comp.comments }}"
+        <!-- Final Score -->
+        <ng-template #scoreTpl let-item>
+          <div class="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 font-extrabold px-2.5 py-1 rounded-lg border border-indigo-200 text-xs">
+            <i class="pi pi-star-fill text-amber-500 text-[10px]"></i>
+            {{ item.final_score || item.finalScore || 0 }} / 5
           </div>
-        </div>
-      </div>
+        </ng-template>
+
+        <!-- Status -->
+        <ng-template #statusTpl let-item>
+          <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold border"
+            [ngClass]="getStatusBadgeClass(item.status)">
+            {{ item.status || 'PENDING_REVIEW' }}
+          </span>
+        </ng-template>
+
+        <!-- Actions -->
+        <ng-template #actionTpl let-item>
+          <div class="flex items-center justify-center gap-1.5">
+            <button type="button" (click)="openViewDrawer(item)"
+              class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+              pTooltip="View Full Details">
+              <i class="pi pi-eye text-slate-600"></i> View
+            </button>
+
+            <button *ngIf="isHrOrManager" type="button" (click)="openReviewDrawer(item)"
+              class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors"
+              pTooltip="Give Manager/HR Rating">
+              <i class="pi pi-star text-indigo-600"></i> Review
+            </button>
+
+            <button type="button" (click)="openSubmitDrawer(item)"
+              class="text-blue-600 hover:text-blue-800 text-xs font-bold p-1 rounded hover:bg-blue-50 transition-colors"
+              pTooltip="Edit Self Rating">
+              <i class="pi pi-pencil"></i>
+            </button>
+
+            <button type="button" (click)="deleteRecord(item.id)"
+              class="text-rose-500 hover:text-rose-700 text-xs font-bold p-1 rounded hover:bg-rose-50 transition-colors"
+              pTooltip="Delete Entry">
+              <i class="pi pi-trash"></i>
+            </button>
+          </div>
+        </ng-template>
+
+      </app-table-template>
     </div>
-  </div>
+  </p-card>
+</section>
 
-  <!-- TAB 3: GOALS & OKRs -->
-  <div *ngIf="activeTab() === 'GOALS'" class="space-y-6">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+<!-- SUBMIT MONTHLY RATING DRAWER -->
+<p-drawer [(visible)]="submitDrawerVisible" position="right" [modal]="true" styleClass="modern-drawer"
+  [style]="{ width: '520px', maxWidth: '100%' }">
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-3">
+      <div class="h-10 w-10 bg-indigo-100 text-indigo-700 rounded-xl flex items-center justify-center text-lg font-bold shadow-xs">
+        <i class="pi pi-star-fill"></i>
+      </div>
       <div>
-        <h3 class="text-base font-black text-slate-800">Key Objectives & Results (OKRs)</h3>
-        <p class="text-xs text-slate-500">Track quarterly goals, target completion dates, and weightages.</p>
-      </div>
-      <button (click)="openAddGoalModal()" type="button" class="px-3.5 py-2 bg-indigo-600 text-white rounded-xl font-bold text-xs flex items-center gap-1.5">
-        <i class="pi pi-plus"></i> Add New Goal
-      </button>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div *ngFor="let goal of goals()" class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
-        <div class="flex justify-between items-start gap-2">
-          <div class="space-y-1">
-            <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700">{{ goal.category }}</span>
-            <h4 class="text-sm font-black text-slate-900">{{ goal.title }}</h4>
-          </div>
-          <p-tag [value]="goal.status" [severity]="getStatusSeverity(goal.status)" styleClass="text-xs font-bold uppercase shrink-0" />
-        </div>
-
-        <p class="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed">
-          <strong class="text-slate-800">Key Results:</strong> {{ goal.keyResults }}
-        </p>
-
-        <div class="space-y-1">
-          <div class="flex justify-between text-xs font-bold text-slate-700">
-            <span>Completion Progress</span>
-            <span>{{ goal.progress }}%</span>
-          </div>
-          <p-progressbar [value]="goal.progress" [showValue]="false" styleClass="h-2 rounded-full" />
-        </div>
-
-        <div class="flex justify-between items-center text-xs font-semibold text-slate-500 pt-2 border-t border-slate-100">
-          <span>Weightage: <strong class="text-slate-900">{{ goal.weightage }}%</strong></span>
-          <span>Target Date: <strong class="text-slate-900">{{ goal.targetDate | date:'dd MMM yyyy' }}</strong></span>
-        </div>
+        <h3 class="text-base font-bold text-slate-900">Submit Monthly Performance Self-Rating</h3>
+        <p class="text-xs text-slate-500">Rate your work & enter key achievements for the month</p>
       </div>
     </div>
-  </div>
+  </ng-template>
 
-  <!-- TAB 4: REVIEW HISTORY -->
-  <div *ngIf="activeTab() === 'REVIEWS'" class="space-y-6">
-    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-2">
-      <h3 class="text-base font-black text-slate-800">Historical Appraisal Cycles</h3>
-      <p class="text-xs text-slate-500">Review past performance scores, manager feedback, and appraisal status history.</p>
-    </div>
+  <ng-template pTemplate="content">
+    <form [formGroup]="selfForm" (ngSubmit)="onSubmitSelfRating()" class="flex flex-col gap-5 pt-2 pb-6">
 
-    <div class="space-y-4">
-      <div *ngFor="let rev of reviewHistory()" class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div class="space-y-1">
-          <div class="flex items-center gap-2">
-            <h4 class="text-sm font-black text-slate-900">{{ rev.cycle }}</h4>
-            <p-tag [value]="rev.status" severity="success" styleClass="text-[10px] font-bold uppercase" />
-          </div>
-          <p class="text-xs text-slate-500">{{ rev.period }} &bull; Reviewed by {{ rev.reviewedBy }}</p>
-          <p class="text-xs text-slate-700 italic mt-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">"{{ rev.comments }}"</p>
+      <!-- Year & Month Selectors -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Year *</label>
+          <p-select [options]="yearOptions" appendTo="body" optionLabel="label" optionValue="value"
+            formControlName="year" styleClass="w-full"></p-select>
         </div>
 
-        <div class="flex items-center gap-6 bg-slate-50 p-4 rounded-xl border border-slate-100 shrink-0 w-full md:w-auto justify-around">
-          <div class="text-center">
-            <span class="text-[10px] font-bold text-slate-400 uppercase block">Self Score</span>
-            <span class="text-sm font-black text-slate-800">{{ rev.selfRating }} / 5</span>
-          </div>
-          <div class="text-center">
-            <span class="text-[10px] font-bold text-slate-400 uppercase block">Manager Score</span>
-            <span class="text-sm font-black text-indigo-600">{{ rev.managerRating }} / 5</span>
-          </div>
-          <div class="text-center">
-            <span class="text-[10px] font-bold text-slate-400 uppercase block">Final Rating</span>
-            <div class="flex items-center gap-1">
-              <span class="text-lg font-black text-emerald-600">{{ rev.overallRating }}</span>
-              <p-rating [ngModel]="rev.overallRating" [readonly]="true" styleClass="text-amber-400 transform scale-75" />
-            </div>
-          </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Month *</label>
+          <p-select [options]="monthOptions" appendTo="body" optionLabel="label" optionValue="value"
+            formControlName="month" styleClass="w-full"></p-select>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- TAB 5: 360 FEEDBACK -->
-  <div *ngIf="activeTab() === 'FEEDBACK'" class="space-y-6">
-    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-2">
-      <h3 class="text-base font-black text-slate-800">360 Peer & Manager Feedback</h3>
-      <p class="text-xs text-slate-500">Feedback received from managers, peers, and team collaborators.</p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div *ngFor="let fb of feedbacks()" class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4 flex flex-col justify-between">
-        <div class="space-y-3">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full text-white font-black flex items-center justify-center text-sm shadow-xs" [ngClass]="fb.avatarBg">
-              {{ fb.giverName.charAt(0) }}
-            </div>
-            <div>
-              <h4 class="text-xs font-black text-slate-900">{{ fb.giverName }}</h4>
-              <p class="text-[11px] text-slate-500">{{ fb.giverRole }} &bull; {{ fb.relationship }}</p>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between">
-            <p-rating [ngModel]="fb.rating" [readonly]="true" styleClass="text-amber-400 transform scale-90 origin-left" />
-            <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">{{ fb.badge }}</span>
-          </div>
-
-          <p class="text-xs text-slate-700 leading-relaxed italic bg-slate-50 p-3 rounded-xl border border-slate-100">
-            "{{ fb.comment }}"
-          </p>
-        </div>
-
-        <div class="text-[10px] font-bold text-slate-400 text-right pt-2 border-t border-slate-100">
-          Received on {{ fb.date }}
-        </div>
+      <!-- Self Rating (1 to 5 Stars) -->
+      <div class="p-4 bg-amber-50/60 border border-amber-200 rounded-xl flex flex-col items-center justify-center text-center gap-2">
+        <label class="text-xs font-extrabold text-amber-900 uppercase tracking-wider">Your Self Rating (1 to 5 Stars) *</label>
+        <p-rating formControlName="selfRating" styleClass="text-amber-500 scale-125 my-1" />
+        <span class="text-xs font-bold text-amber-800">
+          Selected: {{ selfForm.get('selfRating')?.value }} Stars / 5.0
+        </span>
       </div>
-    </div>
-  </div>
 
-</div>
+      <!-- Monthly Key Achievements -->
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Tasks & Key Achievements Done This Month *</label>
+        <textarea pTextarea formControlName="achievements" rows="4"
+          placeholder="List key tasks completed, targets met, projects delivered or major contributions during this month..."
+          class="w-full text-xs p-3 border border-slate-300 rounded-xl focus:border-indigo-500"></textarea>
+      </div>
 
-<!-- CREATE GOAL MODAL -->
-<p-dialog [(visible)]="showGoalModal" header="Create Performance Goal / OKR" [modal]="true" [style]="{ width: '100%', maxWidth: '32rem' }" styleClass="rounded-2xl">
-  <form [formGroup]="goalForm" (ngSubmit)="saveGoal()" class="space-y-4 pt-2">
-    <div>
-      <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Goal Title *</label>
-      <input pInputText formControlName="title" placeholder="e.g. Implement Automated Testing Pipeline" class="w-full text-sm rounded-xl p-2.5 border-slate-300" />
-      <small *ngIf="goalForm.get('title')?.touched && goalForm.get('title')?.invalid" class="text-rose-500 text-xs block mt-1">Title is required (min 5 chars).</small>
-    </div>
+      <!-- Additional Self Comments -->
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Self Remarks / Additional Comments (Optional)</label>
+        <textarea pTextarea formControlName="selfRemarks" rows="2"
+          placeholder="Any challenges faced, support needed, or general comments..."
+          class="w-full text-xs p-3 border border-slate-300 rounded-xl focus:border-indigo-500"></textarea>
+      </div>
 
-    <div class="grid grid-cols-2 gap-3">
+      <!-- Submit Buttons -->
+      <div class="flex items-center justify-end gap-3 border-t border-slate-200 pt-4 mt-2">
+        <p-button type="button" (onClick)="submitDrawerVisible = false" label="Cancel"
+          styleClass="p-button-text p-button-secondary p-button-sm"></p-button>
+        <p-button type="submit" label="Save & Submit Rating" icon="pi pi-check" [loading]="submitting()"
+          styleClass="p-button-primary p-button-sm font-bold px-5"></p-button>
+      </div>
+
+    </form>
+  </ng-template>
+</p-drawer>
+
+<!-- MANAGER / HR REVIEW DRAWER -->
+<p-drawer [(visible)]="reviewDrawerVisible" position="right" [modal]="true" styleClass="modern-drawer"
+  [style]="{ width: '540px', maxWidth: '100%' }">
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-3">
+      <div class="h-10 w-10 bg-indigo-100 text-indigo-700 rounded-xl flex items-center justify-center text-lg font-bold shadow-xs">
+        <i class="pi pi-check-circle"></i>
+      </div>
       <div>
-        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Category *</label>
-        <p-select [options]="categoryOptions" formControlName="category" optionLabel="label" optionValue="value" styleClass="w-full text-sm rounded-xl border-slate-300" appendTo="body" />
+        <h3 class="text-base font-bold text-slate-900">Manager & HR Rating Review</h3>
+        <p class="text-xs text-slate-500">Evaluate employee self-rating and give official performance grade</p>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="content" *ngIf="selectedRecord">
+    <form [formGroup]="reviewForm" (ngSubmit)="onSubmitReview()" class="flex flex-col gap-5 pt-2 pb-6">
+
+      <!-- Employee Summary Banner -->
+      <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+        <div class="flex items-center justify-between text-xs">
+          <span class="font-bold text-slate-900">{{ selectedRecord.employee_name || selectedRecord.employeeName || 'Employee' }}</span>
+          <span class="font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+            {{ selectedRecord.month_name }} {{ selectedRecord.year }}
+          </span>
+        </div>
+        <div class="text-xs text-slate-600">
+          <strong class="text-slate-800 block mb-0.5">Submitted Achievements:</strong>
+          <p class="text-slate-600 bg-white p-2.5 rounded border border-slate-200 text-xs italic">{{ selectedRecord.achievements }}</p>
+        </div>
+        <div class="flex items-center justify-between text-xs pt-1 border-t border-slate-200">
+          <span class="text-slate-500 font-semibold">Employee Self Rating:</span>
+          <span class="font-extrabold text-amber-600 flex items-center gap-1">
+            {{ selectedRecord.self_rating || 0 }} Stars <i class="pi pi-star-fill text-amber-500"></i>
+          </span>
+        </div>
       </div>
 
+      <!-- Manager Rating Input -->
+      <div class="p-4 bg-indigo-50/50 border border-indigo-200 rounded-xl space-y-3">
+        <div class="flex items-center justify-between">
+          <label class="text-xs font-extrabold text-indigo-950 uppercase tracking-wider">Manager Rating (1 to 5 Stars)</label>
+          <span class="text-xs font-bold text-indigo-700">{{ reviewForm.get('managerRating')?.value || 0 }} / 5</span>
+        </div>
+        <p-rating formControlName="managerRating" styleClass="text-indigo-600 scale-110" />
+        <textarea pTextarea formControlName="managerRemarks" rows="2"
+          placeholder="Manager remarks, feedback, or development recommendations..."
+          class="w-full text-xs p-2.5 border border-indigo-200 rounded-lg focus:border-indigo-500 bg-white"></textarea>
+      </div>
+
+      <!-- HR Rating Input -->
+      <div class="p-4 bg-emerald-50/50 border border-emerald-200 rounded-xl space-y-3">
+        <div class="flex items-center justify-between">
+          <label class="text-xs font-extrabold text-emerald-950 uppercase tracking-wider">HR Admin Rating (1 to 5 Stars)</label>
+          <span class="text-xs font-bold text-emerald-700">{{ reviewForm.get('hrRating')?.value || 0 }} / 5</span>
+        </div>
+        <p-rating formControlName="hrRating" styleClass="text-emerald-600 scale-110" />
+        <textarea pTextarea formControlName="hrRemarks" rows="2"
+          placeholder="HR Admin appraisal remarks & policy verification..."
+          class="w-full text-xs p-2.5 border border-emerald-200 rounded-lg focus:border-emerald-500 bg-white"></textarea>
+      </div>
+
+      <!-- Submit Buttons -->
+      <div class="flex items-center justify-end gap-3 border-t border-slate-200 pt-4 mt-2">
+        <p-button type="button" (onClick)="reviewDrawerVisible = false" label="Cancel"
+          styleClass="p-button-text p-button-secondary p-button-sm"></p-button>
+        <p-button type="submit" label="Save Appraisal Review" icon="pi pi-check" [loading]="submitting()"
+          styleClass="p-button-primary p-button-sm font-bold px-5"></p-button>
+      </div>
+
+    </form>
+  </ng-template>
+</p-drawer>
+
+<!-- VIEW DETAILS DIALOG -->
+<p-dialog [(visible)]="viewDrawerVisible" [modal]="true" [style]="{ width: '550px', maxWidth: '95vw' }"
+  header="Monthly Performance Details" styleClass="rounded-2xl shadow-2xl">
+  <div *ngIf="selectedRecord" class="space-y-4 text-xs">
+    <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-200">
       <div>
-        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Weightage (%) *</label>
-        <input pInputText type="number" formControlName="weightage" min="5" max="100" class="w-full text-sm rounded-xl p-2.5 border-slate-300" />
+        <span class="font-extrabold text-slate-900 text-sm block">{{ selectedRecord.month_name }} {{ selectedRecord.year }}</span>
+        <span class="text-slate-500 font-semibold">{{ selectedRecord.employee_name || 'Self' }}</span>
+      </div>
+      <div class="text-right">
+        <span class="text-slate-400 font-bold block text-[10px] uppercase">Final Monthly Score</span>
+        <span class="text-lg font-black text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded border border-indigo-200">
+          {{ selectedRecord.final_score }} / 5
+        </span>
       </div>
     </div>
 
-    <div>
-      <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Target Completion Date *</label>
-      <input pInputText type="date" formControlName="targetDate" class="w-full text-sm rounded-xl p-2.5 border-slate-300" />
+    <!-- Achievements -->
+    <div class="space-y-1">
+      <span class="font-extrabold text-slate-700 uppercase tracking-wider text-[11px] block">Key Achievements Done:</span>
+      <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-slate-700 leading-relaxed whitespace-pre-line">
+        {{ selectedRecord.achievements }}
+      </div>
     </div>
 
-    <div>
-      <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Key Measurable Results *</label>
-      <textarea pTextarea formControlName="keyResults" rows="3" placeholder="Describe measurable targets or key deliverables..." class="w-full text-sm rounded-xl p-3 border-slate-300"></textarea>
-    </div>
+    <!-- Ratings & Remarks Breakdown -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+      <!-- Self -->
+      <div class="p-3 bg-amber-50/60 border border-amber-200 rounded-xl space-y-1">
+        <span class="text-[10px] font-extrabold text-amber-900 uppercase block">Self Rating</span>
+        <div class="font-black text-amber-700 text-sm flex items-center gap-1">
+          {{ selectedRecord.self_rating }} <i class="pi pi-star-fill text-amber-500"></i>
+        </div>
+        <p class="text-[11px] text-slate-600 italic" *ngIf="selectedRecord.self_remarks">"{{ selectedRecord.self_remarks }}"</p>
+      </div>
 
-    <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
-      <button type="button" (click)="showGoalModal = false" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold text-xs hover:bg-slate-200 transition">Cancel</button>
-      <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold text-xs hover:bg-indigo-700 transition">Save Goal</button>
+      <!-- Manager -->
+      <div class="p-3 bg-indigo-50/60 border border-indigo-200 rounded-xl space-y-1">
+        <span class="text-[10px] font-extrabold text-indigo-900 uppercase block">Manager Rating</span>
+        <div class="font-black text-indigo-700 text-sm flex items-center gap-1" *ngIf="selectedRecord.manager_rating; else pendingM">
+          {{ selectedRecord.manager_rating }} <i class="pi pi-star-fill text-indigo-500"></i>
+        </div>
+        <ng-template #pendingM><span class="text-slate-400 italic">Not Reviewed</span></ng-template>
+        <p class="text-[11px] text-slate-600 italic" *ngIf="selectedRecord.manager_remarks">"{{ selectedRecord.manager_remarks }}"</p>
+      </div>
+
+      <!-- HR -->
+      <div class="p-3 bg-emerald-50/60 border border-emerald-200 rounded-xl space-y-1">
+        <span class="text-[10px] font-extrabold text-emerald-900 uppercase block">HR Admin Rating</span>
+        <div class="font-black text-emerald-700 text-sm flex items-center gap-1" *ngIf="selectedRecord.hr_rating; else pendingH">
+          {{ selectedRecord.hr_rating }} <i class="pi pi-star-fill text-emerald-500"></i>
+        </div>
+        <ng-template #pendingH><span class="text-slate-400 italic">Not Reviewed</span></ng-template>
+        <p class="text-[11px] text-slate-600 italic" *ngIf="selectedRecord.hr_remarks">"{{ selectedRecord.hr_remarks }}"</p>
+      </div>
     </div>
-  </form>
+  </div>
 </p-dialog>
