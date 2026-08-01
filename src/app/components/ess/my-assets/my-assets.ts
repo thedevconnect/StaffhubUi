@@ -21,6 +21,7 @@ import { ConfirmationService, MessageService } from 'primeng/api'
 import { FloatLabelModule } from 'primeng/floatlabel'
 
 import { UserService } from '../../../shared/services/user-service'
+import { AuthService } from '../../../shared/services/services/auth.service'
 import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template'
 import { Router } from '@angular/router'
 
@@ -76,8 +77,7 @@ export class MyAssets implements OnInit {
     } else {
       return [
         { label: 'My Assigned Assets', value: 'Assigned', icon: 'pi pi-briefcase' },
-        { label: 'My Requests', value: 'Pending', icon: 'pi pi-clock' },
-        { label: 'All', value: 'All', icon: 'pi pi-list' }
+        { label: 'My Requests', value: 'Pending', icon: 'pi pi-clock' }
       ];
     }
   }
@@ -91,7 +91,7 @@ export class MyAssets implements OnInit {
     return this.assets.filter(asset => {
       if (this.activeTab === 'All') return true;
       const status = (asset.approval_status || '').toUpperCase();
-      
+
       if (this.isHRAdmin) {
         if (this.activeTab === 'Inventory') return !asset.employee_id;
         if (this.activeTab === 'Assigned') return asset.employee_id && status === 'APPROVED';
@@ -150,18 +150,29 @@ export class MyAssets implements OnInit {
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private cdr: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) { }
 
   employees: any[] = []
 
   get isHRAdmin(): boolean {
-    return this.router.url.includes('hradmin');
+    if (this.router.url.includes('hradmin')) return true;
+    const user = this.authService.user();
+    if (!user) return false;
+    const roleStr = user.role || '';
+    const roles = roleStr.split(',').map((r: string) => r.trim().toUpperCase());
+    const roleObjs = (user.roles || []).map(r => (r.roleId || r.rolDes || '').toUpperCase());
+    const privileged = ['HR_ADMIN', 'ADMIN', 'SUPER_ADMIN', 'SUPERADMIN', 'DEVELOPER', 'HRADMIN'];
+    return roles.some((r: string) => privileged.includes(r)) || roleObjs.some((r: string) => privileged.includes(r));
   }
 
   categories: any[] = []
 
   ngOnInit(): void {
+    if (!this.isHRAdmin) {
+      this.activeTab = 'Assigned';
+    }
     this.initForm()
     this.loadEmployees()
     this.getAllData(true)

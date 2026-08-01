@@ -85,10 +85,19 @@
       (onChange)="onRoleDropdownChange($event)" />
 
     <span class="hidden text-sm font-medium text-slate-700 sm:inline">{{ getUserName() }}</span>
-    <p-avatar size="normal" shape="circle" class="cursor-pointer !bg-blue-600 !text-white"
+    <p-avatar *ngIf="userProfileService.profilePicture(); else defaultAvatar"
+      [image]="userProfileService.profilePicture()!"
+      size="normal"
+      shape="circle"
+      class="cursor-pointer border border-slate-200 dark:border-slate-700 overflow-hidden w-8 h-8 flex items-center justify-center"
       (click)="userMenu.toggle($event)">
-      <span>{{ getUserInitial() }}</span>
     </p-avatar>
+    <ng-template #defaultAvatar>
+      <p-avatar size="normal" shape="circle" class="cursor-pointer !bg-blue-600 !text-white"
+        (click)="userMenu.toggle($event)">
+        <span>{{ getUserInitial() }}</span>
+      </p-avatar>
+    </ng-template>
     <p-menu #userMenu [model]="userMenuItems" [popup]="true" [appendTo]="'body'"></p-menu>
   </div>
 </div>

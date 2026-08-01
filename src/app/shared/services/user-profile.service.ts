@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface UserProfileData {
@@ -22,10 +22,18 @@ export interface UserProfileData {
 export class UserProfileService {
   private readonly apiBase = `${environment.apiBaseUrl}/api/user-profile`;
 
+  readonly profilePicture = signal<string | null>(null);
+
   constructor(private http: HttpClient) {}
 
   getUserProfile(): Observable<{ success: boolean; message: string; data: UserProfileData }> {
-    return this.http.get<{ success: boolean; message: string; data: UserProfileData }>(`${this.apiBase}`);
+    return this.http.get<{ success: boolean; message: string; data: UserProfileData }>(`${this.apiBase}`).pipe(
+      tap((res) => {
+        if (res?.success && res?.data) {
+          this.profilePicture.set(res.data.profilePicture || null);
+        }
+      })
+    );
   }
 
   updateUserProfile(payload: {
@@ -34,7 +42,13 @@ export class UserProfileService {
     mobile: string;
     profilePicture?: string | null;
   }): Observable<{ success: boolean; message: string; data: UserProfileData }> {
-    return this.http.put<{ success: boolean; message: string; data: UserProfileData }>(`${this.apiBase}`, payload);
+    return this.http.put<{ success: boolean; message: string; data: UserProfileData }>(`${this.apiBase}`, payload).pipe(
+      tap((res) => {
+        if (res?.success && res?.data) {
+          this.profilePicture.set(res.data.profilePicture || null);
+        }
+      })
+    );
   }
 
   changePassword(payload: {

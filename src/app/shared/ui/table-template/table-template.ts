@@ -132,7 +132,7 @@ export class TableTemplate implements OnChanges {
       this.isFullscreen = true;
     } else {
       if (document.exitFullscreen) {
-        document.exitFullscreen().catch(() => {});
+        document.exitFullscreen().catch(() => { });
       } else if ((document as any).webkitExitFullscreen) {
         (document as any).webkitExitFullscreen();
       } else if ((document as any).msExitFullscreen) {
@@ -227,13 +227,13 @@ export class TableTemplate implements OnChanges {
       this.totalPages = Math.ceil(this.totalCount / this.pageSize) || 1;
     } else {
       const rawData = this.data || [];
-      
+
       // 1. Filter locally
       let processed = [...rawData];
       const search = (this.searchText || '').toLowerCase().trim();
       if (search) {
-        processed = processed.filter(item => 
-          Object.values(item).some(val => 
+        processed = processed.filter(item =>
+          Object.values(item).some(val =>
             String(val ?? '').toLowerCase().includes(search)
           )
         );
@@ -259,12 +259,12 @@ export class TableTemplate implements OnChanges {
       // 3. Paginate locally
       this.totalCount = processed.length;
       this.totalPages = Math.ceil(this.totalCount / this.pageSize) || 1;
-      
+
       // Safety check: if currentPage exceeds totalPages, reset to 1
       if (this.currentPage > this.totalPages) {
         this.currentPage = 1;
       }
-      
+
       const startIndex = (this.currentPage - 1) * this.pageSize;
       this.paginatedData = processed.slice(startIndex, startIndex + this.pageSize);
     }
@@ -412,11 +412,16 @@ export class TableTemplate implements OnChanges {
       if (isNaN(d.getTime())) return String(val);
 
       const isISOString = typeof val === 'string' && val.includes('T');
+      const isDateOnlyUTC = d.getUTCHours() === 0 && d.getUTCMinutes() === 0 && d.getUTCSeconds() === 0;
 
-      const year = isISOString ? d.getUTCFullYear() : d.getFullYear();
-      const month = String((isISOString ? d.getUTCMonth() : d.getMonth()) + 1).padStart(2, '0');
-      const day = String(isISOString ? d.getUTCDate() : d.getDate()).padStart(2, '0');
+      const year = (isISOString || isDateOnlyUTC) ? d.getUTCFullYear() : d.getFullYear();
+      const month = String(((isISOString || isDateOnlyUTC) ? d.getUTCMonth() : d.getMonth()) + 1).padStart(2, '0');
+      const day = String((isISOString || isDateOnlyUTC) ? d.getUTCDate() : d.getDate()).padStart(2, '0');
       const dateStr = `${year}-${month}-${day}`;
+
+      if (isDateOnlyUTC) {
+        return dateStr;
+      }
 
       const rawHours = isISOString ? d.getUTCHours() : d.getHours();
       const rawMinutes = isISOString ? d.getUTCMinutes() : d.getMinutes();
@@ -433,6 +438,11 @@ export class TableTemplate implements OnChanges {
         hours = hours % 12;
         hours = hours ? hours : 12; // hour '0' should be '12'
         const formattedHours = String(hours).padStart(2, '0');
+
+        if (pipeArgs && (pipeArgs.includes('hh:mm') || pipeArgs.includes('shortTime') || pipeArgs.includes('mm'))) {
+          return `${formattedHours}:${minutes} ${ampm}`;
+        }
+
         return `${dateStr} ${formattedHours}:${minutes} ${ampm}`;
       }
 

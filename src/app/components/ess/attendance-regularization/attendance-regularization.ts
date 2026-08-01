@@ -166,6 +166,20 @@ export class AttendanceRegularization implements OnInit {
     this.cdr.markForCheck();
   }
 
+  parseDatetime(val: any): Date | null {
+    if (!val) return null;
+    if (val instanceof Date) return val;
+    let str = String(val).trim();
+    if (!str) return null;
+
+    if (str.includes(' ') && !str.includes('Z') && !str.includes('+')) {
+      str = str.replace(' ', 'T') + 'Z';
+    } else if (str.includes('T') && !str.endsWith('Z') && !str.includes('+')) {
+      str = str + 'Z';
+    }
+    return new Date(str);
+  }
+
   fetchRequests() {
     this.isLoading = true;
     this.attendanceService.getMyRegularizations().subscribe({
@@ -178,10 +192,10 @@ export class AttendanceRegularization implements OnInit {
             .map((req: any) => ({
               ...req,
               id: req.id,
-              attendanceDate: req.attendanceDate ? new Date(req.attendanceDate) : null,
+              attendanceDate: req.attendanceDate || req.attendance_date,
               correctionType: req.correctionType,
-              checkIn: req.checkIn ? new Date(req.checkIn) : null,
-              checkOut: req.checkOut ? new Date(req.checkOut) : null,
+              checkIn: this.parseDatetime(req.checkIn),
+              checkOut: this.parseDatetime(req.checkOut),
               reason: req.reason,
               status: req.status,
               submittedOn: req.createdAt ? new Date(req.createdAt) : null,
@@ -193,7 +207,8 @@ export class AttendanceRegularization implements OnInit {
             }))
             .filter((req: any) => {
               if (!req.attendanceDate) return false;
-              return req.attendanceDate.getMonth() === currentMonth && req.attendanceDate.getFullYear() === currentYear;
+              const dt = new Date(req.attendanceDate);
+              return dt.getMonth() === currentMonth && dt.getFullYear() === currentYear;
             });
         } else {
           this.requests = [];
