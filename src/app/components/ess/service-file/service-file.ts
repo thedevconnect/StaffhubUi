@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, ChangeDetectorRef, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
@@ -15,6 +16,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
 
 import { DocumentService } from '../../../shared/services/document.service';
+import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template';
 
 @Component({
   selector: 'app-service-file',
@@ -33,7 +35,8 @@ import { DocumentService } from '../../../shared/services/document.service';
     FormsModule,
     FloatLabelModule,
     InputTextModule,
-    TooltipModule
+    TooltipModule,
+    TableTemplate
   ],
   providers: [MessageService],
   templateUrl: './service-file.html',
@@ -45,6 +48,16 @@ export class ServiceFile implements OnInit {
   private messageService = inject(MessageService);
   private cdr = inject(ChangeDetectorRef);
   private documentService = inject(DocumentService);
+  private sanitizer = inject(DomSanitizer);
+
+  columns: TableColumn[] = [
+    { key: 'docTitle', header: 'Document Title & ID' },
+    { key: 'docType', header: 'Document Type' },
+    { key: 'fileType', header: 'Format & Size' },
+    { key: 'uploadedBy', header: 'Uploaded By' },
+    { key: 'createdAt', header: 'Uploaded Date' },
+    { key: 'actions', header: 'Action' }
+  ];
 
   breadcrumbItems: any[] = [
     { label: 'Employee Self Service', icon: 'pi pi-home', routerLink: '/ess' },
@@ -60,7 +73,7 @@ export class ServiceFile implements OnInit {
   visible = false;
   previewModalVisible = false;
 
-  activePreviewUrl = '';
+  activePreviewUrl: SafeResourceUrl | string = '';
   activePreviewTitle = '';
   activePreviewType = 'PDF';
 
@@ -76,6 +89,7 @@ export class ServiceFile implements OnInit {
   ];
 
   docTypeOptionsMap: { [key: string]: { label: string; value: string }[] } = {
+
     'PERSONAL': [
       { label: 'Aadhaar Card', value: 'AADHAAR' },
       { label: 'PAN Card', value: 'PAN' },
@@ -84,6 +98,7 @@ export class ServiceFile implements OnInit {
       { label: 'Previous Work Experience / Relieving Letters', value: 'EXPERIENCE' },
       { label: 'Other Personal Document', value: 'OTHER' }
     ],
+
     'COMPANY_ISSUED': [
       { label: 'Offer Letter', value: 'OFFER_LETTER' },
       { label: 'Appointment Letter', value: 'APPOINTMENT_LETTER' },
@@ -242,7 +257,7 @@ export class ServiceFile implements OnInit {
       this.messageService.add({ severity: 'info', summary: 'No File Preview', detail: 'Document file preview is not available.' });
       return;
     }
-    this.activePreviewUrl = url;
+    this.activePreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
     this.activePreviewTitle = doc.doc_title || doc.docTitle || 'Document Preview';
     this.activePreviewType = (doc.file_type || doc.fileType || 'PDF').toUpperCase();
     this.previewModalVisible = true;

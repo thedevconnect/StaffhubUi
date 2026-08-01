@@ -40,10 +40,17 @@ export class MonthlyAttendanceCalendar implements OnInit {
 
   private formatTime(dateStr: string | null): string {
     if (!dateStr) return '-';
-    const parsed = new Date(dateStr.replace(' ', 'T'));
-    const d = isNaN(parsed.getTime()) ? new Date(dateStr) : parsed;
+    let str = String(dateStr).trim();
+    if (!str) return '-';
+
+    if (str.includes(' ') && !str.includes('Z') && !str.includes('+')) {
+      str = str.replace(' ', 'T') + 'Z';
+    } else if (str.includes('T') && !str.endsWith('Z') && !str.includes('+')) {
+      str = str + 'Z';
+    }
+    const d = new Date(str);
     if (isNaN(d.getTime())) return '-';
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
   }
 
   generateCalendar() {
@@ -53,7 +60,6 @@ export class MonthlyAttendanceCalendar implements OnInit {
 
     const firstDayIndex = new Date(year, month, 1).getDay();
     const startDay = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
-
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
     const daysArray = [];
@@ -80,7 +86,7 @@ export class MonthlyAttendanceCalendar implements OnInit {
       if (date <= today) {
         if (isSunday) {
           type = 'WO';
-          colorClass = 'bg-slate-400 text-white';
+          colorClass = 'bg-slate-500 text-white';
         }
       }
 
@@ -122,12 +128,13 @@ export class MonthlyAttendanceCalendar implements OnInit {
           // Check if there is a pending or approved regularization for this date
           let dayReg: any = null;
           for (const reg of regRecords) {
-            if (reg.status === 'Pending' || reg.status === 'Approved') {
-              const regDate = new Date(reg.attendance_date);
-              const yyyy = regDate.getFullYear();
-              const mm = String(regDate.getMonth() + 1).padStart(2, '0');
-              const dd = String(regDate.getDate()).padStart(2, '0');
-              if (`${yyyy}-${mm}-${dd}` === day.dateString) {
+            if (reg.status === 'Pending' || reg.status === 'Approved' || reg.status === 'APPROVED') {
+              const regDateStr = reg.attendance_date || reg.attendanceDate;
+              let dStr = '';
+              if (regDateStr) {
+                dStr = typeof regDateStr === 'string' ? regDateStr.split('T')[0] : new Date(regDateStr).toISOString().split('T')[0];
+              }
+              if (dStr === day.dateString) {
                 dayReg = reg;
                 break;
               }
@@ -137,8 +144,6 @@ export class MonthlyAttendanceCalendar implements OnInit {
           // Check if there is an approved leave for this date
           let dayLeave: LeaveRequest | null = null;
           for (const lr of leaveRecords) {
-            // Status check if needed (e.g. APPROVED), but assume we show whatever they have
-            // Wait, usually only APPROVED leaves are considered, but let's check if it overlaps.
             if (lr.status === 'APPROVED' || lr.status === 'Approved') {
               const start = new Date(lr.start_date);
               start.setHours(0, 0, 0, 0);
@@ -156,8 +161,8 @@ export class MonthlyAttendanceCalendar implements OnInit {
 
           const dayRecords = records.filter((r: any) => {
             if (!r.attendance_date) return false;
-            let localDateString = r.attendance_date;
-            if (r.attendance_date.includes('T')) {
+            let localDateString = typeof r.attendance_date === 'string' ? r.attendance_date.split('T')[0] : '';
+            if (!localDateString) {
               const d = new Date(r.attendance_date);
               const yyyy = d.getFullYear();
               const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -167,11 +172,12 @@ export class MonthlyAttendanceCalendar implements OnInit {
             return localDateString === day.dateString;
           });
 
+          const isSunday = new Date(day.dateString).getDay() === 0;
+
           if (dayRecords.length > 0) {
-            const firstRecord = dayRecords[dayRecords.length - 1]; // First swipe-in (since sorted DESC by id)
+            const firstRecord = dayRecords[dayRecords.length - 1]; // First swipe-in
             const lastRecord = dayRecords[0]; // Last swipe-out
 
-            // Only show First In and Last Out if there are multiple, or just 1 if single
             const recordsToShow = [];
             if (firstRecord.id === lastRecord.id) {
               recordsToShow.push(firstRecord);
@@ -199,43 +205,79 @@ export class MonthlyAttendanceCalendar implements OnInit {
               day.totalTime = '-';
             }
 
-            const status = firstRecord.attendance_status || 'PRESENT';
             day.swipeIn = this.formatTime(firstRecord.swipe_in);
-            day.swipeOut = this.formatTime(lastRecord.swipe_out);
+            day.swipeOut = firstRecord.swipe_out ? this.formatTime(lastRecord.swipe_out) : '-';
+
+            const status = (firstRecord.attendance_status || '').toUpperCase();
 
             if (status === 'PRESENT') {
               day.type = 'P';
               day.colorClass = 'bg-emerald-500 text-white';
+            } else if (status === 'HALF_DAY' || status === 'HALF DAY') {
+              day.type = 'HD';
+              day.colorClass = 'bg-amber-500 text-white';
             } else if (status === 'ABSENT') {
               day.type = 'A';
               day.colorClass = 'bg-rose-500 text-white';
-            } else if (status === 'HALF_DAY') {
-              day.type = 'HD';
-              day.colorClass = 'bg-amber-500 text-white';
-            } else {
-              day.type = status.substring(0, 2).toUpperCase();
-              day.colorClass = 'bg-blue-500 text-white';
-            }
-          } else {
-            // No attendance records for this day
-            if (day.type === '' && new Date(day.dateString) < new Date(new Date().setHours(0, 0, 0, 0))) {
+            } else if (status === 'ON_LEAVE' || status === 'LEAVE') {
               if (dayLeave) {
-                // Determine abbreviation
                 const code = dayLeave.leave_type;
                 if (code === 'Casual Leave') day.type = 'CL';
                 else if (code === 'Sick Leave') day.type = 'SL';
                 else if (code === 'Earned Leave') day.type = 'EL';
-                else if (code === 'LOP' || code.includes('Loss of Pay')) day.type = 'LOP';
-                else day.type = 'L'; // Generic Leave
-
-                day.colorClass = 'bg-indigo-500 text-white';
-              } else if (dayReg) {
-                day.type = 'REG';
-                day.colorClass = 'bg-orange-500 text-white';
+                else day.type = 'L';
               } else {
-                day.type = 'A';
-                day.colorClass = 'bg-rose-500 text-white';
+                day.type = 'L';
               }
+              day.colorClass = 'bg-indigo-500 text-white';
+            } else if (isSunday || status === 'WEEKLY_OFF' || status === 'WEEKOFF' || status === 'WEEKLY OFF') {
+              day.type = 'WO';
+              day.colorClass = 'bg-slate-500 text-white';
+            } else if (dayReg) {
+              day.type = 'RG';
+              day.colorClass = 'bg-amber-500 text-white';
+              if (dayReg.checkIn || dayReg.check_in) {
+                day.swipeIn = this.formatTime(dayReg.checkIn || dayReg.check_in);
+              }
+              if (dayReg.checkOut || dayReg.check_out) {
+                day.swipeOut = this.formatTime(dayReg.checkOut || dayReg.check_out);
+              }
+            } else if (!firstRecord.swipe_out || day.swipeOut === '-') {
+              day.type = 'A';
+              day.colorClass = 'bg-rose-500 text-white';
+            } else {
+              day.type = status.substring(0, 2);
+              day.colorClass = 'bg-blue-500 text-white';
+            }
+          } else {
+            // No attendance records for this day
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const isPastOrToday = new Date(day.dateString) <= today;
+
+            if (isSunday) {
+              day.type = 'WO';
+              day.colorClass = 'bg-slate-500 text-white';
+            } else if (dayReg) {
+              day.type = 'RG';
+              day.colorClass = 'bg-amber-500 text-white';
+              if (dayReg.checkIn || dayReg.check_in) {
+                day.swipeIn = this.formatTime(dayReg.checkIn || dayReg.check_in);
+              }
+              if (dayReg.checkOut || dayReg.check_out) {
+                day.swipeOut = this.formatTime(dayReg.checkOut || dayReg.check_out);
+              }
+            } else if (dayLeave) {
+              const code = dayLeave.leave_type;
+              if (code === 'Casual Leave') day.type = 'CL';
+              else if (code === 'Sick Leave') day.type = 'SL';
+              else if (code === 'Earned Leave') day.type = 'EL';
+              else if (code === 'LOP' || code.includes('Loss of Pay') || code.includes('Lost Of Pay')) day.type = 'LOP';
+              else day.type = 'L';
+              day.colorClass = 'bg-indigo-500 text-white';
+            } else if (isPastOrToday) {
+              day.type = 'A';
+              day.colorClass = 'bg-rose-500 text-white';
             }
           }
 

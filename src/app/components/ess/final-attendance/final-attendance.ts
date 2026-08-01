@@ -204,21 +204,50 @@ export class FinalAttendance implements OnInit {
           if (res && res.success && res.data && res.data.header) {
             const h = res.data.header;
             const s = res.data.summary || {};
+            const details = res.data.details || [];
+
+            let present = s.Present || 0;
+            let halfDays = (s['Half Day'] || 0) + (s['CL/2'] || 0) + (s['EL/2'] || 0) + (s['SL/2'] || 0);
+            let absent = s.Absent || 0;
+            let leaves = (s.CL || 0) + (s.EL || 0) + (s.SL || 0) + (s.LWP || 0) + (s.Leave || 0);
+            let holidays = s.Holiday || 0;
+            let weeklyOffs = s['Weekly Off'] || 0;
+            let paidDays = s['Paid Days'] || 0;
+
+            // Fallback calculation directly from details if summary keys were not populated
+            if (!present && !absent && details.length > 0) {
+              const todayStr = new Date().toISOString().split('T')[0];
+              details.forEach((d: any) => {
+                const st = (d.attendance_status || '').trim();
+                const dStr = typeof d.date === 'string' ? d.date.split('T')[0] : '';
+                if (dStr > todayStr && !st) return;
+
+                const upper = st.toUpperCase();
+                if (['PRESENT', 'LATE_COMING', 'EARLY_GOING', 'RG', 'REGULARIZED', 'P'].includes(upper)) present++;
+                else if (['HALF_DAY', 'HALF DAY', 'HD'].includes(upper)) halfDays++;
+                else if (['ABSENT', 'A'].includes(upper)) absent++;
+                else if (['WEEKLY_OFF', 'WEEKLY OFF', 'WO', 'WEEKOFF'].includes(upper)) weeklyOffs++;
+                else if (['HOLIDAY', 'H'].includes(upper)) holidays++;
+                else if (['ON_LEAVE', 'LEAVE', 'L', 'CL', 'SL', 'EL', 'LOP'].includes(upper)) leaves++;
+              });
+              paidDays = present + weeklyOffs + holidays + leaves + (halfDays * 0.5);
+            }
+
             allMonthsRecords.push({
               monthNumber: month,
               month: `${monthName} ${year}`,
               totalDays: daysInMonth,
-              present: s.Present || 0,
-              halfDays: (s['Half Day'] || 0) + (s['CL/2'] || 0) + (s['EL/2'] || 0) + (s['SL/2'] || 0),
-              absent: s.Absent || 0,
-              leaves: (s.CL || 0) + (s.EL || 0) + (s.SL || 0) + (s.LWP || 0) + (s.Leave || 0),
-              holidays: s.Holiday || 0,
-              weeklyOffs: s['Weekly Off'] || 0,
-              paidDays: s['Paid Days'] || 0,
+              present,
+              halfDays,
+              absent,
+              leaves,
+              holidays,
+              weeklyOffs,
+              paidDays,
               status: h.status || 'Draft',
               submitDate: h.updated_at || h.created_at,
               recordId: h.id,
-              rawDetails: res.data.details || []
+              rawDetails: details
             });
           } else {
             allMonthsRecords.push(this.getDefaultMonthRecord(month, year, daysInMonth, monthName));

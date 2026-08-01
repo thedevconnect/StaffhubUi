@@ -443,13 +443,16 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     const swipeInTime = this.parseDbDate(record.swipe_in);
     if (!swipeInTime) return;
 
-    this.timerIntervalId = setInterval(() => {
+    const tick = () => {
       const now = new Date();
       const currentSessionWorkElapsed = now.getTime() - swipeInTime.getTime();
-      const workMs = Math.max(0, previousCompletedMs + currentSessionWorkElapsed);
+      const workMs = Math.max(0, previousCompletedMs + (currentSessionWorkElapsed > 0 ? currentSessionWorkElapsed : 0));
       this.duration.set(this.formatMsToHMS(workMs));
       this.updateProgressPercentage(workMs);
-    }, 1000);
+    };
+
+    tick();
+    this.timerIntervalId = setInterval(tick, 1000);
   }
 
   private stopTimerTicks(): void {
@@ -518,10 +521,16 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
 
   private parseDbDate(dateStr: string | null): Date | null {
     if (!dateStr) return null;
-    const cleanStr = dateStr.replace('Z', '');
-    const normalized = cleanStr.replace(' ', 'T');
-    const parsed = new Date(normalized);
-    return isNaN(parsed.getTime()) ? new Date(cleanStr) : parsed;
+    let str = String(dateStr).trim();
+    if (!str) return null;
+
+    if (str.includes(' ') && !str.includes('Z') && !str.includes('+')) {
+      str = str.replace(' ', 'T') + 'Z';
+    } else if (str.includes('T') && !str.endsWith('Z') && !str.includes('+')) {
+      str = str + 'Z';
+    }
+    const d = new Date(str);
+    return isNaN(d.getTime()) ? null : d;
   }
 
   private formatMsToHMS(ms: number): string {

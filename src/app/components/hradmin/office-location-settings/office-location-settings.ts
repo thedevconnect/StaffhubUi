@@ -139,6 +139,52 @@ export class OfficeLocationSettings implements OnInit {
     { label: 'Selected Employees Only', value: 'EMPLOYEE' }
   ];
 
+  durationPresetOptions = [
+    { label: '1 Week (7 Days)', value: '1_WEEK' },
+    { label: 'Half Month (15 Days)', value: 'HALF_MONTH' },
+    { label: '1 Month (30 Days)', value: '1_MONTH' },
+    { label: '2 Months (60 Days)', value: '2_MONTHS' },
+    { label: '3 Months (90 Days)', value: '3_MONTHS' },
+    { label: 'All Time / Permanent Exemption', value: 'ALL_TIME' },
+    { label: 'Clear / Custom Dates', value: 'CUSTOM' }
+  ];
+
+  applyDurationPreset(preset: string) {
+    if (!preset || preset === 'CUSTOM') {
+      return;
+    }
+
+    const now = new Date();
+    let endDate = new Date();
+
+    switch (preset) {
+      case '1_WEEK':
+        endDate.setDate(now.getDate() + 7);
+        break;
+      case 'HALF_MONTH':
+        endDate.setDate(now.getDate() + 15);
+        break;
+      case '1_MONTH':
+        endDate.setMonth(now.getMonth() + 1);
+        break;
+      case '2_MONTHS':
+        endDate.setMonth(now.getMonth() + 2);
+        break;
+      case '3_MONTHS':
+        endDate.setMonth(now.getMonth() + 3);
+        break;
+      case 'ALL_TIME':
+        endDate = new Date(2099, 11, 31, 23, 59, 59);
+        break;
+    }
+
+    this.exemptionForm.patchValue({
+      startDateTime: now,
+      endDateTime: endDate
+    });
+    this.exemptionForm.markAsDirty();
+  }
+
   get departmentOptions() {
     const depts = new Set<string>();
     this.employees.forEach(emp => {

@@ -1,63 +1,23 @@
-import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, ChangeDetectorRef, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { RatingModule } from 'primeng/rating';
-import { ProgressBarModule } from 'primeng/progressbar';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
+import { DrawerModule } from 'primeng/drawer';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
-import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { Breadcrumb } from 'primeng/breadcrumb';
+import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, MenuItem } from 'primeng/api';
 
-export interface CompetencyRating {
-  id: string;
-  category: string;
-  title: string;
-  description: string;
-  selfRating: number;
-  managerRating?: number;
-  comments: string;
-}
-
-export interface PerformanceGoal {
-  id: number;
-  title: string;
-  category: string;
-  targetDate: string;
-  progress: number;
-  weightage: number;
-  status: 'IN_PROGRESS' | 'COMPLETED' | 'ON_HOLD' | 'DELAYED';
-  keyResults: string;
-}
-
-export interface ReviewHistory {
-  cycle: string;
-  year: string;
-  period: string;
-  overallRating: number;
-  managerRating: number;
-  selfRating: number;
-  status: 'SUBMITTED' | 'UNDER_REVIEW' | 'COMPLETED' | 'DRAFT';
-  reviewedBy: string;
-  comments: string;
-}
-
-export interface FeedbackItem {
-  id: number;
-  giverName: string;
-  giverRole: string;
-  avatarBg: string;
-  rating: number;
-  relationship: 'Manager' | 'Peer' | 'Subordinate';
-  date: string;
-  comment: string;
-  badge: string;
-}
+import { PerformanceService } from '../../../shared/services/performance.service';
+import { AuthService } from '../../../shared/services/services/auth.service';
+import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template';
 
 @Component({
   selector: 'app-performance-management',
@@ -68,15 +28,17 @@ export interface FeedbackItem {
     ReactiveFormsModule,
     CardModule,
     RatingModule,
-    ProgressBarModule,
     TagModule,
     ButtonModule,
+    DrawerModule,
     DialogModule,
     InputTextModule,
     TextareaModule,
     SelectModule,
     ToastModule,
-    BreadcrumbModule,
+    Breadcrumb,
+    TooltipModule,
+    TableTemplate
   ],
   templateUrl: './performance-management.html',
   styleUrl: './performance-management.scss',
@@ -84,296 +46,266 @@ export interface FeedbackItem {
   providers: [MessageService],
 })
 export class PerformanceManagement implements OnInit {
+  private fb = inject(FormBuilder);
+  private messageService = inject(MessageService);
+  private cdr = inject(ChangeDetectorRef);
+  private performanceService = inject(PerformanceService);
+  private authService = inject(AuthService);
+
   breadcrumbItems: MenuItem[] = [
-    { label: 'ESS', icon: 'pi pi-home', routerLink: '/ess' },
-    { label: 'Performance Management', icon: 'pi pi-chart-line' },
+    { label: 'Employee Self Service', icon: 'pi pi-home', routerLink: '/ess' },
+    { label: 'Performance & Monthly Ratings', icon: 'pi pi-star' },
   ];
 
-  activeTab = signal<'OVERVIEW' | 'COMPETENCIES' | 'GOALS' | 'REVIEWS' | 'FEEDBACK'>('OVERVIEW');
-
-  // Overall summary metrics
-  overallRating = signal<number>(4.4);
-  selfAverageRating = signal<number>(4.5);
-  managerAverageRating = signal<number>(4.3);
-  completedGoalsCount = signal<number>(6);
-  totalGoalsCount = signal<number>(8);
-  currentCycleName = signal<string>('Q2 2026 Annual Performance Review');
-  currentCycleStatus = signal<string>('IN_PROGRESS');
-
-  // Competency Ratings
-  competencies = signal<CompetencyRating[]>([
-    {
-      id: 'comp_1',
-      category: 'TECHNICAL',
-      title: 'Technical Mastery & Code Quality',
-      description: 'Demonstrates deep domain knowledge, writes clean maintainable code, and follows best practices.',
-      selfRating: 5,
-      managerRating: 4,
-      comments: 'Consistently delivers high quality features with excellent code standards.',
-    },
-    {
-      id: 'comp_2',
-      category: 'PROBLEM_SOLVING',
-      title: 'Problem Solving & Critical Thinking',
-      description: 'Analyzes complex requirements, troubleshoots system issues efficiently, and proposes optimal architectures.',
-      selfRating: 4,
-      managerRating: 4,
-      comments: 'Strong analytical skills in resolving production edge cases quickly.',
-    },
-    {
-      id: 'comp_3',
-      category: 'COLLABORATION',
-      title: 'Team Collaboration & Communication',
-      description: 'Communicates clearly with cross-functional teams, mentors junior engineers, and fosters teamwork.',
-      selfRating: 5,
-      managerRating: 5,
-      comments: 'Proactive team player with effective communication across departments.',
-    },
-    {
-      id: 'comp_4',
-      category: 'TIMELINESS',
-      title: 'Execution & Timely Delivery',
-      description: 'Meets project milestones consistently, manages sprint commitments, and respects project timelines.',
-      selfRating: 4,
-      managerRating: 4,
-      comments: 'Reliable execution with on-time sprint completions.',
-    },
-    {
-      id: 'comp_5',
-      category: 'LEADERSHIP',
-      title: 'Ownership & Initiative',
-      description: 'Takes ownership of key modules, drives innovation, and identifies areas for process improvements.',
-      selfRating: 4,
-      managerRating: 4,
-      comments: 'Takes end-to-end accountability for assigned modules.',
-    },
-  ]);
-
-  // OKRs / Goals
-  goals = signal<PerformanceGoal[]>([
-    {
-      id: 1,
-      title: 'Implement Database-Driven Enterprise RBAC System',
-      category: 'Architecture',
-      targetDate: '2026-08-15',
-      progress: 95,
-      weightage: 30,
-      status: 'IN_PROGRESS',
-      keyResults: 'Full dynamic menu tree, permission engine, role switching, and 200+ Swagger API specs.',
-    },
-    {
-      id: 2,
-      title: 'Optimize Front-End Load Time & Bundle Size',
-      category: 'Performance',
-      targetDate: '2026-08-30',
-      progress: 100,
-      weightage: 25,
-      status: 'COMPLETED',
-      keyResults: 'Achieved lazy loading, PrimeNG theme optimizations, and sub-second component renders.',
-    },
-    {
-      id: 3,
-      title: 'Automate Attendance & Payroll Monthly Reconciliations',
-      category: 'Automation',
-      targetDate: '2026-09-10',
-      progress: 60,
-      weightage: 25,
-      status: 'IN_PROGRESS',
-      keyResults: 'Integrated cron schedules for auto-swipe out and automated leave credits.',
-    },
-    {
-      id: 4,
-      title: 'Enhance Code Documentation & Unit Test Coverage',
-      category: 'Quality',
-      targetDate: '2026-09-30',
-      progress: 40,
-      weightage: 20,
-      status: 'IN_PROGRESS',
-      keyResults: 'Write comprehensive specs and OpenAPI documentation across all modules.',
-    },
-  ]);
-
-  // Review Cycles History
-  reviewHistory = signal<ReviewHistory[]>([
-    {
-      cycle: 'Q1 2026 Performance Review',
-      year: '2026',
-      period: 'Jan 2026 - Mar 2026',
-      overallRating: 4.6,
-      managerRating: 4.5,
-      selfRating: 4.7,
-      status: 'COMPLETED',
-      reviewedBy: 'HR Operations / Tech Lead',
-      comments: 'Exceeded expectations in lead delivery and component modularization.',
-    },
-    {
-      cycle: 'Annual Appraisal 2025',
-      year: '2025',
-      period: 'Jan 2025 - Dec 2025',
-      overallRating: 4.5,
-      managerRating: 4.4,
-      selfRating: 4.6,
-      status: 'COMPLETED',
-      reviewedBy: 'Engineering Manager',
-      comments: 'Outstanding contributions to core HRMS infrastructure.',
-    },
-  ]);
-
-  // 360 Feedback
-  feedbacks = signal<FeedbackItem[]>([
-    {
-      id: 1,
-      giverName: 'Rajesh Sharma',
-      giverRole: 'Engineering Manager',
-      avatarBg: 'bg-indigo-600',
-      rating: 5,
-      relationship: 'Manager',
-      date: '15 Jul 2026',
-      comment: 'Demonstrates outstanding ownership in architecting core backend features. Consistently dependable under tight deadlines.',
-      badge: 'Exceeds Expectations',
-    },
-    {
-      id: 2,
-      giverName: 'Priya Verma',
-      giverRole: 'Lead UI/UX Designer',
-      avatarBg: 'bg-emerald-600',
-      rating: 4,
-      relationship: 'Peer',
-      date: '10 Jul 2026',
-      comment: 'Great collaboration during the UI refactoring phase. Very responsive to design feedback and detail-oriented.',
-      badge: 'Great Collaborator',
-    },
-    {
-      id: 3,
-      giverName: 'Amit Patel',
-      giverRole: 'Senior QA Engineer',
-      avatarBg: 'bg-amber-600',
-      rating: 5,
-      relationship: 'Peer',
-      date: '02 Jul 2026',
-      comment: 'Clean API integration and minimal bug regression during feature handoffs. Excellent developer testing.',
-      badge: 'Quality Champion',
-    },
-  ]);
-
-  // Modals state
-  showGoalModal = false;
-  showSelfAppraisalModal = false;
-  goalForm!: FormGroup;
-
-  categoryOptions = [
-    { label: 'Architecture & Technical', value: 'Architecture' },
-    { label: 'Performance & Optimization', value: 'Performance' },
-    { label: 'Automation & Productivity', value: 'Automation' },
-    { label: 'Quality & Process', value: 'Quality' },
-    { label: 'Leadership & Teamwork', value: 'Leadership' },
+  columns: TableColumn[] = [
+    { key: 'monthName', header: 'Month & Year' },
+    { key: 'employeeName', header: 'Employee' },
+    { key: 'selfRating', header: 'Employee Self Rating' },
+    { key: 'managerRating', header: 'Manager Rating' },
+    { key: 'hrRating', header: 'HR Rating' },
+    { key: 'finalScore', header: 'Final Score' },
+    { key: 'status', header: 'Review Status' },
+    { key: 'actions', header: 'Action' }
   ];
 
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly messageService: MessageService
-  ) {}
+  ratings: any[] = [];
+  isLoading = signal(false);
+  submitting = signal(false);
+
+  selectedYear: number = new Date().getFullYear();
+  yearOptions = [
+    { label: 'Year 2026', value: 2026 },
+    { label: 'Year 2025', value: 2025 },
+    { label: 'Year 2024', value: 2024 }
+  ];
+
+  monthOptions = [
+    { label: 'January', value: 1 },
+    { label: 'February', value: 2 },
+    { label: 'March', value: 3 },
+    { label: 'April', value: 4 },
+    { label: 'May', value: 5 },
+    { label: 'June', value: 6 },
+    { label: 'July', value: 7 },
+    { label: 'August', value: 8 },
+    { label: 'September', value: 9 },
+    { label: 'October', value: 10 },
+    { label: 'November', value: 11 },
+    { label: 'December', value: 12 }
+  ];
+
+  summary = {
+    totalMonthsSubmitted: 0,
+    avgSelfRating: 0,
+    avgManagerRating: 0,
+    avgHrRating: 0,
+    cumulativeAppraisalScore: 0,
+    year: new Date().getFullYear()
+  };
+
+  // Modals & Drawers
+  submitDrawerVisible = false;
+  reviewDrawerVisible = false;
+  viewDrawerVisible = false;
+
+  selectedRecord: any = null;
+
+  selfForm!: FormGroup;
+  reviewForm!: FormGroup;
+
+  isHrOrManager = false;
 
   ngOnInit(): void {
-    this.goalForm = this.fb.group({
-      title: ['', [Validators.required, Validators.minLength(5)]],
-      category: ['Architecture', Validators.required],
-      targetDate: ['', Validators.required],
-      weightage: [20, [Validators.required, Validators.min(5), Validators.max(100)]],
-      keyResults: ['', Validators.required],
+    this.checkUserRole();
+    this.initForms();
+    this.loadRatings();
+  }
+
+  checkUserRole(): void {
+    const user = this.authService.user();
+    const roleStr = JSON.stringify(user || '').toUpperCase();
+    this.isHrOrManager = roleStr.includes('HR') || roleStr.includes('ADMIN') || roleStr.includes('MANAGER');
+  }
+
+  initForms(): void {
+    const currentMonth = new Date().getMonth() + 1;
+
+    this.selfForm = this.fb.group({
+      year: [this.selectedYear, [Validators.required]],
+      month: [currentMonth, [Validators.required]],
+      achievements: ['', [Validators.required, Validators.minLength(10)]],
+      selfRating: [4, [Validators.required, Validators.min(1), Validators.max(5)]],
+      selfRemarks: ['']
+    });
+
+    this.reviewForm = this.fb.group({
+      id: [null, [Validators.required]],
+      managerRating: [null],
+      managerRemarks: [''],
+      hrRating: [null],
+      hrRemarks: [''],
+      status: ['']
     });
   }
 
-  setTab(tab: 'OVERVIEW' | 'COMPETENCIES' | 'GOALS' | 'REVIEWS' | 'FEEDBACK'): void {
-    this.activeTab.set(tab);
-  }
-
-  onSelfRatingChange(comp: CompetencyRating, newRating: number): void {
-    const updated = this.competencies().map((c) =>
-      c.id === comp.id ? { ...c, selfRating: newRating } : c
-    );
-    this.competencies.set(updated);
-    this.recalculateSelfAverage();
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Rating Updated',
-      detail: `Updated self-rating for ${comp.title} to ${newRating} stars.`,
-      life: 2500,
+  loadRatings(): void {
+    this.isLoading.set(true);
+    this.performanceService.getMonthlyRatings(undefined, this.selectedYear).subscribe({
+      next: (res: any) => {
+        if (res && res.success) {
+          this.ratings = res.data || [];
+          if (res.summary) {
+            this.summary = res.summary;
+          }
+        }
+        this.isLoading.set(false);
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Error fetching performance ratings:', err);
+        this.isLoading.set(false);
+        this.cdr.markForCheck();
+      }
     });
   }
 
-  private recalculateSelfAverage(): void {
-    const list = this.competencies();
-    if (!list.length) return;
-    const sum = list.reduce((acc, curr) => acc + curr.selfRating, 0);
-    const avg = Number((sum / list.length).toFixed(1));
-    this.selfAverageRating.set(avg);
+  openSubmitDrawer(record?: any): void {
+    if (record) {
+      this.selectedRecord = record;
+      this.selfForm.patchValue({
+        year: record.year,
+        month: record.month,
+        achievements: record.achievements,
+        selfRating: Number(record.self_rating || record.selfRating || 4),
+        selfRemarks: record.self_remarks || record.selfRemarks || ''
+      });
+    } else {
+      this.selectedRecord = null;
+      const currentMonth = new Date().getMonth() + 1;
+      this.selfForm.reset({
+        year: this.selectedYear,
+        month: currentMonth,
+        achievements: '',
+        selfRating: 4,
+        selfRemarks: ''
+      });
+    }
+    this.submitDrawerVisible = true;
+    this.cdr.markForCheck();
   }
 
-  openAddGoalModal(): void {
-    this.goalForm.reset({
-      category: 'Architecture',
-      weightage: 20,
-      targetDate: new Date().toISOString().split('T')[0],
-    });
-    this.showGoalModal = true;
-  }
-
-  saveGoal(): void {
-    if (this.goalForm.invalid) {
-      this.goalForm.markAllAsTouched();
+  onSubmitSelfRating(): void {
+    if (this.selfForm.invalid) {
+      this.selfForm.markAllAsTouched();
+      this.messageService.add({ severity: 'warn', summary: 'Validation Error', detail: 'Please fill all required details and self-rating.' });
       return;
     }
 
-    const val = this.goalForm.value;
-    const newGoal: PerformanceGoal = {
-      id: Date.now(),
-      title: val.title,
-      category: val.category,
-      targetDate: val.targetDate,
-      progress: 0,
-      weightage: Number(val.weightage),
-      status: 'IN_PROGRESS',
-      keyResults: val.keyResults,
+    const val = this.selfForm.value;
+    const monthObj = this.monthOptions.find(m => m.value === Number(val.month));
+    const payload = {
+      year: Number(val.year),
+      month: Number(val.month),
+      monthName: monthObj ? monthObj.label : `Month ${val.month}`,
+      achievements: val.achievements,
+      selfRating: Number(val.selfRating),
+      selfRemarks: val.selfRemarks
     };
 
-    this.goals.update((current) => [newGoal, ...current]);
-    this.totalGoalsCount.update((cnt) => cnt + 1);
-
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Goal Created',
-      detail: 'New performance goal added successfully.',
+    this.submitting.set(true);
+    this.performanceService.submitSelfRating(payload).subscribe({
+      next: (res: any) => {
+        this.submitting.set(false);
+        if (res && res.success) {
+          this.messageService.add({ severity: 'success', summary: 'Submitted', detail: 'Monthly self-rating submitted successfully!' });
+          this.submitDrawerVisible = false;
+          this.loadRatings();
+        } else {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: res?.message || 'Submission failed' });
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.submitting.set(false);
+        console.error('Submission error:', err);
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to submit rating' });
+        this.cdr.markForCheck();
+      }
     });
-
-    this.showGoalModal = false;
   }
 
-  submitSelfAppraisal(): void {
-    this.currentCycleStatus.set('SUBMITTED');
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Self Appraisal Submitted',
-      detail: 'Your performance evaluation has been submitted to your manager for review.',
-      life: 4000,
+  openReviewDrawer(record: any): void {
+    this.selectedRecord = record;
+    this.reviewForm.patchValue({
+      id: record.id,
+      managerRating: record.manager_rating ? Number(record.manager_rating) : 4,
+      managerRemarks: record.manager_remarks || '',
+      hrRating: record.hr_rating ? Number(record.hr_rating) : 4,
+      hrRemarks: record.hr_remarks || '',
+      status: record.status || 'APPROVED'
+    });
+    this.reviewDrawerVisible = true;
+    this.cdr.markForCheck();
+  }
+
+  onSubmitReview(): void {
+    if (!this.selectedRecord) return;
+
+    const val = this.reviewForm.value;
+    const payload = {
+      managerRating: val.managerRating ? Number(val.managerRating) : undefined,
+      managerRemarks: val.managerRemarks,
+      hrRating: val.hrRating ? Number(val.hrRating) : undefined,
+      hrRemarks: val.hrRemarks,
+      status: val.status || 'APPROVED'
+    };
+
+    this.submitting.set(true);
+    this.performanceService.reviewMonthlyRating(this.selectedRecord.id, payload).subscribe({
+      next: (res: any) => {
+        this.submitting.set(false);
+        if (res && res.success) {
+          this.messageService.add({ severity: 'success', summary: 'Review Saved', detail: 'Manager/HR appraisal review saved successfully!' });
+          this.reviewDrawerVisible = false;
+          this.loadRatings();
+        } else {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: res?.message || 'Review update failed' });
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.submitting.set(false);
+        console.error('Review error:', err);
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to save review' });
+        this.cdr.markForCheck();
+      }
     });
   }
 
-  getStatusSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {
-    switch (status) {
-      case 'COMPLETED':
-        return 'success';
-      case 'IN_PROGRESS':
-      case 'UNDER_REVIEW':
-      case 'SUBMITTED':
-        return 'info';
-      case 'ON_HOLD':
-      case 'DRAFT':
-        return 'warn';
-      case 'DELAYED':
-        return 'danger';
-      default:
-        return 'secondary';
-    }
+  openViewDrawer(record: any): void {
+    this.selectedRecord = record;
+    this.viewDrawerVisible = true;
+    this.cdr.markForCheck();
+  }
+
+  deleteRecord(id: number): void {
+    this.performanceService.deleteRating(id).subscribe({
+      next: (res: any) => {
+        if (res && res.success) {
+          this.messageService.add({ severity: 'info', summary: 'Deleted', detail: 'Rating entry deleted.' });
+          this.loadRatings();
+        }
+      },
+      error: (err) => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to delete rating' });
+      }
+    });
+  }
+
+  getStatusBadgeClass(status: string): string {
+    const s = (status || '').toUpperCase();
+    if (s === 'APPROVED') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    if (s === 'MANAGER_REVIEWED') return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+    return 'bg-amber-50 text-amber-700 border-amber-200';
   }
 }
