@@ -25,7 +25,8 @@
               'text-indigo-600 border-b-2 border-indigo-600 font-bold transition-all duration-300': activeTab === tab.value,
               'text-slate-500 hover:text-slate-800 border-b-2 border-transparent hover:border-slate-300 transition-all duration-300':
                 activeTab !== tab.value,
-            }" class="px-3 py-2 text-sm transition-colors duration-200 focus:outline-none flex items-center gap-2 cursor-pointer">
+            }"
+        class="px-3 py-2 text-sm transition-colors duration-200 focus:outline-none flex items-center gap-2 cursor-pointer">
         <i *ngIf="tab.icon" [class]="tab.icon"></i>
         {{ tab.label }}
         <span *ngIf="tab.count !== undefined" [ngClass]="{
@@ -314,12 +315,15 @@
 
     <!-- Pagination Buttons -->
     <div class="flex items-center space-x-1 overflow-x-auto">
-      <button class="px-2.5 py-1.5 rounded-md text-xs font-bold text-slate-500 hover:text-white hover:bg-indigo-600 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition-colors cursor-pointer" (click)="goToFirst()" title="First page"
-        [disabled]="currentPage === 1" aria-label="Go to first page">
+      <button
+        class="px-2.5 py-1.5 rounded-md text-xs font-bold text-slate-500 hover:text-white hover:bg-indigo-600 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition-colors cursor-pointer"
+        (click)="goToFirst()" title="First page" [disabled]="currentPage === 1" aria-label="Go to first page">
         ⟪
       </button>
-      <button class="px-3 py-1.5 rounded-md text-xs font-bold text-slate-600 hover:text-white hover:bg-indigo-600 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition-colors cursor-pointer flex items-center gap-1" (click)="changePage(currentPage - 1)" title="Previous page"
-        [disabled]="currentPage === 1" aria-label="Previous page">
+      <button
+        class="px-3 py-1.5 rounded-md text-xs font-bold text-slate-600 hover:text-white hover:bg-indigo-600 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition-colors cursor-pointer flex items-center gap-1"
+        (click)="changePage(currentPage - 1)" title="Previous page" [disabled]="currentPage === 1"
+        aria-label="Previous page">
         <span class="hidden sm:inline">Previous</span>
         <span class="sm:hidden">‹</span>
       </button>
@@ -333,13 +337,16 @@
         </button>
         }
       </span>
-      <button class="px-3 py-1.5 rounded-md text-xs font-bold text-slate-600 hover:text-white hover:bg-indigo-600 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition-colors cursor-pointer flex items-center gap-1" (click)="changePage(currentPage + 1)" title="Next page"
-        [disabled]="currentPage === totalPages" aria-label="Next page">
+      <button
+        class="px-3 py-1.5 rounded-md text-xs font-bold text-slate-600 hover:text-white hover:bg-indigo-600 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition-colors cursor-pointer flex items-center gap-1"
+        (click)="changePage(currentPage + 1)" title="Next page" [disabled]="currentPage === totalPages"
+        aria-label="Next page">
         <span class="hidden sm:inline">Next</span>
         <span class="sm:hidden">›</span>
       </button>
-      <button class="px-2.5 py-1.5 rounded-md text-xs font-bold text-slate-500 hover:text-white hover:bg-indigo-600 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition-colors cursor-pointer" (click)="goToLast()" title="Last page"
-        [disabled]="currentPage === totalPages" aria-label="Go to last page">
+      <button
+        class="px-2.5 py-1.5 rounded-md text-xs font-bold text-slate-500 hover:text-white hover:bg-indigo-600 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition-colors cursor-pointer"
+        (click)="goToLast()" title="Last page" [disabled]="currentPage === totalPages" aria-label="Go to last page">
         ⟫
       </button>
     </div>

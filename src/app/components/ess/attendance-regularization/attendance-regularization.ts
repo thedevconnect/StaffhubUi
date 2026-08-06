@@ -16,6 +16,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { ActivatedRoute } from '@angular/router';
 import { AttendanceService } from '../../../shared/services/attendance.service';
 import { TableColumn, TableTemplate } from '../../../shared/ui/table-template/table-template';
+import { parseLocalDatetime } from '../../../shared/utils/date-utils';
 
 @Component({
   selector: 'app-attendance-regularization',
@@ -169,17 +170,7 @@ export class AttendanceRegularization implements OnInit {
   }
 
   parseDatetime(val: any): Date | null {
-    if (!val) return null;
-    if (val instanceof Date) return val;
-    let str = String(val).trim();
-    if (!str) return null;
-
-    if (str.includes(' ') && !str.includes('Z') && !str.includes('+')) {
-      str = str.replace(' ', 'T') + 'Z';
-    } else if (str.includes('T') && !str.endsWith('Z') && !str.includes('+')) {
-      str = str + 'Z';
-    }
-    return new Date(str);
+    return parseLocalDatetime(val);
   }
 
   fetchRequests() {

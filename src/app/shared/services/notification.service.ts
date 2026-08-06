@@ -3,20 +3,24 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
+export interface NotificationItem {
+  id?: number;
+  type?: string;
+  date?: string;
+  reason?: string;
+  message: string;
+  targetUrl?: string;
+  employeeId?: number;
+  employeeName?: string;
+}
+
 export interface NotificationResponse {
   success: boolean;
   data: {
-    missingSwipes: Array<{
-      date: string;
-      message: string;
-    }>;
-    pendingRequests: Array<{
-      id: number;
-      employeeId: number;
-      employeeName: string;
-      date: string;
-      message: string;
-    }>;
+    missingSwipes: NotificationItem[];
+    pendingRequests: NotificationItem[];
+    pendingLeaves: NotificationItem[];
+    pendingTickets: NotificationItem[];
   };
 }
 
@@ -27,7 +31,8 @@ export class NotificationService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiBaseUrl}/api/notifications`;
 
-  getNotifications(): Observable<NotificationResponse> {
-    return this.http.get<NotificationResponse>(this.apiUrl);
+  getNotifications(portal?: string): Observable<NotificationResponse> {
+    const url = portal ? `${this.apiUrl}?portal=${encodeURIComponent(portal)}` : this.apiUrl;
+    return this.http.get<NotificationResponse>(url);
   }
 }

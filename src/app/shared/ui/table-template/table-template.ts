@@ -146,6 +146,7 @@ export class TableTemplate implements OnChanges {
   @HostListener('document:webkitfullscreenchange', ['$event'])
   @HostListener('document:mozfullscreenchange', ['$event'])
   @HostListener('document:MSFullscreenChange', ['$event'])
+
   onFullscreenChange(event?: any): void {
     this.isFullscreen = !!document.fullscreenElement;
     if (this.isFullscreen) {

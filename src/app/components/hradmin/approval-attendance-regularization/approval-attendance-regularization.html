@@ -82,16 +82,13 @@
 
   <ng-template #actionsTpl let-item>
     <div class="flex items-center justify-center gap-1.5">
-      <p-button (click)="openDetailDrawer(item)" icon="pi pi-eye" [text]="true" [rounded]="true" severity="info"
-        size="small" pTooltip="View Details" tooltipPosition="top"></p-button>
-
-      <p-button (click)="quickApprove(item)" icon="pi pi-check" [text]="true" [rounded]="true" severity="success"
-        size="small" pTooltip="Approve" tooltipPosition="top"
-        *ngIf="item.status === 'Pending' || item.status === 'PENDING'"></p-button>
-
-      <p-button (click)="quickReject(item)" icon="pi pi-times" [text]="true" [rounded]="true" severity="danger"
-        size="small" pTooltip="Reject" tooltipPosition="top"
-        *ngIf="item.status === 'Pending' || item.status === 'PENDING'"></p-button>
+      <p-button (click)="openDetailDrawer(item)"
+        [icon]="(item.status === 'Pending' || item.status === 'PENDING') ? 'pi pi-check-square' : 'pi pi-eye'"
+        [text]="true" [rounded]="true"
+        [severity]="(item.status === 'Pending' || item.status === 'PENDING') ? 'primary' : 'info'"
+        size="small"
+        [pTooltip]="(item.status === 'Pending' || item.status === 'PENDING') ? 'Process Request (Reason Required)' : 'View Details'"
+        tooltipPosition="top"></p-button>
 
       <p-button (click)="viewHistory(item)" icon="pi pi-history" [text]="true" [rounded]="true" severity="secondary"
         size="small" pTooltip="View History" tooltipPosition="top"></p-button>
