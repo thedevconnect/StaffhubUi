@@ -9,12 +9,12 @@ import { ButtonModule } from 'primeng/button';
 import { DatePickerModule } from 'primeng/datepicker';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
-import { TableColumn, TableTemplate } from '../../../../shared/ui/table-template/table-template';
-import { AttendanceService } from '../../../../shared/services/attendance.service';
-import { LeaveService } from '../../../../shared/services/leave.service';
+import { TableColumn, TableTemplate } from '../../shared/ui/table-template/table-template';
+import { AttendanceService } from '../../shared/services/attendance.service';
+import { LeaveService } from '../../shared/services/leave.service';
 import { forkJoin, Subscription } from 'rxjs';
-import { SocketService } from '../../../../shared/services/socket.service';
-import { AuthService } from '../../../../shared/services/services/auth.service';
+import { SocketService } from '../../shared/services/socket.service';
+import { AuthService } from '../../shared/services/services/auth.service';
 
 interface AttendanceCard {
   label: string;
@@ -97,6 +97,20 @@ export class HrDashboard implements OnInit, OnDestroy {
     this.loadDashboardSummary(this.formattedSelectedDate);
   }
 
+  previousDay(): void {
+    const current = this.selectedDate ? new Date(this.selectedDate) : new Date();
+    current.setDate(current.getDate() - 1);
+    this.selectedDate = current;
+    this.onDateChange();
+  }
+
+  nextDay(): void {
+    const current = this.selectedDate ? new Date(this.selectedDate) : new Date();
+    current.setDate(current.getDate() + 1);
+    this.selectedDate = current;
+    this.onDateChange();
+  }
+
   resetToToday(): void {
     this.selectedDate = new Date();
     this.formattedSelectedDate = this.formatDate(this.selectedDate);
@@ -110,7 +124,6 @@ export class HrDashboard implements OnInit, OnDestroy {
 
   breadcrumbItems: MenuItem[] = [{ label: 'HR Dashboard' }];
   isLoading = false;
-  confirmationService = inject(ConfirmationService);
 
   // KPI cards
   attendanceCards: AttendanceCard[] = [
@@ -422,27 +435,7 @@ export class HrDashboard implements OnInit, OnDestroy {
     });
   }
 
-  loadChartData(): void {
-    this.attendanceService.getHRDashboardChart().subscribe({
-      next: (res: any) => {
-        if (res && res.data) {
-          this.barChartData = res.data.map((item: any) => ({
-            day: item.day,
-            onTime: item.swipeInCount,
-            late: item.swipeOutCount,
-            total: item.total
-          }));
 
-          const maxTotal = Math.max(...this.barChartData.map(d => Math.max(d.onTime, d.late)), 10);
-          this.maxBarValue = Math.ceil(maxTotal * 1.2);
-          this.cdr.detectChanges();
-        }
-      },
-      error: (err) => {
-        console.error('Error fetching chart data:', err);
-      }
-    });
-  }
 
   loadDashboardSummary(dateStr?: string): void {
     const targetDate = dateStr || this.formattedSelectedDate;
@@ -543,8 +536,8 @@ export class HrDashboard implements OnInit, OnDestroy {
 
           // Update Exceptions
           this.exceptions = [
-            { label: 'Late Coming (> 10:00 AM)', count: s.lateComingCount, severity: 'danger', icon: 'pi-clock' },
-            { label: 'Early Logout (< 07:00 PM)', count: s.earlyOutCount, severity: 'warning', icon: 'pi-sign-out' },
+            { label: 'Late Coming (10:00 AM)', count: s.lateComingCount, severity: 'danger', icon: 'pi-clock' },
+            { label: 'Early Logout (07:00 PM)', count: s.earlyOutCount, severity: 'warning', icon: 'pi-sign-out' },
           ];
 
           this.cdr.detectChanges();

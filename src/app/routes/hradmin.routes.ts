@@ -8,7 +8,7 @@ export const hradminRoutes: Routes = [
     { path: '', redirectTo: 'hradmin-dashboard', pathMatch: 'full' },
     {
         path: 'hradmin-dashboard',
-        loadComponent: () => import('../components/hradmin/hrms-dashboard/hr-dashboard/hr-dashboard').then(c => c.HrDashboard)
+        loadComponent: () => import('../dashboard/hrAdmin-Dashboard/hr-dashboard').then(c => c.HrDashboard)
     },
     {
         path: 'employee-management',
@@ -32,10 +32,7 @@ export const hradminRoutes: Routes = [
         title: 'Report',
         loadComponent: () => import('../components/hradmin/hr-attendance-report/hr-attendance-report').then(c => c.HrAttendanceReport)
     },
-    // {
-    //     path: 'monthly-attendance',
-    //     loadComponent: () => import('../components/hradmin/monthly-attendance/monthly-attendance').then(c => c.MonthlyAttendance)
-    // },
+
     {
         path: 'resignation-approvals',
         title: 'Resignation Requests',

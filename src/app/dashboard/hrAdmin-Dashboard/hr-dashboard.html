@@ -50,27 +50,39 @@
   <div *ngIf="activeTab === 'dashboard'" class="space-y-6">
 
     <!-- Attendance Header & Date Picker Filter -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
+    <div
+      class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
       <div class="flex items-center gap-2">
         <h2 class="text-lg font-bold text-slate-900 tracking-tight">Attendance Summary</h2>
-        <span class="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-blue-700 border border-blue-100 select-none">
+        <span
+          class="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-blue-700 border border-blue-100 select-none">
           {{ isTodaySelected ? 'Live Today' : formattedSelectedDate }}
         </span>
       </div>
 
-      <!-- DatePicker Control -->
+      <!-- DatePicker & Next/Previous Navigation Controls -->
       <div class="flex items-center gap-3">
-        <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 shadow-2xs">
-          <i class="pi pi-calendar text-indigo-600 text-sm"></i>
-          <span class="text-xs font-bold text-slate-700">Filter Date:</span>
-          <p-datepicker 
-            [(ngModel)]="selectedDate" 
-            (onSelect)="onDateChange()" 
-            [dateFormat]="'yy-mm-dd'" 
-            [showIcon]="true"
-            styleClass="w-36 text-xs"
-            inputStyleClass="w-full text-xs font-bold text-slate-800 bg-white border border-slate-200 rounded-lg px-2 py-1 focus:ring-1 focus:ring-indigo-500">
-          </p-datepicker>
+        <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-xl p-1 shadow-2xs">
+          <!-- Previous Day Button -->
+          <button (click)="previousDay()" type="button" title="Previous Day"
+            class="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-indigo-600 hover:bg-slate-100 transition cursor-pointer">
+            <i class="pi pi-chevron-left text-xs font-bold"></i>
+          </button>
+
+          <!-- Date Picker -->
+          <div class="flex items-center gap-2 px-2 py-0.5">
+            <i class="pi pi-calendar text-indigo-600 text-sm"></i>
+            <p-datepicker [(ngModel)]="selectedDate" (onSelect)="onDateChange()" [dateFormat]="'yy-mm-dd'"
+              [showIcon]="true" styleClass="w-32 text-xs"
+              inputStyleClass="w-full text-xs font-bold text-slate-800 bg-white border border-slate-200 rounded-lg px-2 py-1 focus:ring-1 focus:ring-indigo-500">
+            </p-datepicker>
+          </div>
+
+          <!-- Next Day Button -->
+          <button (click)="nextDay()" type="button" title="Next Day"
+            class="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-indigo-600 hover:bg-slate-100 transition cursor-pointer">
+            <i class="pi pi-chevron-right text-xs font-bold"></i>
+          </button>
         </div>
 
         <button *ngIf="!isTodaySelected" (click)="resetToToday()" type="button"
@@ -100,7 +112,8 @@
         </div>
         <div class="mt-4">
           <h3 class="text-2xl font-bold tracking-tight text-slate-800">{{ card.count }}</h3>
-          <p class="text-[9px] text-slate-400 mt-0.5">{{ isTodaySelected ? 'Headcount today' : 'Headcount on ' + formattedSelectedDate }}</p>
+          <p class="text-[9px] text-slate-400 mt-0.5">{{ isTodaySelected ? 'Headcount today' : 'Headcount on ' +
+            formattedSelectedDate }}</p>
         </div>
       </div>
     </div>
@@ -232,7 +245,8 @@
           <i class="pi pi-desktop text-slate-400"></i>
         </div>
         <div class="space-y-4">
-          <div *ngFor="let src of sources" (click)="onSourceClick(src)" class="cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-lg transition-colors">
+          <div *ngFor="let src of sources" (click)="onSourceClick(src)"
+            class="cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-lg transition-colors">
             <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1">
               <span>{{ src.label }}</span>
               <span class="text-slate-800 font-bold">{{ src.count }}</span>
@@ -391,9 +405,9 @@
 </div>
 
 <!-- Details Modal for Clickable KPIs -->
-<p-dialog [(visible)]="isDetailsModalVisible" [modal]="true" [header]="detailsCategoryLabel + ' Details (' + (formattedSelectedDate || 'Today') + ')'"
-  [style]="{width: '80vw'}" [maximizable]="true" [draggable]="false" [resizable]="true"
-  [breakpoints]="{'960px': '95vw', '640px': '100vw'}"
+<p-dialog [(visible)]="isDetailsModalVisible" [modal]="true"
+  [header]="detailsCategoryLabel + ' Details (' + (formattedSelectedDate || 'Today') + ')'" [style]="{width: '80vw'}"
+  [maximizable]="true" [draggable]="false" [resizable]="true" [breakpoints]="{'960px': '95vw', '640px': '100vw'}"
   styleClass="custom-hr-details-dialog">
   <div class="p-2 md:p-4">
     <app-table-template [data]="detailsTableData" [columns]="detailsColumns" [isLoading]="isLoadingDetails"

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
@@ -9,6 +9,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { EmployeeManagementService } from '../../../shared/services/employee-management.service';
 import { AttendanceService, AttendanceRecord } from '../../../shared/services/attendance.service';
+import { formatLocalTime } from '../../../shared/utils/date-utils';
 
 export interface Employee {
   id: string;
@@ -41,6 +42,7 @@ export interface CalendarDay {
   providers: [MessageService, ConfirmationService],
   templateUrl: './emp-monthly-calendar.html',
   styleUrl: './emp-monthly-calendar.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EmpMonthlyCalendar implements OnInit {
   breadcrumbItems: any[] = [
@@ -56,9 +58,10 @@ export class EmpMonthlyCalendar implements OnInit {
   calendarDays: CalendarDay[] = [];
 
   constructor(
-    private messageService: MessageService,
-    private employeeManagementService: EmployeeManagementService,
-    private attendanceService: AttendanceService
+    private readonly messageService: MessageService,
+    private readonly employeeManagementService: EmployeeManagementService,
+    private readonly attendanceService: AttendanceService,
+    private readonly cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -85,6 +88,7 @@ export class EmpMonthlyCalendar implements OnInit {
             detail: 'No employees found for this company. Please add employees first.'
           });
         }
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.messageService.add({
@@ -92,6 +96,7 @@ export class EmpMonthlyCalendar implements OnInit {
           summary: 'Error',
           detail: 'Failed to fetch employee list from server.'
         });
+        this.cdr.markForCheck();
       }
     });
   }
@@ -123,6 +128,7 @@ export class EmpMonthlyCalendar implements OnInit {
           summary: 'Synchronized',
           detail: 'Employee calendar successfully synchronized.'
         });
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.isLoading = false;
@@ -131,6 +137,7 @@ export class EmpMonthlyCalendar implements OnInit {
           summary: 'Error',
           detail: 'Failed to refresh employee list.'
         });
+        this.cdr.markForCheck();
       }
     });
   }
@@ -163,18 +170,22 @@ export class EmpMonthlyCalendar implements OnInit {
         const historyMap = new Map<string, any>();
         history.forEach(record => {
           if (record.attendance_date) {
-            const dStr = new Date(record.attendance_date).toISOString().split('T')[0];
+            const dStr = typeof record.attendance_date === 'string'
+              ? record.attendance_date.split('T')[0]
+              : new Date(record.attendance_date).toISOString().split('T')[0];
             historyMap.set(dStr, record);
           }
         });
 
         this.buildCalendarGrid(historyMap);
         this.isLoading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.isLoading = false;
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch attendance history.' });
         this.buildCalendarGrid(new Map());
+        this.cdr.markForCheck();
       }
     });
   }
@@ -216,17 +227,16 @@ export class EmpMonthlyCalendar implements OnInit {
 
       if (dateObj <= today) {
         const isSunday = dateObj.getDay() === 0;
-        const isSaturday = dateObj.getDay() === 6;
 
         if (record) {
           status = record.attendance_status === 'PRESENT' ? 'P' : (record.attendance_status === 'ON_LEAVE' ? 'L' : 'P');
           if (status === 'P') colorClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
           if (status === 'L') colorClass = 'bg-amber-50 text-amber-700 border-amber-200';
 
-          swipeInTime = record.swipe_in || null;
-          swipeOutTime = record.swipe_out || null;
-        } else if (isSunday || isSaturday) {
-          status = 'WO'; // Weekly Off
+          swipeInTime = record.swipe_in ? formatLocalTime(record.swipe_in) : null;
+          swipeOutTime = record.swipe_out ? formatLocalTime(record.swipe_out) : null;
+        } else if (isSunday) {
+          status = 'WO'; // Weekly Off (Sunday only)
           colorClass = 'bg-slate-50 text-slate-400 border-slate-200';
         } else {
           status = 'A'; // Absent
@@ -244,6 +254,7 @@ export class EmpMonthlyCalendar implements OnInit {
     }
 
     this.calendarDays = gridDays;
+    this.cdr.markForCheck();
   }
 
   // Summary counts for attendance

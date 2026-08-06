@@ -11,9 +11,12 @@ import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { SelectModule } from 'primeng/select';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { AttendanceService } from '../../../shared/services/attendance.service';
 import { TableColumn, TableTemplate, Tab } from '../../../shared/ui/table-template/table-template';
+
+import { parseLocalDatetime } from '../../../shared/utils/date-utils';
 
 @Component({
   selector: 'app-approval-attendance-regularization',
@@ -32,6 +35,7 @@ import { TableColumn, TableTemplate, Tab } from '../../../shared/ui/table-templa
     ToastModule,
     SelectModule,
     ConfirmDialogModule,
+    TooltipModule,
     TableTemplate
   ],
   providers: [MessageService, ConfirmationService],
@@ -124,17 +128,7 @@ export class ApprovalAttendanceRegularization implements OnInit {
   }
 
   parseDatetime(val: any): Date | null {
-    if (!val) return null;
-    if (val instanceof Date) return val;
-    let str = String(val).trim();
-    if (!str) return null;
-
-    if (str.includes(' ') && !str.includes('Z') && !str.includes('+')) {
-      str = str.replace(' ', 'T') + 'Z';
-    } else if (str.includes('T') && !str.endsWith('Z') && !str.includes('+')) {
-      str = str + 'Z';
-    }
-    return new Date(str);
+    return parseLocalDatetime(val);
   }
 
   ngOnInit() {
@@ -153,14 +147,14 @@ export class ApprovalAttendanceRegularization implements OnInit {
             employeeName: item.employee_name || item.employeeName || 'Employee',
             department: item.department_name || item.department || 'Staff',
             attendanceDate: item.attendanceDate || item.attendance_date,
-            correctionType: item.correctionType || 'Punch Correction',
-            checkIn: this.parseDatetime(item.checkIn),
-            checkOut: this.parseDatetime(item.checkOut),
+            correctionType: item.correctionType || item.correction_type || 'Punch Correction',
+            checkIn: this.parseDatetime(item.check_in || item.checkIn),
+            checkOut: this.parseDatetime(item.check_out || item.checkOut),
             reason: item.reason || '',
             status: item.status || 'Pending',
-            submittedOn: item.submittedOn || item.createdAt || new Date(),
-            managerRemarks: item.managerRemarks || item.remarks || '',
-            hrRemarks: item.hrRemarks || '',
+            submittedOn: item.submittedOn || item.createdAt || item.created_at || new Date(),
+            managerRemarks: item.managerRemarks || item.manager_remarks || item.remarks || '',
+            hrRemarks: item.hrRemarks || item.hr_remarks || '',
             approvedByName: item.approved_by_name || item.approvedByName || ''
           }));
         } else {
@@ -247,38 +241,7 @@ export class ApprovalAttendanceRegularization implements OnInit {
     });
   }
 
-  quickApprove(req: any) {
-    this.confirmationService.confirm({
-      message: `Are you sure you want to approve regularization for ${req.employeeName}?`,
-      header: 'Approve Request',
-      icon: 'pi pi-check-circle',
-      acceptIcon: "none",
-      rejectIcon: "none",
-      rejectButtonStyleClass: "p-button-text",
-      accept: () => {
-        this.selectedRequest = req;
-        this.processForm.patchValue({ hrRemarks: 'Approved automatically from quick action.' });
-        this.processRequest('Approved');
-      }
-    });
-  }
 
-  quickReject(req: any) {
-    this.confirmationService.confirm({
-      message: `Are you sure you want to reject regularization for ${req.employeeName}?`,
-      header: 'Reject Request',
-      icon: 'pi pi-times-circle',
-      acceptIcon: "none",
-      rejectIcon: "none",
-      acceptButtonStyleClass: "p-button-danger",
-      rejectButtonStyleClass: "p-button-text",
-      accept: () => {
-        this.selectedRequest = req;
-        this.processForm.patchValue({ hrRemarks: 'Rejected from quick action.' });
-        this.processRequest('Rejected');
-      }
-    });
-  }
 
   processRequest(status: 'Approved' | 'Rejected') {
     if (!this.selectedRequest) return;

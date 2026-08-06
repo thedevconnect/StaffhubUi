@@ -1,45 +1,34 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterModule } from '@angular/router';
-import { CardModule } from 'primeng/card';
-import { ButtonModule } from 'primeng/button';
+import { RouterLink } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { Breadcrumb } from 'primeng/breadcrumb';
+import { PayrollService } from '../../shared/services/payroll.service';
 
 @Component({
   selector: 'app-payroll-dashboard',
   standalone: true,
   imports: [
     CommonModule,
-    CardModule,
-    ButtonModule,
     TableModule,
     Breadcrumb,
-    RouterLink,
-    RouterModule
+    RouterLink
   ],
   templateUrl: './payroll-dashboard.html',
   styleUrl: './payroll-dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PayrollDashboard {
+export class PayrollDashboard implements OnInit {
+  private payrollService = inject(PayrollService);
+  private cdr = inject(ChangeDetectorRef);
+
   breadcrumbItems: any[] = [
     { label: 'Payroll Management', icon: 'pi pi-home', routerLink: '/payroll' },
     { label: 'Dashboard', icon: 'pi pi-chart-bar', routerLink: '/payroll/payroll-dashboard' }
   ];
 
-  stats = [
-    { label: 'Total Salary Disbursed (June)', value: '₹42,85,600', icon: 'pi pi-wallet', color: 'bg-blue-50 text-blue-600' },
-    { label: 'Employees Processed', value: '148', icon: 'pi pi-users', color: 'bg-emerald-50 text-emerald-600' },
-    { label: 'Pending Approvals', value: '0', icon: 'pi pi-check-circle', color: 'bg-amber-50 text-amber-600' },
-    { label: 'Tax & PF Contributions', value: '₹8,42,100', icon: 'pi pi-shield', color: 'bg-indigo-50 text-indigo-600' }
-  ];
-
-  payrollHistory = [
-    { month: 'June 2026', gross: '₹48,50,200', deductions: '₹5,64,600', net: '₹42,85,600', count: '148', status: 'Disbursed' },
-    { month: 'May 2026', gross: '₹46,20,500', deductions: '₹5,10,200', net: '₹41,10,300', count: '142', status: 'Disbursed' },
-    { month: 'April 2026', gross: '₹46,20,500', deductions: '₹5,10,200', net: '₹41,10,300', count: '142', status: 'Disbursed' }
-  ];
+  stats: any[] = [];
+  payrollHistory: any[] = [];
 
   activeModules = [
     {
@@ -65,4 +54,64 @@ export class PayrollDashboard {
     { title: 'Yearly Salary Components', desc: 'Oversee yearly bonuses, gratuity, and LTA allocations.' },
     { title: 'Employee Expense Statement', desc: 'Process tour reimbursements, travel fares, and local conveyances.' }
   ];
+
+  ngOnInit(): void {
+    this.loadDashboardSummary();
+  }
+
+  loadDashboardSummary(): void {
+    this.payrollService.getDashboardSummary().subscribe({
+      next: (res) => {
+        if (res && res.data) {
+          const d = res.data;
+          const currencyFormatter = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
+
+          this.stats = [
+            {
+              label: 'Total Salary Disbursed',
+              value: d.totalDisbursed ? currencyFormatter.format(d.totalDisbursed) : '₹0',
+              icon: 'pi pi-wallet',
+              color: 'bg-blue-50 text-blue-600'
+            },
+            {
+              label: 'Employees Processed',
+              value: String(d.processedCount || d.totalEmployees || 0),
+              icon: 'pi pi-users',
+              color: 'bg-emerald-50 text-emerald-600'
+            },
+            {
+              label: 'Pending Approvals',
+              value: String(d.pendingApprovals || 0),
+              icon: 'pi pi-check-circle',
+              color: 'bg-amber-50 text-amber-600'
+            },
+            {
+              label: 'Tax & PF Contributions',
+              value: d.taxPfContributions ? currencyFormatter.format(d.taxPfContributions) : '₹0',
+              icon: 'pi pi-shield',
+              color: 'bg-indigo-50 text-indigo-600'
+            }
+          ];
+
+          if (d.payrollHistory && d.payrollHistory.length > 0) {
+            this.payrollHistory = d.payrollHistory.map((h: any) => ({
+              month: h.month,
+              gross: currencyFormatter.format(h.gross || 0),
+              deductions: currencyFormatter.format(h.deductions || 0),
+              net: currencyFormatter.format(h.net || 0),
+              count: String(h.count || 0),
+              status: h.status || 'Disbursed'
+            }));
+          } else {
+            this.payrollHistory = [];
+          }
+
+          this.cdr.markForCheck();
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching payroll dashboard summary:', err);
+      }
+    });
+  }
 }

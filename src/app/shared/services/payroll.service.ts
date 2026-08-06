@@ -47,6 +47,10 @@ export class PayrollService {
     return this.http.put<any>(`${this.apiUrl}/yearly-components/${id}`, data);
   }
 
+  getDashboardSummary(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/dashboard-summary`);
+  }
+
   deleteYearlyComponent(id: number): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/yearly-components/${id}`);
   }

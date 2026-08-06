@@ -11,6 +11,7 @@ import {
   AttendanceRecord,
   DashboardSummary
 } from '../../../shared/services/attendance.service';
+import { parseLocalDatetime, formatLocalTime } from '../../../shared/utils/date-utils';
 import * as L from 'leaflet';
 
 @Component({
@@ -520,17 +521,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   }
 
   private parseDbDate(dateStr: string | null): Date | null {
-    if (!dateStr) return null;
-    let str = String(dateStr).trim();
-    if (!str) return null;
-
-    if (str.includes(' ') && !str.includes('Z') && !str.includes('+')) {
-      str = str.replace(' ', 'T') + 'Z';
-    } else if (str.includes('T') && !str.endsWith('Z') && !str.includes('+')) {
-      str = str + 'Z';
-    }
-    const d = new Date(str);
-    return isNaN(d.getTime()) ? null : d;
+    return parseLocalDatetime(dateStr);
   }
 
   private formatMsToHMS(ms: number): string {
@@ -542,10 +533,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   }
 
   private formatDateTimeToTime(dateStr: string | null): string {
-    if (!dateStr) return '-';
-    const date = this.parseDbDate(dateStr);
-    if (!date) return '-';
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    return formatLocalTime(dateStr);
   }
 
   private getBrowserName(): string {
@@ -572,14 +560,11 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   private getDeviceName(): string {
     const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
     const isMobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile/i.test(userAgent);
-    
-    // iPadOS 13+ presents as MacIntel, so we check touch points
+
     const isIpadOS = navigator.maxTouchPoints && navigator.maxTouchPoints > 2 && /MacIntel/.test(navigator.platform);
-    
-    // We remove the innerWidth check because rotating a device or resizing a window 
-    // shouldn't change the device identity from Mobile to Laptop.
+
     const isMobile = isMobileRegex || isIpadOS;
-    
+
     return isMobile ? 'Mobile' : 'Laptop';
   }
 

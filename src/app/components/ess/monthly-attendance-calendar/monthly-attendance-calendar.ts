@@ -5,6 +5,7 @@ import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb';
 import { PopoverModule } from 'primeng/popover';
 import { AttendanceService } from '../../../shared/services/attendance.service';
 import { LeaveService, LeaveRequest } from '../../../shared/services/leave.service';
+import { formatLocalTime } from '../../../shared/utils/date-utils';
 import { forkJoin } from 'rxjs';
 
 @Component({
@@ -39,18 +40,7 @@ export class MonthlyAttendanceCalendar implements OnInit {
   }
 
   private formatTime(dateStr: string | null): string {
-    if (!dateStr) return '-';
-    let str = String(dateStr).trim();
-    if (!str) return '-';
-
-    if (str.includes(' ') && !str.includes('Z') && !str.includes('+')) {
-      str = str.replace(' ', 'T') + 'Z';
-    } else if (str.includes('T') && !str.endsWith('Z') && !str.includes('+')) {
-      str = str + 'Z';
-    }
-    const d = new Date(str);
-    if (isNaN(d.getTime())) return '-';
-    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    return formatLocalTime(dateStr);
   }
 
   generateCalendar() {

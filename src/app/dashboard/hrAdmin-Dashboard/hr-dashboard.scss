@@ -150,12 +150,14 @@
    .p-dialog-header {
      padding: 1rem 1.25rem;
      border-bottom: 1px solid #e2e8f0;
+
      .p-dialog-title {
        font-weight: 700;
        font-size: 1.125rem;
        color: #0f172a;
      }
    }
+
    &.p-dialog-maximized {
      width: 100vw !important;
      height: 100vh !important;

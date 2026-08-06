@@ -135,34 +135,15 @@ export class EssDashboard implements OnInit {
       isSortable: true,
       pipe: 'date',
       pipeArgs: 'dd-MM-yyyy hh:mm a'
-    },
-
-    {
-      key: 'updated_at',
-      header: 'Updated At',
-      isVisible: true,
-      isSortable: true,
-      pipe: 'date',
-      pipeArgs: 'dd-MM-yyyy hh:mm a'
     }
+
   ]
 
+
   rowActions = [
-    {
-      label: 'View',
-      icon: 'pi pi-eye',
-      id: 'view'
-    },
-    {
-      label: 'Edit',
-      icon: 'pi pi-pencil',
-      id: 'edit'
-    },
-    {
-      label: 'Delete',
-      icon: 'pi pi-trash',
-      id: 'delete'
-    }
+    { label: 'View', icon: 'pi pi-eye', id: 'view' },
+    { label: 'Edit', icon: 'pi pi-pencil', id: 'edit' },
+    { label: 'Delete', icon: 'pi pi-trash', id: 'delete' }
   ];
   loadDashboardData(): void {
     this.loading.set(true)
