@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb';
 import { DialogModule } from 'primeng/dialog';
@@ -31,6 +31,8 @@ import * as L from 'leaflet';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EmployeeAttendance implements OnInit, OnDestroy {
+  readonly Math = Math;
+
   readonly currentTime = signal<string>('');
   readonly currentDate = signal<string>('');
 
@@ -54,6 +56,14 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     totalWorkingMinutes: 0
   });
 
+  readonly historyRecords = signal<AttendanceRecord[]>([]);
+  readonly historyTotal = signal<number>(0);
+  readonly historyPage = signal<number>(1);
+  readonly historyLimit = signal<number>(10);
+  readonly historyTotalPages = signal<number>(1);
+  readonly historyLoading = signal<boolean>(false);
+  readonly historySearch = signal<string>('');
+
   isActionLoading = false;
   swipeOutDialogVisible = false;
   swipeOutNote = '';
@@ -70,13 +80,15 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
 
   constructor(
     private readonly attendanceService: AttendanceService,
-    private readonly messageService: MessageService
+    private readonly messageService: MessageService,
+    private readonly cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
     this.updateClock();
     this.clockIntervalId = setInterval(() => this.updateClock(), 1000);
     this.loadAllData();
+    this.loadHistory(1, 10);
     this.checkIncompleteAttendance();
 
     this.attendanceService.getOfficeLocation().subscribe({
@@ -91,6 +103,81 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
         }
       }
     });
+  }
+
+  loadHistory(page: number = 1, limit: number = 10, search: string = ''): void {
+    this.historyLoading.set(true);
+    this.historyPage.set(page);
+    this.historyLimit.set(limit);
+    this.historySearch.set(search);
+
+    this.attendanceService.getHistory(page, limit, search).subscribe({
+      next: (res) => {
+        if (res.success && Array.isArray(res.data)) {
+          this.historyRecords.set(res.data);
+          if (res.pagination) {
+            this.historyTotal.set(res.pagination.total);
+            this.historyTotalPages.set(res.pagination.totalPages || Math.ceil(res.pagination.total / limit) || 1);
+          } else {
+            this.historyTotal.set(res.data.length);
+            this.historyTotalPages.set(Math.ceil(res.data.length / limit) || 1);
+          }
+        } else {
+          this.historyRecords.set([]);
+          this.historyTotal.set(0);
+          this.historyTotalPages.set(1);
+        }
+        this.historyLoading.set(false);
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.historyRecords.set([]);
+        this.historyLoading.set(false);
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  onHistorySearchInput(event: Event): void {
+    const val = (event.target as HTMLInputElement).value;
+    this.loadHistory(1, this.historyLimit(), val);
+  }
+
+  onHistoryPageChange(newPage: number): void {
+    if (newPage >= 1 && newPage <= this.historyTotalPages()) {
+      this.loadHistory(newPage, this.historyLimit(), this.historySearch());
+    }
+  }
+
+  onHistoryLimitChange(newLimit: number): void {
+    this.loadHistory(1, newLimit, this.historySearch());
+  }
+
+  getPagesArray(): number[] {
+    const total = this.historyTotalPages();
+    const current = this.historyPage();
+    const pages: number[] = [];
+    const maxVisible = 5;
+    let start = Math.max(1, current - 2);
+    let end = Math.min(total, start + maxVisible - 1);
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
+
+  formatWorkHours(minutes: number | null): string {
+    if (minutes === null || minutes === undefined || isNaN(minutes) || minutes < 0) return '-';
+    const hrs = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hrs}h ${mins}m`;
+  }
+
+  formatDisplayTime(dateStr: string | null): string {
+    return formatLocalTime(dateStr);
   }
 
   checkIncompleteAttendance(): void {

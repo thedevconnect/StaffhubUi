@@ -7,16 +7,14 @@ import {
   SimpleChanges,
   TemplateRef,
   ElementRef,
-  HostListener,
-  signal,
+  HostListener
 } from '@angular/core';
-import { CommonModule, NgClass, NgIf, NgFor, DatePipe } from '@angular/common';
+import { CommonModule, NgClass, NgIf, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SkeletonModule } from 'primeng/skeleton';
 import { MenuModule } from 'primeng/menu';
 import { ButtonModule } from 'primeng/button';
 import { MenuItem } from 'primeng/api';
-import { UserService } from '../../services/user-service';
 import { ExcelService } from '../../services/excel.service';
 
 export interface TableColumn {
@@ -40,8 +38,8 @@ export interface TableAction {
 export interface Tab {
   label: string;
   value: any;
-  count?: number; // Optional badge count
-  icon?: string; // Optional icon
+  count?: number;
+  icon?: string;
 }
 
 @Component({
@@ -49,22 +47,20 @@ export interface Tab {
   standalone: true,
   imports: [CommonModule, FormsModule, NgClass, NgIf, SkeletonModule, MenuModule, ButtonModule],
   templateUrl: './table-template.html',
-  styleUrls: ['./table-template.scss'],
+  styleUrls: ['./table-template.scss']
 })
 export class TableTemplate implements OnChanges {
   @Input() data: any[] = [];
   @Input() columns: TableColumn[] = [];
   @Input() pageSize = 5;
   @Input() totalCount = 0;
-  @Input() isLoading: boolean = false;
+  @Input() isLoading = false;
 
   // Template inputs
   @Input() actionTemplate: TemplateRef<any> | null = null;
   @Input() rowTemplate: TemplateRef<any> | null = null;
   @Input() customTemplate: TemplateRef<any> | null = null;
   @Input() headerCheckbox: TemplateRef<any> | null = null;
-
-  // Custom Cell Templates mapped by column key
   @Input() cellTemplates: { [key: string]: TemplateRef<any> } = {};
   @Input() headerExtraTemplate: TemplateRef<any> | null = null;
 
@@ -73,14 +69,22 @@ export class TableTemplate implements OnChanges {
   @Input() sortDirection: 'asc' | 'desc' = 'asc';
   @Input() searchText = '';
   @Input() pageSizeOptions: number[] = [5, 10, 20, 50, 100];
-  @Input() showRefresh: boolean = false;
-  @Input() showSortButtons: boolean = false;
-  @Input() showExport: boolean = false;
-  @Input() exportFileName: string = 'Exported_Data';
-  @Input() serverSide: boolean = false;
-  @Input() enableFullScreen: boolean = true;
+  @Input() showRefresh = false;
+  @Input() showSortButtons = false;
+  @Input() showExport = false;
+  @Input() exportFileName = 'Exported_Data';
+  @Input() serverSide = false;
+  @Input() enableFullScreen = true;
 
-  isFullscreen: boolean = false;
+  @Input() tableActions: TableAction[] = [
+    { label: 'View', icon: 'pi pi-eye', id: 'view' },
+    { label: 'Edit', icon: 'pi pi-pencil', id: 'edit' },
+    { label: 'Delete', icon: 'pi pi-trash', id: 'delete' }
+  ];
+  @Input() disableActionCondition: (actionId: string, row: any) => boolean = () => false;
+
+  @Input() tabs: Tab[] = [];
+  @Input() activeTab: any = null;
 
   @Output() pageChange = new EventEmitter<number>();
   @Output() sortChange = new EventEmitter<{ column: string; direction: 'asc' | 'desc' }>();
@@ -88,19 +92,28 @@ export class TableTemplate implements OnChanges {
   @Output() pageSizeChange = new EventEmitter<number>();
   @Output() refresh = new EventEmitter<void>();
   @Output() exportData = new EventEmitter<void>();
-
-  // Actions Menu
-  @Input() tableActions: TableAction[] = [
-    { label: 'View', icon: 'pi pi-eye', id: 'view' },
-    { label: 'Edit', icon: 'pi pi-pencil', id: 'edit' },
-    { label: 'Delete', icon: 'pi pi-trash', id: 'delete' }
-  ];
-  @Input() disableActionCondition: (actionId: string, row: any) => boolean = () => false;
   @Output() actionClicked = new EventEmitter<{ actionId: string; row: any }>();
+  @Output() tabChange = new EventEmitter<any>();
 
+  isFullscreen = false;
   menuItems: MenuItem[] = [];
+  paginatedData: any[] = [];
+  totalPages = 1;
+  Math = Math;
+  expandedStates: { [key: string]: boolean } = {};
 
-  toggleMenu(menu: any, event: any, row: any) {
+  constructor(
+    private excelService: ExcelService,
+    private elementRef: ElementRef
+  ) { }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['data'] || changes['currentPage'] || changes['pageSize'] || changes['totalCount']) {
+      this.updatePaginatedData();
+    }
+  }
+
+  toggleMenu(menu: any, event: any, row: any): void {
     this.menuItems = this.tableActions.map(action => ({
       label: action.label,
       icon: action.icon,
@@ -110,91 +123,50 @@ export class TableTemplate implements OnChanges {
     menu.toggle(event);
   }
 
-  constructor(
-    private userService: UserService,
-    private excelService: ExcelService,
-    private elementRef: ElementRef
-  ) { }
-
-  toggleFullScreen() {
+  toggleFullScreen(): void {
     const el = this.elementRef.nativeElement;
-
     if (!document.fullscreenElement) {
       if (el.requestFullscreen) {
         el.requestFullscreen().catch(() => this.toggleCssFullScreen());
-      } else if ((el as any).webkitRequestFullscreen) {
-        (el as any).webkitRequestFullscreen();
-      } else if ((el as any).msRequestFullscreen) {
-        (el as any).msRequestFullscreen();
       } else {
         this.toggleCssFullScreen();
       }
       this.isFullscreen = true;
     } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen().catch(() => { });
-      } else if ((document as any).webkitExitFullscreen) {
-        (document as any).webkitExitFullscreen();
-      } else if ((document as any).msExitFullscreen) {
-        (document as any).msExitFullscreen();
-      }
+      if (document.exitFullscreen) document.exitFullscreen().catch(() => { });
       this.isFullscreen = false;
     }
   }
 
-  @HostListener('document:fullscreenchange', ['$event'])
-  @HostListener('document:webkitfullscreenchange', ['$event'])
-  @HostListener('document:mozfullscreenchange', ['$event'])
-  @HostListener('document:MSFullscreenChange', ['$event'])
-
-  onFullscreenChange(event?: any): void {
+  @HostListener('document:fullscreenchange')
+  @HostListener('document:webkitfullscreenchange')
+  onFullscreenChange(): void {
     this.isFullscreen = !!document.fullscreenElement;
-    if (this.isFullscreen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    document.body.style.overflow = this.isFullscreen ? 'hidden' : '';
   }
 
   private toggleCssFullScreen(): void {
     this.isFullscreen = !this.isFullscreen;
-    if (this.isFullscreen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    document.body.style.overflow = this.isFullscreen ? 'hidden' : '';
   }
-
-  // Tab Inputs/Outputs
-  @Input() tabs: Tab[] = [];
-  @Input() activeTab: any = null;
-  @Output() tabChange = new EventEmitter<any>();
 
   onTabClick(tab: Tab): void {
     if (this.activeTab !== tab.value) {
       this.activeTab = tab.value;
-      this.currentPage = 1; // Reset to first page on tab change
+      this.currentPage = 1;
       this.tabChange.emit(tab.value);
     }
   }
 
-  paginatedData: any[] = [];
-  totalPages = 1;
-  Math = Math;
+  getRowId = (item: any, idx: number) => item?.id ?? item?.ID ?? item?.resignId ?? item?.employeId ?? item?.refNo ?? idx;
 
-  expandedStates: { [key: string]: boolean } = {};
+  private getCellKey = (item: any, col: string, idx: number) => `${this.getRowId(item, idx)}_${col}`;
 
-  getRowId = (item: any, idx: number) =>
-    item?.id ?? item?.ID ?? item?.resignId ?? item?.employeId ?? item?.refNo ?? idx;
-
-  private getCellKey = (item: any, col: string, idx: number) =>
-    `${this.getRowId(item, idx)}_${col}`;
-
-  toggleExpand(item: any, col: string, idx: number) {
+  toggleExpand(item: any, col: string, idx: number): void {
     this.expandedStates[this.getCellKey(item, col, idx)] = !this.isExpanded(item, col, idx);
   }
 
-  isExpanded(item: any, col: string, idx: number) {
+  isExpanded(item: any, col: string, idx: number): boolean {
     return !!this.expandedStates[this.getCellKey(item, col, idx)];
   }
 
@@ -202,9 +174,7 @@ export class TableTemplate implements OnChanges {
     const text = this.getDeepValue(item, col);
     if (typeof text !== 'string') return text;
     const words = text.split(/\s+/);
-    return words.length > 4 && !this.isExpanded(item, col, idx)
-      ? words.slice(0, 4).join(' ') + '...'
-      : text;
+    return words.length > 4 && !this.isExpanded(item, col, idx) ? words.slice(0, 4).join(' ') + '...' : text;
   }
 
   shouldShowMore(item: any, col: string): boolean {
@@ -213,13 +183,7 @@ export class TableTemplate implements OnChanges {
   }
 
   get skeletonRows(): number[] {
-    return Array.from({ length: 5 }, (_, i) => i);
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['data'] || changes['currentPage'] || changes['pageSize'] || changes['totalCount']) {
-      this.updatePaginatedData();
-    }
+    return [0, 1, 2, 3, 4];
   }
 
   updatePaginatedData(): void {
@@ -227,20 +191,14 @@ export class TableTemplate implements OnChanges {
       this.paginatedData = this.data || [];
       this.totalPages = Math.ceil(this.totalCount / this.pageSize) || 1;
     } else {
-      const rawData = this.data || [];
-
-      // 1. Filter locally
-      let processed = [...rawData];
+      let processed = [...(this.data || [])];
       const search = (this.searchText || '').toLowerCase().trim();
       if (search) {
         processed = processed.filter(item =>
-          Object.values(item).some(val =>
-            String(val ?? '').toLowerCase().includes(search)
-          )
+          Object.values(item).some(val => String(val ?? '').toLowerCase().includes(search))
         );
       }
 
-      // 2. Sort locally
       if (this.sortColumn) {
         const col = this.sortColumn;
         const dir = this.sortDirection;
@@ -249,22 +207,14 @@ export class TableTemplate implements OnChanges {
           const bv = this.getDeepValue(b, col);
           if (av == null) return 1;
           if (bv == null) return -1;
-          const result = String(av).localeCompare(String(bv), undefined, {
-            numeric: true,
-            sensitivity: 'base'
-          });
-          return dir === 'asc' ? result : -result;
+          const res = String(av).localeCompare(String(bv), undefined, { numeric: true, sensitivity: 'base' });
+          return dir === 'asc' ? res : -res;
         });
       }
 
-      // 3. Paginate locally
       this.totalCount = processed.length;
       this.totalPages = Math.ceil(this.totalCount / this.pageSize) || 1;
-
-      // Safety check: if currentPage exceeds totalPages, reset to 1
-      if (this.currentPage > this.totalPages) {
-        this.currentPage = 1;
-      }
+      if (this.currentPage > this.totalPages) this.currentPage = 1;
 
       const startIndex = (this.currentPage - 1) * this.pageSize;
       this.paginatedData = processed.slice(startIndex, startIndex + this.pageSize);
@@ -272,18 +222,15 @@ export class TableTemplate implements OnChanges {
   }
 
   get visibleColumnsCount(): number {
-    return (this.columns || []).filter((col) => col.isVisible).length;
+    return (this.columns || []).filter(col => col.isVisible !== false).length;
   }
 
   get shouldShowRefresh(): boolean {
-    // Show refresh button if showRefresh is explicitly true OR if refresh event has subscribers
     return this.showRefresh || this.refresh.observed;
   }
 
   onRefreshClick(): void {
-    if (!this.isLoading) {
-      this.refresh.emit();
-    }
+    if (!this.isLoading) this.refresh.emit();
   }
 
   get visiblePages(): number[] {
@@ -291,16 +238,11 @@ export class TableTemplate implements OnChanges {
     const current = this.currentPage;
     const maxVisible = 5;
 
-    if (total <= maxVisible) {
-      return Array.from({ length: total }, (_, i) => i + 1);
-    }
+    if (total <= maxVisible) return Array.from({ length: total }, (_, i) => i + 1);
 
     let start = Math.max(current - Math.floor(maxVisible / 2), 1);
     let end = Math.min(start + maxVisible - 1, total);
-
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(end - maxVisible + 1, 1);
-    }
+    if (end - start + 1 < maxVisible) start = Math.max(end - maxVisible + 1, 1);
 
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
@@ -309,30 +251,16 @@ export class TableTemplate implements OnChanges {
     if (page > 0 && page <= this.totalPages) {
       this.currentPage = page;
       this.pageChange.emit(page);
-      if (!this.serverSide) {
-        this.updatePaginatedData();
-      }
+      if (!this.serverSide) this.updatePaginatedData();
     }
   }
 
   goToFirst(): void {
-    if (this.currentPage !== 1) {
-      this.currentPage = 1;
-      this.pageChange.emit(this.currentPage);
-      if (!this.serverSide) {
-        this.updatePaginatedData();
-      }
-    }
+    if (this.currentPage !== 1) this.changePage(1);
   }
 
   goToLast(): void {
-    if (this.currentPage !== this.totalPages) {
-      this.currentPage = this.totalPages;
-      this.pageChange.emit(this.currentPage);
-      if (!this.serverSide) {
-        this.updatePaginatedData();
-      }
-    }
+    if (this.currentPage !== this.totalPages) this.changePage(this.totalPages);
   }
 
   changePageSize(newSize: number): void {
@@ -347,36 +275,24 @@ export class TableTemplate implements OnChanges {
   onSearch(): void {
     this.currentPage = 1;
     this.searchChange.emit(this.searchText);
-    if (!this.serverSide) {
-      this.updatePaginatedData();
-    }
+    if (!this.serverSide) this.updatePaginatedData();
   }
 
   onSort(columnKey: string): void {
-    let newDirection: 'asc' | 'desc' = 'asc';
-    if (this.sortColumn === columnKey && this.sortDirection === 'asc') {
-      newDirection = 'desc';
-    }
+    const newDirection = (this.sortColumn === columnKey && this.sortDirection === 'asc') ? 'desc' : 'asc';
     this.sortColumn = columnKey;
     this.sortDirection = newDirection;
     this.sortChange.emit({ column: columnKey, direction: newDirection });
-    if (!this.serverSide) {
-      this.updatePaginatedData();
-    }
+    if (!this.serverSide) this.updatePaginatedData();
   }
 
   getDeepValue(o: any, key: string): any {
     if (!o || !key) return null;
-
     return key.split('.').reduce((obj, i) => {
       if (!obj) return null;
-
-      // Try exact match first
       if (obj[i] !== undefined) return obj[i];
-
-      // Try case-insensitive match
       const lowerKey = i.toLowerCase();
-      const actualKey = Object.keys(obj).find((k) => k.toLowerCase() === lowerKey);
+      const actualKey = Object.keys(obj).find(k => k.toLowerCase() === lowerKey);
       return actualKey ? obj[actualKey] : null;
     }, o);
   }
@@ -384,28 +300,18 @@ export class TableTemplate implements OnChanges {
   isDateField(col: TableColumn, item: any): boolean {
     if (col.format === 'date' || col.pipe === 'date') return true;
     const lowerKey = (col.key || '').toLowerCase();
-    if (
-      lowerKey.includes('date') ||
-      lowerKey.includes('created_at') ||
-      lowerKey.includes('updated_at') ||
-      lowerKey.includes('joiningdate')
-    ) {
+    if (lowerKey.includes('date') || lowerKey.includes('created_at') || lowerKey.includes('updated_at') || lowerKey.includes('joiningdate')) {
       const val = this.getDeepValue(item, col.key);
-      if (typeof val === 'string' && (val.includes('T') || /^\d{4}-\d{2}-\d{2}/.test(val))) {
-        return true;
-      }
+      if (typeof val === 'string' && (val.includes('T') || /^\d{4}-\d{2}-\d{2}/.test(val))) return true;
     }
     return false;
   }
 
   formatDateCell(val: any, pipeArgs?: string): string {
     if (!val) return '-';
-    if (typeof val === 'string') {
-      const str = val.trim();
-      if (str.includes(' to ')) {
-        const parts = str.split(' to ');
-        return `${this.formatDateCell(parts[0])} to ${this.formatDateCell(parts[1])}`;
-      }
+    if (typeof val === 'string' && val.includes(' to ')) {
+      const parts = val.split(' to ');
+      return `${this.formatDateCell(parts[0])} to ${this.formatDateCell(parts[1])}`;
     }
 
     try {
@@ -420,9 +326,7 @@ export class TableTemplate implements OnChanges {
       const day = String((isISOString || isDateOnlyUTC) ? d.getUTCDate() : d.getDate()).padStart(2, '0');
       const dateStr = `${year}-${month}-${day}`;
 
-      if (isDateOnlyUTC) {
-        return dateStr;
-      }
+      if (isDateOnlyUTC) return dateStr;
 
       const rawHours = isISOString ? d.getUTCHours() : d.getHours();
       const rawMinutes = isISOString ? d.getUTCMinutes() : d.getMinutes();
@@ -436,14 +340,12 @@ export class TableTemplate implements OnChanges {
         let hours = rawHours;
         const minutes = String(rawMinutes).padStart(2, '0');
         const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        hours = hours ? hours : 12; // hour '0' should be '12'
+        hours = hours % 12 || 12;
         const formattedHours = String(hours).padStart(2, '0');
 
         if (pipeArgs && (pipeArgs.includes('hh:mm') || pipeArgs.includes('shortTime') || pipeArgs.includes('mm'))) {
           return `${formattedHours}:${minutes} ${ampm}`;
         }
-
         return `${dateStr} ${formattedHours}:${minutes} ${ampm}`;
       }
 
@@ -453,30 +355,25 @@ export class TableTemplate implements OnChanges {
     }
   }
 
+  formatWorkMinutes(val: any): string {
+    if (val === null || val === undefined || isNaN(Number(val)) || Number(val) <= 0) return '0h 0m';
+    const mins = Math.round(Number(val));
+    const hrs = Math.floor(mins / 60);
+    const remainingMins = mins % 60;
+    return `${hrs}h ${remainingMins}m`;
+  }
+
   exportToExcel(): void {
     if (!this.data || this.data.length === 0) return;
-
-    // Filter columns to export
-    const exportableCols = (this.columns || []).filter(col =>
-      col.isVisible !== false &&
-      col.key !== 'actions' &&
-      col.key !== 'checkbox'
-    );
-
+    const exportableCols = (this.columns || []).filter(col => col.isVisible !== false && col.key !== 'actions' && col.key !== 'checkbox');
     if (exportableCols.length === 0) return;
 
-    // Map data to sheet format
     const exportData = this.data.map(item => {
       const row: any = {};
       exportableCols.forEach(col => {
         let val = this.getDeepValue(item, col.key);
+        if (typeof val === 'string') val = val.trim();
 
-        // Strip out HTML tags or formatting details if they exist in string format
-        if (typeof val === 'string') {
-          val = val.trim();
-        }
-
-        // Format special column values
         if (col.formatter) {
           val = col.formatter(val, item);
         } else if (col.pipe === 'date' && val) {
@@ -488,15 +385,9 @@ export class TableTemplate implements OnChanges {
         } else if (col.pipe === 'lowercase' && val) {
           val = String(val).toLowerCase();
         } else if (col.format === 'date' && val) {
-          try {
-            val = new Date(val).toLocaleDateString();
-          } catch (e) { }
+          try { val = new Date(val).toLocaleDateString(); } catch (e) { }
         } else if (col.format === 'time' && val) {
-          try {
-            val = new Date(val).toLocaleTimeString();
-          } catch (e) { }
-        } else if (col.format === 'uppercase' && val) {
-          val = String(val).toUpperCase();
+          try { val = new Date(val).toLocaleTimeString(); } catch (e) { }
         }
 
         row[col.header] = val ?? '';
@@ -504,7 +395,6 @@ export class TableTemplate implements OnChanges {
       return row;
     });
 
-    // Use ExcelService to export
     this.excelService.exportAsExcelFile(exportData, this.exportFileName);
   }
 }

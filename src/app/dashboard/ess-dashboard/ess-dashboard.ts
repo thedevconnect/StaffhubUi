@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { CardModule } from 'primeng/card'
 import { TableModule } from 'primeng/table'
@@ -63,7 +63,8 @@ export class EssDashboard implements OnInit {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly attendanceService: AttendanceService
+    private readonly attendanceService: AttendanceService,
+    private readonly cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -81,106 +82,55 @@ export class EssDashboard implements OnInit {
   // Table Columns
 
   columns: TableColumn[] = [
-    // {
-    //   key: 'actions',
-    //   header: 'Actions',
-    //   isVisible: true
-    // },
-
-    {
-      key: 'employee_id',
-      header: 'Employee ID',
-      isVisible: true,
-      isSortable: true
-    },
-
-    {
-      key: 'attendance_date',
-      header: 'Attendance Date',
-      isVisible: true,
-      isSortable: true,
-      pipe: 'date',
-      pipeArgs: 'dd-MM-yyyy'
-    },
-
-    {
-      key: 'swipe_in',
-      header: 'Swipe In',
-      isVisible: true,
-      isSortable: true,
-      pipe: 'date',
-      pipeArgs: 'hh:mm a'
-    },
-
-    {
-      key: 'swipe_out',
-      header: 'Swipe Out',
-      isVisible: true,
-      isSortable: true,
-      pipe: 'date',
-      pipeArgs: 'hh:mm a'
-    },
-
-    {
-      key: 'attendance_status',
-      header: 'Status',
-      isVisible: true,
-      isSortable: true
-    },
-
-    {
-      key: 'created_at',
-      header: 'Created At',
-      isVisible: true,
-      isSortable: true,
-      pipe: 'date',
-      pipeArgs: 'dd-MM-yyyy hh:mm a'
-    }
-
+    { key: 'employee_id', header: 'Employee ID', isVisible: true, isSortable: true },
+    { key: 'attendance_date', header: 'Attendance Date', isVisible: true, isSortable: true, pipe: 'date', pipeArgs: 'dd-MM-yyyy' },
+    { key: 'swipe_in', header: 'Swipe In', isVisible: true, isSortable: true, pipe: 'date', pipeArgs: 'hh:mm a' },
+    { key: 'swipe_out', header: 'Swipe Out', isVisible: true, isSortable: true, pipe: 'date', pipeArgs: 'hh:mm a' },
+    { key: 'attendance_status', header: 'Status', isVisible: true, isSortable: true },
+    { key: 'total_work_minutes', header: 'Total Time', isVisible: true, isSortable: true, pipe: 'formatTotalWorkingHours' },
+    { key: 'created_at', header: 'Created At', isVisible: true, isSortable: true, pipe: 'date', pipeArgs: 'dd-MM-yyyy hh:mm a' }
   ]
-
 
   rowActions = [
     { label: 'View', icon: 'pi pi-eye', id: 'view' },
     { label: 'Edit', icon: 'pi pi-pencil', id: 'edit' },
     { label: 'Delete', icon: 'pi pi-trash', id: 'delete' }
   ];
+
   loadDashboardData(): void {
     this.loading.set(true)
 
     // Dashboard Summary
-
     this.attendanceService.getDashboardSummary().subscribe({
       next: res => {
         if (res.success && res.data) {
           this.dashboardSummary.set(res.data)
         }
+        this.cdr.markForCheck()
       },
-
       error: err => {
         console.error(err)
       }
     })
 
-    // Attendance History
-
-    this.attendanceService.getHistory().subscribe({
+    // Attendance History with Pagination
+    this.attendanceService.getHistory(this.pageNo, this.pageSize, this.searchText).subscribe({
       next: res => {
         if (res.success && res.data) {
           this.resData = res.data
-
-          this.totalCount = res.data.length
+          if (res.pagination) {
+            this.totalCount = res.pagination.total
+          } else {
+            this.totalCount = res.data.length
+          }
         }
-
-        //console.log(this.resData)
-
         this.loading.set(false)
+        this.cdr.markForCheck()
       },
-
       error: err => {
         console.error(err)
-
         this.loading.set(false)
+        this.cdr.markForCheck()
       }
     })
   }

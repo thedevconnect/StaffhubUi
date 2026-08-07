@@ -158,7 +158,7 @@ export class AppHeader implements OnInit {
     }
 
     this.userProfileService.getUserProfile().subscribe({
-      error: () => {}
+      error: () => { }
     });
   }
 
@@ -195,7 +195,7 @@ export class AppHeader implements OnInit {
           detail: 'You have been successfully logged out.',
           life: 4000
         });
-        this.router.navigate(['/landing']);
+        this.router.navigate(['/login']);
         this.onLogout.emit();
       }
     });
