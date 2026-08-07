@@ -9,7 +9,8 @@
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div>
         <h2 class="text-xl font-bold text-slate-900">Final Attendance Summary</h2>
-        <p class="mt-1 text-xs text-slate-500">Track final monthly attendance & payable days used for employee payroll & monthly salary calculation.
+        <p class="mt-1 text-xs text-slate-500">Track final monthly attendance & payable days used for employee payroll &
+          monthly salary calculation.
         </p>
       </div>
 
@@ -17,15 +18,19 @@
         <!-- HR Admin Employee Selector -->
         <div *ngIf="isHrView()" class="flex items-center gap-2">
           <label class="text-xs font-semibold text-slate-700">Select Employee:</label>
-          <p-select [options]="employees()" [(ngModel)]="selectedEmployeeId" (onChange)="onEmployeeSelect()" optionLabel="full_name" optionValue="id" [filter]="true" filterBy="full_name,employee_code,emp_id" placeholder="Select Employee" styleClass="w-56 text-sm"></p-select>
+          <p-select [options]="employees()" [(ngModel)]="selectedEmployeeId" (onChange)="onEmployeeSelect()"
+            optionLabel="full_name" optionValue="id" [filter]="true" filterBy="full_name,employee_code,emp_id"
+            placeholder="Select Employee" styleClass="w-56 text-sm"></p-select>
         </div>
 
         <div class="flex items-center gap-2">
           <label class="text-xs font-semibold text-slate-700">Year:</label>
-          <p-select [options]="years" [(ngModel)]="selectedYear" (onChange)="onYearChange()" placeholder="Select Year" styleClass="w-32 text-sm"></p-select>
+          <p-select [options]="years" [(ngModel)]="selectedYear" (onChange)="onYearChange()" placeholder="Select Year"
+            styleClass="w-32 text-sm"></p-select>
         </div>
 
-        <p-button label="Refresh" icon="pi pi-refresh" (onClick)="loadYearlyRecords()" [loading]="loading" styleClass="p-button-outlined p-button-sm"></p-button>
+        <p-button label="Refresh" icon="pi pi-refresh" (onClick)="loadYearlyRecords()" [loading]="loading"
+          styleClass="p-button-outlined p-button-sm"></p-button>
       </div>
     </div>
   </header>
@@ -75,7 +80,7 @@
     <ng-template pTemplate="header">
       <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
         <span class="text-sm font-bold text-slate-800">Monthly Attendance & Payroll Summary ({{ selectedYear }})</span>
-        <span class="text-xs text-slate-500 font-medium">Click "View Daily Log" to inspect swipe in/out details</span>
+        <span class="text-xs text-slate-500 font-medium">Monthly breakdown for payroll payable days</span>
       </div>
     </ng-template>
 
@@ -128,10 +133,12 @@
             </td>
             <td class="py-3 px-4 text-center">
               <div class="flex items-center justify-center gap-2">
-                <button (click)="openDetailDrawer(rec)" title="View Daily Log" class="p-1.5 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 transition text-xs font-bold flex items-center gap-1">
-                  <i class="pi pi-eye"></i> Log
+                <button (click)="openDetailDrawer(rec)" title="View Summary Breakdown"
+                  class="p-1.5 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 transition text-xs font-bold flex items-center gap-1">
+                  <i class="pi pi-eye"></i> Summary
                 </button>
-                <button (click)="navigateToMonthlyAttendance(rec)" title="Open Monthly Sheet" class="p-1.5 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-xs font-bold flex items-center gap-1">
+                <button (click)="navigateToMonthlyAttendance(rec)" title="Open Monthly Sheet"
+                  class="p-1.5 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-xs font-bold flex items-center gap-1">
                   <i class="pi pi-external-link"></i>
                 </button>
               </div>
@@ -143,70 +150,57 @@
   </p-card>
 </section>
 
-<!-- Daily Attendance Detail Drawer -->
-<p-drawer [(visible)]="detailDrawerVisible" position="right" [modal]="true" [style]="{ width: '100%', maxWidth: '650px' }">
+<!-- Monthly Summary Breakdown Drawer -->
+<p-drawer [(visible)]="detailDrawerVisible" position="right" [modal]="true"
+  [style]="{ width: '100%', maxWidth: '480px' }">
   <ng-template pTemplate="header">
     <div class="flex items-center gap-3">
       <div class="h-9 w-9 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
-        <i class="pi pi-calendar-plus"></i>
+        <i class="pi pi-chart-pie"></i>
       </div>
       <div>
-        <h3 class="text-lg font-bold text-slate-900 m-0">Daily Attendance Log</h3>
+        <h3 class="text-lg font-bold text-slate-900 m-0">Monthly Attendance Summary</h3>
         <p class="text-xs text-slate-500 m-0" *ngIf="selectedMonthRecord">{{ selectedMonthRecord.month }} Breakdown</p>
       </div>
     </div>
   </ng-template>
 
   <div class="space-y-4" *ngIf="selectedMonthRecord">
-    <!-- Month Summary Pill Box -->
-    <div class="grid grid-cols-4 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-center text-xs">
-      <div>
-        <div class="text-slate-400 font-medium">Present</div>
-        <div class="font-extrabold text-emerald-600 text-sm">{{ selectedMonthRecord.present }}</div>
+    <!-- Month Summary Breakdown Cards -->
+    <div class="grid grid-cols-2 gap-3">
+      <div class="p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
+        <div class="text-xs font-medium text-emerald-600">Present Days</div>
+        <div class="text-xl font-black text-emerald-700 mt-1">{{ selectedMonthRecord.present }}</div>
       </div>
-      <div>
-        <div class="text-slate-400 font-medium">Half Days</div>
-        <div class="font-extrabold text-amber-600 text-sm">{{ selectedMonthRecord.halfDays || 0 }}</div>
+      <div class="p-3 bg-amber-50 border border-amber-100 rounded-xl">
+        <div class="text-xs font-medium text-amber-600">Half Days</div>
+        <div class="text-xl font-black text-amber-700 mt-1">{{ selectedMonthRecord.halfDays || 0 }}</div>
       </div>
-      <div>
-        <div class="text-slate-400 font-medium">Absent</div>
-        <div class="font-extrabold text-rose-600 text-sm">{{ selectedMonthRecord.absent || 0 }}</div>
+      <div class="p-3 bg-rose-50 border border-rose-100 rounded-xl">
+        <div class="text-xs font-medium text-rose-600">Absent Days</div>
+        <div class="text-xl font-black text-rose-700 mt-1">{{ selectedMonthRecord.absent || 0 }}</div>
       </div>
-      <div>
-        <div class="text-slate-400 font-medium">Payable Days</div>
-        <div class="font-extrabold text-indigo-600 text-sm">{{ selectedMonthRecord.paidDays }}</div>
+      <div class="p-3 bg-blue-50 border border-blue-100 rounded-xl">
+        <div class="text-xs font-medium text-blue-600">Leaves</div>
+        <div class="text-xl font-black text-blue-700 mt-1">{{ selectedMonthRecord.leaves || 0 }}</div>
+      </div>
+      <div class="p-3 bg-purple-50 border border-purple-100 rounded-xl">
+        <div class="text-xs font-medium text-purple-600">Holidays</div>
+        <div class="text-xl font-black text-purple-700 mt-1">{{ selectedMonthRecord.holidays || 0 }}</div>
+      </div>
+      <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+        <div class="text-xs font-medium text-slate-500">Weekly Offs</div>
+        <div class="text-xl font-black text-slate-700 mt-1">{{ selectedMonthRecord.weeklyOffs || 0 }}</div>
       </div>
     </div>
 
-    <!-- Daily Details Table -->
-    <div class="rounded-xl border border-slate-200 overflow-hidden">
-      <table class="w-full text-xs text-left">
-        <thead class="bg-slate-100 text-slate-700 font-bold uppercase">
-          <tr>
-            <th class="p-2.5">Date</th>
-            <th class="p-2.5">Status</th>
-            <th class="p-2.5">Remarks / Reason</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          <tr *ngFor="let item of dailyDetails" class="hover:bg-slate-50 transition">
-            <td class="p-2.5 font-bold text-slate-800">{{ item.date | date: 'dd MMM yyyy (EEE)' }}</td>
-            <td class="p-2.5">
-              <span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-bold"
-                [ngClass]="{
-                  'bg-emerald-100 text-emerald-800': item.attendance_status === 'Present',
-                  'bg-amber-100 text-amber-800': item.attendance_status === 'Half Day',
-                  'bg-rose-100 text-rose-800': item.attendance_status === 'Absent',
-                  'bg-blue-100 text-blue-800': item.attendance_status === 'Weekly Off',
-                  'bg-purple-100 text-purple-800': item.attendance_status === 'Holiday' || item.attendance_status === 'Leave'
-                }">
-                {{ item.attendance_status || 'Absent' }}
-              </span>
-            </td>
-            <td class="p-2.5 text-slate-500 italic">{{ item.remarks || '-' }}</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Highlighted Total Payable Days Card -->
+    <div class="p-4 bg-indigo-50 border border-indigo-200 rounded-xl flex items-center justify-between">
+      <div>
+        <div class="text-xs font-bold text-indigo-500 uppercase tracking-wider">Payable Days (Salary)</div>
+        <div class="text-xs text-slate-500 mt-0.5">Calculated for monthly payroll calculation</div>
+      </div>
+      <div class="text-2xl font-black text-indigo-700">{{ selectedMonthRecord.paidDays }}</div>
     </div>
   </div>
 </p-drawer>
