@@ -11,9 +11,7 @@
       <p class="mt-1 text-sm text-slate-500">Manage your daily work shifts, track break sessions, and view your
         historical log sheets.</p>
     </div>
-
   </header>
-
 
   <!-- Swipe Panel -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -48,7 +46,6 @@
             <span class="text-base tracking-wide">{{ isSwipedIn() ? 'Swipe Out' : 'Swipe In' }}</span>
           </button>
         </div>
-
       </div>
 
       <!-- Progress Bar (Only visible when swiped in, or when there is a shift duration today) -->
@@ -98,7 +95,6 @@
           <i class="pi pi-compass" [ngClass]="{'pi-spin': isRefreshingLocation}"></i>
         </button>
       </div>
-
     </div>
 
     <!-- Today's Logs Sidebar Card -->
@@ -145,154 +141,46 @@
     </div>
   </div>
 
-  <!-- Attendance History Table Card with Pagination -->
-  <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
-    <!-- Card Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-4">
-      <div>
-        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-          <i class="pi pi-history text-blue-600"></i>
-          Attendance Log Sheet & History
-        </h3>
-        <p class="text-xs text-slate-500 mt-0.5">View your historical shift logs, swipe times, total working hours, and regularization notes.</p>
-      </div>
-
-      <!-- Search & Limit Controls -->
-      <div class="flex flex-wrap items-center gap-3">
-        <div class="relative w-full sm:w-64">
-          <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-          <input type="text" [value]="historySearch()" (input)="onHistorySearchInput($event)"
-            placeholder="Search date, status, notes..."
-            class="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-slate-50 text-slate-700 focus:outline-none focus:border-blue-500 transition-colors" />
-        </div>
-
-        <select [ngModel]="historyLimit()" (ngModelChange)="onHistoryLimitChange($event)"
-          class="text-xs rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer">
-          <option [ngValue]="5">5 per page</option>
-          <option [ngValue]="10">10 per page</option>
-          <option [ngValue]="20">20 per page</option>
-          <option [ngValue]="50">50 per page</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Table Container -->
-    <div class="overflow-x-auto relative min-h-[220px]">
-      <!-- Loading Spinner -->
-      <div *ngIf="historyLoading()"
-        class="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center z-10">
-        <i class="pi pi-spin pi-spinner text-2xl text-blue-600"></i>
-      </div>
-
-      <table class="w-full text-left text-xs text-slate-600 border-collapse">
-        <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider font-bold text-[11px] border-b border-slate-200">
-          <tr>
-            <th class="py-3 px-4">Date</th>
-            <th class="py-3 px-4">Swipe In</th>
-            <th class="py-3 px-4">Swipe Out</th>
-            <th class="py-3 px-4">Work Hours</th>
-            <th class="py-3 px-4">Status</th>
-            <th class="py-3 px-4">Location / Device</th>
-            <th class="py-3 px-4">Notes</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          <tr *ngIf="historyRecords().length === 0 && !historyLoading()">
-            <td colspan="7" class="py-8 text-center text-slate-400 font-medium">
-              No attendance records found.
-            </td>
-          </tr>
-
-          <tr *ngFor="let record of historyRecords()" class="hover:bg-slate-50/70 transition-colors">
-            <td class="py-3 px-4 font-semibold text-slate-800 font-mono">
-              {{ record.attendance_date | date:'mediumDate' }}
-            </td>
-            <td class="py-3 px-4 font-mono font-medium text-emerald-700">
-              <span class="inline-flex items-center gap-1">
-                <i class="pi pi-arrow-down-right text-[10px]"></i>
-                {{ formatDisplayTime(record.swipe_in) }}
-              </span>
-            </td>
-            <td class="py-3 px-4 font-mono font-medium text-rose-700">
-              <span *ngIf="record.swipe_out" class="inline-flex items-center gap-1">
-                <i class="pi pi-arrow-up-right text-[10px]"></i>
-                {{ formatDisplayTime(record.swipe_out) }}
-              </span>
-              <span *ngIf="!record.swipe_out" class="text-slate-400 font-mono text-[11px] italic">-</span>
-            </td>
-            <td class="py-3 px-4 font-mono font-bold text-slate-700">
-              {{ formatWorkHours(record.total_work_minutes) }}
-            </td>
-            <td class="py-3 px-4">
-              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold"
-                [ngClass]="{
-                  'bg-emerald-50 text-emerald-700 border border-emerald-200': record.attendance_status === 'PRESENT',
-                  'bg-rose-50 text-rose-700 border border-rose-200': record.attendance_status === 'ABSENT',
-                  'bg-amber-50 text-amber-700 border border-amber-200': record.attendance_status === 'HALF_DAY',
-                  'bg-blue-50 text-blue-700 border border-blue-200': record.attendance_status === 'ON_LEAVE',
-                  'bg-slate-100 text-slate-600 border border-slate-200': record.attendance_status !== 'PRESENT' && record.attendance_status !== 'ABSENT' && record.attendance_status !== 'HALF_DAY' && record.attendance_status !== 'ON_LEAVE'
-                }">
-                {{ record.attendance_status }}
-              </span>
-            </td>
-            <td class="py-3 px-4 max-w-[200px] truncate text-[11px] text-slate-500" title="{{ record.swipe_in_address || record.location_address || '-' }}">
-              <div class="truncate">{{ record.swipe_in_address || record.location_address || '-' }}</div>
-              <div class="text-[10px] text-slate-400 font-mono" *ngIf="record.device_name">
-                {{ record.device_name }} <span *ngIf="record.os_name">({{ record.os_name }})</span>
-              </div>
-            </td>
-            <td class="py-3 px-4 max-w-[180px] truncate text-[11px] text-slate-500" title="{{ record.notes || '-' }}">
-              {{ record.notes || '-' }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Pagination Controls Footer -->
-    <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100 text-xs">
-      <!-- Summary Text -->
-      <div class="text-slate-500 font-medium">
-        Showing
-        <span class="font-bold text-slate-700">
-          {{ historyTotal() === 0 ? 0 : (historyPage() - 1) * historyLimit() + 1 }}
-        </span>
-        to
-        <span class="font-bold text-slate-700">
-          {{ Math.min(historyPage() * historyLimit(), historyTotal()) }}
-        </span>
-        of
-        <span class="font-bold text-slate-700">{{ historyTotal() }}</span>
-        entries
-      </div>
-
-      <!-- Page Buttons -->
-      <div class="flex items-center gap-1" *ngIf="historyTotalPages() > 1">
-        <!-- Previous Button -->
-        <button (click)="onHistoryPageChange(historyPage() - 1)" [disabled]="historyPage() === 1"
-          class="px-2.5 py-1 rounded border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors font-medium">
-          <i class="pi pi-chevron-left text-[10px]"></i> Prev
-        </button>
-
-        <!-- Page Numbers -->
-        <button *ngFor="let pageNum of getPagesArray()" (click)="onHistoryPageChange(pageNum)"
-          class="px-2.5 py-1 rounded border font-mono text-xs cursor-pointer transition-colors"
-          [ngClass]="pageNum === historyPage() ? 'bg-blue-600 text-white border-blue-600 font-bold' : 'border-slate-200 text-slate-600 hover:bg-slate-100'">
-          {{ pageNum }}
-        </button>
-
-        <!-- Next Button -->
-        <button (click)="onHistoryPageChange(historyPage() + 1)" [disabled]="historyPage() === historyTotalPages()"
-          class="px-2.5 py-1 rounded border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors font-medium">
-          Next <i class="pi pi-chevron-right text-[10px]"></i>
-        </button>
-      </div>
-    </div>
+  <!-- Attendance History Table Card with Pagination using TableTemplate -->
+  <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+    <app-table-template [data]="historyRecords()" [columns]="columns" [pageSize]="historyLimit()"
+      [totalCount]="historyTotal()" [isLoading]="historyLoading()" [currentPage]="historyPage()"
+      [searchText]="historySearch()" [serverSide]="true" [showExport]="true" exportFileName="Attendance_History"
+      [tableActions]="[]" (pageChange)="onHistoryPageChange($event)" (pageSizeChange)="onHistoryLimitChange($event)"
+      (searchChange)="onHistorySearch($event)" (refresh)="loadHistory(historyPage(), historyLimit(), historySearch())"
+      [cellTemplates]="{
+        'swipe_in': swipeInTpl,
+        'swipe_out': swipeOutTpl,
+        'location_address': locationTpl
+      }">
+    </app-table-template>
   </div>
 
+  <ng-template #swipeInTpl let-record>
+    <span class="inline-flex items-center gap-1 font-mono font-medium text-emerald-700">
+      <i class="pi pi-arrow-down-right text-[10px]"></i>
+      {{ formatDisplayTime(record.swipe_in) }}
+    </span>
+  </ng-template>
+
+  <ng-template #swipeOutTpl let-record>
+    <span *ngIf="record.swipe_out" class="inline-flex items-center gap-1 font-mono font-medium text-rose-700">
+      <i class="pi pi-arrow-up-right text-[10px]"></i>
+      {{ formatDisplayTime(record.swipe_out) }}
+    </span>
+    <span *ngIf="!record.swipe_out" class="text-slate-400 font-mono text-[11px] italic">-</span>
+  </ng-template>
+
+  <ng-template #locationTpl let-record>
+    <div class="max-w-[200px] truncate text-[11px] text-slate-500"
+      [title]="record.swipe_in_address || record.location_address || '-'">
+      <div class="truncate">{{ record.swipe_in_address || record.location_address || '-' }}</div>
+      <div class="text-[10px] text-slate-400 font-mono" *ngIf="record.device_name">
+        {{ record.device_name }} <span *ngIf="record.os_name">({{ record.os_name }})</span>
+      </div>
+    </div>
+  </ng-template>
 </section>
-
-
 
 <!-- Swipe Out Confirmation Dialog -->
 <p-dialog header="Confirm Swipe Out" [(visible)]="swipeOutDialogVisible" [modal]="true"
@@ -304,8 +192,9 @@
       <span>Are you sure you want to end your active work session? You can check in again later if needed.</span>
     </div>
     <div>
-      <label for="swipeOutNotes" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Shift
-        Notes / Handover Comments (Optional)</label>
+      <label for="swipeOutNotes" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+        Shift Notes / Handover Comments (Optional)
+      </label>
       <textarea id="swipeOutNotes" [(ngModel)]="swipeOutNote" rows="3"
         placeholder="Enter notes or updates for the day..."
         class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none resize-none"></textarea>
@@ -314,8 +203,9 @@
       <button (click)="swipeOutDialogVisible = false"
         class="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 cursor-pointer">Cancel</button>
       <button (click)="performSwipeOut()"
-        class="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow cursor-pointer transition-colors">Confirm
-        Check Out</button>
+        class="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow cursor-pointer transition-colors">
+        Confirm Check Out
+      </button>
     </div>
   </div>
 </p-dialog>

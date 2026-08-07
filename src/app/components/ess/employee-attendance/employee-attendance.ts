@@ -11,6 +11,7 @@ import {
   AttendanceRecord,
   DashboardSummary
 } from '../../../shared/services/attendance.service';
+import { TableTemplate, TableColumn } from '../../../shared/ui/table-template/table-template';
 import { parseLocalDatetime, formatLocalTime } from '../../../shared/utils/date-utils';
 import * as L from 'leaflet';
 
@@ -23,7 +24,8 @@ import * as L from 'leaflet';
     DialogModule,
     ToastModule,
     FormsModule,
-    ProgressBarModule
+    ProgressBarModule,
+    TableTemplate
   ],
   providers: [MessageService],
   templateUrl: './employee-attendance.html',
@@ -39,6 +41,16 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   breadcrumbItems: any[] = [
     { label: 'Employee Self Service', icon: 'pi pi-home', routerLink: '/ess' },
     { label: 'Attendance', icon: 'pi pi-clock', routerLink: '/ess/employee-attendance' }
+  ];
+
+  columns: TableColumn[] = [
+    { key: 'attendance_date', header: 'Date', isSortable: true, pipe: 'date', pipeArgs: 'mediumDate' },
+    { key: 'swipe_in', header: 'Swipe In', isSortable: true },
+    { key: 'swipe_out', header: 'Swipe Out', isSortable: true },
+    { key: 'total_work_minutes', header: 'Work Hours', isSortable: true },
+    { key: 'attendance_status', header: 'Status', isSortable: true },
+    { key: 'location_address', header: 'Location / Device', isSortable: false },
+    { key: 'notes', header: 'Notes', isSortable: false }
   ];
 
   readonly isSwipedIn = signal<boolean>(false);
@@ -74,7 +86,6 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   employeeMarker: any = null;
 
   private allTodayRecords: AttendanceRecord[] = [];
-
   private clockIntervalId: any;
   private timerIntervalId: any;
 
@@ -103,6 +114,11 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
         }
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.clockIntervalId) clearInterval(this.clockIntervalId);
+    if (this.timerIntervalId) clearInterval(this.timerIntervalId);
   }
 
   loadHistory(page: number = 1, limit: number = 10, search: string = ''): void {
@@ -138,35 +154,16 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     });
   }
 
-  onHistorySearchInput(event: Event): void {
-    const val = (event.target as HTMLInputElement).value;
-    this.loadHistory(1, this.historyLimit(), val);
+  onHistorySearch(search: string): void {
+    this.loadHistory(1, this.historyLimit(), search);
   }
 
   onHistoryPageChange(newPage: number): void {
-    if (newPage >= 1 && newPage <= this.historyTotalPages()) {
-      this.loadHistory(newPage, this.historyLimit(), this.historySearch());
-    }
+    this.loadHistory(newPage, this.historyLimit(), this.historySearch());
   }
 
   onHistoryLimitChange(newLimit: number): void {
     this.loadHistory(1, newLimit, this.historySearch());
-  }
-
-  getPagesArray(): number[] {
-    const total = this.historyTotalPages();
-    const current = this.historyPage();
-    const pages: number[] = [];
-    const maxVisible = 5;
-    let start = Math.max(1, current - 2);
-    let end = Math.min(total, start + maxVisible - 1);
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1);
-    }
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-    return pages;
   }
 
   formatWorkHours(minutes: number | null): string {
@@ -181,14 +178,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   }
 
   checkIncompleteAttendance(): void {
-    // We no longer show a toast here. 
-    // The backend handles showing the missing attendance count in the Notifications dropdown automatically.
     this.attendanceService.checkIncompleteAttendance().subscribe();
-  }
-
-  ngOnDestroy(): void {
-    if (this.clockIntervalId) clearInterval(this.clockIntervalId);
-    if (this.timerIntervalId) clearInterval(this.timerIntervalId);
   }
 
   private updateClock(): void {
@@ -215,12 +205,9 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
             const previousCompletedMs = allTodayRecords
               .filter((r: any) => r.id !== record.id && r.swipe_in && r.swipe_out)
               .reduce((sum: number, r: any) => {
-                const inTime = this.parseDbDate(r.swipe_in);
-                const outTime = this.parseDbDate(r.swipe_out);
-                if (inTime && outTime) {
-                  return sum + (outTime.getTime() - inTime.getTime());
-                }
-                return sum;
+                const inTime = parseLocalDatetime(r.swipe_in);
+                const outTime = parseLocalDatetime(r.swipe_out);
+                return (inTime && outTime) ? sum + (outTime.getTime() - inTime.getTime()) : sum;
               }, 0);
 
             this.startTimerTicks(record, previousCompletedMs);
@@ -232,12 +219,9 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
             const totalWorkMsToday = allTodayRecords
               .filter((r: any) => r.swipe_in && r.swipe_out)
               .reduce((sum: number, r: any) => {
-                const inTime = this.parseDbDate(r.swipe_in);
-                const outTime = this.parseDbDate(r.swipe_out);
-                if (inTime && outTime) {
-                  return sum + (outTime.getTime() - inTime.getTime());
-                }
-                return sum;
+                const inTime = parseLocalDatetime(r.swipe_in);
+                const outTime = parseLocalDatetime(r.swipe_out);
+                return (inTime && outTime) ? sum + (outTime.getTime() - inTime.getTime()) : sum;
               }, 0);
 
             if (totalWorkMsToday > 0) {
@@ -259,7 +243,6 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
       error: (err) => {
         this.resetTodayState();
         this.isActionLoading = false;
-
         this.messageService.add({
           severity: 'error',
           summary: 'Load Failed',
@@ -277,72 +260,71 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     });
   }
 
-  async performSwipeIn(): Promise<void> {
-    this.isActionLoading = true;
-
+  private async collectSwipeContext(): Promise<{ payload: Partial<AttendanceRecord>; coords: { latitude: number; longitude: number } } | null> {
     if (typeof navigator !== 'undefined' && navigator.permissions) {
       try {
         const status = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
         if (status.state === 'denied') {
-          this.isActionLoading = false;
           this.messageService.add({
             severity: 'error',
             summary: 'Location Access Denied',
             detail: 'Location permission is blocked in your browser. Please reset location permissions and try again.'
           });
-          return;
+          return null;
         }
-      } catch (e) {
-        console.warn('Permissions API query failed', e);
-      }
+      } catch (e) { }
     }
 
-    const os_name = this.getOSName();
-    const browser_name = this.getBrowserName();
-    const device_name = this.getDeviceName();
     const coords = await this.getGeolocation();
-
     if (!coords.latitude || !coords.longitude) {
-      this.isActionLoading = false;
       this.messageService.add({
         severity: 'error',
         summary: 'Location Required',
-        detail: 'Location permission is mandatory to Swipe In. Please allow location access.'
+        detail: 'Location permission is mandatory to Swipe. Please allow location access.'
       });
-      return;
+      return null;
     }
 
     const ip_address = await this.getIpAddress();
     if (!ip_address) {
-      this.isActionLoading = false;
       this.messageService.add({
         severity: 'error',
         summary: 'Network Error',
         detail: 'Unable to retrieve IP Address. Please check your connection.'
       });
-      return;
+      return null;
     }
 
     const location_address = await this.getDetailedLocation(coords.latitude, coords.longitude);
-
-    const payload: Partial<AttendanceRecord> = {
-      os_name,
-      browser_name,
-      device_name,
-      latitude: coords.latitude,
-      longitude: coords.longitude,
-      location_address: location_address,
-      ip_address: ip_address,
-      device_id: this.getDeviceId()
+    return {
+      coords: { latitude: coords.latitude, longitude: coords.longitude },
+      payload: {
+        os_name: this.getOSName(),
+        browser_name: this.getBrowserName(),
+        device_name: this.getDeviceName(),
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        location_address,
+        ip_address,
+        device_id: this.getDeviceId()
+      }
     };
+  }
 
-    this.attendanceService.swipeIn(payload).subscribe({
+  async performSwipeIn(): Promise<void> {
+    this.isActionLoading = true;
+    const ctx = await this.collectSwipeContext();
+
+    if (!ctx) {
+      this.isActionLoading = false;
+      return;
+    }
+
+    this.attendanceService.swipeIn(ctx.payload).subscribe({
       next: (res) => {
         this.isActionLoading = false;
-
         if (res.success) {
           const now = this.getLocalDateTimeISOString();
-
           const newRecord: any = {
             id: res.data?.id || res.data?.attendanceId,
             attendance_date: now.split('T')[0],
@@ -351,13 +333,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
             total_work_minutes: 0,
             attendance_status: 'PRESENT',
             notes: '',
-            os_name,
-            browser_name,
-            device_name,
-            latitude: coords.latitude,
-            longitude: coords.longitude,
-            location_address: payload.location_address,
-            ip_address: ip_address
+            ...ctx.payload
           };
 
           this.activeRecord.set(newRecord);
@@ -368,29 +344,19 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
           const previousCompletedMs = this.allTodayRecords
             .filter((r: any) => r.swipe_in && r.swipe_out)
             .reduce((sum: number, r: any) => {
-              const inTime = this.parseDbDate(r.swipe_in);
-              const outTime = this.parseDbDate(r.swipe_out);
-              if (inTime && outTime) {
-                return sum + (outTime.getTime() - inTime.getTime());
-              }
-              return sum;
+              const inTime = parseLocalDatetime(r.swipe_in);
+              const outTime = parseLocalDatetime(r.swipe_out);
+              return (inTime && outTime) ? sum + (outTime.getTime() - inTime.getTime()) : sum;
             }, 0);
 
           this.buildTodayTimeline(newRecord);
           this.startTimerTicks(newRecord, previousCompletedMs);
-
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Checked In',
-            detail: 'Swiped in successfully!'
-          });
-
+          this.messageService.add({ severity: 'success', summary: 'Checked In', detail: 'Swiped in successfully!' });
           this.loadAllData();
         }
       },
       error: (err) => {
         this.isActionLoading = false;
-
         this.messageService.add({
           severity: 'error',
           summary: 'Swipe In Failed',
@@ -409,97 +375,33 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   async performSwipeOut(): Promise<void> {
     this.swipeOutDialogVisible = false;
     this.isActionLoading = true;
+    const ctx = await this.collectSwipeContext();
 
-    if (typeof navigator !== 'undefined' && navigator.permissions) {
-      try {
-        const status = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
-        if (status.state === 'denied') {
-          this.isActionLoading = false;
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Location Access Denied',
-            detail: 'Location permission is blocked in your browser. Please reset location permissions and try again.'
-          });
-          return;
-        }
-      } catch (e) {
-        console.warn('Permissions API query failed', e);
-      }
-    }
-
-    const os_name = this.getOSName();
-    const browser_name = this.getBrowserName();
-    const device_name = this.getDeviceName();
-    const coords = await this.getGeolocation();
-
-    if (!coords.latitude || !coords.longitude) {
+    if (!ctx) {
       this.isActionLoading = false;
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Location Required',
-        detail: 'Location permission is mandatory to Swipe Out. Please allow location access.'
-      });
       return;
     }
 
-    const ip_address = await this.getIpAddress();
-    if (!ip_address) {
-      this.isActionLoading = false;
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Network Error',
-        detail: 'Unable to retrieve IP Address. Please check your connection.'
-      });
-      return;
-    }
-
-    const location_address = await this.getDetailedLocation(coords.latitude, coords.longitude);
-
-    const payload = {
-      notes: this.swipeOutNote,
-      os_name,
-      browser_name,
-      device_name,
-      latitude: coords.latitude,
-      longitude: coords.longitude,
-      location_address: location_address,
-      ip_address: ip_address,
-      device_id: this.getDeviceId()
-    };
+    const payload = { ...ctx.payload, notes: this.swipeOutNote };
 
     this.attendanceService.swipeOut(payload).subscribe({
       next: (res) => {
         this.isActionLoading = false;
-
         if (res.success) {
           const current = this.activeRecord();
           const now = this.getLocalDateTimeISOString();
-
           if (current) {
-            const updatedRecord: any = {
-              ...current,
-              swipe_out: now,
-              notes: this.swipeOutNote
-            };
-
-            this.activeRecord.set(updatedRecord);
+            this.activeRecord.set({ ...current, swipe_out: now, notes: this.swipeOutNote });
           }
 
           this.isSwipedIn.set(false);
           this.stopTimerTicks();
-
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Checked Out',
-            detail: 'Swiped out successfully!'
-          });
-
+          this.messageService.add({ severity: 'success', summary: 'Checked Out', detail: 'Swiped out successfully!' });
           this.loadAllData();
         }
       },
       error: (err) => {
         this.isActionLoading = false;
-
         this.messageService.add({
           severity: 'error',
           summary: 'Swipe Out Failed',
@@ -520,7 +422,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   }
 
   private updateProgressPercentage(workMs: number): void {
-    const targetMs = 9 * 60 * 60 * 1000; // 9 hours
+    const targetMs = 9 * 60 * 60 * 1000;
     const percent = (workMs / targetMs) * 100;
     this.shiftProgressPercentage.set(Math.min(100, Math.max(0, parseFloat(percent.toFixed(1)))));
   }
@@ -528,7 +430,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   private startTimerTicks(record: AttendanceRecord, previousCompletedMs: number = 0): void {
     if (this.timerIntervalId) clearInterval(this.timerIntervalId);
 
-    const swipeInTime = this.parseDbDate(record.swipe_in);
+    const swipeInTime = parseLocalDatetime(record.swipe_in);
     if (!swipeInTime) return;
 
     const tick = () => {
@@ -551,34 +453,30 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   }
 
   private buildTodayTimeline(records: AttendanceRecord[] | AttendanceRecord | null): void {
-    const timeline: Array<{ type: string; time: string; timestamp: number; icon: string; colorClass: string }> = [];
-
     if (!records) {
       this.todayPunches.set([]);
       return;
     }
 
     const recordsList = Array.isArray(records) ? records : [records];
+    const timeline: Array<{ type: string; time: string; timestamp: number; icon: string; colorClass: string }> = [];
 
     recordsList.forEach(record => {
       if (record.swipe_in) {
-        const dt = this.parseDbDate(record.swipe_in);
+        const dt = parseLocalDatetime(record.swipe_in);
         timeline.push({
           type: 'Swipe In',
-          time: this.formatDateTimeToTime(record.swipe_in),
+          time: formatLocalTime(record.swipe_in),
           timestamp: dt ? dt.getTime() : 0,
           icon: 'pi pi-sign-in',
           colorClass: 'border-emerald-500 bg-emerald-50 text-emerald-600'
         });
       }
       if (record.swipe_out) {
-        const dt = this.parseDbDate(record.swipe_out);
-        const typeStr = record.notes
-          ? `Swipe Out (${record.notes})`
-          : 'Swipe Out';
+        const dt = parseLocalDatetime(record.swipe_out);
         timeline.push({
-          type: typeStr,
-          time: this.formatDateTimeToTime(record.swipe_out),
+          type: record.notes ? `Swipe Out (${record.notes})` : 'Swipe Out',
+          time: formatLocalTime(record.swipe_out),
           timestamp: dt ? dt.getTime() : 0,
           icon: 'pi pi-sign-out',
           colorClass: 'border-rose-500 bg-rose-50 text-rose-600'
@@ -587,7 +485,6 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     });
 
     timeline.sort((a, b) => b.timestamp - a.timestamp);
-
     this.todayPunches.set(timeline.map(item => ({
       type: item.type,
       time: item.time,
@@ -598,17 +495,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
 
   private getLocalDateTimeISOString(date = new Date()): string {
     const pad = (n: number) => String(n).padStart(2, '0');
-    const year = date.getFullYear();
-    const month = pad(date.getMonth() + 1);
-    const day = pad(date.getDate());
-    const hours = pad(date.getHours());
-    const minutes = pad(date.getMinutes());
-    const seconds = pad(date.getSeconds());
-    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-  }
-
-  private parseDbDate(dateStr: string | null): Date | null {
-    return parseLocalDatetime(dateStr);
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
   }
 
   private formatMsToHMS(ms: number): string {
@@ -619,40 +506,31 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     return [hours, minutes, seconds].map(v => v < 10 ? '0' + v : v).join(':');
   }
 
-  private formatDateTimeToTime(dateStr: string | null): string {
-    return formatLocalTime(dateStr);
-  }
-
   private getBrowserName(): string {
-    const userAgent = navigator.userAgent;
-    if (userAgent.indexOf('Firefox') > -1) return 'Firefox';
-    if (userAgent.indexOf('Opera') > -1 || userAgent.indexOf('OPR') > -1) return 'Opera';
-    if (userAgent.indexOf('Chrome') > -1) return 'Chrome';
-    if (userAgent.indexOf('Safari') > -1) return 'Safari';
-    if (userAgent.indexOf('Edge') > -1 || userAgent.indexOf('Edg') > -1) return 'Edge';
-    if (userAgent.indexOf('Trident') > -1) return 'Internet Explorer';
+    const ua = navigator.userAgent;
+    if (ua.includes('Firefox')) return 'Firefox';
+    if (ua.includes('Opera') || ua.includes('OPR')) return 'Opera';
+    if (ua.includes('Chrome')) return 'Chrome';
+    if (ua.includes('Safari')) return 'Safari';
+    if (ua.includes('Edge') || ua.includes('Edg')) return 'Edge';
     return 'Browser';
   }
 
   private getOSName(): string {
-    const userAgent = navigator.userAgent;
-    if (userAgent.indexOf('Windows') > -1) return 'Windows';
-    if (userAgent.indexOf('Macintosh') > -1 || userAgent.indexOf('Mac OS') > -1) return 'macOS';
-    if (userAgent.indexOf('Linux') > -1) return 'Linux';
-    if (userAgent.indexOf('Android') > -1) return 'Android';
-    if (userAgent.indexOf('iPhone') > -1 || userAgent.indexOf('iPad') > -1) return 'iOS';
+    const ua = navigator.userAgent;
+    if (ua.includes('Windows')) return 'Windows';
+    if (ua.includes('Macintosh') || ua.includes('Mac OS')) return 'macOS';
+    if (ua.includes('Linux')) return 'Linux';
+    if (ua.includes('Android')) return 'Android';
+    if (ua.includes('iPhone') || ua.includes('iPad')) return 'iOS';
     return 'Operating System';
   }
 
   private getDeviceName(): string {
-    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
-    const isMobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile/i.test(userAgent);
-
+    const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
+    const isMobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile/i.test(ua);
     const isIpadOS = navigator.maxTouchPoints && navigator.maxTouchPoints > 2 && /MacIntel/.test(navigator.platform);
-
-    const isMobile = isMobileRegex || isIpadOS;
-
-    return isMobile ? 'Mobile' : 'Laptop';
+    return (isMobileRegex || isIpadOS) ? 'Mobile' : 'Laptop';
   }
 
   private getDeviceId(): string {
@@ -671,26 +549,12 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
         resolve({ latitude: null, longitude: null });
         return;
       }
-
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          resolve({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
-          });
-        },
-        (error) => {
-          console.warn('High accuracy geolocation failed or timed out. Trying standard resolution...', error);
+        (pos) => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+        () => {
           navigator.geolocation.getCurrentPosition(
-            (position) => {
-              resolve({
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude
-              });
-            },
-            () => {
-              resolve({ latitude: null, longitude: null });
-            },
+            (pos) => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+            () => resolve({ latitude: null, longitude: null }),
             { enableHighAccuracy: false, timeout: 5000, maximumAge: 0 }
           );
         },
@@ -713,11 +577,9 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
       const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
       const data = await res.json();
       let displayName = data.display_name || `Lat: ${lat.toFixed(4)}, Long: ${lon.toFixed(4)}`;
-
       if (displayName.includes('110059') && displayName.includes('Patel Nagar')) {
         displayName = displayName.replace('Patel Nagar', 'Uttam Nagar');
       }
-
       return displayName;
     } catch {
       return `Lat: ${lat.toFixed(4)}, Long: ${lon.toFixed(4)}`;
@@ -725,63 +587,40 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   }
 
   private initMap(): void {
-    if (!this.officeLocation) return;
+    if (!this.officeLocation || typeof document === 'undefined') return;
 
-    // Check if we run on browser
-    if (typeof document !== 'undefined') {
-      setTimeout(() => {
-        const mapElement = document.getElementById('attendance-map');
-        if (!mapElement) return;
+    setTimeout(() => {
+      const mapElement = document.getElementById('attendance-map');
+      if (!mapElement) return;
 
-        // Leaflet setup
-        this.map = L.map(mapElement).setView([this.officeLocation!.latitude, this.officeLocation!.longitude], 18);
+      this.map = L.map(mapElement).setView([this.officeLocation!.latitude, this.officeLocation!.longitude], 18);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(this.map);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19,
-          attribution: '© OpenStreetMap'
-        }).addTo(this.map);
+      this.officeCircle = L.circle([this.officeLocation!.latitude, this.officeLocation!.longitude], {
+        color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.2, radius: this.officeLocation!.radius
+      }).addTo(this.map);
 
-        this.officeCircle = L.circle([this.officeLocation!.latitude, this.officeLocation!.longitude], {
-          color: '#3b82f6',
-          fillColor: '#3b82f6',
-          fillOpacity: 0.2,
-          radius: this.officeLocation!.radius
-        }).addTo(this.map);
-
-        this.refreshMapLocation();
-      }, 100);
-    }
+      this.refreshMapLocation();
+    }, 100);
   }
 
   async refreshMapLocation(): Promise<void> {
     if (!this.map || !this.officeLocation) return;
-
     this.isRefreshingLocation = true;
     try {
       const coords = await this.getGeolocation();
       if (coords.latitude && coords.longitude) {
-        const R = 6371e3; // Radius of the earth in m
-        const lat1 = this.officeLocation.latitude * (Math.PI / 180);
-        const lon1 = this.officeLocation.longitude * (Math.PI / 180);
-        const lat2 = coords.latitude * (Math.PI / 180);
-        const lon2 = coords.longitude * (Math.PI / 180);
-        const dLat = lat2 - lat1;
-        const dLon = lon2 - lon1;
-        const a =
-          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-          Math.cos(lat1) * Math.cos(lat2) *
-          Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        const distance = R * c;
+        const distance = this.calculateDistanceInMeters(
+          this.officeLocation.latitude, this.officeLocation.longitude,
+          coords.latitude, coords.longitude
+        );
 
         const isInside = distance <= this.officeLocation.radius;
-        const markerColor = isInside ? '#10b981' : '#f43f5e'; // Emerald or Rose
-
+        const markerColor = isInside ? '#10b981' : '#f43f5e';
         const icon = L.divIcon({
           className: 'custom-div-icon',
           html: `<div style='background-color:${markerColor}; width:16px; height:16px; border-radius:50%; border:2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5);'></div>`,
-          iconSize: [16, 16],
-          iconAnchor: [8, 8]
+          iconSize: [16, 16], iconAnchor: [8, 8]
         });
 
         if (this.employeeMarker) {
@@ -791,11 +630,8 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
           this.employeeMarker = L.marker([coords.latitude, coords.longitude], { icon }).addTo(this.map);
         }
 
-        if (isInside) {
-          this.employeeMarker.bindPopup('You are within the allowed radius.').openPopup();
-        } else {
-          this.employeeMarker.bindPopup(`You Are Outside The Allowed Radius (${Math.round(distance)}m).`).openPopup();
-        }
+        const msg = isInside ? 'You are within the allowed radius.' : `You Are Outside The Allowed Radius (${Math.round(distance)}m).`;
+        this.employeeMarker.bindPopup(msg).openPopup();
 
         const group = L.featureGroup([this.employeeMarker, this.officeCircle]);
         this.map.fitBounds(group.getBounds().pad(0.1));
@@ -805,4 +641,13 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     }
   }
 
+  private calculateDistanceInMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371e3;
+    const rad1 = lat1 * (Math.PI / 180);
+    const rad2 = lat2 * (Math.PI / 180);
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(rad1) * Math.cos(rad2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+  }
 }
