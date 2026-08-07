@@ -11,7 +11,6 @@ import { MessageService } from 'primeng/api';
 import { PayrollService } from '../../shared/services/payroll.service';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-
 import { DrawerModule } from 'primeng/drawer';
 
 @Component({
@@ -141,13 +140,17 @@ export class EmployeeSalaryPreparation implements OnInit, OnDestroy {
           this.payrollSummary = data.attendance?.summary || {};
 
           this.totalDays = data.total_days || 0;
-          this.payableDays = data.payable_days || 0;
-          
-          let sundays = 0;
-          for (let i = 1; i <= this.totalDays; i++) {
-            if (new Date(this.selectedYear, this.selectedMonth - 1, i).getDay() === 0) sundays++;
+          this.workingDays = this.totalDays;
+
+          const paidDaysFromAttendance = this.payrollSummary['Paid Days'] !== undefined
+            ? this.payrollSummary['Paid Days']
+            : (data.payable_days || 0);
+
+          if (data.payroll && data.payroll.payable_days !== null && data.payroll.payable_days !== undefined) {
+            this.payableDays = Number(data.payroll.payable_days);
+          } else {
+            this.payableDays = Number(paidDaysFromAttendance);
           }
-          this.workingDays = this.totalDays - sundays;
 
           if (data.payroll && data.payroll.calculated_salary) {
             this.calculatedSalary = parseFloat(data.payroll.calculated_salary);
@@ -224,8 +227,6 @@ export class EmployeeSalaryPreparation implements OnInit, OnDestroy {
       }
     });
   }
-
-
 
   processAllPayroll() {
     this.processing = true;

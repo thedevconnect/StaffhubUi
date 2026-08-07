@@ -93,7 +93,6 @@ export class MonthlyAttendance implements OnInit {
   currentRecord: any = null;
   summary: any = null;
 
-  // Dynamically filter months up to current month for current year
   availableMonths = computed(() => {
     const filterYear = Number(this.filterForm?.get('year')?.value || new Date().getFullYear());
     const now = new Date();
@@ -110,7 +109,6 @@ export class MonthlyAttendance implements OnInit {
     return this.allMonths.filter(m => m.value <= maxMonth);
   });
 
-  // Current month & Last month can be edited/submitted
   isEditable = computed(() => {
     const filter = this.filterForm?.value;
     if (!filter) return true;
@@ -122,22 +120,19 @@ export class MonthlyAttendance implements OnInit {
     const curMonth = now.getMonth() + 1;
     const curYear = now.getFullYear();
 
-    // Current month
     if (selYear === curYear && selMonth === curMonth) {
       return true;
     }
 
-    // Previous month in same year
     if (selYear === curYear && selMonth === curMonth - 1) {
       return true;
     }
 
-    // Previous month across year boundary (e.g. Jan 2026 -> Dec 2025)
     if (curMonth === 1 && selYear === curYear - 1 && selMonth === 12) {
       return true;
     }
 
-    return false; // Older months are read-only
+    return false;
   });
 
   constructor() {
@@ -258,23 +253,63 @@ export class MonthlyAttendance implements OnInit {
       Present: 0, Absent: 0, 'Weekly Off': 0, Holiday: 0,
       CL: 0, EL: 0, SL: 0, 'Half Day': 0,
       'CL/2': 0, 'EL/2': 0, 'SL/2': 0,
-      WFH: 0, OD: 0, LWP: 0, 'Paid Days': 0
+      WFH: 0, OD: 0, LWP: 0, Leave: 0, 'Paid Days': 0
     };
 
+    const dateMap: any = {};
     details.forEach(d => {
       const st = d.attendance_status;
+      if (!st) return;
+      if (d.date) dateMap[d.date] = d;
+
       if (st === 'Lost Of Pay' || st === 'Loss Of Pay') {
         sum['LWP'] = (sum['LWP'] || 0) + 1;
+      } else if (st === 'Leave') {
+        sum['Leave'] = (sum['Leave'] || 0) + 1;
       } else if (sum[st] !== undefined) {
         sum[st] += 1;
       }
     });
 
-    const effectiveWeeklyOffs = sum.Present >= 6 ? sum['Weekly Off'] : 0;
+    let paidWeeklyOffs = 0;
+    details.forEach(d => {
+      const st = (d.attendance_status || '').trim().toUpperCase();
+      const isSundayOrWO = d.day === 'Sunday' || ['WEEKLY_OFF', 'WEEKLY OFF', 'WO', 'WEEKOFF'].includes(st);
+
+      if (isSundayOrWO) {
+        const dateObj = new Date(d.date);
+        const dayOfWeek = dateObj.getDay();
+        const diffToMon = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+
+        let workDaysCount = 0;
+        for (let i = 1; i <= diffToMon; i++) {
+          const prevDateObj = new Date(dateObj);
+          prevDateObj.setDate(dateObj.getDate() - i);
+          const yyyy = prevDateObj.getFullYear();
+          const mm = String(prevDateObj.getMonth() + 1).padStart(2, '0');
+          const dd = String(prevDateObj.getDate()).padStart(2, '0');
+          const prevDStr = `${yyyy}-${mm}-${dd}`;
+
+          const prevDetail = dateMap[prevDStr];
+          if (prevDetail && prevDetail.attendance_status) {
+            const pSt = prevDetail.attendance_status.trim().toUpperCase();
+            if (['PRESENT', 'LATE_COMING', 'EARLY_GOING', 'RG', 'REGULARIZED', 'P', 'HOLIDAY', 'H', 'ON_LEAVE', 'LEAVE', 'L', 'CL', 'EL', 'SL', 'WFH', 'OD'].includes(pSt)) {
+              workDaysCount += 1;
+            } else if (['HALF_DAY', 'HALF DAY', 'HD', 'CL/2', 'EL/2', 'SL/2'].includes(pSt)) {
+              workDaysCount += 0.5;
+            }
+          }
+        }
+
+        if (workDaysCount >= 2) {
+          paidWeeklyOffs += 1;
+        }
+      }
+    });
 
     sum['Paid Days'] =
-      sum.Present + effectiveWeeklyOffs + sum.Holiday +
-      sum.CL + sum.EL + sum.SL + sum.WFH + sum.OD +
+      sum.Present + paidWeeklyOffs + sum.Holiday +
+      sum.CL + sum.EL + sum.SL + sum.WFH + sum.OD + (sum.Leave || 0) +
       ((sum['Half Day'] + sum['CL/2'] + sum['EL/2'] + sum['SL/2']) * 0.5);
 
     this.summary = sum;
@@ -296,8 +331,11 @@ export class MonthlyAttendance implements OnInit {
     )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => {
+        next: (res) => {
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Draft saved successfully' });
+          if (res && res.data && res.data.summary) {
+            this.summary = res.data.summary;
+          }
           this.saving.set(false);
         },
         error: (err) => {
@@ -355,7 +393,7 @@ export class MonthlyAttendance implements OnInit {
     if (!status || !this.isEditable()) return;
     this.detailsArray.controls.forEach(ctrl => {
       if (this.isFutureDate(ctrl.get('date')?.value)) {
-        return; // Do not apply bulk status to future dates
+        return;
       }
       if (this.isWeekend(ctrl.get('day')?.value)) {
         ctrl.get('attendance_status')?.setValue('Weekly Off');
