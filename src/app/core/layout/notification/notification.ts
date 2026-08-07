@@ -56,13 +56,14 @@ export class NotificationComponent implements OnInit, OnDestroy {
   pendingRequests = signal<NotificationItem[]>([]);
   pendingLeaves = signal<NotificationItem[]>([]);
   pendingTickets = signal<NotificationItem[]>([]);
+  pendingAssets = signal<NotificationItem[]>([]);
 
   ngOnInit(): void {
     this.updatePortalViewMode();
     this.loadNotifications();
 
-    // Poll for updated notification counts every 20 seconds
-    this.pollSub = timer(20000, 20000).subscribe(() => {
+    // Poll for updated notification counts every 15 seconds
+    this.pollSub = timer(15000, 15000).subscribe(() => {
       this.loadNotifications();
     });
 
@@ -104,6 +105,7 @@ export class NotificationComponent implements OnInit, OnDestroy {
           this.pendingRequests.set(res.data.pendingRequests || []);
           this.pendingLeaves.set(res.data.pendingLeaves || []);
           this.pendingTickets.set(res.data.pendingTickets || []);
+          this.pendingAssets.set(res.data.pendingAssets || []);
 
           const newCategories: NotificationCategory[] = [];
 
@@ -135,14 +137,21 @@ export class NotificationComponent implements OnInit, OnDestroy {
             });
           }
 
+          if (this.pendingAssets().length > 0) {
+            newCategories.push({
+              title: this.isHrView() ? 'Pending Asset Approvals' : 'My Asset Requests',
+              count: this.pendingAssets().length
+            });
+          }
+
           this.categories.set(newCategories);
 
           const total = this.missingSwipes().length +
             this.pendingRequests().length +
             this.pendingLeaves().length +
-            this.pendingTickets().length;
+            this.pendingTickets().length +
+            this.pendingAssets().length;
 
-          // Trigger smooth animation ONLY when count increases (0->1, 1->2, etc.) after initial load
           if (!this.isInitialLoad && this.prevTotalCount !== null && total > this.prevTotalCount) {
             this.triggerNotificationAnimation();
           }
@@ -175,6 +184,8 @@ export class NotificationComponent implements OnInit, OnDestroy {
       return this.pendingLeaves();
     } else if (title.includes('Ticket')) {
       return this.pendingTickets();
+    } else if (title.includes('Asset')) {
+      return this.pendingAssets();
     }
     return [];
   }
@@ -194,13 +205,25 @@ export class NotificationComponent implements OnInit, OnDestroy {
     }
 
     if (this.isHrView()) {
-      this.router.navigate(['/hradmin/approval-attendance-regularization']);
-    } else {
-      const targetDate = item.date;
-      if (targetDate) {
-        this.router.navigate(['/ess/attendance-regularization'], { queryParams: { date: targetDate } });
+      if (item.type?.includes('asset')) {
+        this.router.navigate(['/hradmin/asset-approval']);
+      } else if (item.type?.includes('leave')) {
+        this.router.navigate(['/hradmin/leave-approval']);
       } else {
-        this.router.navigate(['/ess/attendance-regularization']);
+        this.router.navigate(['/hradmin/approval-attendance-regularization']);
+      }
+    } else {
+      if (item.type?.includes('asset')) {
+        this.router.navigate(['/ess/my-assets']);
+      } else if (item.type?.includes('leave')) {
+        this.router.navigate(['/ess/leave-application']);
+      } else {
+        const targetDate = item.date;
+        if (targetDate) {
+          this.router.navigate(['/ess/attendance-regularization'], { queryParams: { date: targetDate } });
+        } else {
+          this.router.navigate(['/ess/attendance-regularization']);
+        }
       }
     }
   }
@@ -210,7 +233,11 @@ export class NotificationComponent implements OnInit, OnDestroy {
       this.op.hide();
     }
     if (this.isHrView()) {
-      this.router.navigate(['/hradmin/approval-attendance-regularization']);
+      if (this.pendingAssets().length > 0 && this.pendingRequests().length === 0) {
+        this.router.navigate(['/hradmin/asset-approval']);
+      } else {
+        this.router.navigate(['/hradmin/approval-attendance-regularization']);
+      }
     } else {
       this.router.navigate(['/ess/attendance-regularization']);
     }
