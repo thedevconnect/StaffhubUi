@@ -21,6 +21,7 @@ export interface NotificationResponse {
     pendingRequests: NotificationItem[];
     pendingLeaves: NotificationItem[];
     pendingTickets: NotificationItem[];
+    pendingAssets?: NotificationItem[];
   };
 }
 

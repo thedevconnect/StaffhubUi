@@ -64,20 +64,20 @@ export class MyAssets implements OnInit {
   selectedAsset: any = null
   assetHistory: any[] = []
 
-  activeTab: string = 'All';
+  activeTab: string = 'Pending';
 
   get tabs(): any[] {
     if (this.isHRAdmin) {
       return [
-        { label: 'Company Inventory', value: 'Inventory', icon: 'pi pi-box' },
-        { label: 'Assigned Assets', value: 'Assigned', icon: 'pi pi-users' },
         { label: 'Pending Requests', value: 'Pending', icon: 'pi pi-clock' },
+        { label: 'Assigned Assets', value: 'Assigned', icon: 'pi pi-users' },
+        { label: 'Company Inventory', value: 'Inventory', icon: 'pi pi-box' },
         { label: 'All', value: 'All', icon: 'pi pi-list' }
       ];
     } else {
       return [
-        { label: 'My Assigned Assets', value: 'Assigned', icon: 'pi pi-briefcase' },
-        { label: 'My Requests', value: 'Pending', icon: 'pi pi-clock' }
+        { label: 'My Requests', value: 'Pending', icon: 'pi pi-clock' },
+        { label: 'My Assigned Assets', value: 'Assigned', icon: 'pi pi-briefcase' }
       ];
     }
   }
@@ -124,8 +124,9 @@ export class MyAssets implements OnInit {
     ];
     if (this.isHRAdmin) {
       actions.push({ label: 'Edit', icon: 'pi pi-pencil', id: 'edit' });
-      actions.push({ label: 'Delete', icon: 'pi pi-trash', id: 'delete' });
       actions.push({ label: 'Approve', icon: 'pi pi-check', id: 'approve' });
+      actions.push({ label: 'Reject', icon: 'pi pi-times', id: 'reject' });
+      actions.push({ label: 'Delete', icon: 'pi pi-trash', id: 'delete' });
     } else {
       actions.push({ label: 'Withdraw', icon: 'pi pi-times-circle', id: 'withdraw' });
       actions.push({ label: 'Return', icon: 'pi pi-undo', id: 'return' });
@@ -136,7 +137,7 @@ export class MyAssets implements OnInit {
   disableActionCondition = (actionId: string, row: any): boolean => {
     const status = (row.approval_status || '').toUpperCase();
     if (this.isHRAdmin) {
-      if (status === 'APPROVED' && actionId === 'approve') return true;
+      if (status === 'APPROVED' && (actionId === 'approve' || actionId === 'reject')) return true;
     } else {
       if (actionId === 'withdraw' && status !== 'PENDING') return true;
       if (actionId === 'return' && status !== 'APPROVED') return true;
@@ -170,9 +171,7 @@ export class MyAssets implements OnInit {
   categories: any[] = []
 
   ngOnInit(): void {
-    if (!this.isHRAdmin) {
-      this.activeTab = 'Assigned';
-    }
+    this.activeTab = 'Pending';
     this.initForm()
     this.loadEmployees()
     this.getAllData(true)
@@ -199,55 +198,62 @@ export class MyAssets implements OnInit {
     })
   }
 
-  getAllData(showLoader: boolean = true): void {
-    if (showLoader) this.isLoading = true
-
+  getAllData(showLoading = true): void {
+    if (showLoading) this.isLoading = true
     this.assetsService.getAllAssets().subscribe({
       next: (res: any) => {
-        const dataArray = res?.table || res?.data || []
-        this.assets = dataArray.map((item: any) => this.mapAsset(item))
+        const raw = res?.data || []
+        this.assets = raw.map((item: any) => ({
+          ...item,
+          approval_status: item.approval_status || item.status || 'PENDING'
+        }))
         this.isLoading = false
         this.cdr.markForCheck()
       },
-      error: err => {
-        console.log(err)
-        this.assets = []
+      error: (err: any) => {
         this.isLoading = false
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err.error?.message || 'Failed to fetch asset data'
+        })
         this.cdr.markForCheck()
       }
     })
   }
 
-  mapAsset(item: any): any {
-    return {
-      ...item,
-      employee_name: item.employee_name || item.EmployeeName || item.employeeName || (item.employee_id ? `Employee #${item.employee_id}` : '-'),
-      assigned_date: item.assigned_date ? item.assigned_date.split('T')[0] : null
-    }
-  }
-
   openAddDrawer(): void {
     this.isEditMode = false
     this.selectedAsset = null
-    this.assetForm.reset()
+    this.assetForm.reset({
+      employee_id: '',
+      asset_name: '',
+      asset_type: '',
+      asset_code: '',
+      serial_number: '',
+      assigned_date: new Date().toISOString().substring(0, 10),
+      employee_remarks: ''
+    })
     this.showAssetDrawer = true
   }
 
   openEditDrawer(row: any): void {
     this.isEditMode = true
     this.selectedAsset = row
-
     this.assetForm.patchValue({
-      employee_id: row.employee_id,
+      employee_id: row.employee_id || '',
       asset_name: row.asset_name,
       asset_type: row.asset_type,
-      asset_code: row.asset_code || '',
-      serial_number: row.serial_number || '',
-      assigned_date: row.assigned_date || '',
+      asset_code: row.asset_code,
+      serial_number: row.serial_number,
+      assigned_date: row.assigned_date ? new Date(row.assigned_date).toISOString().substring(0, 10) : '',
       employee_remarks: row.employee_remarks || ''
     })
-
     this.showAssetDrawer = true
+  }
+
+  closeDrawer(): void {
+    this.showAssetDrawer = false
   }
 
   saveAsset(): void {
@@ -256,9 +262,13 @@ export class MyAssets implements OnInit {
       return
     }
 
-    const payload = this.assetForm.value
+    const val = this.assetForm.value
+    const payload = {
+      ...val,
+      assigned_date: val.assigned_date ? new Date(val.assigned_date).toISOString().substring(0, 10) : null
+    }
 
-    if (this.isEditMode && this.selectedAsset?.id) {
+    if (this.isEditMode && this.selectedAsset) {
       this.assetsService.updateAsset(this.selectedAsset.id, payload).subscribe({
         next: () => {
           this.messageService.add({
@@ -266,10 +276,10 @@ export class MyAssets implements OnInit {
             summary: 'Updated',
             detail: 'Asset updated successfully'
           })
-          this.showAssetDrawer = false
+          this.closeDrawer()
           this.getAllData(false)
         },
-        error: err => {
+        error: (err: any) => {
           this.messageService.add({
             severity: 'error',
             summary: 'Update Failed',
@@ -277,27 +287,26 @@ export class MyAssets implements OnInit {
           })
         }
       })
-      return
+    } else {
+      this.assetsService.createAsset(payload).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Created',
+            detail: 'Asset created successfully'
+          })
+          this.closeDrawer()
+          this.getAllData(false)
+        },
+        error: (err: any) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Creation Failed',
+            detail: err.error?.message || 'Unable to create asset'
+          })
+        }
+      })
     }
-
-    this.assetsService.createAsset(payload).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Created',
-          detail: 'Asset created successfully'
-        })
-        this.showAssetDrawer = false
-        this.getAllData(false)
-      },
-      error: err => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Create Failed',
-          detail: err.error?.message || 'Unable to create asset'
-        })
-      }
-    })
   }
 
   confirmDelete(row: any): void {
@@ -320,7 +329,7 @@ export class MyAssets implements OnInit {
         })
         this.getAllData(false)
       },
-      error: err => {
+      error: (err: any) => {
         this.messageService.add({
           severity: 'error',
           summary: 'Delete Failed',
@@ -354,6 +363,10 @@ export class MyAssets implements OnInit {
 
     if (event.actionId === 'approve') {
       this.approveAsset(event.row)
+    }
+
+    if (event.actionId === 'reject') {
+      this.rejectAsset(event.row)
     }
 
     if (event.actionId === 'withdraw') {
@@ -396,8 +409,28 @@ export class MyAssets implements OnInit {
             this.messageService.add({ severity: 'success', summary: 'Approved', detail: 'Asset approved successfully' })
             this.getAllData(false)
           },
-          error: err => {
+          error: (err: any) => {
             this.messageService.add({ severity: 'error', summary: 'Failed', detail: err.error?.message || 'Unable to approve asset' })
+          }
+        })
+      }
+    })
+  }
+
+  rejectAsset(row: any): void {
+    this.confirmationService.confirm({
+      message: `Are you sure you want to reject ${row.asset_name}?`,
+      header: 'Reject Asset',
+      icon: 'pi pi-times-circle',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => {
+        this.assetsService.deleteAsset(row.id).subscribe({
+          next: () => {
+            this.messageService.add({ severity: 'success', summary: 'Rejected', detail: 'Asset request rejected successfully' })
+            this.getAllData(false)
+          },
+          error: (err: any) => {
+            this.messageService.add({ severity: 'error', summary: 'Failed', detail: err.error?.message || 'Unable to reject asset request' })
           }
         })
       }
@@ -416,7 +449,7 @@ export class MyAssets implements OnInit {
             this.messageService.add({ severity: 'success', summary: 'Withdrawn', detail: 'Asset request withdrawn successfully' })
             this.getAllData(false)
           },
-          error: err => {
+          error: (err: any) => {
             this.messageService.add({ severity: 'error', summary: 'Failed', detail: err.error?.message || 'Unable to withdraw request' })
           }
         })
@@ -436,7 +469,7 @@ export class MyAssets implements OnInit {
             this.messageService.add({ severity: 'success', summary: 'Returned', detail: 'Asset returned successfully' })
             this.getAllData(false)
           },
-          error: err => {
+          error: (err: any) => {
             this.messageService.add({ severity: 'error', summary: 'Failed', detail: err.error?.message || 'Unable to return asset' })
           }
         })
