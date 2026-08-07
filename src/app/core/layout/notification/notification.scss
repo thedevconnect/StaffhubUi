@@ -1,0 +1,106 @@
+:host ::ng-deep .p-popover {
+  padding: 0 !important;
+  border-radius: 0.5rem;
+  border: none;
+}
+
+:host ::ng-deep .p-popover-content {
+  padding: 0;
+}
+
+:host ::ng-deep .p-accordion-header-link {
+  background: white !important;
+  border-radius: 0.5rem !important;
+  border: 1px solid #f1f5f9 !important;
+  padding: 0.6rem 0.85rem !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+}
+
+:host ::ng-deep .p-accordion-tab {
+  margin-bottom: 0.5rem;
+}
+
+:host ::ng-deep .p-accordion-tab-active .p-accordion-header-link {
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+:host ::ng-deep .p-accordion-content {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-top: none;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  padding: 0;
+}
+
+
+:host ::ng-deep .bell-repeat-shake,
+.bell-repeat-shake {
+  display: inline-block !important;
+  animation: bellPeriodicShake 3.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite !important;
+  transform-origin: top center !important;
+  will-change: transform;
+}
+
+@keyframes bellPeriodicShake {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  4% {
+    transform: rotate(20deg);
+  }
+
+  8% {
+    transform: rotate(-18deg);
+  }
+
+  12% {
+    transform: rotate(14deg);
+  }
+
+  16% {
+    transform: rotate(-10deg);
+  }
+
+  20% {
+    transform: rotate(5deg);
+  }
+
+  24% {
+    transform: rotate(-2deg);
+  }
+
+  28% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+
+  /* Rest period until next periodic shake */
+}
+
+/* Continuous Badge Pulse & Soft Red Glow */
+:host ::ng-deep .has-pending-badge .p-badge,
+:host ::ng-deep .has-pending-badge .p-overlaybadge-badge,
+:host ::ng-deep .p-badge.has-pending-badge {
+  animation: badgePeriodicGlow 2s ease-in-out infinite !important;
+  will-change: transform, box-shadow;
+}
+
+@keyframes badgePeriodicGlow {
+
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+  }
+
+  50% {
+    transform: scale(1.2);
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.9);
+  }
+}
