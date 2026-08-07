@@ -158,7 +158,7 @@ export class NotificationComponent implements OnInit, OnDestroy {
   isHrView = signal<boolean>(false);
   categories = signal<NotificationCategory[]>([]);
   totalPending = signal<number>(0);
-  
+
   // Detailed items arrays
   missingSwipes = signal<NotificationItem[]>([]);
   pendingRequests = signal<NotificationItem[]>([]);
@@ -203,16 +203,16 @@ export class NotificationComponent implements OnInit, OnDestroy {
           this.pendingRequests.set(res.data.pendingRequests || []);
           this.pendingLeaves.set(res.data.pendingLeaves || []);
           this.pendingTickets.set(res.data.pendingTickets || []);
-          
+
           const newCategories: NotificationCategory[] = [];
-          
+
           if (this.missingSwipes().length > 0) {
             newCategories.push({
               title: 'Missing Swipes',
               count: this.missingSwipes().length
             });
           }
-          
+
           if (this.pendingRequests().length > 0) {
             newCategories.push({
               title: this.isHrView() ? 'Pending Regularizations' : 'My Regularizations',
@@ -233,13 +233,13 @@ export class NotificationComponent implements OnInit, OnDestroy {
               count: this.pendingTickets().length
             });
           }
-          
+
           this.categories.set(newCategories);
-          
-          const total = this.missingSwipes().length + 
-                        this.pendingRequests().length + 
-                        this.pendingLeaves().length + 
-                        this.pendingTickets().length;
+
+          const total = this.missingSwipes().length +
+            this.pendingRequests().length +
+            this.pendingLeaves().length +
+            this.pendingTickets().length;
           this.totalPending.set(total);
         }
       },
@@ -296,4 +296,5 @@ export class NotificationComponent implements OnInit, OnDestroy {
       this.router.navigate(['/ess/attendance-regularization']);
     }
   }
+
 }
