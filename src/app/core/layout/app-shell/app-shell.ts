@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, HostListener, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, computed, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
@@ -7,7 +7,6 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AppHeader } from '../header/header';
 import { AuthService } from '../../../shared/services/services/auth.service';
-import { UserService } from '../../../shared/services/user-service';
 import { SidebarMenuItem, UserDetails } from './app-shell.models';
 import { essRoutes } from '../../../routes/ess.routes';
 import { hradminRoutes } from '../../../routes/hradmin.routes';
@@ -17,6 +16,7 @@ import { payrollRoutes } from '../../../routes/payroll.routes';
 
 @Component({
   selector: 'app-shell',
+  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
@@ -32,7 +32,7 @@ import { payrollRoutes } from '../../../routes/payroll.routes';
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [MessageService, ConfirmationService],
 })
-export class AppShell {
+export class AppShell implements OnInit {
   readonly isMobileView = signal(this.checkIsMobileView());
   readonly sidebarOpen = signal(!this.isMobileView());
   readonly selectedRoleId = computed(() => this.authService.selectedRoleId());
@@ -48,14 +48,9 @@ export class AppShell {
   });
 
   readonly dynamicMenuItems = signal<SidebarMenuItem[]>([]);
-  readonly menuItemsWithSubmenu = computed<SidebarMenuItem[]>(() => this.dynamicMenuItems());
-
-  // Search query state
   readonly searchQuery = signal<string>('');
-
-  // Filtered menu items using computed signal
   readonly filteredMenuItems = computed(() =>
-    this.filterMenuItems(this.menuItemsWithSubmenu(), this.searchQuery()),
+    this.filterMenuItems(this.dynamicMenuItems(), this.searchQuery()),
   );
 
   constructor(
@@ -63,7 +58,6 @@ export class AppShell {
     private readonly messageService: MessageService,
     private readonly confirmationService: ConfirmationService,
     private readonly router: Router,
-    private readonly userService: UserService,
   ) { }
 
   ngOnInit(): void {
@@ -71,34 +65,24 @@ export class AppShell {
   }
 
   fetchUserSidebar(): void {
-    const roleId = this.selectedRoleId();
-    if (!roleId) return;
+    const rawRoleId = this.selectedRoleId()?.toLowerCase();
+    if (!rawRoleId) return;
 
-    const rawRoleId = roleId.toLowerCase();
-
-    // Determine prefix and select corresponding routes
-    let rolePrefix = rawRoleId;
-    let routesToMap: any[] = [];
+    let rolePrefix = 'ess';
+    let routesToMap: any[] = essRoutes;
 
     if (rawRoleId === 'hr_admin' || rawRoleId === 'hradmin') {
       rolePrefix = 'hradmin';
       routesToMap = hradminRoutes;
-    } else if (rawRoleId === 'ess') {
-      rolePrefix = 'ess';
-      routesToMap = essRoutes;
     } else if (rawRoleId === 'developer') {
       rolePrefix = 'developer';
       routesToMap = developerRoutes;
     } else if (rawRoleId === 'super_admin' || rawRoleId === 'superadmin') {
       rolePrefix = 'superadmin';
       routesToMap = superadminRoutes;
-    } else if (rawRoleId === 'payroll' || rawRoleId === 'payroll_admin' || rawRoleId.includes('payroll')) {
+    } else if (rawRoleId.includes('payroll')) {
       rolePrefix = 'payroll';
       routesToMap = payrollRoutes;
-    } else {
-      // Default to ESS routes if role is unrecognized
-      rolePrefix = 'ess';
-      routesToMap = essRoutes;
     }
 
     const menus: SidebarMenuItem[] = [
@@ -111,21 +95,17 @@ export class AppShell {
       const standaloneMenus: SidebarMenuItem[] = [];
 
       routesToMap.forEach((route) => {
-        if (!route.path || route.redirectTo !== undefined) return;
-        if (route.path === 'ess-dashboard') return;
+        if (!route.path || route.redirectTo !== undefined || route.path === 'ess-dashboard') return;
 
-        const label = (route.title as string) || this.formatPathToLabel(route.path);
-        const icon = this.getIconForPath(route.path);
         const item: SidebarMenuItem = {
-          label: label,
-          icon: icon,
+          label: (route.title as string) || this.formatPathToLabel(route.path),
+          icon: this.getIconForPath(route.path),
           route: `/${rolePrefix}/${route.path}`,
           isOpen: false,
         };
 
         const pathLower = route.path.toLowerCase();
-
-        if (pathLower.includes('resignation') || pathLower.includes('exit-interview') || pathLower.includes('exit')) {
+        if (pathLower.includes('resignation') || pathLower.includes('exit')) {
           exitSubmenus.push(item);
         } else if (
           pathLower.includes('expense') ||
@@ -141,24 +121,8 @@ export class AppShell {
         }
       });
 
-      if (essSubmenus.length > 0) {
-        menus.push({
-          label: 'ESS',
-          icon: 'pi-user',
-          isOpen: false,
-          children: essSubmenus,
-        });
-      }
-
-      if (exitSubmenus.length > 0) {
-        menus.push({
-          label: 'Exit',
-          icon: 'pi-times-circle',
-          isOpen: false,
-          children: exitSubmenus,
-        });
-      }
-
+      if (essSubmenus.length > 0) menus.push({ label: 'ESS', icon: 'pi-user', isOpen: false, children: essSubmenus });
+      if (exitSubmenus.length > 0) menus.push({ label: 'Exit', icon: 'pi-times-circle', isOpen: false, children: exitSubmenus });
       menus.push(...standaloneMenus);
     } else if (rawRoleId === 'hr_admin' || rawRoleId === 'hradmin') {
       const empMgmtSubmenus: SidebarMenuItem[] = [];
@@ -168,23 +132,25 @@ export class AppShell {
       const standaloneBottomMenus: SidebarMenuItem[] = [];
 
       routesToMap.forEach((route) => {
-        if (!route.path || route.redirectTo !== undefined) return;
-        if (route.path === 'hradmin-dashboard') return;
+        if (!route.path || route.redirectTo !== undefined || route.path === 'hradmin-dashboard') return;
 
-        const label = (route.title as string) || this.formatPathToLabel(route.path);
-        const icon = this.getIconForPath(route.path);
         const item: SidebarMenuItem = {
-          label: label,
-          icon: icon,
+          label: (route.title as string) || this.formatPathToLabel(route.path),
+          icon: this.getIconForPath(route.path),
           route: `/${rolePrefix}/${route.path}`,
           isOpen: false,
         };
 
         const pathLower = route.path.toLowerCase();
-
         if (pathLower.includes('approval') || pathLower.includes('exit')) {
           approvalSubmenus.push(item);
-        } else if (pathLower.includes('employee-management') || pathLower.includes('offboarding') || pathLower.includes('office-location') || pathLower.includes('device-management') || pathLower.includes('probation')) {
+        } else if (
+          pathLower.includes('employee-management') ||
+          pathLower.includes('offboarding') ||
+          pathLower.includes('office-location') ||
+          pathLower.includes('device-management') ||
+          pathLower.includes('probation')
+        ) {
           empMgmtSubmenus.push(item);
         } else if (pathLower.includes('attendance') || pathLower.includes('leave') || pathLower.includes('calendar')) {
           attendanceSubmenus.push(item);
@@ -197,62 +163,21 @@ export class AppShell {
         }
       });
 
-      if (empMgmtSubmenus.length > 0) {
-        menus.push({
-          label: 'Employee Management',
-          icon: 'pi-users',
-          isOpen: false,
-          children: empMgmtSubmenus,
-        });
-      }
-      if (attendanceSubmenus.length > 0) {
-        menus.push({
-          label: 'Attendance & Leave',
-          icon: 'pi-calendar-times',
-          isOpen: false,
-          children: attendanceSubmenus,
-        });
-      }
-      if (assetSubmenus.length > 0) {
-        menus.push({
-          label: 'Asset Management',
-          icon: 'pi-briefcase',
-          isOpen: false,
-          children: assetSubmenus,
-        });
-      }
-      if (approvalSubmenus.length > 0) {
-        menus.push({
-          label: 'Approvals',
-          icon: 'pi-check-square',
-          isOpen: false,
-          children: approvalSubmenus,
-        });
-      }
-
+      if (empMgmtSubmenus.length > 0) menus.push({ label: 'Employee Management', icon: 'pi-users', isOpen: false, children: empMgmtSubmenus });
+      if (attendanceSubmenus.length > 0) menus.push({ label: 'Attendance & Leave', icon: 'pi-calendar-times', isOpen: false, children: attendanceSubmenus });
+      if (assetSubmenus.length > 0) menus.push({ label: 'Asset Management', icon: 'pi-briefcase', isOpen: false, children: assetSubmenus });
+      if (approvalSubmenus.length > 0) menus.push({ label: 'Approvals', icon: 'pi-check-square', isOpen: false, children: approvalSubmenus });
       menus.push(...standaloneBottomMenus);
     } else {
-      if (routesToMap && routesToMap.length > 0) {
-        routesToMap.forEach((route) => {
-          if (!route.path || route.redirectTo !== undefined) return;
-          if (
-            route.path === 'payroll-dashboard' ||
-            route.path === 'developer-dashboard' ||
-            route.path === 'superadmin-dashboard' ||
-            route.path === 'hradmin-dashboard'
-          ) return;
-
-          const label = (route.title as string) || this.formatPathToLabel(route.path);
-          const icon = this.getIconForPath(route.path);
-
-          menus.push({
-            label: label,
-            icon: icon,
-            route: `/${rolePrefix}/${route.path}`,
-            isOpen: false,
-          });
+      (routesToMap || []).forEach((route) => {
+        if (!route.path || route.redirectTo !== undefined || route.path.includes('dashboard')) return;
+        menus.push({
+          label: (route.title as string) || this.formatPathToLabel(route.path),
+          icon: this.getIconForPath(route.path),
+          route: `/${rolePrefix}/${route.path}`,
+          isOpen: false,
         });
-      }
+      });
     }
 
     this.dynamicMenuItems.set(menus);
@@ -296,7 +221,7 @@ export class AppShell {
   }
 
   closeSidebarOnMobile(): void {
-    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+    if (this.isMobileView()) {
       this.sidebarOpen.set(false);
     }
   }
@@ -321,43 +246,46 @@ export class AppShell {
       header: 'Logout',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
+        this.clearSession();
         this.authService.logout();
         this.messageService.add({
           severity: 'success',
           summary: 'Logged out',
           detail: 'You have been logged out successfully.',
         });
-        sessionStorage.removeItem('user');
-        sessionStorage.removeItem('selectedRoleId');
-        sessionStorage.removeItem('roleOptions');
-        sessionStorage.removeItem('token');
         this.router.navigate(['/login']);
       },
     });
   }
 
   onHeaderLogout(): void {
-    sessionStorage.removeItem('user');
-    sessionStorage.removeItem('selectedRoleId');
-    sessionStorage.removeItem('roleOptions');
-    sessionStorage.removeItem('token');
+    this.clearSession();
   }
 
-  onSearchQueryChange(event: any): void {
-    this.searchQuery.set(event.target.value);
+  private clearSession(): void {
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.removeItem('user');
+      sessionStorage.removeItem('selectedRoleId');
+      sessionStorage.removeItem('roleOptions');
+      sessionStorage.removeItem('token');
+    }
+  }
+
+  onSearchQueryChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.searchQuery.set(target?.value || '');
   }
 
   private filterMenuItems(items: SidebarMenuItem[], query: string): SidebarMenuItem[] {
-    if (!query.trim()) {
-      return items;
-    }
+    if (!query.trim()) return items;
     const lowerQuery = query.toLowerCase();
+
     return items
       .map((item) => {
         const cloned = { ...item };
         if (cloned.children && cloned.children.length > 0) {
           const matchedChildren = cloned.children
-            .map((sub: SidebarMenuItem) => {
+            .map((sub) => {
               const clonedSub = { ...sub };
               if (clonedSub.children && clonedSub.children.length > 0) {
                 const matchedGrand = clonedSub.children.filter((child) =>
@@ -373,7 +301,7 @@ export class AppShell {
               }
               return null;
             })
-            .filter((sub) => sub !== null) as SidebarMenuItem[];
+            .filter((sub): sub is SidebarMenuItem => sub !== null);
 
           if (matchedChildren.length > 0) {
             cloned.children = matchedChildren;
@@ -385,7 +313,7 @@ export class AppShell {
         }
         return null;
       })
-      .filter((item) => item !== null) as SidebarMenuItem[];
+      .filter((item): item is SidebarMenuItem => item !== null);
   }
 
   private checkIsMobileView(): boolean {
@@ -394,12 +322,7 @@ export class AppShell {
 
   private syncLayoutForViewport(): void {
     const nextIsMobile = this.checkIsMobileView();
-    const previousIsMobile = this.isMobileView();
-
-    if (nextIsMobile === previousIsMobile) {
-      return;
-    }
-
+    if (nextIsMobile === this.isMobileView()) return;
     this.isMobileView.set(nextIsMobile);
     this.sidebarOpen.set(!nextIsMobile);
   }

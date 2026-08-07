@@ -3,19 +3,22 @@
   <div *ngIf="isMobileView() && sidebarOpen()" (click)="toggleSidebar()"
     class="fixed inset-0 z-20 bg-slate-900/40 backdrop-blur-[1px] md:hidden"></div>
 
-  <aside
-    [style.background-color]="'var(--accent-color, #1976D2)'"
+  <!-- Sidebar Container -->
+  <aside [style.background-color]="'var(--accent-color, #1976D2)'"
     class="fixed left-0 top-0 z-30 h-screen border-r border-slate-200 dark:border-slate-800 text-white transition-all duration-300 max-md:-translate-x-full flex flex-col shadow-lg"
     [class.w-64]="sidebarOpen() || isMobileView()" [class.w-16]="!sidebarOpen() && !isMobileView()"
     [class.!translate-x-0]="sidebarOpen()">
-    <div class="flex h-[56px] items-center justify-center border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 flex-none">
+
+    <!-- Logo / Brand Header -->
+    <div
+      class="flex h-[56px] items-center justify-center border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 flex-none">
       <a [routerLink]="getDashboardRoute()" class="flex w-full items-center justify-center">
         <img src="assets/stubhub-com-banner-2.jpg" alt="StaffHub Logo"
           class="max-h-[44px] w-auto max-w-[90%] object-contain" />
       </a>
     </div>
 
-    <!-- Sidebar Search -->
+    <!-- Sidebar Search Bar -->
     <div class="p-3 pb-0 flex-none" *ngIf="sidebarOpen()">
       <div class="relative flex items-center">
         <i class="pi pi-search absolute left-3 text-white/50 text-xs"></i>
@@ -25,6 +28,7 @@
       </div>
     </div>
 
+    <!-- Sidebar Navigation Links -->
     <nav class="sidebar-nav-container flex-1 overflow-y-auto space-y-1 p-3 select-none">
       @for (item of filteredMenuItems(); track item.label) {
       <div>
@@ -45,13 +49,12 @@
           }
         </button>
 
-        <!-- Nested Submenus (First level) -->
+        <!-- Submenu Items -->
         @if (item.isOpen && sidebarOpen()) {
         <div class="ml-4 mt-1 space-y-1 border-l border-white/20 pl-2 transition-all duration-300">
           @for (sub of item.children; track sub.label) {
           <div>
             @if (sub.children && sub.children.length > 0) {
-            <!-- Level 2 Parent -->
             <button (click)="toggleMenuOpen(sub)"
               class="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-xs text-white/80 transition hover:bg-white/10 cursor-pointer text-left focus:outline-none">
               <span class="font-medium">{{ sub.label }}</span>
@@ -59,7 +62,6 @@
                 [class]="'pi pi-chevron-right text-[9px] transition-transform duration-200' + (sub.isOpen ? ' rotate-90' : '')"></i>
             </button>
 
-            <!-- Level 2 Children -->
             @if (sub.isOpen) {
             <div class="ml-3 mt-1 space-y-1 border-l border-white/10 pl-2 transition-all duration-300">
               @for (child of sub.children; track child.label) {
@@ -83,7 +85,7 @@
         </div>
         }
         } @else {
-        <!-- Flat Menu Item -->
+        <!-- Single Menu Item -->
         <a [routerLink]="item.route" routerLinkActive="bg-white/20 font-semibold text-white"
           class="flex items-center rounded-lg px-3 py-2 text-sm text-white/95 transition hover:bg-white/10"
           [class.justify-center]="!sidebarOpen()" [class.justify-start]="sidebarOpen()"
@@ -99,16 +101,17 @@
     </nav>
   </aside>
 
+  <!-- Main Content Layout -->
   <div class="flex h-screen flex-1 flex-col transition-all duration-300 relative min-w-0"
     [class.md:ml-64]="sidebarOpen()" [class.md:ml-16]="!sidebarOpen()">
     @if (userDetails(); as user) {
-    <header class="flex-none sticky top-0 z-20 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm w-full transition-colors">
+    <header
+      class="flex-none sticky top-0 z-20 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm w-full transition-colors">
       <app-app-header [user]="user" [sidebarOpen]="sidebarOpen()" [selectedRoleId]="selectedRoleId()"
         [roleOptions]="roleOptions()" (onLogout)="onHeaderLogout()" (onRoleChange)="onRoleChange($event)"
         (onToggleSidebar)="toggleSidebar()" />
     </header>
     }
-
 
     <main class="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-6 w-full">
       <router-outlet />

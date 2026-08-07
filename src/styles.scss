@@ -165,29 +165,85 @@ html[data-accent] {
   --color-submit: var(--primary-600);
   --color-submit-hover: var(--primary-700);
 
-  .bg-indigo-600, .bg-blue-600, .bg-indigo-700 { background-color: var(--primary-600) !important; }
-  .bg-indigo-500, .bg-blue-500 { background-color: var(--primary-500) !important; }
-  .bg-indigo-100, .bg-blue-100 { background-color: var(--primary-100) !important; }
-  .bg-indigo-50, .bg-blue-50 { background-color: var(--primary-50) !important; }
+  .bg-indigo-600,
+  .bg-blue-600,
+  .bg-indigo-700 {
+    background-color: var(--primary-600) !important;
+  }
 
-  .text-indigo-600, .text-blue-600 { color: var(--primary-600) !important; }
-  .text-indigo-700, .text-blue-700, .text-indigo-800 { color: var(--primary-700) !important; }
-  .text-indigo-500, .text-blue-500 { color: var(--primary-500) !important; }
+  .bg-indigo-500,
+  .bg-blue-500 {
+    background-color: var(--primary-500) !important;
+  }
 
-  .border-indigo-600, .border-blue-600 { border-color: var(--primary-600) !important; }
-  .border-indigo-200, .border-blue-200 { border-color: var(--primary-200) !important; }
-  .border-indigo-100, .border-blue-100 { border-color: var(--primary-100) !important; }
+  .bg-indigo-100,
+  .bg-blue-100 {
+    background-color: var(--primary-100) !important;
+  }
 
-  .hover\:bg-indigo-700:hover, .hover\:bg-blue-700:hover { background-color: var(--primary-700) !important; }
-  .hover\:bg-indigo-600:hover, .hover\:bg-blue-600:hover { background-color: var(--primary-600) !important; }
-  .hover\:bg-indigo-50:hover, .hover\:bg-blue-50:hover { background-color: var(--primary-50) !important; }
-  .hover\:text-indigo-600:hover, .hover\:text-blue-600:hover { color: var(--primary-600) !important; }
+  .bg-indigo-50,
+  .bg-blue-50 {
+    background-color: var(--primary-50) !important;
+  }
+
+  .text-indigo-600,
+  .text-blue-600 {
+    color: var(--primary-600) !important;
+  }
+
+  .text-indigo-700,
+  .text-blue-700,
+  .text-indigo-800 {
+    color: var(--primary-700) !important;
+  }
+
+  .text-indigo-500,
+  .text-blue-500 {
+    color: var(--primary-500) !important;
+  }
+
+  .border-indigo-600,
+  .border-blue-600 {
+    border-color: var(--primary-600) !important;
+  }
+
+  .border-indigo-200,
+  .border-blue-200 {
+    border-color: var(--primary-200) !important;
+  }
+
+  .border-indigo-100,
+  .border-blue-100 {
+    border-color: var(--primary-100) !important;
+  }
+
+  .hover\:bg-indigo-700:hover,
+  .hover\:bg-blue-700:hover {
+    background-color: var(--primary-700) !important;
+  }
+
+  .hover\:bg-indigo-600:hover,
+  .hover\:bg-blue-600:hover {
+    background-color: var(--primary-600) !important;
+  }
+
+  .hover\:bg-indigo-50:hover,
+  .hover\:bg-blue-50:hover {
+    background-color: var(--primary-50) !important;
+  }
+
+  .hover\:text-indigo-600:hover,
+  .hover\:text-blue-600:hover {
+    color: var(--primary-600) !important;
+  }
 
   /* PrimeNG Button, Badge & Progressbar Overrides */
-  .p-button, button.p-button {
+  .p-button,
+  button.p-button {
     &:not(.p-button-outlined):not(.p-button-text):not(.p-button-secondary):not(.p-button-danger):not(.p-button-success) {
       background-color: var(--primary-600) !important;
       border-color: var(--primary-600) !important;
+
       &:hover {
         background-color: var(--primary-700) !important;
         border-color: var(--primary-700) !important;
@@ -222,6 +278,7 @@ html[data-accent] {
     color: var(--primary-700) !important;
     background-color: #ffffff !important;
     font-weight: 700 !important;
+
     &:focus {
       outline: 2px solid var(--primary-600) !important;
     }
@@ -299,4 +356,3 @@ html[data-accent] {
   border-left: 3.5px solid #ffffff !important;
   font-weight: 700 !important;
 }
-

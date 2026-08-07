@@ -56,10 +56,18 @@ export interface SwipeLog {
   employee_name: string;
 }
 
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
   data: T;
+  pagination?: PaginationMeta;
 }
 
 @Injectable({
@@ -82,12 +90,24 @@ export class AttendanceService {
     return this.http.post<ApiResponse<AttendanceRecord>>(`${this.apiBase}/api/attendance/swipe-out`, data || {});
   }
 
-  getHistory(): Observable<ApiResponse<AttendanceRecord[]>> {
-    return this.http.get<ApiResponse<AttendanceRecord[]>>(`${this.apiBase}/api/attendance/history`);
+  getHistory(page?: number, limit?: number, search?: string, startDate?: string, endDate?: string): Observable<ApiResponse<AttendanceRecord[]>> {
+    const params: string[] = [];
+    if (page) params.push(`page=${page}`);
+    if (limit) params.push(`limit=${limit}`);
+    if (search) params.push(`search=${encodeURIComponent(search)}`);
+    if (startDate) params.push(`startDate=${encodeURIComponent(startDate)}`);
+    if (endDate) params.push(`endDate=${encodeURIComponent(endDate)}`);
+    const queryString = params.length > 0 ? `?${params.join('&')}` : '';
+    return this.http.get<ApiResponse<AttendanceRecord[]>>(`${this.apiBase}/api/attendance/history${queryString}`);
   }
 
-  getEmployeeHistory(employeeId: number | string): Observable<ApiResponse<AttendanceRecord[]>> {
-    return this.http.get<ApiResponse<AttendanceRecord[]>>(`${this.apiBase}/api/attendance/employee-history/${employeeId}`);
+  getEmployeeHistory(employeeId: number | string, page?: number, limit?: number, search?: string): Observable<ApiResponse<AttendanceRecord[]>> {
+    const params: string[] = [];
+    if (page) params.push(`page=${page}`);
+    if (limit) params.push(`limit=${limit}`);
+    if (search) params.push(`search=${encodeURIComponent(search)}`);
+    const queryString = params.length > 0 ? `?${params.join('&')}` : '';
+    return this.http.get<ApiResponse<AttendanceRecord[]>>(`${this.apiBase}/api/attendance/employee-history/${employeeId}${queryString}`);
   }
 
   getDashboardSummary(): Observable<ApiResponse<DashboardSummary>> {
