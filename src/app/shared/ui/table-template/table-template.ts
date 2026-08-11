@@ -263,12 +263,15 @@ export class TableTemplate implements OnChanges {
     if (this.currentPage !== this.totalPages) this.changePage(this.totalPages);
   }
 
-  changePageSize(newSize: number): void {
-    this.pageSize = Number(newSize);
-    this.pageSizeChange.emit(this.pageSize);
-    if (!this.serverSide) {
+  changePageSize(newSize: number | string): void {
+    const size = Number(newSize);
+    if (!isNaN(size) && size > 0) {
+      this.pageSize = size;
       this.currentPage = 1;
-      this.updatePaginatedData();
+      this.pageSizeChange.emit(this.pageSize);
+      if (!this.serverSide) {
+        this.updatePaginatedData();
+      }
     }
   }
 

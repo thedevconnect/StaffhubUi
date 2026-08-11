@@ -27,12 +27,32 @@ export class PayrollService {
     return this.http.post<any>(`${this.apiUrl}/process`, { month, year });
   }
 
-  setBaseSalary(employee_id: number, base_salary: number): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/set-base-salary`, { employee_id, base_salary });
+  setBaseSalary(employee_id: number, base_salary: number, effective_from: string | null = null): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/set-base-salary`, { employee_id, base_salary, effective_from });
+  }
+
+  recordPayment(data: { payroll_id: number; employee_id: number; amount: number; payment_mode?: string; reference_number?: string; payment_date?: string; notes?: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/record-payment`, data);
   }
 
   getEmployeePayrollLedger(employeeId: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/ledger/${employeeId}`);
+  }
+
+  getMonthlyComponents(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/monthly-components`);
+  }
+
+  createMonthlyComponent(data: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/monthly-components`, data);
+  }
+
+  updateMonthlyComponent(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/monthly-components/${id}`, data);
+  }
+
+  deleteMonthlyComponent(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/monthly-components/${id}`);
   }
 
   getYearlyComponents(): Observable<any> {
@@ -47,12 +67,11 @@ export class PayrollService {
     return this.http.put<any>(`${this.apiUrl}/yearly-components/${id}`, data);
   }
 
-  getDashboardSummary(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/dashboard-summary`);
-  }
-
   deleteYearlyComponent(id: number): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/yearly-components/${id}`);
   }
-}
 
+  getDashboardSummary(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/dashboard-summary`);
+  }
+}

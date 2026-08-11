@@ -201,17 +201,17 @@
     </div>
 
     <!-- Pagination Footer -->
-    <div *ngIf="totalCount > 5"
+    <div *ngIf="totalCount > 0 || (data && data.length > 0)"
       class="sticky bottom-0 bg-white z-10 p-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 space-y-4 sm:space-y-0">
       <div class="flex items-center space-x-2">
-        <select [(ngModel)]="pageSize" (change)="changePageSize(pageSize)" title="Select records per page"
+        <select [ngModel]="pageSize" (ngModelChange)="changePageSize($event)" title="Select records per page"
           class="border border-gray-300 rounded-md px-2 py-1 text-sm cursor-pointer" aria-label="Select rows per page">
           @for (size of pageSizeOptions; track size) {
             <option [value]="size">{{ size }}</option>
           }
         </select>
         <div class="text-sm text-gray-600">
-          Showing {{ (currentPage - 1) * pageSize + 1 }} - {{ Math.min(currentPage * pageSize, totalCount) }} of {{ totalCount }}
+          Showing {{ totalCount > 0 ? (currentPage - 1) * pageSize + 1 : 0 }} - {{ Math.min(currentPage * pageSize, totalCount) }} of {{ totalCount }}
         </div>
       </div>
 
