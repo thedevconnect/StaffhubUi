@@ -71,6 +71,9 @@ export class RegisterCompanyComponent implements OnInit {
       companyEmail: ['', [Validators.required, Validators.email]],
       companyPhone: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
       address: ['', Validators.required],
+      officeLatitude: [''],
+      officeLongitude: [''],
+      allowedRadius: [200],
       industry: ['', Validators.required],
       otherIndustry: [''],
       empId: [''],
@@ -177,14 +180,21 @@ export class RegisterCompanyComponent implements OnInit {
           const lat = position.coords.latitude;
           const lon = position.coords.longitude;
 
+          this.signupForm.patchValue({
+            officeLatitude: lat,
+            officeLongitude: lon,
+            allowedRadius: 100
+          });
+
           fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
             .then(response => response.json())
             .then(data => {
               this.isLocating = false;
               if (data && data.display_name) {
                 this.signupForm.patchValue({ address: data.display_name });
+                this.messageService.add({ severity: 'success', summary: 'Location Captured', detail: `Address and GPS coordinates (${lat.toFixed(4)}, ${lon.toFixed(4)}) captured.` });
               } else {
-                this.messageService.add({ severity: 'warn', summary: 'Location Warning', detail: 'Could not resolve address.' });
+                this.messageService.add({ severity: 'warn', summary: 'Location Warning', detail: 'Could not resolve address name.' });
               }
             })
             .catch(err => {
@@ -200,6 +210,26 @@ export class RegisterCompanyComponent implements OnInit {
     } else {
       this.messageService.add({ severity: 'error', summary: 'Not Supported', detail: 'Geolocation is not supported by this browser.' });
     }
+  }
+
+  geocodeAddress() {
+    const address = this.signupForm.get('address')?.value;
+    if (!address || address.length < 5) return;
+
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lon = parseFloat(data[0].lon);
+          this.signupForm.patchValue({
+            officeLatitude: lat,
+            officeLongitude: lon,
+            allowedRadius: 100
+          });
+        }
+      })
+      .catch(() => { });
   }
 
   redirectToLogin() {

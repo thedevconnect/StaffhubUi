@@ -14,6 +14,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { AttendanceService } from '../../../shared/services/attendance.service';
+import { NotificationService } from '../../../shared/services/notification.service';
 import { TableColumn, TableTemplate, Tab } from '../../../shared/ui/table-template/table-template';
 
 import { parseLocalDatetime } from '../../../shared/utils/date-utils';
@@ -119,6 +120,7 @@ export class ApprovalAttendanceRegularization implements OnInit {
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private attendanceService: AttendanceService,
+    private notificationService: NotificationService,
     private cdr: ChangeDetectorRef,
     private fb: FormBuilder
   ) {
@@ -135,7 +137,6 @@ export class ApprovalAttendanceRegularization implements OnInit {
     this.loadCompanyRequests();
   }
 
-  // Load from backend API if available, fallback to mock data on failure
   loadCompanyRequests() {
     this.isLoading = true;
     this.attendanceService.getCompanyRegularizations(1, 100, '', '').subscribe({
@@ -272,6 +273,7 @@ export class ApprovalAttendanceRegularization implements OnInit {
         this.detailDrawerVisible = false;
         this.isLoading = false;
         this.messageService.add({ severity: 'success', summary: 'Success', detail: `Request ${status} successfully!` });
+        this.notificationService.triggerRefresh();
         this.cdr.markForCheck();
       },
       error: (err: any) => {

@@ -77,8 +77,8 @@ export class ReportingsAttendance implements OnInit {
     { key: 'employee_name', header: 'Employee Name', isSortable: true },
     { key: 'department', header: 'Department', isSortable: true },
     { key: 'designation', header: 'Designation' },
-    { key: 'swipe_in', header: 'Swipe In', pipe: 'date', pipeArgs: 'mediumTime', isSortable: true },
-    { key: 'swipe_out', header: 'Swipe Out', pipe: 'date', pipeArgs: 'mediumTime', isSortable: true },
+    { key: 'swipe_in', header: 'Swipe In', pipe: 'date', pipeArgs: 'hh:mm:ss a', isSortable: true },
+    { key: 'swipe_out', header: 'Swipe Out', pipe: 'date', pipeArgs: 'hh:mm:ss a', isSortable: true },
     { key: 'total_time', header: 'Total Work Time' },
     { key: 'swipe_in_address', header: 'Location / Device' },
     { key: 'attendance_status', header: 'Status' }

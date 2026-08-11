@@ -44,9 +44,9 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   ];
 
   columns: TableColumn[] = [
-    { key: 'attendance_date', header: 'Date', isSortable: true, pipe: 'date', pipeArgs: 'mediumDate' },
-    { key: 'swipe_in', header: 'Swipe In', isSortable: true },
-    { key: 'swipe_out', header: 'Swipe Out', isSortable: true },
+    { key: 'attendance_date', header: 'Date', isSortable: true, pipe: 'date', pipeArgs: 'dd-MM-yyyy' },
+    { key: 'swipe_in', header: 'Swipe In', isSortable: true, pipe: 'date', pipeArgs: 'hh:mm:ss a' },
+    { key: 'swipe_out', header: 'Swipe Out', isSortable: true, pipe: 'date', pipeArgs: 'hh:mm:ss a' },
     { key: 'total_work_minutes', header: 'Work Hours', isSortable: true },
     { key: 'attendance_status', header: 'Status', isSortable: true },
     { key: 'location_address', header: 'Location / Device', isSortable: false },
