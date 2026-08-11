@@ -16,28 +16,18 @@ export const payrollRoutes: Routes = [
         loadComponent: () => import('../dashboard/payroll-dashboard/payroll-dashboard').then(m => m.PayrollDashboard)
     },
     {
-        path: 'monthly-salary',
-        loadComponent: () => import('../components/payroll/monthly-salary-prepration/monthly-salary').then(m => m.MonthlySalary)
+        path: 'monthly-salary-components',
+        title: 'Monthly Salary Components',
+        loadComponent: () => import('../payroll/monthly-salary-components/monthly-salary-components').then((m) => m.MonthlySalaryComponents)
+    },
+    {
+        path: 'yearly-salary-components',
+        title: 'Yearly Salary Components',
+        loadComponent: () => import('../payroll/yearly-salary-components/yearly-salary-components').then((m) => m.YearlySalary)
     },
     {
         path: 'employee-expense-statement',
         title: 'Employee Expense Statement',
         loadComponent: () => import('../reports/employee-expense-statement/employee-expense-statement').then((m) => m.EmployeeExpenseStatement)
-    },
-    {
-        path: 'yearly-salary-components',
-        loadComponent: () => import('../payroll/yearly-salary-components/yearly-salary-components').then((m) => m.YearlySalary)
-    },
-    {
-        path: 'monthly-salary-components',
-        loadComponent: () => import('../payroll/monthly-salary-components/monthly-salary-components').then((m) => m.MonthlySalaryComponents)
-    },
-    {
-        path: 'monthly-salary-preparation',
-        loadComponent: () => import('../payroll/monthly-salary-preparation/monthly-salary-preparation').then((m) => m.MonthlySalaryPreparation)
-    },
-    {
-        path: 'monthly-salary-approval',
-        loadComponent: () => import('../payroll/monthly-salary-approval/monthly-salary-approval').then((m) => m.MonthlySalaryApproval)
     }
 ];

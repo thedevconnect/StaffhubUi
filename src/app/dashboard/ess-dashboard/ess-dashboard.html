@@ -9,11 +9,11 @@
 
 <section class="space-y-4">
   <!-- Welcome Header Card -->
-  <header
-    class="rounded-xl border border-slate-200 bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white relative overflow-hidden shadow-sm">
+  <header [style.background-color]="'var(--accent-color, #1976D2)'"
+    class="rounded-xl border border-slate-200 p-6 text-white relative overflow-hidden shadow-sm transition-all duration-300">
     <div class="relative z-10">
       <h2 class="text-2xl font-bold tracking-tight">Welcome Back, {{ employeeName() }}!</h2>
-      <p class="mt-1 text-sm text-blue-100 font-medium">Have a wonderful day ahead. Here is an overview of your work
+      <p class="mt-1 text-sm text-white/90 font-medium">Have a wonderful day ahead. Here is an overview of your work
         records and shortcuts.</p>
     </div>
     <div class="absolute right-6 -bottom-6 opacity-10 text-9xl">
@@ -154,8 +154,8 @@
       <div class="w-full overflow-x-auto">
         <app-table-template [data]="resData" [columns]="columns" [pageSize]="pageSize" [totalCount]="totalCount"
           [isLoading]="loading()" [currentPage]="pageNo" [searchText]="searchText" [showRefresh]="true"
-          [tableActions]="rowActions" (actionClicked)="onActionClicked($event)" (refresh)="loadDashboardData()"
-          (pageChange)="onPageChange($event)" (searchChange)="onSearchChange($event)"
+          [serverSide]="true" [tableActions]="rowActions" (actionClicked)="onActionClicked($event)"
+          (refresh)="loadDashboardData()" (pageChange)="onPageChange($event)" (searchChange)="onSearchChange($event)"
           (sortChange)="onSortChange($event)" (pageSizeChange)="onPageSizeChange($event)">
         </app-table-template>
 
