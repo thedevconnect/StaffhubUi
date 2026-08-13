@@ -1,8 +1,6 @@
 import { ChangeDetectionStrategy, Component, ChangeDetectorRef, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CardModule } from 'primeng/card';
-import { TableModule } from 'primeng/table';
 import { Breadcrumb } from 'primeng/breadcrumb';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
@@ -26,8 +24,6 @@ import { TableColumn, TableTemplate, TableAction } from '../../../shared/ui/tabl
   imports: [
     CommonModule,
     FormsModule,
-    CardModule,
-    TableModule,
     Breadcrumb,
     ButtonModule,
     SelectModule,

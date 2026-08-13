@@ -1,6 +1,4 @@
 import { ChangeDetectionStrategy, Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CardModule } from 'primeng/card';
-import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { Breadcrumb } from 'primeng/breadcrumb';
 import { ButtonModule } from 'primeng/button';
@@ -23,8 +21,6 @@ import { parseLocalDatetime } from '../../../shared/utils/date-utils';
   standalone: true,
   imports: [
     CommonModule,
-    CardModule,
-    TableModule,
     Breadcrumb,
     ButtonModule,
     ReactiveFormsModule,
@@ -105,6 +101,7 @@ export class AttendanceRegularization implements OnInit {
 
   regForm!: FormGroup;
   selectedFileName: string = '';
+  selectedFileBase64: string = '';
 
   // Select Options
   correctionTypes = [
@@ -113,13 +110,6 @@ export class AttendanceRegularization implements OnInit {
     { label: 'Early Out', value: 'Early Out' },
     { label: 'Half Day Correction', value: 'Half Day Correction' },
     { label: 'Other Correction', value: 'Other Correction' }
-  ];
-
-  statusOptions = [
-    { label: 'All Statuses', value: 'All' },
-    { label: 'Pending', value: 'Pending' },
-    { label: 'Approved', value: 'Approved' },
-    { label: 'Rejected', value: 'Rejected' }
   ];
 
   monthOptions = [
@@ -192,7 +182,8 @@ export class AttendanceRegularization implements OnInit {
             hrRemarks: req.hrRemarks,
             approvedBy: req.approvedBy,
             approvedByName: req.approvedByName,
-            employeeName: req.employeeName
+            employeeName: req.employeeName,
+            attachmentUrl: req.attachmentUrl || req.attachment_url || null
           }));
         } else {
           this.requests = [];
@@ -285,6 +276,7 @@ export class AttendanceRegularization implements OnInit {
       reason: ''
     });
     this.selectedFileName = '';
+    this.selectedFileBase64 = '';
     this.cdr.markForCheck();
   }
 
@@ -292,7 +284,8 @@ export class AttendanceRegularization implements OnInit {
     this.drawerType = 'edit';
     this.selectedRequest = req;
     this.drawerVisible = true;
-    this.selectedFileName = '';
+    this.selectedFileName = req.attachmentUrl ? (req.attachmentUrl.startsWith('data:') ? 'Uploaded Attachment' : req.attachmentUrl) : '';
+    this.selectedFileBase64 = req.attachmentUrl || '';
 
     this.regForm.patchValue({
       attendanceDate: req.attendanceDate,
@@ -341,9 +334,15 @@ export class AttendanceRegularization implements OnInit {
   }
 
   onFileSelected(event: any) {
-    const file = event.target.files[0];
+    const file = event.target.files?.[0];
     if (file) {
       this.selectedFileName = file.name;
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.selectedFileBase64 = e.target.result;
+        this.cdr.markForCheck();
+      };
+      reader.readAsDataURL(file);
     }
   }
 
@@ -369,7 +368,7 @@ export class AttendanceRegularization implements OnInit {
       checkIn: formValue.checkIn,
       checkOut: formValue.checkOut,
       reason: formValue.reason,
-      attachmentUrl: this.selectedFileName || null
+      attachmentUrl: this.selectedFileBase64 || this.selectedFileName || null
     };
 
     if (this.drawerType === 'add') {

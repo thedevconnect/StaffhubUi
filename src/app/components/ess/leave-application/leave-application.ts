@@ -80,7 +80,7 @@ export class LeaveApplication {
   sessionTo: any;
   leaveTypedata: any;
   selectedCc: any;
-  
+
   isHistoryDrawerVisible: boolean = false;
   leaveHistoryData: any[] = [];
 
@@ -339,7 +339,7 @@ export class LeaveApplication {
 
   get filteredData() {
     let data = this.tblData;
-    
+
     // Filter by Tab
     if (this.activeTab !== 'All') {
       if (this.activeTab === 'Pending') {
@@ -358,7 +358,7 @@ export class LeaveApplication {
         )
       );
     }
-    
+
     return data;
   }
 
@@ -541,7 +541,7 @@ export class LeaveApplication {
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         this.loadingService.startLoading();
-        
+
         const val = this.leaveForm.value;
         const formatDateStr = (d: any): string => {
           if (!d) return '';
@@ -558,9 +558,9 @@ export class LeaveApplication {
           status: 'PENDING'
         };
 
-        const req = (this.postType === 'edit' && this.editingId) 
-           ? this.leaveService.updateLeave(this.editingId, payload)
-           : this.leaveService.createLeave(payload);
+        const req = (this.postType === 'edit' && this.editingId)
+          ? this.leaveService.updateLeave(this.editingId, payload)
+          : this.leaveService.createLeave(payload);
 
         req.subscribe({
           next: (res) => {
