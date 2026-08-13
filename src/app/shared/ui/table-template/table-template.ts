@@ -14,6 +14,7 @@ import { FormsModule } from '@angular/forms';
 import { SkeletonModule } from 'primeng/skeleton';
 import { MenuModule } from 'primeng/menu';
 import { ButtonModule } from 'primeng/button';
+import { ScrollerModule } from 'primeng/scroller';
 import { MenuItem } from 'primeng/api';
 import { ExcelService } from '../../services/excel.service';
 
@@ -45,7 +46,7 @@ export interface Tab {
 @Component({
   selector: 'app-table-template',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgClass, NgIf, SkeletonModule, MenuModule, ButtonModule],
+  imports: [CommonModule, FormsModule, NgClass, NgIf, SkeletonModule, MenuModule, ButtonModule, ScrollerModule],
   templateUrl: './table-template.html',
   styleUrls: ['./table-template.scss']
 })
@@ -55,6 +56,8 @@ export class TableTemplate implements OnChanges {
   @Input() pageSize = 5;
   @Input() totalCount = 0;
   @Input() isLoading = false;
+  @Input() enableVirtualScroll = false;
+  @Input() virtualScrollItemSize = 52;
 
   // Template inputs
   @Input() actionTemplate: TemplateRef<any> | null = null;

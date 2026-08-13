@@ -84,11 +84,11 @@ export class EssDashboard implements OnInit {
   columns: TableColumn[] = [
     { key: 'employee_id', header: 'Employee ID', isVisible: true, isSortable: true },
     { key: 'attendance_date', header: 'Attendance Date', isVisible: true, isSortable: true, pipe: 'date', pipeArgs: 'dd-MM-yyyy' },
-    { key: 'swipe_in', header: 'Swipe In', isVisible: true, isSortable: true, pipe: 'date', pipeArgs: 'hh:mm a' },
-    { key: 'swipe_out', header: 'Swipe Out', isVisible: true, isSortable: true, pipe: 'date', pipeArgs: 'hh:mm a' },
+    { key: 'swipe_in', header: 'Swipe In', isVisible: true, isSortable: true, pipe: 'date', pipeArgs: 'hh:mm:ss a' },
+    { key: 'swipe_out', header: 'Swipe Out', isVisible: true, isSortable: true, pipe: 'date', pipeArgs: 'hh:mm:ss a' },
     { key: 'attendance_status', header: 'Status', isVisible: true, isSortable: true },
     { key: 'total_work_minutes', header: 'Total Time', isVisible: true, isSortable: true, pipe: 'formatTotalWorkingHours' },
-    { key: 'created_at', header: 'Created At', isVisible: true, isSortable: true, pipe: 'date', pipeArgs: 'dd-MM-yyyy hh:mm a' }
+    { key: 'created_at', header: 'Created At', isVisible: true, isSortable: true, pipe: 'date', pipeArgs: 'dd-MM-yyyy hh:mm:ss a' }
   ]
 
   rowActions = [
@@ -201,6 +201,7 @@ export class EssDashboard implements OnInit {
     return parsed.toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
+      second: '2-digit',
       hour12: true
     })
   }

@@ -1,6 +1,4 @@
 import { ChangeDetectionStrategy, Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CardModule } from 'primeng/card';
-import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb';
 import { ButtonModule } from 'primeng/button';
@@ -14,6 +12,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { AttendanceService } from '../../../shared/services/attendance.service';
+import { NotificationService } from '../../../shared/services/notification.service';
 import { TableColumn, TableTemplate, Tab } from '../../../shared/ui/table-template/table-template';
 
 import { parseLocalDatetime } from '../../../shared/utils/date-utils';
@@ -23,8 +22,6 @@ import { parseLocalDatetime } from '../../../shared/utils/date-utils';
   standalone: true,
   imports: [
     CommonModule,
-    CardModule,
-    TableModule,
     AppBreadcrumb,
     ButtonModule,
     ReactiveFormsModule,
@@ -87,6 +84,8 @@ export class ApprovalAttendanceRegularization implements OnInit {
   historyEvents: any[] = [];
   processForm: FormGroup;
   isLoading: boolean = false;
+  isApproving: boolean = false;
+  isRejecting: boolean = false;
 
   isDetailDrawerFullScreen = false;
   isHistoryDrawerFullScreen = false;
@@ -108,17 +107,11 @@ export class ApprovalAttendanceRegularization implements OnInit {
     { label: 'Other Correction', value: 'Other Correction' }
   ];
 
-  statusOptions = [
-    { label: 'All Statuses', value: 'All' },
-    { label: 'Pending', value: 'Pending' },
-    { label: 'Approved', value: 'Approved' },
-    { label: 'Rejected', value: 'Rejected' }
-  ];
-
   constructor(
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private attendanceService: AttendanceService,
+    private notificationService: NotificationService,
     private cdr: ChangeDetectorRef,
     private fb: FormBuilder
   ) {
@@ -135,7 +128,6 @@ export class ApprovalAttendanceRegularization implements OnInit {
     this.loadCompanyRequests();
   }
 
-  // Load from backend API if available, fallback to mock data on failure
   loadCompanyRequests() {
     this.isLoading = true;
     this.attendanceService.getCompanyRegularizations(1, 100, '', '').subscribe({
@@ -155,7 +147,8 @@ export class ApprovalAttendanceRegularization implements OnInit {
             submittedOn: item.submittedOn || item.createdAt || item.created_at || new Date(),
             managerRemarks: item.managerRemarks || item.manager_remarks || item.remarks || '',
             hrRemarks: item.hrRemarks || item.hr_remarks || '',
-            approvedByName: item.approved_by_name || item.approvedByName || ''
+            approvedByName: item.approved_by_name || item.approvedByName || '',
+            attachmentUrl: item.attachmentUrl || item.attachment_url || null
           }));
         } else {
           // If the backend returns no records, we clear the array so that local table updates correctly
@@ -250,7 +243,11 @@ export class ApprovalAttendanceRegularization implements OnInit {
       return;
     }
 
-    this.isLoading = true;
+    if (status === 'Approved') {
+      this.isApproving = true;
+    } else {
+      this.isRejecting = true;
+    }
     const finalStatus = status; // Keep it as 'Approved' or 'Rejected' to match backend expectation
     const currentRemarks = this.processForm.value.hrRemarks;
 
@@ -270,8 +267,10 @@ export class ApprovalAttendanceRegularization implements OnInit {
         });
 
         this.detailDrawerVisible = false;
-        this.isLoading = false;
+        this.isApproving = false;
+        this.isRejecting = false;
         this.messageService.add({ severity: 'success', summary: 'Success', detail: `Request ${status} successfully!` });
+        this.notificationService.triggerRefresh();
         this.cdr.markForCheck();
       },
       error: (err: any) => {
@@ -288,7 +287,8 @@ export class ApprovalAttendanceRegularization implements OnInit {
         });
 
         this.detailDrawerVisible = false;
-        this.isLoading = false;
+        this.isApproving = false;
+        this.isRejecting = false;
         this.messageService.add({ severity: 'success', summary: 'Mock Status Updated', detail: `Request ${status} updated in memory.` });
         this.cdr.markForCheck();
       }

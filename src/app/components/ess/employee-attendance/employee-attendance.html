@@ -86,15 +86,21 @@
         </span>
       </div>
 
-      <!-- Leaflet Map Container for Geo-Attendance -->
-      <div class="w-full mt-4 border border-slate-200 rounded-lg overflow-hidden relative" style="height: 200px;">
-        <div id="attendance-map" class="w-full h-full z-0"></div>
-        <button (click)="refreshMapLocation()"
-          class="absolute top-2 right-2 z-10 bg-white p-2 rounded-full shadow-md text-slate-600 hover:text-blue-600 focus:outline-none transition-colors"
-          title="Refresh My Location">
-          <i class="pi pi-compass" [ngClass]="{'pi-spin': isRefreshingLocation}"></i>
-        </button>
-      </div>
+      <!-- Leaflet Map Container for Geo-Attendance with @defer -->
+      @defer (on idle) {
+        <div class="w-full mt-4 border border-slate-200 rounded-lg overflow-hidden relative" style="height: 200px;">
+          <div id="attendance-map" class="w-full h-full z-0"></div>
+          <button (click)="refreshMapLocation()"
+            class="absolute top-2 right-2 z-10 bg-white p-2 rounded-full shadow-md text-slate-600 hover:text-blue-600 focus:outline-none transition-colors"
+            title="Refresh My Location">
+            <i class="pi pi-compass" [ngClass]="{'pi-spin': isRefreshingLocation}"></i>
+          </button>
+        </div>
+      } @placeholder {
+        <div class="w-full mt-4 border border-slate-200 rounded-lg h-[200px] flex items-center justify-center bg-slate-50 text-xs text-slate-400 font-medium">
+          <i class="pi pi-map-marker text-lg text-slate-400 mr-2"></i> Initializing Geo Location Map...
+        </div>
+      }
     </div>
 
     <!-- Today's Logs Sidebar Card -->
@@ -105,26 +111,30 @@
           Today's Timeline
         </h4>
 
-        <div class="overflow-y-auto custom-scrollbar max-h-[300px] space-y-4 pr-1">
+        <div class="custom-scrollbar max-h-[300px] space-y-4 pr-1">
           <div *ngIf="todayPunches().length === 0"
             class="flex flex-col items-center justify-center py-12 text-center text-slate-400 space-y-2">
             <i class="pi pi-calendar text-2xl opacity-40"></i>
             <p class="text-xs font-semibold">No activity recorded for today.</p>
           </div>
 
-          <!-- Timeline Log -->
+          <!-- Virtual Scroller Timeline Log -->
           <div class="relative border-l border-slate-200 ml-4 pl-6 space-y-6" *ngIf="todayPunches().length > 0">
-            <div *ngFor="let punch of todayPunches()" class="relative">
-              <span
-                class="absolute -left-[35px] top-0 h-6 w-6 rounded-full border-2 bg-white flex items-center justify-center shadow-sm"
-                [ngClass]="punch.colorClass">
-                <i [class]="punch.icon + ' text-[10px]'"></i>
-              </span>
-              <div>
-                <span class="text-xs font-bold text-slate-700 block leading-tight">{{ punch.type }}</span>
-                <span class="text-[10px] text-slate-400 font-mono">{{ punch.time }}</span>
-              </div>
-            </div>
+            <p-scroller [items]="todayPunches()" [itemSize]="54" scrollHeight="260px" styleClass="w-full">
+              <ng-template pTemplate="item" let-punch>
+                <div class="relative mb-6">
+                  <span
+                    class="absolute -left-[35px] top-0 h-6 w-6 rounded-full border-2 bg-white flex items-center justify-center shadow-sm"
+                    [ngClass]="punch.colorClass">
+                    <i [class]="punch.icon + ' text-[10px]'"></i>
+                  </span>
+                  <div>
+                    <span class="text-xs font-bold text-slate-700 block leading-tight">{{ punch.type }}</span>
+                    <span class="text-[10px] text-slate-400 font-mono">{{ punch.time }}</span>
+                  </div>
+                </div>
+              </ng-template>
+            </p-scroller>
           </div>
         </div>
       </div>
@@ -141,20 +151,33 @@
     </div>
   </div>
 
-  <!-- Attendance History Table Card with Pagination using TableTemplate -->
-  <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-    <app-table-template [data]="historyRecords()" [columns]="columns" [pageSize]="historyLimit()"
-      [totalCount]="historyTotal()" [isLoading]="historyLoading()" [currentPage]="historyPage()"
-      [searchText]="historySearch()" [serverSide]="true" [showExport]="true" exportFileName="Attendance_History"
-      [tableActions]="[]" (pageChange)="onHistoryPageChange($event)" (pageSizeChange)="onHistoryLimitChange($event)"
-      (searchChange)="onHistorySearch($event)" (refresh)="loadHistory(historyPage(), historyLimit(), historySearch())"
-      [cellTemplates]="{
-        'swipe_in': swipeInTpl,
-        'swipe_out': swipeOutTpl,
-        'location_address': locationTpl
-      }">
-    </app-table-template>
-  </div>
+  <!-- Attendance History Table Card with Pagination using TableTemplate with Angular @defer & Virtual Scroll -->
+  @defer (on viewport) {
+    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+      <app-table-template [data]="historyRecords()" [columns]="columns" [pageSize]="historyLimit()"
+        [totalCount]="historyTotal()" [isLoading]="historyLoading()" [currentPage]="historyPage()"
+        [searchText]="historySearch()" [serverSide]="true" [showExport]="true" exportFileName="Attendance_History"
+        [enableVirtualScroll]="true" [virtualScrollItemSize]="52"
+        [tableActions]="[]" (pageChange)="onHistoryPageChange($event)" (pageSizeChange)="onHistoryLimitChange($event)"
+        (searchChange)="onHistorySearch($event)" (refresh)="loadHistory(historyPage(), historyLimit(), historySearch())"
+        [cellTemplates]="{
+          'swipe_in': swipeInTpl,
+          'swipe_out': swipeOutTpl,
+          'location_address': locationTpl
+        }">
+      </app-table-template>
+    </div>
+  } @placeholder {
+    <div class="bg-white border border-slate-200 rounded-xl p-8 text-center text-slate-400 text-xs font-medium">
+      <i class="pi pi-table text-xl mb-2 text-slate-300 block"></i>
+      <span>Scroll to view Attendance History Table...</span>
+    </div>
+  } @loading (after 100ms; minimum 300ms) {
+    <div class="bg-white border border-slate-200 rounded-xl p-8 text-center text-blue-600 text-xs font-medium">
+      <i class="pi pi-spin pi-spinner text-xl mb-2 block"></i>
+      <span>Loading Table Component...</span>
+    </div>
+  }
 
   <ng-template #swipeInTpl let-record>
     <span class="inline-flex items-center gap-1 font-mono font-medium text-emerald-700">

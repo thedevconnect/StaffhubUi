@@ -181,8 +181,8 @@
                             </div>
                             <div>
                                 <p-floatlabel>
-                                    <input pInputText id="companyPhone" type="text" formControlName="companyPhone" maxlength="10"
-                                        (input)="onlyNumbers($event, 'companyPhone')"
+                                    <input pInputText id="companyPhone" type="text" formControlName="companyPhone"
+                                        maxlength="10" (input)="onlyNumbers($event, 'companyPhone')"
                                         class="w-full bg-white"
                                         [class.ng-invalid]="f2['companyPhone'].invalid && f2['companyPhone'].touched"
                                         [class.ng-dirty]="f2['companyPhone'].invalid && f2['companyPhone'].touched" />
@@ -191,8 +191,10 @@
                                 </p-floatlabel>
                                 <small *ngIf="f2['companyPhone'].touched && f2['companyPhone'].errors"
                                     class="text-rose-500 text-xs mt-1.5 block font-medium">
-                                    <span *ngIf="f2['companyPhone'].errors?.['required']">Company phone is required</span>
-                                    <span *ngIf="f2['companyPhone'].errors?.['pattern']">Please enter a valid 10-digit phone number</span>
+                                    <span *ngIf="f2['companyPhone'].errors?.['required']">Company phone is
+                                        required</span>
+                                    <span *ngIf="f2['companyPhone'].errors?.['pattern']">Please enter a valid 10-digit
+                                        phone number</span>
                                 </small>
                             </div>
                         </div>
@@ -229,7 +231,7 @@
                                 <div class="relative">
                                     <p-floatlabel>
                                         <input pInputText id="address" formControlName="address"
-                                            class="w-full bg-white pr-12"
+                                            (blur)="geocodeAddress()" class="w-full bg-white pr-12"
                                             [class.ng-invalid]="f2['address'].invalid && f2['address'].touched"
                                             [class.ng-dirty]="f2['address'].invalid && f2['address'].touched" />
                                         <label for="address"><i class="pi pi-map-marker mr-2 text-slate-400"></i>Company
@@ -242,6 +244,9 @@
                                             [ngClass]="isLocating ? 'pi-spin pi-spinner' : 'pi-compass'"></i>
                                     </button>
                                 </div>
+                                <!-- <div *ngIf="signupForm.value.officeLatitude" class="text-[11px] text-emerald-600 font-mono flex items-center gap-1 mt-1 font-semibold">
+                                    <i class="pi pi-check-circle text-xs"></i> GPS Coordinates: {{ signupForm.value.officeLatitude }}, {{ signupForm.value.officeLongitude }}
+                                </div> -->
                                 <small *ngIf="f2['address'].touched && f2['address'].invalid"
                                     class="text-rose-500 text-xs mt-1.5 block font-medium">Address is required</small>
                             </div>
@@ -305,8 +310,7 @@
                             <div>
                                 <p-floatlabel>
                                     <input pInputText id="mobile" type="text" formControlName="mobile" maxlength="10"
-                                        (input)="onlyNumbers($event, 'mobile')"
-                                        class="w-full bg-white"
+                                        (input)="onlyNumbers($event, 'mobile')" class="w-full bg-white"
                                         [class.ng-invalid]="f2['mobile'].invalid && f2['mobile'].touched"
                                         [class.ng-dirty]="f2['mobile'].invalid && f2['mobile'].touched" />
                                     <label for="mobile"><i class="pi pi-phone mr-2 text-slate-400"></i>Mobile
@@ -315,7 +319,8 @@
                                 <small *ngIf="f2['mobile'].touched && f2['mobile'].errors"
                                     class="text-rose-500 text-xs mt-1.5 block font-medium">
                                     <span *ngIf="f2['mobile'].errors?.['required']">Mobile number is required</span>
-                                    <span *ngIf="f2['mobile'].errors?.['pattern']">Please enter a valid 10-digit mobile number</span>
+                                    <span *ngIf="f2['mobile'].errors?.['pattern']">Please enter a valid 10-digit mobile
+                                        number</span>
                                 </small>
                             </div>
                         </div>

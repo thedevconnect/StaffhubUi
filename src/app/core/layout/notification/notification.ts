@@ -1,4 +1,4 @@
-import { Component, signal, inject, ViewChild, OnInit, OnDestroy } from '@angular/core';
+import { Component, signal, inject, ViewChild, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
 import { OverlayBadgeModule } from 'primeng/overlaybadge';
@@ -7,6 +7,7 @@ import { ButtonModule } from 'primeng/button';
 import { Accordion, AccordionPanel, AccordionHeader, AccordionContent } from 'primeng/accordion';
 import { NotificationService, NotificationItem } from '../../../shared/services/notification.service';
 import { AuthService } from '../../../shared/services/services/auth.service';
+import { SocketService } from '../../../shared/services/socket.service';
 import { Subscription, timer } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
@@ -36,10 +37,15 @@ export class NotificationComponent implements OnInit, OnDestroy {
 
   private readonly notificationService = inject(NotificationService);
   private readonly authService = inject(AuthService);
+  private readonly socketService = inject(SocketService);
   private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   private routerSub?: Subscription;
   private pollSub?: Subscription;
+  private socketSub?: Subscription;
+  private attendanceSocketSub?: Subscription;
+  private refreshSub?: Subscription;
 
   isHrView = signal<boolean>(false);
   categories = signal<NotificationCategory[]>([]);
@@ -60,24 +66,38 @@ export class NotificationComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.updatePortalViewMode();
-    this.loadNotifications();
+    this.loadNotifications(true);
 
-    // Poll for updated notification counts every 15 seconds
-    this.pollSub = timer(15000, 15000).subscribe(() => {
-      this.loadNotifications();
+    // Connect to WebSocket room for real-time instant notification updates (100% event-driven, zero polling)
+    const user = this.authService.user();
+    const companyId = user?.companyId || user?.company_id || 1;
+    this.socketService.connect(companyId);
+
+    this.socketSub = this.socketService.onNotificationUpdated().subscribe(() => {
+      this.loadNotifications(true);
+    });
+
+    this.attendanceSocketSub = this.socketService.onAttendanceUpdated().subscribe(() => {
+      this.loadNotifications(true);
+    });
+
+    this.refreshSub = this.notificationService.refresh$.subscribe(() => {
+      this.loadNotifications(true);
     });
 
     this.routerSub = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
       this.updatePortalViewMode();
-      this.loadNotifications();
+      this.loadNotifications(true);
     });
   }
 
   ngOnDestroy(): void {
     this.routerSub?.unsubscribe();
-    this.pollSub?.unsubscribe();
+    this.socketSub?.unsubscribe();
+    this.attendanceSocketSub?.unsubscribe();
+    this.refreshSub?.unsubscribe();
     if (this.animTimeout) {
       clearTimeout(this.animTimeout);
     }
@@ -96,7 +116,7 @@ export class NotificationComponent implements OnInit, OnDestroy {
     }
   }
 
-  loadNotifications(): void {
+  loadNotifications(force = false): void {
     const portal = this.isHrView() ? 'hradmin' : 'ess';
     this.notificationService.getNotifications(portal).subscribe({
       next: (res: any) => {
@@ -159,9 +179,13 @@ export class NotificationComponent implements OnInit, OnDestroy {
           this.totalPending.set(total);
           this.prevTotalCount = total;
           this.isInitialLoad = false;
+          this.cdr.markForCheck();
         }
       },
-      error: (err: any) => console.error('Failed to load notifications:', err)
+      error: (err: any) => {
+        console.error('Failed to load notifications:', err);
+        this.cdr.markForCheck();
+      }
     });
   }
 

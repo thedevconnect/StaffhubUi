@@ -6,6 +6,7 @@ import { ToastModule } from 'primeng/toast';
 import { FormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { ProgressBarModule } from 'primeng/progressbar';
+import { ScrollerModule } from 'primeng/scroller';
 import {
   AttendanceService,
   AttendanceRecord,
@@ -25,6 +26,7 @@ import * as L from 'leaflet';
     ToastModule,
     FormsModule,
     ProgressBarModule,
+    ScrollerModule,
     TableTemplate
   ],
   providers: [MessageService],
@@ -44,9 +46,9 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
   ];
 
   columns: TableColumn[] = [
-    { key: 'attendance_date', header: 'Date', isSortable: true, pipe: 'date', pipeArgs: 'mediumDate' },
-    { key: 'swipe_in', header: 'Swipe In', isSortable: true },
-    { key: 'swipe_out', header: 'Swipe Out', isSortable: true },
+    { key: 'attendance_date', header: 'Date', isSortable: true, pipe: 'date', pipeArgs: 'dd-MM-yyyy' },
+    { key: 'swipe_in', header: 'Swipe In', isSortable: true, pipe: 'date', pipeArgs: 'hh:mm:ss a' },
+    { key: 'swipe_out', header: 'Swipe Out', isSortable: true, pipe: 'date', pipeArgs: 'hh:mm:ss a' },
     { key: 'total_work_minutes', header: 'Work Hours', isSortable: true },
     { key: 'attendance_status', header: 'Status', isSortable: true },
     { key: 'location_address', header: 'Location / Device', isSortable: false },
@@ -193,24 +195,26 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     this.attendanceService.getTodayRecord().subscribe({
       next: (res) => {
         if (res.success && res.data) {
-          const record = res.data;
-          const allTodayRecords = (res as any).allToday || (record ? [record] : []);
+          const allTodayRecords = (res as any).allToday || [res.data];
           this.allTodayRecords = allTodayRecords;
-          this.activeRecord.set(record);
 
-          if (record.swipe_in && !record.swipe_out) {
+          // Find current active session (swipe_in present, swipe_out IS NULL)
+          const activeSession = allTodayRecords.find((r: any) => r.swipe_in && !r.swipe_out);
+          this.activeRecord.set(activeSession || res.data);
+
+          if (activeSession && activeSession.swipe_in) {
             this.isSwipedIn.set(true);
             this.buildTodayTimeline(allTodayRecords);
 
             const previousCompletedMs = allTodayRecords
-              .filter((r: any) => r.id !== record.id && r.swipe_in && r.swipe_out)
+              .filter((r: any) => r.id !== activeSession.id && r.swipe_in && r.swipe_out)
               .reduce((sum: number, r: any) => {
                 const inTime = parseLocalDatetime(r.swipe_in);
                 const outTime = parseLocalDatetime(r.swipe_out);
-                return (inTime && outTime) ? sum + (outTime.getTime() - inTime.getTime()) : sum;
+                return (inTime && outTime && outTime > inTime) ? sum + (outTime.getTime() - inTime.getTime()) : sum;
               }, 0);
 
-            this.startTimerTicks(record, previousCompletedMs);
+            this.startTimerTicks(activeSession, previousCompletedMs);
             this.isActionLoading = false;
           } else {
             this.isSwipedIn.set(false);
@@ -221,7 +225,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
               .reduce((sum: number, r: any) => {
                 const inTime = parseLocalDatetime(r.swipe_in);
                 const outTime = parseLocalDatetime(r.swipe_out);
-                return (inTime && outTime) ? sum + (outTime.getTime() - inTime.getTime()) : sum;
+                return (inTime && outTime && outTime > inTime) ? sum + (outTime.getTime() - inTime.getTime()) : sum;
               }, 0);
 
             if (totalWorkMsToday > 0) {
@@ -239,6 +243,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
           this.resetTodayState();
           this.isActionLoading = false;
         }
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.resetTodayState();
@@ -248,6 +253,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
           summary: 'Load Failed',
           detail: err.error?.message || 'Failed to load today status.'
         });
+        this.cdr.markForCheck();
       }
     });
 
@@ -439,6 +445,7 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
       const workMs = Math.max(0, previousCompletedMs + (currentSessionWorkElapsed > 0 ? currentSessionWorkElapsed : 0));
       this.duration.set(this.formatMsToHMS(workMs));
       this.updateProgressPercentage(workMs);
+      this.cdr.markForCheck();
     };
 
     tick();

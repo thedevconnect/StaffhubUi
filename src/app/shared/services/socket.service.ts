@@ -54,4 +54,16 @@ export class SocketService {
       };
     });
   }
+
+  onNotificationUpdated(): Observable<any> {
+    return new Observable(observer => {
+      this.socket.on('notification_updated', (data) => {
+        observer.next(data);
+      });
+
+      return () => {
+        this.socket.off('notification_updated');
+      };
+    });
+  }
 }

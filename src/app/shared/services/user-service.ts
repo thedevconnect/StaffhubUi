@@ -197,12 +197,16 @@ export class UserService {
     return this.http.put(`${this.apiUrl}/api/employee-assets/approve/${id}`, data);
   }
 
-  withdrawAsset(id: string | number) {
-    return this.http.put(`${this.apiUrl}/api/employee-assets/withdraw/${id}`, {});
+  rejectAsset(id: string | number, data: any = {}) {
+    return this.http.put(`${this.apiUrl}/api/employee-assets/reject/${id}`, data);
   }
 
-  returnAsset(id: string | number) {
-    return this.http.put(`${this.apiUrl}/api/employee-assets/return/${id}`, {});
+  withdrawAsset(id: string | number, data: any = {}) {
+    return this.http.put(`${this.apiUrl}/api/employee-assets/withdraw/${id}`, data);
+  }
+
+  returnAsset(id: string | number, data: any = {}) {
+    return this.http.put(`${this.apiUrl}/api/employee-assets/return/${id}`, data);
   }
 
   getAssetHistory(id: string | number): Observable<any> {

@@ -76,8 +76,10 @@ export class MyAssets implements OnInit {
       ];
     } else {
       return [
-        { label: 'My Requests', value: 'Pending', icon: 'pi pi-clock' },
-        { label: 'My Assigned Assets', value: 'Assigned', icon: 'pi pi-briefcase' }
+        { label: 'My Assigned Assets', value: 'Assigned', icon: 'pi pi-briefcase' },
+        { label: 'Pending Requests', value: 'Pending', icon: 'pi pi-clock' },
+        { label: 'Rejected Requests', value: 'Rejected', icon: 'pi pi-times-circle' },
+        { label: 'All My Assets', value: 'All', icon: 'pi pi-list' }
       ];
     }
   }
@@ -99,6 +101,7 @@ export class MyAssets implements OnInit {
       } else {
         if (this.activeTab === 'Assigned') return status === 'APPROVED';
         if (this.activeTab === 'Pending') return status === 'PENDING';
+        if (this.activeTab === 'Rejected') return status === 'REJECTED';
       }
       return true;
     });
@@ -132,17 +135,6 @@ export class MyAssets implements OnInit {
       actions.push({ label: 'Return', icon: 'pi pi-undo', id: 'return' });
     }
     return actions;
-  }
-
-  disableActionCondition = (actionId: string, row: any): boolean => {
-    const status = (row.approval_status || '').toUpperCase();
-    if (this.isHRAdmin) {
-      if (status === 'APPROVED' && (actionId === 'approve' || actionId === 'reject')) return true;
-    } else {
-      if (actionId === 'withdraw' && status !== 'PENDING') return true;
-      if (actionId === 'return' && status !== 'APPROVED') return true;
-    }
-    return false;
   }
 
   constructor(
@@ -192,9 +184,9 @@ export class MyAssets implements OnInit {
       asset_name: ['', Validators.required],
       asset_type: ['', Validators.required],
       asset_code: [''],
-      serial_number: [''],
+      serial_number: ['', Validators.required],
       assigned_date: ['', Validators.required],
-      employee_remarks: ['']
+      employee_remarks: ['', Validators.required]
     })
   }
 
@@ -258,8 +250,13 @@ export class MyAssets implements OnInit {
 
   saveAsset(): void {
     if (this.assetForm.invalid) {
-      this.assetForm.markAllAsTouched()
-      return
+      this.assetForm.markAllAsTouched();
+      this.messageService.add({
+        severity: 'error',
+        summary: 'All Fields are Mandatory',
+        detail: 'All fields are mandatory. Please fill in all required fields.'
+      });
+      return;
     }
 
     const val = this.assetForm.value
@@ -339,6 +336,22 @@ export class MyAssets implements OnInit {
     })
   }
 
+  showActionReasonDialog = false;
+  actionType: 'approve' | 'reject' | 'withdraw' | 'return' = 'approve';
+  actionRemarks = '';
+  targetRow: any = null;
+
+  disableActionCondition = (actionId: string, row: any): boolean => {
+    const status = (row.approval_status || '').toUpperCase();
+    if (this.isHRAdmin) {
+      if (['APPROVED', 'REJECTED', 'WITHDRAWN', 'RETURNED'].includes(status) && (actionId === 'approve' || actionId === 'reject')) return true;
+    } else {
+      if (actionId === 'withdraw' && status !== 'PENDING') return true;
+      if (actionId === 'return' && status !== 'APPROVED') return true;
+    }
+    return false;
+  }
+
   onActionClicked(event: { actionId: string; row: any }): void {
     if (event.actionId === 'view') {
       this.selectedAsset = event.row
@@ -362,23 +375,83 @@ export class MyAssets implements OnInit {
     }
 
     if (event.actionId === 'approve') {
-      this.approveAsset(event.row)
+      this.openActionReasonModal(event.row, 'approve');
     }
 
     if (event.actionId === 'reject') {
-      this.rejectAsset(event.row)
+      this.openActionReasonModal(event.row, 'reject');
     }
 
     if (event.actionId === 'withdraw') {
-      this.withdrawAsset(event.row)
+      this.openActionReasonModal(event.row, 'withdraw');
     }
 
     if (event.actionId === 'return') {
-      this.returnAsset(event.row)
+      this.openActionReasonModal(event.row, 'return');
     }
 
     if (event.actionId === 'history') {
       this.viewHistory(event.row)
+    }
+  }
+
+  openActionReasonModal(row: any, type: 'approve' | 'reject' | 'withdraw' | 'return') {
+    this.targetRow = row;
+    this.actionType = type;
+    this.actionRemarks = '';
+    this.showActionReasonDialog = true;
+    this.cdr.markForCheck();
+  }
+
+  submitActionReason() {
+    if (!this.targetRow) return;
+
+    const row = this.targetRow;
+    const type = this.actionType;
+    const remarks = this.actionRemarks.trim() || (type === 'approve' ? 'Approved' : (type === 'reject' ? 'Rejected' : (type === 'withdraw' ? 'Withdrawal requested' : 'Return requested')));
+
+    this.showActionReasonDialog = false;
+
+    if (type === 'approve') {
+      this.assetsService.approveAsset(row.id, { hr_remarks: remarks }).subscribe({
+        next: (res: any) => {
+          this.messageService.add({ severity: 'success', summary: 'Approved', detail: res.message || 'Asset action approved successfully' });
+          this.getAllData(false);
+        },
+        error: (err: any) => {
+          this.messageService.add({ severity: 'error', summary: 'Failed', detail: err.error?.message || 'Unable to approve action' });
+        }
+      });
+    } else if (type === 'reject') {
+      this.assetsService.rejectAsset(row.id, { hr_remarks: remarks }).subscribe({
+        next: (res: any) => {
+          this.messageService.add({ severity: 'success', summary: 'Rejected', detail: res.message || 'Asset action rejected' });
+          this.getAllData(false);
+        },
+        error: (err: any) => {
+          this.messageService.add({ severity: 'error', summary: 'Failed', detail: err.error?.message || 'Unable to reject action' });
+        }
+      });
+    } else if (type === 'withdraw') {
+      this.assetsService.withdrawAsset(row.id, { remarks }).subscribe({
+        next: (res: any) => {
+          this.messageService.add({ severity: 'success', summary: 'Withdraw Requested', detail: res.message || 'Withdrawal request submitted for HR approval' });
+          this.getAllData(false);
+        },
+        error: (err: any) => {
+          this.messageService.add({ severity: 'error', summary: 'Failed', detail: err.error?.message || 'Unable to submit withdrawal request' });
+        }
+      });
+    } else if (type === 'return') {
+      this.assetsService.returnAsset(row.id, { remarks }).subscribe({
+        next: (res: any) => {
+          this.messageService.add({ severity: 'success', summary: 'Return Requested', detail: res.message || 'Return request submitted for HR approval' });
+          this.getAllData(false);
+        },
+        error: (err: any) => {
+          this.messageService.add({ severity: 'error', summary: 'Failed', detail: err.error?.message || 'Unable to submit return request' });
+        }
+      });
     }
   }
 
@@ -420,11 +493,11 @@ export class MyAssets implements OnInit {
   rejectAsset(row: any): void {
     this.confirmationService.confirm({
       message: `Are you sure you want to reject ${row.asset_name}?`,
-      header: 'Reject Asset',
+      header: 'Reject Asset Request',
       icon: 'pi pi-times-circle',
       acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
-        this.assetsService.deleteAsset(row.id).subscribe({
+        this.assetsService.rejectAsset(row.id, { hr_remarks: 'Rejected by HR' }).subscribe({
           next: () => {
             this.messageService.add({ severity: 'success', summary: 'Rejected', detail: 'Asset request rejected successfully' })
             this.getAllData(false)

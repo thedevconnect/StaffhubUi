@@ -61,8 +61,8 @@ export class HrAttendanceReport implements OnInit {
   columns: TableColumn[] = [
     { key: 'attendance_date', header: 'Date', isSortable: true, pipe: 'date', pipeArgs: 'mediumDate' },
     { key: 'attendance_status', header: 'Status', isSortable: true },
-    { key: 'swipe_in', header: 'Swipe In', isSortable: true, pipe: 'date', pipeArgs: 'shortTime' },
-    { key: 'swipe_out', header: 'Swipe Out', isSortable: true, pipe: 'date', pipeArgs: 'shortTime' },
+    { key: 'swipe_in', header: 'Swipe In', isSortable: true, pipe: 'date', pipeArgs: 'hh:mm:ss a' },
+    { key: 'swipe_out', header: 'Swipe Out', isSortable: true, pipe: 'date', pipeArgs: 'hh:mm:ss a' },
     { key: 'work_hours', header: 'Work Hours', isSortable: false, formatter: (val, row) => this.formatDuration(row.total_work_minutes) },
     { key: 'device_info', header: 'Device Info', isSortable: false, formatter: (val, row) => `${row.device_name || 'Unknown'} - ${row.browser_name || ''} ${row.os_name ? '(' + row.os_name + ')' : ''}` },
     { key: 'ip_address', header: 'IP Address', isSortable: false },
