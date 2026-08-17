@@ -8,6 +8,7 @@
             <div class="w-full overflow-x-auto">
                 <app-table-template [data]="holiday_calendar" [columns]="columns" [pageSize]="pageSize"
                     [totalCount]="totalCount" [isLoading]="loading()" [currentPage]="pageNo" [searchText]="searchText"
+                    [tabs]="monthTabs" [activeTab]="selectedMonth" (tabChange)="onMonthTabChange($event)"
                     [showRefresh]="true" (refresh)="loadDashboardData()" (pageChange)="onPageChange($event)"
                     (searchChange)="onSearchChange($event)" (sortChange)="onSortChange($event)"
                     (pageSizeChange)="onPageSizeChange($event)"

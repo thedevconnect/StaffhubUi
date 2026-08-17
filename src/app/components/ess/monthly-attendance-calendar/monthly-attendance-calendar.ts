@@ -243,9 +243,25 @@ export class MonthlyAttendanceCalendar implements OnInit {
             // No attendance records for this day
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            const isPastOrToday = new Date(day.dateString) <= today;
 
-            if (isSunday) {
+            const dayDate = new Date(day.dateString);
+            dayDate.setHours(0, 0, 0, 0);
+            const isPastOrToday = dayDate <= today;
+
+            const joiningStr = localStorage.getItem('joiningDate');
+            let isBeforeJoining = false;
+            if (joiningStr) {
+              const joiningDate = new Date(joiningStr);
+              joiningDate.setHours(0, 0, 0, 0);
+              if (dayDate < joiningDate) {
+                isBeforeJoining = true;
+              }
+            }
+
+            if (isBeforeJoining) {
+              day.type = '-';
+              day.colorClass = 'bg-slate-100 text-slate-400 border border-slate-200';
+            } else if (isSunday) {
               day.type = 'WO';
               day.colorClass = 'bg-slate-500 text-white';
             } else if (dayReg) {

@@ -1,6 +1,7 @@
-<!-- Page Header Inline with Breadcrumb -->
+<p-toast></p-toast>
+
 <div
-  class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 md:-mx-6 mb-4 px-4 md:px-6">
+  class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6">
   <div class="flex-1 min-w-0">
     <p-breadcrumb [model]="breadcrumbItems"
       styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
@@ -16,7 +17,8 @@
   <!-- Title section -->
   <div class="mb-6">
     <h2 class="text-xl font-bold text-slate-800">Company Management</h2>
-    <p class="text-xs text-slate-500 mt-1">Register and manage client companies, their HR admins, and approval requests.</p>
+    <p class="text-xs text-slate-500 mt-1">Register and manage client companies, their HR admins, and approval requests.
+    </p>
   </div>
 
   <!-- Page Content -->
@@ -30,13 +32,20 @@
           (tabChange)="onTabChange($event)" [tableActions]="rowActions" (actionClicked)="onActionClicked($event)"
           [disableActionCondition]="disableActionCondition" (pageChange)="onPageChange($event)"
           (searchChange)="onSearchChange($event)" (pageSizeChange)="onPageSizeChange($event)"
-          [cellTemplates]="{ approval_status: approvalStatusTpl, status: statusTpl }">
+          [cellTemplates]="{ company_logo: logoTpl, approval_status: approvalStatusTpl, status: statusTpl }">
         </app-table-template>
       </div>
     </div>
   </section>
 
   <!-- Custom Cell Templates -->
+  <ng-template #logoTpl let-item>
+    <div class="flex items-center justify-center h-8 w-11 rounded-md bg-slate-50 border border-slate-200 overflow-hidden p-0.5 shadow-xs">
+      <img [src]="item.company_logo || item.companyLogo || item.logo || 'assets/stubhub-com-banner-2.jpg'"
+        (error)="onLogoError($event)" class="h-full w-full object-contain" />
+    </div>
+  </ng-template>
+
   <ng-template #approvalStatusTpl let-item>
     <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold" [ngClass]="{
         'bg-emerald-50 text-emerald-700 border border-emerald-100': item.approval_status === 'APPROVED',
@@ -76,8 +85,7 @@
         {{ isRegisterMode ? 'Register New Company' : (isEditMode ? 'Edit Company Request' : 'Company Details') }}
       </h3>
       <p class="text-xs text-slate-500 m-0 mt-0.5">
-        {{ isRegisterMode ? 'Add a new company and its HR admin user account.' : (isEditMode ? 'Modify registration
-        request details.' : 'Detailed overview of the company registration request.') }}
+        {{ isRegisterMode ? 'Add a new company and its HR admin user account.' : (isEditMode ? 'Modify registration request details.' : 'Detailed overview of the company registration request.') }}
       </p>
     </div>
   </ng-template>
@@ -86,6 +94,30 @@
 
     <!-- Registration Form (isRegisterMode) -->
     <div *ngIf="isRegisterMode" class="space-y-6">
+
+      <!-- Company Logo Upload Section -->
+      <div>
+        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Company Logo</h4>
+        <div class="p-3.5 bg-slate-50 border border-dashed border-slate-300 rounded-xl flex items-center gap-4">
+          <div class="h-14 w-20 rounded-lg border border-slate-200 bg-white p-1 flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
+            <img [src]="selectedCompany.company_logo || selectedCompany.companyLogo || 'assets/stubhub-com-banner-2.jpg'" (error)="onLogoError($event)" class="h-full w-full object-contain" />
+          </div>
+          <div class="flex flex-col gap-1.5 flex-1">
+            <div class="flex items-center gap-2">
+              <input type="file" #regLogoInput accept="image/*" class="hidden" (change)="onLogoFileSelected($event)" />
+              <button type="button" (click)="regLogoInput.click()"
+                class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition shadow-xs inline-flex items-center gap-1.5">
+                <i class="pi pi-upload text-xs"></i> Upload Company Logo
+              </button>
+              <button type="button" *ngIf="selectedCompany.company_logo || selectedCompany.companyLogo" (click)="removeLogo()"
+                class="px-2.5 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-bold rounded-lg transition border border-rose-200 inline-flex items-center gap-1">
+                <i class="pi pi-trash text-xs"></i> Remove
+              </button>
+            </div>
+            <span class="text-[11px] text-slate-500">Upload logo (PNG, JPG, SVG). This logo will appear in sidebar for all employees of this company.</span>
+          </div>
+        </div>
+      </div>
 
       <!-- Company Information Section -->
       <div>
@@ -197,7 +229,32 @@
 
       <!-- Company Section -->
       <div>
-        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Company Details</h4>
+        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Company Details & Logo</h4>
+        
+        <!-- Company Logo Upload / View -->
+        <div class="mb-4 p-3.5 bg-slate-50 border border-dashed border-slate-300 rounded-xl flex items-center gap-4">
+          <div class="h-14 w-20 rounded-lg border border-slate-200 bg-white p-1 flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
+            <img [src]="selectedCompany.company_logo || selectedCompany.companyLogo || 'assets/stubhub-com-banner-2.jpg'" (error)="onLogoError($event)" class="h-full w-full object-contain" />
+          </div>
+          <div class="flex flex-col gap-1.5 flex-1">
+            <div class="flex items-center gap-2" *ngIf="isEditMode">
+              <input type="file" #editLogoInput accept="image/*" class="hidden" (change)="onLogoFileSelected($event)" />
+              <button type="button" (click)="editLogoInput.click()"
+                class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition shadow-xs inline-flex items-center gap-1.5">
+                <i class="pi pi-upload text-xs"></i> {{ (selectedCompany.company_logo || selectedCompany.companyLogo) ? 'Change Logo' : 'Upload Logo' }}
+              </button>
+              <button type="button" *ngIf="selectedCompany.company_logo || selectedCompany.companyLogo" (click)="removeLogo()"
+                class="px-2.5 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-bold rounded-lg transition border border-rose-200 inline-flex items-center gap-1">
+                <i class="pi pi-trash text-xs"></i> Remove Logo
+              </button>
+            </div>
+            <div *ngIf="!isEditMode">
+              <span class="text-xs font-bold text-slate-800 block">Company Logo</span>
+              <span class="text-[11px] text-slate-500">{{ (selectedCompany.company_logo || selectedCompany.companyLogo) ? 'Custom logo configured' : 'Default StaffHub logo in use' }}</span>
+            </div>
+          </div>
+        </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div *ngIf="!isEditMode">
             <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Company Name</span>
@@ -270,7 +327,8 @@
           <!-- Location Fields -->
           <div *ngIf="!isEditMode">
             <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Latitude</span>
-            <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.office_latitude || '-' }}</span>
+            <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.office_latitude || '-'
+              }}</span>
           </div>
           <div *ngIf="isEditMode">
             <label class="block text-xs font-bold text-slate-500 uppercase">Latitude</label>
@@ -281,7 +339,8 @@
 
           <div *ngIf="!isEditMode">
             <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Longitude</span>
-            <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.office_longitude || '-' }}</span>
+            <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.office_longitude || '-'
+              }}</span>
           </div>
           <div *ngIf="isEditMode">
             <label class="block text-xs font-bold text-slate-500 uppercase">Longitude</label>
@@ -292,7 +351,8 @@
 
           <div *ngIf="!isEditMode">
             <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Allowed Radius (m)</span>
-            <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.allowed_radius || '-' }}</span>
+            <span class="text-sm font-semibold text-slate-800 block mt-0.5">{{ selectedCompany.allowed_radius || '-'
+              }}</span>
           </div>
           <div *ngIf="isEditMode">
             <label class="block text-xs font-bold text-slate-500 uppercase">Allowed Radius (m)</label>

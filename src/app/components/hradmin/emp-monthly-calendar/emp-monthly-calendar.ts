@@ -77,7 +77,11 @@ export class EmpMonthlyCalendar implements OnInit {
             name: emp.fullName,
             displayName: `${emp.fullName} - ${emp.employeeCode || emp.id}`,
             role: emp.designation || 'Staff',
-            department: emp.department || 'Operations'
+            department: emp.department || 'Operations',
+            joining_date: (emp as any).joining_date,
+            date_of_joining: (emp as any).date_of_joining,
+            doj: (emp as any).doj,
+            created_at: (emp as any).created_at
           }));
           this.selectedEmployee = this.employees[0];
           this.generateCalendar();
@@ -112,7 +116,11 @@ export class EmpMonthlyCalendar implements OnInit {
             name: emp.fullName,
             displayName: `${emp.fullName} - ${emp.employeeCode || emp.id}`,
             role: emp.designation || 'Staff',
-            department: emp.department || 'Operations'
+            department: emp.department || 'Operations',
+            joining_date: (emp as any).joining_date,
+            date_of_joining: (emp as any).date_of_joining,
+            doj: (emp as any).doj,
+            created_at: (emp as any).created_at
           }));
           // Keep current selected if still exists, else pick first
           const found = this.employees.find(e => e.id === this.selectedEmployee?.id);
@@ -228,7 +236,24 @@ export class EmpMonthlyCalendar implements OnInit {
       if (dateObj <= today) {
         const isSunday = dateObj.getDay() === 0;
 
-        if (record) {
+        const rawJoining = (this.selectedEmployee as any)?.joining_date || (this.selectedEmployee as any)?.date_of_joining || (this.selectedEmployee as any)?.doj || (this.selectedEmployee as any)?.created_at;
+        let isBeforeJoining = false;
+        if (rawJoining) {
+          try {
+            const doj = new Date(rawJoining);
+            doj.setHours(0, 0, 0, 0);
+            const targetDate = new Date(dateObj);
+            targetDate.setHours(0, 0, 0, 0);
+            if (targetDate < doj) {
+              isBeforeJoining = true;
+            }
+          } catch (e) { }
+        }
+
+        if (isBeforeJoining) {
+          status = '-';
+          colorClass = 'bg-slate-50 text-slate-400 border-slate-200';
+        } else if (record) {
           status = record.attendance_status === 'PRESENT' ? 'P' : (record.attendance_status === 'ON_LEAVE' ? 'L' : 'P');
           if (status === 'P') colorClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
           if (status === 'L') colorClass = 'bg-amber-50 text-amber-700 border-amber-200';

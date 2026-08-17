@@ -4,6 +4,8 @@ import {
   Output,
   EventEmitter,
   OnChanges,
+  OnInit,
+  OnDestroy,
   SimpleChanges,
   TemplateRef,
   ElementRef,
@@ -17,6 +19,8 @@ import { ButtonModule } from 'primeng/button';
 import { ScrollerModule } from 'primeng/scroller';
 import { MenuItem } from 'primeng/api';
 import { ExcelService } from '../../services/excel.service';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 export interface TableColumn {
   key: string;
@@ -50,7 +54,7 @@ export interface Tab {
   templateUrl: './table-template.html',
   styleUrls: ['./table-template.scss']
 })
-export class TableTemplate implements OnChanges {
+export class TableTemplate implements OnChanges, OnInit, OnDestroy {
   @Input() data: any[] = [];
   @Input() columns: TableColumn[] = [];
   @Input() pageSize = 5;
@@ -278,10 +282,26 @@ export class TableTemplate implements OnChanges {
     }
   }
 
+  private searchSubject = new Subject<string>();
+  private searchSub?: Subscription;
+
+  ngOnInit(): void {
+    this.searchSub = this.searchSubject.pipe(
+      debounceTime(350),
+      distinctUntilChanged()
+    ).subscribe(value => {
+      this.currentPage = 1;
+      this.searchChange.emit(value);
+      if (!this.serverSide) this.updatePaginatedData();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.searchSub?.unsubscribe();
+  }
+
   onSearch(): void {
-    this.currentPage = 1;
-    this.searchChange.emit(this.searchText);
-    if (!this.serverSide) this.updatePaginatedData();
+    this.searchSubject.next(this.searchText || '');
   }
 
   onSort(columnKey: string): void {

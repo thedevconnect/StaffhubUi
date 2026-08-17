@@ -33,9 +33,9 @@ export class SuperadminDashboard implements OnInit {
 
   stats = [
     { label: 'Active Companies', value: '0', icon: 'pi pi-building', color: 'bg-blue-50 text-blue-600' },
+    { label: 'Pending Approvals', value: '0', icon: 'pi pi-clock', color: 'bg-amber-50 text-amber-600' },
     { label: 'Active Employees', value: '0', icon: 'pi pi-users', color: 'bg-emerald-50 text-emerald-600' },
-    { label: 'System Memory Load', value: '0%', icon: 'pi pi-sliders-h', color: 'bg-amber-50 text-amber-600' },
-    { label: 'Platform Status', value: 'Checking', icon: 'pi pi-check-circle', color: 'bg-indigo-50 text-indigo-600' }
+    { label: 'Platform Status', value: 'Active', icon: 'pi pi-check-circle', color: 'bg-indigo-50 text-indigo-600' }
   ];
 
   activeModules = [
@@ -65,11 +65,14 @@ export class SuperadminDashboard implements OnInit {
       next: (res: any) => {
         if (res.success && res.data) {
           const s = res.data.stats;
+          const pendingCount = s.pendingCompanies !== undefined ? s.pendingCompanies : 
+            (res.data.recentCompanies || []).filter((c: any) => c.status === 'PENDING').length;
+            
           this.stats = [
             { label: 'Active Companies', value: s.activeCompanies.toString(), icon: 'pi pi-building', color: 'bg-blue-50 text-blue-600' },
+            { label: 'Pending Approvals', value: pendingCount.toString(), icon: 'pi pi-clock', color: 'bg-amber-50 text-amber-600' },
             { label: 'Active Employees', value: s.activeEmployees.toString(), icon: 'pi pi-users', color: 'bg-emerald-50 text-emerald-600' },
-            { label: 'System Memory Load', value: s.systemLoad, icon: 'pi pi-sliders-h', color: 'bg-amber-50 text-amber-600' },
-            { label: 'Platform Status', value: s.platformStatus, icon: 'pi pi-check-circle', color: 'bg-indigo-50 text-indigo-600' }
+            { label: 'Platform Status', value: s.platformStatus || 'Active', icon: 'pi pi-check-circle', color: 'bg-indigo-50 text-indigo-600' }
           ];
           
           this.companies = res.data.recentCompanies || [];

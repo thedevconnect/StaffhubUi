@@ -64,6 +64,8 @@ export class RegisterCompanyComponent implements OnInit {
     private messageService: MessageService
   ) { }
 
+  companyLogoPreview: string | null = null;
+
   ngOnInit(): void {
     this.signupForm = this.fb.group({
       companyName: ['', Validators.required],
@@ -71,6 +73,7 @@ export class RegisterCompanyComponent implements OnInit {
       companyEmail: ['', [Validators.required, Validators.email]],
       companyPhone: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
       address: ['', Validators.required],
+      companyLogo: [''],
       officeLatitude: [''],
       officeLongitude: [''],
       allowedRadius: [200],
@@ -83,6 +86,35 @@ export class RegisterCompanyComponent implements OnInit {
       mobile: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
       password: ['', Validators.required]
     });
+  }
+
+  onRegisterLogoSelected(event: any): void {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'File Too Large',
+        detail: 'Company logo image must be under 3MB.'
+      });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      const logoBase64 = e.target.result as string;
+      this.companyLogoPreview = logoBase64;
+      this.signupForm.patchValue({ companyLogo: logoBase64 });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removeRegisterLogo(): void {
+    this.companyLogoPreview = null;
+    this.signupForm.patchValue({ companyLogo: '' });
+  }
+
+  onLogoError(event: any): void {
+    event.target.src = 'assets/stubhub-com-banner-2.jpg';
   }
 
   get f2() { return this.signupForm.controls; }
@@ -107,7 +139,10 @@ export class RegisterCompanyComponent implements OnInit {
   submitSignUpForm() {
     this.isProcess = true;
 
-    const payload = { ...this.signupForm.value };
+    const payload = {
+      ...this.signupForm.value,
+      company_logo: this.signupForm.value.companyLogo
+    };
     if (payload.industry === 'Other') {
       payload.industry = payload.otherIndustry || 'Other';
     }

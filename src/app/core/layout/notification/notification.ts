@@ -8,7 +8,8 @@ import { Accordion, AccordionPanel, AccordionHeader, AccordionContent } from 'pr
 import { NotificationService, NotificationItem } from '../../../shared/services/notification.service';
 import { AuthService } from '../../../shared/services/services/auth.service';
 import { SocketService } from '../../../shared/services/socket.service';
-import { Subscription, timer } from 'rxjs';
+import { UserService } from '../../../shared/services/user-service';
+import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 interface NotificationCategory {
@@ -36,6 +37,7 @@ export class NotificationComponent implements OnInit, OnDestroy {
   @ViewChild('op') op!: Popover;
 
   private readonly notificationService = inject(NotificationService);
+  private readonly userService = inject(UserService);
   private readonly authService = inject(AuthService);
   private readonly socketService = inject(SocketService);
   private readonly router = inject(Router);
@@ -47,6 +49,7 @@ export class NotificationComponent implements OnInit, OnDestroy {
   private attendanceSocketSub?: Subscription;
   private refreshSub?: Subscription;
 
+  isSuperAdminView = signal<boolean>(false);
   isHrView = signal<boolean>(false);
   categories = signal<NotificationCategory[]>([]);
   totalPending = signal<number>(0);
@@ -58,6 +61,7 @@ export class NotificationComponent implements OnInit, OnDestroy {
   private animTimeout?: any;
 
   // Detailed items arrays
+  pendingCompanies = signal<NotificationItem[]>([]);
   missingSwipes = signal<NotificationItem[]>([]);
   pendingRequests = signal<NotificationItem[]>([]);
   pendingLeaves = signal<NotificationItem[]>([]);
@@ -105,24 +109,114 @@ export class NotificationComponent implements OnInit, OnDestroy {
 
   private updatePortalViewMode(): void {
     const currentUrl = this.router.url || '';
-    if (currentUrl.includes('/hradmin')) {
+    if (currentUrl.includes('/superadmin')) {
+      this.isSuperAdminView.set(true);
+      this.isHrView.set(false);
+    } else if (currentUrl.includes('/hradmin')) {
+      this.isSuperAdminView.set(false);
       this.isHrView.set(true);
     } else if (currentUrl.includes('/ess')) {
+      this.isSuperAdminView.set(false);
       this.isHrView.set(false);
     } else {
       const selectedRole = (this.authService.selectedRoleId() || '').toUpperCase();
-      const isHr = selectedRole.includes('HR_ADMIN') || selectedRole.includes('ADMIN') || selectedRole.includes('SUPER_ADMIN');
-      this.isHrView.set(isHr);
+      const userRole = (this.authService.user()?.role || '').toUpperCase();
+      if (selectedRole.includes('SUPER_ADMIN') || userRole.includes('SUPER_ADMIN') || selectedRole.includes('SUPERADMIN')) {
+        this.isSuperAdminView.set(true);
+        this.isHrView.set(false);
+      } else {
+        const isHr = selectedRole.includes('HR_ADMIN') || selectedRole.includes('ADMIN');
+        this.isSuperAdminView.set(false);
+        this.isHrView.set(isHr);
+      }
     }
   }
 
   loadNotifications(force = false): void {
+    if (this.isSuperAdminView()) {
+      this.userService.getPendingCompanies().subscribe({
+        next: (res: any) => {
+          const rawCompanies = res?.data || [];
+          const pendingCompanies: NotificationItem[] = rawCompanies.map((c: any) => ({
+            id: c.id,
+            type: 'company_approval',
+            date: c.company_name || c.name || 'Company Registration',
+            reason: c.admin_name ? `Admin: ${c.admin_name} (${c.admin_email || ''})` : (c.company_email || ''),
+            message: `Company registration pending approval: ${c.company_name || c.name}`,
+            targetUrl: '/superadmin/company-management'
+          }));
+
+          this.pendingCompanies.set(pendingCompanies);
+          this.missingSwipes.set([]);
+          this.pendingRequests.set([]);
+          this.pendingLeaves.set([]);
+          this.pendingTickets.set([]);
+          this.pendingAssets.set([]);
+
+          const newCategories: NotificationCategory[] = [];
+          if (pendingCompanies.length > 0) {
+            newCategories.push({
+              title: 'Pending Company Approvals',
+              count: pendingCompanies.length
+            });
+          }
+
+          this.categories.set(newCategories);
+          const total = pendingCompanies.length;
+
+          if (!this.isInitialLoad && this.prevTotalCount !== null && total > this.prevTotalCount) {
+            this.triggerNotificationAnimation();
+          }
+
+          this.totalPending.set(total);
+          this.prevTotalCount = total;
+          this.isInitialLoad = false;
+          this.cdr.markForCheck();
+        },
+        error: (err: any) => {
+          console.error('Failed to load pending companies for superadmin:', err);
+          this.cdr.markForCheck();
+        }
+      });
+      return;
+    }
+
     const portal = this.isHrView() ? 'hradmin' : 'ess';
     this.notificationService.getNotifications(portal).subscribe({
       next: (res: any) => {
         if (res && res.success && res.data) {
-          this.missingSwipes.set(res.data.missingSwipes || []);
-          this.pendingRequests.set(res.data.pendingRequests || []);
+          this.pendingCompanies.set([]);
+
+          let rawMissingSwipes = res.data.missingSwipes || [];
+          let rawRequests = res.data.pendingRequests || [];
+
+          // Filter notifications by employee joining date for ESS view
+          if (!this.isHrView()) {
+            const joiningStr = localStorage.getItem('joiningDate');
+            if (joiningStr) {
+              const joiningDate = new Date(joiningStr);
+              joiningDate.setHours(0, 0, 0, 0);
+
+              rawMissingSwipes = rawMissingSwipes.filter((item: any) => {
+                const itemDateStr = item.date || item.attendance_date;
+                if (!itemDateStr) return true;
+                const itemDate = new Date(itemDateStr);
+                itemDate.setHours(0, 0, 0, 0);
+                return itemDate >= joiningDate;
+              });
+
+              rawRequests = rawRequests.filter((item: any) => {
+                const itemDateStr = item.date || item.attendance_date;
+                if (!itemDateStr) return true;
+                const itemDate = new Date(itemDateStr);
+                itemDate.setHours(0, 0, 0, 0);
+                return itemDate >= joiningDate;
+              });
+            }
+          }
+
+          this.missingSwipes.set(rawMissingSwipes);
+          this.pendingRequests.set(rawRequests);
           this.pendingLeaves.set(res.data.pendingLeaves || []);
           this.pendingTickets.set(res.data.pendingTickets || []);
           this.pendingAssets.set(res.data.pendingAssets || []);
@@ -200,7 +294,9 @@ export class NotificationComponent implements OnInit, OnDestroy {
   }
 
   getItemsForCategory(title: string): NotificationItem[] {
-    if (title === 'Missing Swipes') {
+    if (title.includes('Company')) {
+      return this.pendingCompanies();
+    } else if (title === 'Missing Swipes') {
       return this.missingSwipes();
     } else if (title.includes('Regularization')) {
       return this.pendingRequests();
@@ -217,6 +313,11 @@ export class NotificationComponent implements OnInit, OnDestroy {
   onNotificationClick(item: NotificationItem): void {
     if (this.op) {
       this.op.hide();
+    }
+
+    if (this.isSuperAdminView() || item.type === 'company_approval') {
+      this.router.navigate(['/superadmin/company-management']);
+      return;
     }
 
     if (item.targetUrl) {
@@ -256,6 +357,12 @@ export class NotificationComponent implements OnInit, OnDestroy {
     if (this.op) {
       this.op.hide();
     }
+
+    if (this.isSuperAdminView()) {
+      this.router.navigate(['/superadmin/company-management']);
+      return;
+    }
+
     if (this.isHrView()) {
       if (this.pendingAssets().length > 0 && this.pendingRequests().length === 0) {
         this.router.navigate(['/hradmin/asset-approval']);

@@ -1,28 +1,16 @@
 <div class="flex items-center">
-  <button
-    type="button"
+  <button type="button"
     class="relative flex items-center justify-center rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 focus:outline-none"
-    (click)="op.toggle($event)"
-  >
+    (click)="op.toggle($event)">
     <!-- Ripple / Glow ring background continuously active when pending notifications exist -->
-    <span
-      *ngIf="totalPending() > 0"
-      class="absolute inset-0 rounded-full bg-red-400/40 animate-ping pointer-events-none"
-    ></span>
+    <span *ngIf="totalPending() > 0"
+      class="absolute inset-0 rounded-full bg-red-400/40 animate-ping pointer-events-none"></span>
 
     <div class="relative inline-flex items-center justify-center">
-      <p-overlayBadge 
-        [value]="totalPending().toString()" 
-        severity="danger" 
-        size="small"
-        [class.has-pending-badge]="totalPending() > 0"
-        [ngClass]="{ 'has-pending-badge': totalPending() > 0 }"
-      >
-        <i 
-          class="pi pi-bell text-xl inline-block transition-transform" 
-          [class.bell-repeat-shake]="totalPending() > 0"
-          [ngClass]="{ 'bell-repeat-shake': totalPending() > 0 }"
-        ></i>
+      <p-overlayBadge [value]="totalPending().toString()" severity="danger" size="small"
+        [class.has-pending-badge]="totalPending() > 0" [ngClass]="{ 'has-pending-badge': totalPending() > 0 }">
+        <i class="pi pi-bell text-xl inline-block transition-transform" [class.bell-repeat-shake]="totalPending() > 0"
+          [ngClass]="{ 'bell-repeat-shake': totalPending() > 0 }"></i>
       </p-overlayBadge>
     </div>
   </button>
@@ -30,15 +18,18 @@
   <p-popover #op>
     <div class="flex w-[360px] flex-col overflow-hidden rounded-lg bg-white shadow-xl">
       <!-- Header -->
-      <div [ngClass]="isHrView() ? 'bg-indigo-600' : 'bg-blue-600'" class="p-4 text-white flex justify-between items-start">
+      <div [ngClass]="isSuperAdminView() ? 'bg-amber-600' : (isHrView() ? 'bg-indigo-600' : 'bg-blue-600')"
+        class="p-4 text-white flex justify-between items-start">
         <div>
           <div class="flex items-center gap-2 font-semibold text-sm">
             <i class="pi pi-bell"></i>
-            <span>{{ isHrView() ? 'HR Admin Notifications' : 'Employee Notifications' }}</span>
+            <span>{{ isSuperAdminView() ? 'Super Admin Notifications' : (isHrView() ? 'HR Admin Notifications' :
+              'Employee Notifications') }}</span>
           </div>
           <div class="mt-1 text-xs opacity-90">{{ totalPending() }} pending action(s)</div>
         </div>
-        <button class="flex h-6 w-6 items-center justify-center rounded-full bg-black/20 hover:bg-black/40 transition" (click)="op.hide()">
+        <button class="flex h-6 w-6 items-center justify-center rounded-full bg-black/20 hover:bg-black/40 transition"
+          (click)="op.hide()">
           <i class="pi pi-times text-xs"></i>
         </button>
       </div>
@@ -55,8 +46,9 @@
             <p-accordion-header>
               <div class="flex w-full items-center gap-3 py-1">
                 <div class="flex h-8 w-8 items-center justify-center rounded-md text-xs font-bold"
-                  [ngClass]="isHrView() ? 'bg-indigo-100 text-indigo-700' : 'bg-blue-100 text-blue-700'">
-                  <i [ngClass]="cat.title.includes('Leave') ? 'pi pi-calendar' : (cat.title.includes('Ticket') ? 'pi pi-ticket' : (cat.title.includes('Asset') ? 'pi pi-box' : 'pi pi-user-edit'))"></i>
+                  [ngClass]="isSuperAdminView() ? 'bg-amber-100 text-amber-700' : (isHrView() ? 'bg-indigo-100 text-indigo-700' : 'bg-blue-100 text-blue-700')">
+                  <i
+                    [ngClass]="cat.title.includes('Company') ? 'pi pi-building' : (cat.title.includes('Leave') ? 'pi pi-calendar' : (cat.title.includes('Ticket') ? 'pi pi-ticket' : (cat.title.includes('Asset') ? 'pi pi-box' : 'pi pi-user-edit')))"></i>
                 </div>
                 <div class="flex flex-col">
                   <span class="text-xs font-bold text-slate-800">{{ cat.title }}</span>
@@ -66,19 +58,19 @@
             </p-accordion-header>
             <p-accordion-content>
               <div class="flex flex-col">
-                <div *ngFor="let item of getItemsForCategory(cat.title)" 
-                     (click)="onNotificationClick(item)"
-                     class="p-3 text-xs text-slate-700 border-t border-slate-100 flex items-start gap-2.5 hover:bg-slate-100/70 transition cursor-pointer group">
-                  <i class="pi pi-info-circle text-slate-400 mt-0.5 text-sm group-hover:text-blue-600 transition"></i>
+                <div *ngFor="let item of getItemsForCategory(cat.title)" (click)="onNotificationClick(item)"
+                  class="p-3 text-xs text-slate-700 border-t border-slate-100 flex items-start gap-2.5 hover:bg-slate-100/70 transition cursor-pointer group">
+                  <i class="pi pi-info-circle text-slate-400 mt-0.5 text-sm group-hover:text-amber-600 transition"></i>
                   <div class="flex-1">
                     <div class="font-bold text-slate-900 text-xs mb-0.5 flex items-center justify-between">
                       <span>{{ item.date || item.employeeName || 'Pending Action' }}</span>
                       <span class="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase"
-                        [ngClass]="isHrView() ? 'bg-indigo-100 text-indigo-700' : 'bg-blue-100 text-blue-700'">
+                        [ngClass]="isSuperAdminView() ? 'bg-amber-100 text-amber-700' : (isHrView() ? 'bg-indigo-100 text-indigo-700' : 'bg-blue-100 text-blue-700')">
                         View &rarr;
                       </span>
                     </div>
                     <div class="text-[11px] text-slate-600 leading-relaxed">{{ item.message }}</div>
+                    <div *ngIf="item.reason" class="text-[10px] text-slate-400 mt-0.5 font-mono">{{ item.reason }}</div>
                   </div>
                 </div>
               </div>
@@ -89,10 +81,11 @@
 
       <!-- Footer -->
       <div class="border-t border-slate-100 p-3 bg-slate-50" *ngIf="categories().length > 0">
-        <button (click)="onViewAllClick()" 
-          [ngClass]="isHrView() ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-blue-600 hover:bg-blue-700'"
+        <button (click)="onViewAllClick()"
+          [ngClass]="isSuperAdminView() ? 'bg-amber-600 hover:bg-amber-700' : (isHrView() ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-blue-600 hover:bg-blue-700')"
           class="w-full rounded-lg py-2.5 text-xs font-bold text-white transition flex justify-center items-center gap-2 shadow-xs">
-          {{ isHrView() ? 'Go to Pending Approvals' : 'View Pending Notifications' }}
+          {{ isSuperAdminView() ? 'Go to Company Approvals' : (isHrView() ? 'Go to Pending Approvals' : 'View Pending
+          Notifications') }}
           <i class="pi pi-arrow-right text-xs"></i>
         </button>
       </div>

@@ -14,6 +14,8 @@ import { developerRoutes } from '../../../routes/developer.routes';
 import { superadminRoutes } from '../../../routes/superadmin.routes';
 import { payrollRoutes } from '../../../routes/payroll.routes';
 
+import { UserProfileService } from '../../../shared/services/user-profile.service';
+
 @Component({
   selector: 'app-shell',
   standalone: true,
@@ -37,6 +39,8 @@ export class AppShell implements OnInit {
   readonly sidebarOpen = signal(!this.isMobileView());
   readonly selectedRoleId = computed(() => this.authService.selectedRoleId());
   readonly roleOptions = computed(() => this.authService.roleOptions());
+  readonly companyLogoUrl = computed(() => this.userProfileService.companyLogo());
+
   readonly userDetails = computed<UserDetails>(() => {
     const user = this.authService.user();
     const selectedRole = this.roleOptions().find((role) => role.roleId === this.selectedRoleId());
@@ -55,6 +59,7 @@ export class AppShell implements OnInit {
 
   constructor(
     private readonly authService: AuthService,
+    private readonly userProfileService: UserProfileService,
     private readonly messageService: MessageService,
     private readonly confirmationService: ConfirmationService,
     private readonly router: Router,
@@ -62,6 +67,13 @@ export class AppShell implements OnInit {
 
   ngOnInit(): void {
     this.fetchUserSidebar();
+    if (this.authService.isAuthenticated()) {
+      this.userProfileService.getUserProfile().subscribe({ error: () => {} });
+    }
+  }
+
+  onLogoError(event: any): void {
+    event.target.src = 'assets/stubhub-com-banner-2.jpg';
   }
 
   fetchUserSidebar(): void {

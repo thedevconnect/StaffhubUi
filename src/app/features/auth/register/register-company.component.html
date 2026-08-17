@@ -1,5 +1,6 @@
 <p-toast></p-toast>
 
+
 <div class="min-h-screen w-full flex bg-slate-50 font-sans">
     <!-- Left Column: Branding (hidden on mobile) -->
     <div
@@ -134,6 +135,30 @@
                             class="text-xs font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2 select-none uppercase tracking-wide">
                             <i class="pi pi-building text-indigo-600"></i> Company Registration
                         </h3>
+
+                        <!-- Optional Company Logo Upload -->
+                        <div class="py-1">
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Company Logo (Optional)</label>
+                            <div class="p-3 bg-white border border-dashed border-slate-300 rounded-xl flex items-center gap-3.5 shadow-2xs">
+                                <div class="h-12 w-16 rounded-lg border border-slate-200 bg-slate-50 p-1 flex items-center justify-center overflow-hidden shrink-0">
+                                    <img [src]="companyLogoPreview || 'assets/stubhub-com-banner-2.jpg'" (error)="onLogoError($event)" class="h-full w-full object-contain" />
+                                </div>
+                                <div class="flex flex-col gap-1 flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <input type="file" #publicLogoInput accept="image/*" class="hidden" (change)="onRegisterLogoSelected($event)" />
+                                        <button type="button" (click)="publicLogoInput.click()"
+                                            class="px-2.5 py-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 text-xs font-bold rounded-lg transition inline-flex items-center gap-1.5 cursor-pointer">
+                                            <i class="pi pi-upload text-xs"></i> Select Logo Image
+                                        </button>
+                                        <button type="button" *ngIf="companyLogoPreview" (click)="removeRegisterLogo()"
+                                            class="px-2 py-1 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-bold rounded-lg transition border border-rose-200 inline-flex items-center gap-1 cursor-pointer">
+                                            <i class="pi pi-trash text-xs"></i> Remove
+                                        </button>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400">Upload your company logo. If skipped, Super Admin can also configure it later.</span>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Row 1: Company Name & Short Name -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 py-1.5">

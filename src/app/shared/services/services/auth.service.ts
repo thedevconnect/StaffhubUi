@@ -66,6 +66,8 @@ export class AuthService {
     sessionStorage.removeItem('userToken');
     localStorage.removeItem('userId');
     localStorage.removeItem('companyId');
+    localStorage.removeItem('companyLogo');
+    localStorage.removeItem('joiningDate');
     localStorage.removeItem('role');
   }
 
@@ -130,6 +132,10 @@ export class AuthService {
   private toAuthUser(data: LoginApiResponse['data'], decoded: JwtPayload | null): AuthUser {
     let normalizedRoles = this.normalizeRoles(data);
     const companyId = decoded?.companyId || (data as any)?.companyId || localStorage.getItem('companyId') || null;
+    const companyLogo = (data as any)?.companyLogo || (data as any)?.company_logo || (data as any)?.logo;
+    if (companyLogo) {
+      localStorage.setItem('companyLogo', companyLogo);
+    }
 
     return {
       id: decoded?.userId || data.userId || data.id || 0,

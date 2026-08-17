@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TaskService, TaskStats, TaskItem, TaskDetailResponse } from '../../shared/services/task.service';
 import { AuthService } from '../../shared/services/services/auth.service';
 import { MenuItem, MessageService, ConfirmationService } from 'primeng/api';
@@ -217,6 +218,7 @@ export class WorkManagementComponent implements OnInit {
     private authService: AuthService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
+    private router: Router,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -233,23 +235,24 @@ export class WorkManagementComponent implements OnInit {
   }
 
   updateBreadcrumbs(): void {
+    const currentUrl = this.router.url || '';
     const rawRoleId = (this.userRole || '').toLowerCase();
     let rootPath = '/ess';
     let rootLabel = 'Employee Self Service';
 
-    if (rawRoleId === 'hr_admin' || rawRoleId === 'hradmin') {
-      rootPath = '/hradmin';
-      rootLabel = 'HR Admin';
-    } else if (rawRoleId === 'developer') {
-      rootPath = '/developer';
-      rootLabel = 'Developer';
-    } else if (rawRoleId === 'super_admin' || rawRoleId === 'superadmin') {
+    if (currentUrl.includes('/superadmin') || rawRoleId === 'super_admin' || rawRoleId === 'superadmin') {
       rootPath = '/superadmin';
       rootLabel = 'Super Admin';
+    } else if (currentUrl.includes('/hradmin') || rawRoleId === 'hr_admin' || rawRoleId === 'hradmin') {
+      rootPath = '/hradmin';
+      rootLabel = 'HR Admin';
+    } else if (currentUrl.includes('/developer') || rawRoleId === 'developer') {
+      rootPath = '/developer';
+      rootLabel = 'Developer';
     }
 
     this.breadcrumbItems = [
-      { label: rootLabel, icon: 'pi pi-home', routerLink: rootPath },
+      { label: rootLabel, icon: rootLabel === 'Super Admin' ? 'pi pi-user' : 'pi pi-home', routerLink: rootPath },
       { label: 'Task Management', icon: 'pi pi-briefcase', routerLink: `${rootPath}/task-management` }
     ];
     this.cdr.markForCheck();

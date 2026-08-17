@@ -50,6 +50,7 @@ export class CompanyManagement implements OnInit {
 
   columns: TableColumn[] = [
     { key: 'actions', header: 'Actions', isVisible: true, isSortable: false, isCustom: true },
+    { key: 'company_logo', header: 'Logo', isVisible: true, isSortable: false, isCustom: true },
     { key: 'company_name', header: 'Company Name', isVisible: true, isSortable: true },
     { key: 'short_name', header: 'Short Name', isVisible: true, isSortable: true },
     { key: 'company_email', header: 'Company Email', isVisible: true, isSortable: true },
@@ -162,6 +163,8 @@ export class CompanyManagement implements OnInit {
       companyEmail: '',
       companyPhone: '',
       industry: '',
+      company_logo: '',
+      companyLogo: '',
       fullName: '',
       username: '',
       email: '',
@@ -171,6 +174,41 @@ export class CompanyManagement implements OnInit {
     };
     this.showDrawer = true;
     this.cdr.detectChanges();
+  }
+
+  onLogoFileSelected(event: any): void {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'File Too Large',
+        detail: 'Company logo image must be under 3MB.'
+      });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      const logoBase64 = e.target.result as string;
+      if (this.selectedCompany) {
+        this.selectedCompany.company_logo = logoBase64;
+        this.selectedCompany.companyLogo = logoBase64;
+        this.cdr.detectChanges();
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removeLogo(): void {
+    if (this.selectedCompany) {
+      this.selectedCompany.company_logo = '';
+      this.selectedCompany.companyLogo = '';
+      this.cdr.detectChanges();
+    }
+  }
+
+  onLogoError(event: any): void {
+    event.target.src = 'assets/stubhub-com-banner-2.jpg';
   }
 
   registerNewCompany() {
