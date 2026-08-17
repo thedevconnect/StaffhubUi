@@ -156,12 +156,15 @@
       (actionClicked)="onActionClicked($event)" 
       [cellTemplates]="{
         'leaveDate': dateTpl,
+        'leave_date': dateTpl,
         'duration': durationTpl,
         'session': sessionTpl,
         'reason': reasonTpl,
         'toMail': toMailTpl,
+        'to_mail': toMailTpl,
         'status': statusTpl,
-        'employeeName': empTpl
+        'employeeName': empTpl,
+        'employee_name': empTpl
       }">
     </app-table-template>
   </div>

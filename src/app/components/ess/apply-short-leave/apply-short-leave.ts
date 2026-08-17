@@ -170,11 +170,29 @@ export class ApplyShortLeave implements OnInit {
 
     this.shortLeaveService.getShortLeaves().subscribe({
       next: (res) => {
-        this.shortLeaves = res?.data || [];
+        const raw = res?.data || [];
+        this.shortLeaves = raw.map((item: any) => {
+          const lDate = item.leave_date || item.leaveDate || item.date || item.from_date || '';
+          const mail = item.to_mail || item.toMail || '';
+          const empName = item.employee_name || item.employeeName || 'Employee';
+          return {
+            ...item,
+            leave_date: lDate,
+            leaveDate: lDate,
+            date: lDate,
+            to_mail: mail,
+            toMail: mail,
+            employee_name: empName,
+            employeeName: empName,
+            duration: item.duration || '2 Hours'
+          };
+        });
         this.isLoading = false;
         this.cdr.markForCheck();
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error fetching short leaves:', err);
+        this.shortLeaves = [];
         this.isLoading = false;
         this.cdr.markForCheck();
       }
