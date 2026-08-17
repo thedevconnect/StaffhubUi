@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, AfterViewInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppBreadcrumb } from '../../../shared/ui/breadcrumb/breadcrumb';
 import { DialogModule } from 'primeng/dialog';
@@ -7,11 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ScrollerModule } from 'primeng/scroller';
-import {
-  AttendanceService,
-  AttendanceRecord,
-  DashboardSummary
-} from '../../../shared/services/attendance.service';
+import { AttendanceService, AttendanceRecord, DashboardSummary } from '../../../shared/services/attendance.service';
 import { TableTemplate, TableColumn } from '../../../shared/ui/table-template/table-template';
 import { parseLocalDatetime, formatLocalTime } from '../../../shared/utils/date-utils';
 import * as L from 'leaflet';
@@ -34,7 +30,7 @@ import * as L from 'leaflet';
   styleUrl: './employee-attendance.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EmployeeAttendance implements OnInit, OnDestroy {
+export class EmployeeAttendance implements OnInit, AfterViewInit, OnDestroy {
   readonly Math = Math;
 
   readonly currentTime = signal<string>('');
@@ -103,7 +99,9 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     this.loadAllData();
     this.loadHistory(1, 10);
     this.checkIncompleteAttendance();
+  }
 
+  ngAfterViewInit() {
     this.attendanceService.getOfficeLocation().subscribe({
       next: (res) => {
         if (res.success && res.data && res.data.office_latitude) {
@@ -599,6 +597,11 @@ export class EmployeeAttendance implements OnInit, OnDestroy {
     setTimeout(() => {
       const mapElement = document.getElementById('attendance-map');
       if (!mapElement) return;
+
+      if (this.map) {
+        this.map.remove();
+        this.map = null;
+      }
 
       this.map = L.map(mapElement).setView([this.officeLocation!.latitude, this.officeLocation!.longitude], 18);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(this.map);
