@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { UserService } from '../../../shared/services/user-service';
@@ -16,6 +16,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { SelectModule } from 'primeng/select';
+import { DialogModule } from 'primeng/dialog';
 
 @Component({
   selector: 'app-register-company',
@@ -34,7 +35,8 @@ import { SelectModule } from 'primeng/select';
     FloatLabelModule,
     IconFieldModule,
     InputIconModule,
-    SelectModule
+    SelectModule,
+    DialogModule
   ],
   templateUrl: './register-company.component.html',
   styleUrls: ['./register-company.component.scss'],
@@ -61,8 +63,19 @@ export class RegisterCompanyComponent implements OnInit {
     private router: Router,
     private userService: UserService,
     private authService: AuthService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) { }
+
+  companyLogoPreview: string | null = null;
+  showLogoViewModal = false;
+
+  viewLogo(): void {
+    if (this.companyLogoPreview) {
+      this.showLogoViewModal = true;
+      this.cdr.markForCheck();
+    }
+  }
 
   ngOnInit(): void {
     this.signupForm = this.fb.group({
@@ -71,6 +84,7 @@ export class RegisterCompanyComponent implements OnInit {
       companyEmail: ['', [Validators.required, Validators.email]],
       companyPhone: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
       address: ['', Validators.required],
+      companyLogo: [''],
       officeLatitude: [''],
       officeLongitude: [''],
       allowedRadius: [200],
@@ -83,6 +97,40 @@ export class RegisterCompanyComponent implements OnInit {
       mobile: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
       password: ['', Validators.required]
     });
+  }
+
+  onRegisterLogoSelected(event: any): void {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'File Too Large',
+        detail: 'Company logo image must be under 3MB.'
+      });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      const logoBase64 = e.target.result as string;
+      this.companyLogoPreview = logoBase64;
+      this.signupForm.patchValue({ companyLogo: logoBase64 });
+      this.cdr.markForCheck();
+    };
+    reader.readAsDataURL(file);
+    if (event.target) {
+      event.target.value = '';
+    }
+  }
+
+  removeRegisterLogo(): void {
+    this.companyLogoPreview = null;
+    this.signupForm.patchValue({ companyLogo: '' });
+    this.cdr.markForCheck();
+  }
+
+  onLogoError(event: any): void {
+    event.target.src = 'assets/stubhub-com-banner-2.jpg';
   }
 
   get f2() { return this.signupForm.controls; }
@@ -107,7 +155,10 @@ export class RegisterCompanyComponent implements OnInit {
   submitSignUpForm() {
     this.isProcess = true;
 
-    const payload = { ...this.signupForm.value };
+    const payload = {
+      ...this.signupForm.value,
+      company_logo: this.companyLogoPreview || this.signupForm.value.companyLogo
+    };
     if (payload.industry === 'Other') {
       payload.industry = payload.otherIndustry || 'Other';
     }

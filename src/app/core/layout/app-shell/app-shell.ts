@@ -14,6 +14,8 @@ import { developerRoutes } from '../../../routes/developer.routes';
 import { superadminRoutes } from '../../../routes/superadmin.routes';
 import { payrollRoutes } from '../../../routes/payroll.routes';
 
+import { UserProfileService } from '../../../shared/services/user-profile.service';
+
 @Component({
   selector: 'app-shell',
   standalone: true,
@@ -37,6 +39,8 @@ export class AppShell implements OnInit {
   readonly sidebarOpen = signal(!this.isMobileView());
   readonly selectedRoleId = computed(() => this.authService.selectedRoleId());
   readonly roleOptions = computed(() => this.authService.roleOptions());
+  readonly companyLogoUrl = computed(() => this.userProfileService.companyLogo());
+
   readonly userDetails = computed<UserDetails>(() => {
     const user = this.authService.user();
     const selectedRole = this.roleOptions().find((role) => role.roleId === this.selectedRoleId());
@@ -55,6 +59,7 @@ export class AppShell implements OnInit {
 
   constructor(
     private readonly authService: AuthService,
+    private readonly userProfileService: UserProfileService,
     private readonly messageService: MessageService,
     private readonly confirmationService: ConfirmationService,
     private readonly router: Router,
@@ -62,6 +67,13 @@ export class AppShell implements OnInit {
 
   ngOnInit(): void {
     this.fetchUserSidebar();
+    if (this.authService.isAuthenticated()) {
+      this.userProfileService.getUserProfile().subscribe({ error: () => {} });
+    }
+  }
+
+  onLogoError(event: any): void {
+    event.target.src = 'assets/stubhub-com-banner-2.jpg';
   }
 
   fetchUserSidebar(): void {
@@ -127,13 +139,6 @@ export class AppShell implements OnInit {
     } else if (rawRoleId === 'hr_admin' || rawRoleId === 'hradmin') {
       const empMgmtSubmenus: SidebarMenuItem[] = [];
       const attendanceSubmenus: SidebarMenuItem[] = [];
-      const payrollSubmenus: SidebarMenuItem[] = [
-        { label: 'Master Salary Preparation', icon: 'pi-money-bill', route: '/payroll/employee-salary-preparation', isOpen: false },
-        { label: 'Payroll Dashboard', icon: 'pi-chart-bar', route: '/payroll/payroll-dashboard', isOpen: false },
-        { label: 'Monthly Salary Components', icon: 'pi-sliders-v', route: '/payroll/monthly-salary-components', isOpen: false },
-        { label: 'Yearly Salary Components', icon: 'pi-sliders-h', route: '/payroll/yearly-salary-components', isOpen: false },
-        { label: 'Employee Expense Statement', icon: 'pi-file-excel', route: '/payroll/employee-expense-statement', isOpen: false },
-      ];
       const assetSubmenus: SidebarMenuItem[] = [];
       const approvalSubmenus: SidebarMenuItem[] = [];
       const standaloneBottomMenus: SidebarMenuItem[] = [];
@@ -172,7 +177,6 @@ export class AppShell implements OnInit {
 
       if (empMgmtSubmenus.length > 0) menus.push({ label: 'Employee Management', icon: 'pi-users', isOpen: false, children: empMgmtSubmenus });
       if (attendanceSubmenus.length > 0) menus.push({ label: 'Attendance & Leave', icon: 'pi-calendar-times', isOpen: false, children: attendanceSubmenus });
-      menus.push({ label: 'Payroll & Salary', icon: 'pi-wallet', isOpen: false, children: payrollSubmenus });
       if (assetSubmenus.length > 0) menus.push({ label: 'Asset Management', icon: 'pi-briefcase', isOpen: false, children: assetSubmenus });
       if (approvalSubmenus.length > 0) menus.push({ label: 'Approvals', icon: 'pi-check-square', isOpen: false, children: approvalSubmenus });
       menus.push(...standaloneBottomMenus);

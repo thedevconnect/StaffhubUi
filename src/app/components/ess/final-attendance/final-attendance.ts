@@ -280,18 +280,32 @@ export class FinalAttendance implements OnInit {
     }
     const present = 0;
     const effectiveWeeklyOffs = present >= 6 ? sundays : 0;
+
+    const joiningStr = localStorage.getItem('joiningDate');
+    let isBeforeJoiningMonth = false;
+    if (joiningStr) {
+      try {
+        const doj = new Date(joiningStr);
+        doj.setHours(0, 0, 0, 0);
+        const endOfMonth = new Date(year, month, 0, 23, 59, 59);
+        if (endOfMonth < doj) {
+          isBeforeJoiningMonth = true;
+        }
+      } catch (e) { }
+    }
+
     return {
       monthNumber: month,
       month: `${monthName} ${year}`,
       totalDays: daysInMonth,
       present: 0,
       halfDays: 0,
-      absent: daysInMonth - sundays,
+      absent: isBeforeJoiningMonth ? 0 : (daysInMonth - sundays),
       leaves: 0,
       holidays: 0,
       weeklyOffs: sundays,
       paidDays: effectiveWeeklyOffs,
-      status: 'Not Started',
+      status: isBeforeJoiningMonth ? 'Not Applicable' : 'Not Started',
       submitDate: null,
       recordId: null,
       rawDetails: []

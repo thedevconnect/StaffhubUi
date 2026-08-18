@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -7,6 +7,8 @@ import {
   Validators,
   FormsModule
 } from '@angular/forms';
+import { Subject, Subscription, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
 
 import { AppBreadcrumb } from '../../../../shared/ui/breadcrumb/breadcrumb';
 import { ButtonModule } from 'primeng/button';
@@ -26,7 +28,8 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { AttendanceService } from '../../../../shared/services/attendance.service';
 import {
   TableColumn,
-  TableTemplate
+  TableTemplate,
+  Tab
 } from '../../../../shared/ui/table-template/table-template';
 
 @Component({
@@ -57,11 +60,12 @@ import {
   templateUrl: './holiday-list.html',
   styleUrl: './holiday-list.scss',
 })
-export class HolidayList implements OnInit {
+export class HolidayList implements OnInit, OnDestroy {
   pageNo = 1;
   pageSize = 10;
   totalCount = 0;
   searchText = '';
+  selectedMonth: any = 'ALL';
 
   holiday_calendar: any[] = [];
 
@@ -72,6 +76,25 @@ export class HolidayList implements OnInit {
   showDialog = false;
   isHoliday = false;
   loading = signal(false);
+
+  private searchSubject = new Subject<{ page: number; limit: number; search: string; month: any }>();
+  private searchSub?: Subscription;
+
+  monthTabs: Tab[] = [
+    { label: 'All Months', value: 'ALL', icon: 'pi pi-calendar' },
+    { label: 'Jan', value: '1' },
+    { label: 'Feb', value: '2' },
+    { label: 'Mar', value: '3' },
+    { label: 'Apr', value: '4' },
+    { label: 'May', value: '5' },
+    { label: 'Jun', value: '6' },
+    { label: 'Jul', value: '7' },
+    { label: 'Aug', value: '8' },
+    { label: 'Sep', value: '9' },
+    { label: 'Oct', value: '10' },
+    { label: 'Nov', value: '11' },
+    { label: 'Dec', value: '12' }
+  ];
 
   breadcrumbItems: any[] = [
     { label: 'Employee Self Service', icon: 'pi pi-home', routerLink: '/ess' },
@@ -95,7 +118,12 @@ export class HolidayList implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
-    this.loadAllData();
+    this.setupSearchPipeline();
+    this.triggerSearch();
+  }
+
+  ngOnDestroy(): void {
+    this.searchSub?.unsubscribe();
   }
 
   initForm(): void {
@@ -110,6 +138,71 @@ export class HolidayList implements OnInit {
       DeptRemarks: [''],
       EmployeeRemarks: ['']
     });
+  }
+
+  setupSearchPipeline(): void {
+    this.searchSub = this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged((prev, curr) =>
+        prev.page === curr.page && prev.limit === curr.limit && prev.search === curr.search && prev.month === curr.month
+      ),
+      switchMap(params => {
+        this.loading.set(true);
+        return this.user.getHolidays(params.page, params.limit, params.search).pipe(
+          catchError(err => {
+            console.error('Holiday API Error:', err);
+            return of({ holiday_calendar: [], totalCount: 0 });
+          })
+        );
+      })
+    ).subscribe((res: any) => {
+      const rawList = res?.holiday_calendar ?? res?.data ?? [];
+
+      // Deduplicate holidays by ID or date + name combination
+      const seen = new Set<string>();
+      const uniqueList: any[] = [];
+
+      for (const item of rawList) {
+        const dStr = item.holiday_date ? new Date(item.holiday_date).toISOString().split('T')[0] : '';
+        const nameStr = (item.holiday_name || '').toLowerCase().trim();
+        const key = item.id ? `id_${item.id}` : `${dStr}_${nameStr}`;
+
+        if (!seen.has(key)) {
+          seen.add(key);
+          uniqueList.push(item);
+        }
+      }
+
+      // Filter by Month if selected
+      let filtered = uniqueList;
+      if (this.selectedMonth && this.selectedMonth !== 'ALL') {
+        const targetMonth = Number(this.selectedMonth);
+        filtered = uniqueList.filter((item: any) => {
+          if (!item.holiday_date) return false;
+          const m = new Date(item.holiday_date).getMonth() + 1;
+          return m === targetMonth;
+        });
+      }
+
+      this.holiday_calendar = filtered;
+      this.totalCount = filtered.length;
+      this.loading.set(false);
+    });
+  }
+
+  triggerSearch(): void {
+    this.searchSubject.next({
+      page: this.pageNo,
+      limit: this.pageSize,
+      search: this.searchText,
+      month: this.selectedMonth
+    });
+  }
+
+  onMonthTabChange(monthValue: any): void {
+    this.selectedMonth = monthValue;
+    this.pageNo = 1;
+    this.triggerSearch();
   }
 
   getHolidayImage(row: any): string {
@@ -245,27 +338,11 @@ export class HolidayList implements OnInit {
   }
 
   loadDashboardData(): void {
-    this.loadAllData();
+    this.triggerSearch();
   }
 
   loadAllData(): void {
-    this.loading.set(true);
-
-    this.user.getHolidays(this.pageNo, this.pageSize, this.searchText).subscribe({
-      next: (res: any) => {
-        this.holiday_calendar = res?.holiday_calendar ?? [];
-        this.totalCount = res?.totalCount ?? this.holiday_calendar.length;
-        this.loading.set(false);
-
-        // console.log('Holiday Calendar:', this.holiday_calendar);
-      },
-      error: (err) => {
-        console.error('Holiday API Error:', err);
-        this.holiday_calendar = [];
-        this.totalCount = 0;
-        this.loading.set(false);
-      }
-    });
+    this.triggerSearch();
   }
 
   openAddDrawer(): void {
@@ -280,8 +357,6 @@ export class HolidayList implements OnInit {
       return;
     }
 
-    // console.log('Form Value:', this.assetForm.value);
-
     this.showAssetDrawer = false;
     this.isEditMode = false;
     this.assetForm.reset();
@@ -289,24 +364,22 @@ export class HolidayList implements OnInit {
 
   onPageChange(newPage: number): void {
     this.pageNo = newPage;
-    this.loadAllData();
+    this.triggerSearch();
   }
 
   onSearchChange(value: string): void {
     this.searchText = value;
     this.pageNo = 1;
-    this.loadAllData();
+    this.triggerSearch();
   }
 
   onPageSizeChange(size: number): void {
     this.pageSize = size;
     this.pageNo = 1;
-    this.loadAllData();
+    this.triggerSearch();
   }
 
   onSortChange(event: any): void {
-    //  console.log('Sort Event', event);
+    // Sort logic if needed
   }
-
-
 }

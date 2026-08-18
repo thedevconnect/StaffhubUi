@@ -66,6 +66,8 @@ export class AuthService {
     sessionStorage.removeItem('userToken');
     localStorage.removeItem('userId');
     localStorage.removeItem('companyId');
+    localStorage.removeItem('companyLogo');
+    localStorage.removeItem('joiningDate');
     localStorage.removeItem('role');
   }
 
@@ -93,6 +95,16 @@ export class AuthService {
 
   private restoreSession(): void {
     try {
+      const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
+      if (token) {
+        const decoded = this.decodeToken(token);
+        if (decoded?.exp && (decoded.exp * 1000) < Date.now()) {
+          console.warn('⚠️ JWT Session expired after 2 hours. Logging out user.');
+          this.logout();
+          return;
+        }
+      }
+
       const raw = localStorage.getItem(SESSION_KEY);
       if (!raw) return;
       const session = JSON.parse(raw) as StoredSession;
@@ -130,6 +142,10 @@ export class AuthService {
   private toAuthUser(data: LoginApiResponse['data'], decoded: JwtPayload | null): AuthUser {
     let normalizedRoles = this.normalizeRoles(data);
     const companyId = decoded?.companyId || (data as any)?.companyId || localStorage.getItem('companyId') || null;
+    const companyLogo = (data as any)?.companyLogo || (data as any)?.company_logo || (data as any)?.logo;
+    if (companyLogo) {
+      localStorage.setItem('companyLogo', companyLogo);
+    }
 
     return {
       id: decoded?.userId || data.userId || data.id || 0,

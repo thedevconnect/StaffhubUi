@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StaffHub HRMS - Full E2E Presentation Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0b0f19 0%, #111827 50%, #0f172a 100%);
+      --card-bg: rgba(17, 24, 39, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #6366f1;
+      --primary-light: #818cf8;
+      --accent: #10b981;
+      --warning: #f59e0b;
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--card-border);
+      z-index: 10;
+    }
+
+    .logo-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+    }
+
+    .logo-text {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-text span {
+      color: var(--primary-light);
+    }
+
+    .deck-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .slide-counter {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .nav-btn {
+      background: rgba(31, 41, 55, 0.8);
+      border: 1px solid var(--card-border);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    main {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .slide {
+      position: absolute;
+      width: 100%;
+      max-width: 1180px;
+      height: calc(100vh - 160px);
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.97);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1);
+    }
+
+    .slide-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-y: auto;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 5px 12px;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: var(--primary-light);
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 1.25rem;
+      background: linear-gradient(135deg, #ffffff 0%, #d1d5db 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: white;
+    }
+
+    p.subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+
+    .feature-box {
+      background: rgba(11, 15, 25, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 1.25rem;
+      transition: all 0.25s ease;
+    }
+
+    .feature-box:hover {
+      border-color: var(--primary);
+      transform: translateY(-3px);
+    }
+
+    .feature-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
+    .feature-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.35rem; color: white; }
+    .feature-desc { font-size: 0.88rem; color: var(--text-muted); line-height: 1.45; }
+
+    .hero-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 10px 18px;
+      border-radius: 12px;
+      color: #34d399;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+    }
+
+    footer {
+      padding: 0.75rem 2rem;
+      background: rgba(11, 15, 25, 0.9);
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .stat-num {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--primary-light);
+      margin-bottom: 2px;
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 1rem;
+    }
+
+    .pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      color: #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-box">
+      <div class="logo-badge">S</div>
+      <div class="logo-text">Staff<span>Hub</span> HRMS & Payroll</div>
+    </div>
+    <div class="deck-controls">
+      <span class="slide-counter" id="slideNum">Slide 1 of 6</span>
+      <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+      <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next →</button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- SLIDE 1 -->
+    <div class="slide active">
+      <div class="slide-card">
+        <div>
+          <span class="tag">Complete Workforce Platform</span>
+          <h1>StaffHub HRMS & Payroll E2E Pitch</h1>
+          <p class="subtitle">Complete Employee Lifecycle Digitization with Geo-Fenced GPS Attendance, Automated Payroll, and Integrated Kanban Task Management.</p>
+
+          <div class="hero-badge">
+            ⚡ 35+ Active Features • Zero Proxy Attendance • Master Salary Generator
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="feature-box">
+            <div class="feature-icon">📍</div>
+            <div class="feature-title">Geo-Fenced Attendance</div>
+            <div class="feature-desc">Restrict Punch In/Out strictly to office GPS coordinates and configured meter radiuses.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">💸</div>
+            <div class="feature-title">Master Payroll</div>
+            <div class="feature-desc">Automated salary calculations linked with attendance, LWP, taxes, and approved expense claims.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">👥</div>
+            <div class="feature-title">Employee Self-Service</div>
+            <div class="feature-desc">Leaves, Short-Leaves, Expenses, Asset requests, Performance appraisals, and Tickets.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2 -->
+    <div class="slide">
+      <div class="slide-card">
+        <div>
+          <span class="tag">Hero Feature</span>
+          <h2>📍 Geo-Fenced Distance-Based Attendance</h2>
+          <p class="subtitle">HR Admin defines exact Office Latitude, Longitude, and Allowed Radial Meter Distance (e.g. 100m).</p>
+        </div>
+
+        <div class="grid-2">
+          <div class="feature-box">
+            <div class="feature-title">🔒 Strict Boundary Check</div>
+            <div class="feature-desc">When staff click Swipe In, real-time GPS distance is calculated. If inside radius ➔ Punch Approved. If outside radius ➔ Regularization trigger.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-title">🌐 Smart Exemption Management</div>
+            <div class="feature-desc">Configure exemption rules for Work From Home (WFH), Client Site visits, and Sales outstation trips.</div>
+          </div>
+        </div>
+
+        <div class="pill-list" style="margin-top: 1.5rem;">
+          <span class="pill">✓ Real-time Location Fetch</span>
+          <span class="pill">✓ Shift Duration Timer</span>
+          <span class="pill">✓ Missed Punch Regularization</span>
+          <span class="pill">✓ Reporting Manager Approvals</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="slide">
+      <div class="slide-card">
+        <div>
+          <span class="tag">35+ App Features</span>
+          <h2>All Active Modules Ecosystem</h2>
+          <p class="subtitle">Seamless collaboration between Employees, HR Managers, and Finance Teams.</p>
+        </div>
+
+        <div class="grid-4">
+          <div class="feature-box">
+            <div class="feature-icon">👤</div>
+            <div class="feature-title">ESS Portal</div>
+            <div class="feature-desc">Swipe In/Out, Leaves, Short-Leaves, Expenses, Assets, Tickets, Probation.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">🏢</div>
+            <div class="feature-title">HR Admin Hub</div>
+            <div class="feature-desc">Employee directory, Geo-fencing, Approvals, Exit interviews, Offboarding.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">💰</div>
+            <div class="feature-title">Master Payroll</div>
+            <div class="feature-desc">Salary prep, Salary components, Expense statements, Deductions, Form 16 CTC.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">🎯</div>
+            <div class="feature-title">Work Kanban</div>
+            <div class="feature-desc">Task boards, drag-and-drop status, due dates, team assignment, productivity.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4 -->
+    <div class="slide">
+      <div class="slide-card">
+        <div>
+          <span class="tag">Onboarding Journey</span>
+          <h2>End-to-End Onboarding Flow</h2>
+          <p class="subtitle">From company registration to automated monthly salary disbursement.</p>
+        </div>
+
+        <div class="grid-3">
+          <div class="feature-box">
+            <div class="feature-title">1. Company Registration</div>
+            <div class="feature-desc">Register domain, corporate contact, industry, and default HR account.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-title">2. Geo-Fence Setup</div>
+            <div class="feature-desc">Define office GPS coordinates and allowed meter radial radius.</div>
+          </div>
+          <div class="feature-box">
+            <div class="feature-title">3. Staff Onboarding</div>
+            <div class="feature-desc">Import staff database or trigger self-service profile onboarding links.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5 -->
+    <div class="slide">
+      <div class="slide-card">
+        <div>
+          <span class="tag">Business ROI</span>
+          <h2>Measurable Business Impact</h2>
+          <p class="subtitle">Why client companies adopt StaffHub.</p>
+        </div>
+
+        <div class="grid-3">
+          <div class="feature-box">
+            <div class="stat-num">80%</div>
+            <div class="feature-title">Time Savings</div>
+            <div class="feature-desc">In monthly attendance consolidation and payroll calculation.</div>
+          </div>
+          <div class="feature-box">
+            <div class="stat-num">100%</div>
+            <div class="feature-title">Payroll Accuracy</div>
+            <div class="feature-desc">Eliminates proxy attendance losses and calculation errors.</div>
+          </div>
+          <div class="feature-box">
+            <div class="stat-num">24/7</div>
+            <div class="feature-title">Employee Transparency</div>
+            <div class="feature-desc">Self-service portal for leave balances, claims, and pay slips.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6 -->
+    <div class="slide">
+      <div class="slide-card" style="text-align:center; justify-content:center;">
+        <span class="tag" style="margin:0 auto 1.25rem auto;">Schedule Your Demo</span>
+        <h1 style="font-size:3.2rem;">Transform Your HR Operations Today</h1>
+        <p class="subtitle" style="max-width:650px; margin:0 auto 2rem auto;">Deploy StaffHub for your company and experience seamless HR automation.</p>
+
+        <div style="display:flex; gap:14px; justify-content:center;">
+          <button class="nav-btn" style="background:var(--primary); padding:12px 24px; font-size:1rem;" onclick="alert('StaffHub E2E Demo Initialized!')">🚀 Launch Live Demo</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <div>StaffHub HRMS & Payroll System • Asset Presentation Deck</div>
+    <div>Use Arrow Keys (← / →) to Navigate Slides</div>
+  </footer>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const slideNumEl = document.getElementById('slideNum');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateSlides() {
+      slides.forEach((slide, idx) => {
+        if (idx === currentSlide) slide.classList.add('active');
+        else slide.classList.remove('active');
+      });
+      slideNumEl.textContent = `Slide ${currentSlide + 1} of ${totalSlides}`;
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === totalSlides - 1;
+    }
+
+    function changeSlide(direction) {
+      currentSlide += direction;
+      if (currentSlide < 0) currentSlide = 0;
+      if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+      updateSlides();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') changeSlide(1);
+      else if (e.key === 'ArrowLeft') changeSlide(-1);
+    });
+
+    updateSlides();
+  </script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TaskService, TaskStats, TaskItem, TaskDetailResponse } from '../../shared/services/task.service';
 import { AuthService } from '../../shared/services/services/auth.service';
 import { MenuItem, MessageService, ConfirmationService } from 'primeng/api';
@@ -201,6 +202,13 @@ export class WorkManagementComponent implements OnInit {
   uploadingFile = false;
   newSubtaskInput = '';
 
+  // Image Preview Lightbox Modal State
+  isImageFile(url?: string, name?: string): boolean {
+    if (!url && !name) return false;
+    const str = `${url || ''} ${name || ''}`.toLowerCase();
+    return str.startsWith('data:image/') || str.includes('image/') || !!str.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i);
+  }
+
 
   // Worklog Modal
   showWorklogModal = false;
@@ -217,6 +225,7 @@ export class WorkManagementComponent implements OnInit {
     private authService: AuthService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
+    private router: Router,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -233,23 +242,24 @@ export class WorkManagementComponent implements OnInit {
   }
 
   updateBreadcrumbs(): void {
+    const currentUrl = this.router.url || '';
     const rawRoleId = (this.userRole || '').toLowerCase();
     let rootPath = '/ess';
     let rootLabel = 'Employee Self Service';
 
-    if (rawRoleId === 'hr_admin' || rawRoleId === 'hradmin') {
-      rootPath = '/hradmin';
-      rootLabel = 'HR Admin';
-    } else if (rawRoleId === 'developer') {
-      rootPath = '/developer';
-      rootLabel = 'Developer';
-    } else if (rawRoleId === 'super_admin' || rawRoleId === 'superadmin') {
+    if (currentUrl.includes('/superadmin') || rawRoleId === 'super_admin' || rawRoleId === 'superadmin') {
       rootPath = '/superadmin';
       rootLabel = 'Super Admin';
+    } else if (currentUrl.includes('/hradmin') || rawRoleId === 'hr_admin' || rawRoleId === 'hradmin') {
+      rootPath = '/hradmin';
+      rootLabel = 'HR Admin';
+    } else if (currentUrl.includes('/developer') || rawRoleId === 'developer') {
+      rootPath = '/developer';
+      rootLabel = 'Developer';
     }
 
     this.breadcrumbItems = [
-      { label: rootLabel, icon: 'pi pi-home', routerLink: rootPath },
+      { label: rootLabel, icon: rootLabel === 'Super Admin' ? 'pi pi-user' : 'pi pi-home', routerLink: rootPath },
       { label: 'Task Management', icon: 'pi pi-briefcase', routerLink: `${rootPath}/task-management` }
     ];
     this.cdr.markForCheck();
@@ -378,11 +388,14 @@ export class WorkManagementComponent implements OnInit {
   previewImageUrl: string | null = null;
   previewImageTitle: string | null = null;
   showImagePreviewModal = false;
+  previewImageModal = false;
 
   openImagePreview(url: string, title?: string): void {
+    if (!url) return;
     this.previewImageUrl = url;
     this.previewImageTitle = title || 'Screenshot Preview';
     this.showImagePreviewModal = true;
+    this.previewImageModal = true;
     this.cdr.markForCheck();
   }
 
@@ -420,6 +433,7 @@ export class WorkManagementComponent implements OnInit {
     this.formLabelsList = this.getLabelsArray(task.labels);
     this.formTagInput = '';
     this.initialScreenshots = [];
+
     this.taskForm.patchValue({
       title: task.title,
       description: task.description || '',
@@ -434,6 +448,22 @@ export class WorkManagementComponent implements OnInit {
       logged_hours: task.logged_hours || 0,
       progress: task.progress || 0
     });
+
+    this.taskService.getTaskById(task.id).subscribe({
+      next: (res) => {
+        if (res?.success && res?.data?.attachments) {
+          this.initialScreenshots = res.data.attachments.map((att: any) => ({
+            fileName: att.file_name,
+            fileUrl: att.file_url,
+            fileType: att.file_type || 'image/png',
+            fileSize: att.file_size || 'File',
+            isImage: this.isImageFile(att.file_url, att.file_name)
+          }));
+          this.cdr.markForCheck();
+        }
+      }
+    });
+
     this.showTaskModal = true;
   }
 

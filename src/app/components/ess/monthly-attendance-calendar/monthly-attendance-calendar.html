@@ -25,7 +25,8 @@
     <div class="overflow-x-auto pb-2">
       <div class="min-w-[650px]">
         <!-- Days Header -->
-        <div class="grid grid-cols-7 gap-2 text-center font-bold text-xs uppercase tracking-wider text-slate-500 border-b border-slate-100 pb-2.5 mb-2.5">
+        <div
+          class="grid grid-cols-7 gap-2 text-center font-bold text-xs uppercase tracking-wider text-slate-500 border-b border-slate-100 pb-2.5 mb-2.5">
           <div *ngFor="let day of daysOfWeek" class="py-1" [ngClass]="{'text-rose-500': day === 'Sun'}">{{ day }}</div>
         </div>
 
@@ -38,8 +39,8 @@
               <!-- Top Row: Day Number & Status Badge -->
               <div class="flex items-center justify-between w-full mb-1">
                 <span class="text-xs font-black text-slate-700 group-hover:text-blue-600">{{ item.dayNum }}</span>
-                
-                <span *ngIf="item.type" 
+
+                <span *ngIf="item.type"
                   class="text-[9px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider shadow-2xs"
                   [ngClass]="item.colorClass">
                   {{ item.type }}
@@ -50,16 +51,19 @@
               <div *ngIf="item.swipeIn || (item.records && item.records.length > 0)"
                 class="w-full flex flex-col gap-1 text-[9px] font-medium text-slate-600 bg-slate-50/80 p-1.5 rounded-lg border border-slate-100 mt-auto">
                 <div class="flex justify-between items-center w-full" *ngIf="item.swipeIn && item.swipeIn !== '-'">
-                  <span class="text-emerald-600 font-bold flex items-center gap-0.5"><i class="pi pi-sign-in text-[8px]"></i>IN</span>
+                  <span class="text-emerald-600 font-bold flex items-center gap-0.5"><i
+                      class="pi pi-sign-in text-[8px]"></i>IN</span>
                   <span class="font-semibold text-slate-700">{{ item.swipeIn }}</span>
                 </div>
                 <div class="flex justify-between items-center w-full" *ngIf="item.swipeOut && item.swipeOut !== '-'">
-                  <span class="text-rose-500 font-bold flex items-center gap-0.5"><i class="pi pi-sign-out text-[8px]"></i>OUT</span>
+                  <span class="text-rose-500 font-bold flex items-center gap-0.5"><i
+                      class="pi pi-sign-out text-[8px]"></i>OUT</span>
                   <span class="font-semibold text-slate-700">{{ item.swipeOut }}</span>
                 </div>
                 <div class="flex justify-between items-center w-full pt-1 border-t border-slate-200/60 mt-0.5"
                   *ngIf="item.totalTime && item.totalTime !== '-'">
-                  <span class="text-blue-600 font-bold flex items-center gap-0.5"><i class="pi pi-clock text-[8px]"></i>HRS</span>
+                  <span class="text-blue-600 font-bold flex items-center gap-0.5"><i
+                      class="pi pi-clock text-[8px]"></i>HRS</span>
                   <span class="font-bold text-blue-700">{{ item.totalTime }}</span>
                 </div>
               </div>
@@ -70,30 +74,37 @@
     </div>
 
     <!-- Legend -->
-    <div class="flex flex-wrap items-center justify-between gap-3 mt-6 border-t border-slate-100 pt-4 text-xs font-semibold">
+    <div
+      class="flex flex-wrap items-center justify-between gap-3 mt-6 border-t border-slate-100 pt-4 text-xs font-semibold">
       <div class="flex flex-wrap gap-4 items-center">
         <div class="flex items-center gap-1.5">
-          <span class="h-4 w-4 rounded-md bg-emerald-500 flex items-center justify-center text-[9px] text-white font-bold">P</span>
+          <span
+            class="h-4 w-4 rounded-md bg-emerald-500 flex items-center justify-center text-[9px] text-white font-bold">P</span>
           <span class="text-slate-600">Present</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <span class="h-4 w-4 rounded-md bg-rose-500 flex items-center justify-center text-[9px] text-white font-bold">A</span>
+          <span
+            class="h-4 w-4 rounded-md bg-rose-500 flex items-center justify-center text-[9px] text-white font-bold">A</span>
           <span class="text-slate-600">Absent</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <span class="h-4 w-4 rounded-md bg-amber-500 flex items-center justify-center text-[9px] text-white font-bold">HD</span>
+          <span
+            class="h-4 w-4 rounded-md bg-amber-500 flex items-center justify-center text-[9px] text-white font-bold">HD</span>
           <span class="text-slate-600">Half Day</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <span class="h-4 w-4 rounded-md bg-slate-500 flex items-center justify-center text-[9px] text-white font-bold">WO</span>
+          <span
+            class="h-4 w-4 rounded-md bg-slate-500 flex items-center justify-center text-[9px] text-white font-bold">WO</span>
           <span class="text-slate-600">Weekly Off</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <span class="h-4 w-4 rounded-md bg-amber-500 flex items-center justify-center text-[9px] text-white font-bold">RG</span>
+          <span
+            class="h-4 w-4 rounded-md bg-amber-500 flex items-center justify-center text-[9px] text-white font-bold">RG</span>
           <span class="text-slate-600">Regularization</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <span class="h-4 w-4 rounded-md bg-indigo-500 flex items-center justify-center text-[9px] text-white font-bold">L</span>
+          <span
+            class="h-4 w-4 rounded-md bg-indigo-500 flex items-center justify-center text-[9px] text-white font-bold">L</span>
           <span class="text-slate-600">Leave</span>
         </div>
       </div>

@@ -11,10 +11,10 @@
 
     <!-- Logo / Brand Header -->
     <div
-      class="flex h-[56px] items-center justify-center border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 flex-none">
-      <a [routerLink]="getDashboardRoute()" class="flex w-full items-center justify-center">
-        <img src="assets/stubhub-com-banner-2.jpg" alt="StaffHub Logo"
-          class="max-h-[44px] w-auto max-w-[90%] object-contain" />
+      class="flex h-[56px] items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 flex-none">
+      <a [routerLink]="getDashboardRoute()" class="flex items-center gap-2 max-w-full overflow-hidden">
+        <img [src]="companyLogoUrl() || 'assets/stubhub-com-banner-2.jpg'" (error)="onLogoError($event)" alt="Company Logo"
+          class="max-h-[42px] w-auto max-w-[150px] object-contain rounded-md" />
       </a>
     </div>
 
