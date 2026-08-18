@@ -202,6 +202,13 @@ export class WorkManagementComponent implements OnInit {
   uploadingFile = false;
   newSubtaskInput = '';
 
+  // Image Preview Lightbox Modal State
+  isImageFile(url?: string, name?: string): boolean {
+    if (!url && !name) return false;
+    const str = `${url || ''} ${name || ''}`.toLowerCase();
+    return str.startsWith('data:image/') || str.includes('image/') || !!str.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i);
+  }
+
 
   // Worklog Modal
   showWorklogModal = false;
@@ -381,11 +388,14 @@ export class WorkManagementComponent implements OnInit {
   previewImageUrl: string | null = null;
   previewImageTitle: string | null = null;
   showImagePreviewModal = false;
+  previewImageModal = false;
 
   openImagePreview(url: string, title?: string): void {
+    if (!url) return;
     this.previewImageUrl = url;
     this.previewImageTitle = title || 'Screenshot Preview';
     this.showImagePreviewModal = true;
+    this.previewImageModal = true;
     this.cdr.markForCheck();
   }
 
@@ -423,6 +433,7 @@ export class WorkManagementComponent implements OnInit {
     this.formLabelsList = this.getLabelsArray(task.labels);
     this.formTagInput = '';
     this.initialScreenshots = [];
+
     this.taskForm.patchValue({
       title: task.title,
       description: task.description || '',
@@ -437,6 +448,22 @@ export class WorkManagementComponent implements OnInit {
       logged_hours: task.logged_hours || 0,
       progress: task.progress || 0
     });
+
+    this.taskService.getTaskById(task.id).subscribe({
+      next: (res) => {
+        if (res?.success && res?.data?.attachments) {
+          this.initialScreenshots = res.data.attachments.map((att: any) => ({
+            fileName: att.file_name,
+            fileUrl: att.file_url,
+            fileType: att.file_type || 'image/png',
+            fileSize: att.file_size || 'File',
+            isImage: this.isImageFile(att.file_url, att.file_name)
+          }));
+          this.cdr.markForCheck();
+        }
+      }
+    });
+
     this.showTaskModal = true;
   }
 

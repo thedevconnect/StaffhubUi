@@ -95,6 +95,16 @@ export class AuthService {
 
   private restoreSession(): void {
     try {
+      const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
+      if (token) {
+        const decoded = this.decodeToken(token);
+        if (decoded?.exp && (decoded.exp * 1000) < Date.now()) {
+          console.warn('⚠️ JWT Session expired after 2 hours. Logging out user.');
+          this.logout();
+          return;
+        }
+      }
+
       const raw = localStorage.getItem(SESSION_KEY);
       if (!raw) return;
       const session = JSON.parse(raw) as StoredSession;

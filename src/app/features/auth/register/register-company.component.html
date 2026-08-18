@@ -4,7 +4,7 @@
 <div class="min-h-screen w-full flex bg-slate-50 font-sans">
     <!-- Left Column: Branding (hidden on mobile) -->
     <div
-        class="hidden lg:flex lg:w-[40%] bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white flex-col justify-between p-16 relative overflow-hidden">
+        class="hidden lg:flex lg:w-[40%] bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white flex-col justify-between p-8 lg:p-12 relative overflow-hidden">
         <!-- Animated Background Blur Blobs -->
         <div
             class="absolute -top-12 -left-12 w-96 h-96 bg-indigo-500 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-blob">
@@ -27,50 +27,59 @@
 
         <!-- Center Highlight Message -->
         <div class="my-auto z-10 max-w-lg">
-            <h1 class="text-4xl font-extrabold leading-tight mb-4 tracking-tight">
-                Manage Your Workforce <br>
+            <h1 class="text-3xl lg:text-4xl font-extrabold leading-tight mb-3 tracking-tight">
+                Effortless HR Management, <br>
                 <span
-                    class="text-emerald-400 bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-indigo-300">To
-                    StaffHub Today.</span>
+                    class="text-emerald-400 bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-indigo-300">All
+                    in One Platform.</span>
             </h1>
-            <p class="text-slate-300 text-base leading-relaxed mb-10">
-                Ready to transform your workplace? Fill in the details to register your organization and launch a
-                modern, intelligent HR portal for your entire team.
+            <p class="text-slate-300 text-sm leading-relaxed mb-8">
+                Simplify your daily HR operations—from automated attendance swipes and payroll calculations to leave approvals and work management.
             </p>
 
-            <!-- Feature Checklist -->
-            <div class="flex flex-col gap-6">
-                <div class="flex items-center gap-4">
+            <!-- Feature Checklist (Complete HR Overview) -->
+            <div class="flex flex-col gap-5">
+                <div class="flex items-center gap-3.5">
                     <div
-                        class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 text-xl border border-white/10 shadow-lg">
-                        <i class="pi pi-building"></i>
+                        class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 text-lg border border-white/10 shadow-md shrink-0">
+                        <i class="pi pi-clock"></i>
                     </div>
                     <div>
-                        <h4 class="font-bold text-white text-base">Quick Setup & Onboarding</h4>
-                        <p class="text-xs text-slate-400">Register in minutes. We'll set up your company workspace
-                            immediately.</p>
+                        <h4 class="font-bold text-white text-sm">Automated Attendance & Swipes</h4>
+                        <p class="text-[11px] text-slate-300">Live attendance logging, shift timers & attendance regularization.</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-4">
+
+                <div class="flex items-center gap-3.5">
                     <div
-                        class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 text-xl border border-white/10 shadow-lg">
-                        <i class="pi pi-users"></i>
+                        class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-indigo-400 text-lg border border-white/10 shadow-md shrink-0">
+                        <i class="pi pi-dollar"></i>
                     </div>
                     <div>
-                        <h4 class="font-bold text-white text-base">Empower Your Workforce</h4>
-                        <p class="text-xs text-slate-400">Add employees, configure departments, and assign roles
-                            effortlessly.</p>
+                        <h4 class="font-bold text-white text-sm">Payroll & Salary Engine</h4>
+                        <p class="text-[11px] text-slate-300">1-click salary preparation, payslip downloads & deduction management.</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-4">
+
+                <div class="flex items-center gap-3.5">
                     <div
-                        class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 text-xl border border-white/10 shadow-lg">
-                        <i class="pi pi-envelope"></i>
+                        class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 text-lg border border-white/10 shadow-md shrink-0">
+                        <i class="pi pi-calendar-plus"></i>
                     </div>
                     <div>
-                        <h4 class="font-bold text-white text-base">Instant Credentials Delivery</h4>
-                        <p class="text-xs text-slate-400">Admin credentials will be instantly sent to your email &
-                            WhatsApp.</p>
+                        <h4 class="font-bold text-white text-sm">Leave, Expense & ESS Portal</h4>
+                        <p class="text-[11px] text-slate-300">Quick leave approvals, expense claims & employee self-service dashboard.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3.5">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-indigo-400 text-lg border border-white/10 shadow-md shrink-0">
+                        <i class="pi pi-check-square"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-white text-sm">Task & Work Management</h4>
+                        <p class="text-[11px] text-slate-300">Assign tasks with image proof attachments & track probation progress.</p>
                     </div>
                 </div>
             </div>
@@ -78,7 +87,7 @@
 
         <!-- Footer Note -->
         <div class="z-10 text-xs text-slate-400 select-none">
-            &copy; 2026 StaffHub. Powered by Oblo. All Rights Reserved.
+            &copy; 2026 StaffHub. Powered by StaffHub. All Rights Reserved.
         </div>
     </div>
 
@@ -117,16 +126,11 @@
                 <p class="text-xs text-slate-400 mb-4 font-medium">Register your company to set up StaffHub portal.</p>
 
                 <!-- Onboarding Information Alert -->
-                <div class="mb-4 p-3.5 rounded-xl bg-indigo-50 border border-indigo-100 flex items-start gap-3">
-                    <i class="pi pi-info-circle text-indigo-600 text-lg mt-0.5 animate-pulse"></i>
-                    <div class="flex flex-col gap-1">
-                        <span class="text-xs font-bold text-slate-800">HR Admin Credentials Delivery</span>
-                        <p class="text-[11px] text-slate-500 leading-relaxed">
-                            Once your company is registered, your admin login credentials (username and password) will
-                            be sent to you via <strong>Email and WhatsApp</strong>. You can then log in to access the
-                            system and begin onboarding your employees from the HR Admin dashboard.
-                        </p>
-                    </div>
+                <div class="mb-4 p-3 rounded-xl bg-indigo-50/80 border border-indigo-100 flex items-center gap-2.5">
+                    <i class="pi pi-shield text-indigo-600 text-base shrink-0"></i>
+                    <p class="text-xs text-slate-600 font-medium leading-normal">
+                        Admin credentials will be sent instantly via <strong class="text-indigo-700">Email & WhatsApp</strong> upon registration.
+                    </p>
                 </div>
 
                 <form [formGroup]="signupForm" class="flex flex-col gap-4">
@@ -135,30 +139,6 @@
                             class="text-xs font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2 select-none uppercase tracking-wide">
                             <i class="pi pi-building text-indigo-600"></i> Company Registration
                         </h3>
-
-                        <!-- Optional Company Logo Upload -->
-                        <div class="py-1">
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Company Logo (Optional)</label>
-                            <div class="p-3 bg-white border border-dashed border-slate-300 rounded-xl flex items-center gap-3.5 shadow-2xs">
-                                <div class="h-12 w-16 rounded-lg border border-slate-200 bg-slate-50 p-1 flex items-center justify-center overflow-hidden shrink-0">
-                                    <img [src]="companyLogoPreview || 'assets/stubhub-com-banner-2.jpg'" (error)="onLogoError($event)" class="h-full w-full object-contain" />
-                                </div>
-                                <div class="flex flex-col gap-1 flex-1">
-                                    <div class="flex items-center gap-2">
-                                        <input type="file" #publicLogoInput accept="image/*" class="hidden" (change)="onRegisterLogoSelected($event)" />
-                                        <button type="button" (click)="publicLogoInput.click()"
-                                            class="px-2.5 py-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 text-xs font-bold rounded-lg transition inline-flex items-center gap-1.5 cursor-pointer">
-                                            <i class="pi pi-upload text-xs"></i> Select Logo Image
-                                        </button>
-                                        <button type="button" *ngIf="companyLogoPreview" (click)="removeRegisterLogo()"
-                                            class="px-2 py-1 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-bold rounded-lg transition border border-rose-200 inline-flex items-center gap-1 cursor-pointer">
-                                            <i class="pi pi-trash text-xs"></i> Remove
-                                        </button>
-                                    </div>
-                                    <span class="text-[10px] text-slate-400">Upload your company logo. If skipped, Super Admin can also configure it later.</span>
-                                </div>
-                            </div>
-                        </div>
 
                         <!-- Row 1: Company Name & Short Name -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 py-1.5">
@@ -349,6 +329,46 @@
                                 </small>
                             </div>
                         </div>
+
+                        <!-- Optional Company Logo Upload (At the very end of the form) -->
+                        <div class="pt-2 border-t border-slate-100 mt-1">
+                            <label
+                                class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Company
+                                Logo (Optional)</label>
+                            <div
+                                class="p-3 bg-white border border-dashed border-slate-300 rounded-xl flex items-center gap-3.5 shadow-2xs">
+                                <div *ngIf="companyLogoPreview" (click)="viewLogo()" title="Click to view full logo"
+                                    class="h-12 w-16 rounded-lg border border-slate-200 bg-slate-50 p-1 flex items-center justify-center overflow-hidden shrink-0 cursor-pointer hover:border-indigo-400 group relative">
+                                    <img [src]="companyLogoPreview" (error)="onLogoError($event)"
+                                        class="h-full w-full object-contain group-hover:scale-105 transition-transform" />
+                                    <div
+                                        class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                                        <i class="pi pi-eye text-xs"></i>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-1 flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <input type="file" #publicLogoInput accept="image/*" class="hidden"
+                                            (change)="onRegisterLogoSelected($event)" />
+                                        <button type="button" (click)="publicLogoInput.click()"
+                                            class="px-2.5 py-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 text-xs font-bold rounded-lg transition inline-flex items-center gap-1.5 cursor-pointer">
+                                            <i class="pi pi-upload text-xs"></i> {{ companyLogoPreview ? 'Change ' :
+                                            'Select Logo Image' }}
+                                        </button>
+                                        <button type="button" *ngIf="companyLogoPreview" (click)="viewLogo()"
+                                            class="px-2.5 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 text-xs font-bold rounded-lg transition inline-flex items-center gap-1 cursor-pointer">
+                                            <i class="pi pi-eye text-xs"></i>
+                                        </button>
+                                        <button type="button" *ngIf="companyLogoPreview" (click)="removeRegisterLogo()"
+                                            class="px-2 py-1 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-bold rounded-lg transition border border-rose-200 inline-flex items-center gap-1 cursor-pointer">
+                                            <i class="pi pi-trash text-xs"></i>
+                                        </button>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400">Upload your company logo. If skipped, Super
+                                        Admin can also configure it later.</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Register Button -->
@@ -387,6 +407,11 @@
 
         <!-- Detail Summary -->
         <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-100 text-xs mb-6 flex flex-col gap-2">
+            <div *ngIf="companyLogoPreview" class="flex justify-between items-center pb-2 border-b border-slate-200/60">
+                <span class="text-slate-400 font-medium">Company Logo:</span>
+                <img [src]="companyLogoPreview"
+                    class="h-8 w-12 object-contain rounded border border-slate-200 bg-white p-0.5" />
+            </div>
             <div class="flex justify-between">
                 <span class="text-slate-400 font-medium">Company Name:</span>
                 <span class="text-slate-800 font-semibold">{{ signupForm.value.companyName }}</span>
@@ -414,3 +439,14 @@
         </div>
     </div>
 </div>
+
+<!-- Company Logo Full Preview Modal -->
+<p-dialog [(visible)]="showLogoViewModal" header="Company Logo Preview" [modal]="true" [dismissableMask]="true"
+    [style]="{ width: '90vw', maxWidth: '500px' }" styleClass="rounded-2xl overflow-hidden shadow-2xl">
+    <div *ngIf="companyLogoPreview"
+        class="flex flex-col items-center justify-center p-6 bg-slate-900 rounded-xl space-y-4">
+        <img [src]="companyLogoPreview" alt="Company Logo Preview"
+            class="max-h-72 w-auto object-contain rounded-lg border border-slate-700 shadow-md bg-white p-3" />
+        <span class="text-xs text-slate-300 font-semibold">Company Logo Preview</span>
+    </div>
+</p-dialog>

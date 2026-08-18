@@ -37,7 +37,7 @@ export class ForgotPasswordComponent implements OnInit {
     private router: Router,
     private authService: AuthService,
     private messageService: MessageService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.forgotForm = this.fb.group({

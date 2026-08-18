@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { UserService } from '../../../shared/services/user-service';
@@ -16,6 +16,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { SelectModule } from 'primeng/select';
+import { DialogModule } from 'primeng/dialog';
 
 @Component({
   selector: 'app-register-company',
@@ -34,7 +35,8 @@ import { SelectModule } from 'primeng/select';
     FloatLabelModule,
     IconFieldModule,
     InputIconModule,
-    SelectModule
+    SelectModule,
+    DialogModule
   ],
   templateUrl: './register-company.component.html',
   styleUrls: ['./register-company.component.scss'],
@@ -61,10 +63,19 @@ export class RegisterCompanyComponent implements OnInit {
     private router: Router,
     private userService: UserService,
     private authService: AuthService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   companyLogoPreview: string | null = null;
+  showLogoViewModal = false;
+
+  viewLogo(): void {
+    if (this.companyLogoPreview) {
+      this.showLogoViewModal = true;
+      this.cdr.markForCheck();
+    }
+  }
 
   ngOnInit(): void {
     this.signupForm = this.fb.group({
@@ -104,13 +115,18 @@ export class RegisterCompanyComponent implements OnInit {
       const logoBase64 = e.target.result as string;
       this.companyLogoPreview = logoBase64;
       this.signupForm.patchValue({ companyLogo: logoBase64 });
+      this.cdr.markForCheck();
     };
     reader.readAsDataURL(file);
+    if (event.target) {
+      event.target.value = '';
+    }
   }
 
   removeRegisterLogo(): void {
     this.companyLogoPreview = null;
     this.signupForm.patchValue({ companyLogo: '' });
+    this.cdr.markForCheck();
   }
 
   onLogoError(event: any): void {
@@ -141,7 +157,7 @@ export class RegisterCompanyComponent implements OnInit {
 
     const payload = {
       ...this.signupForm.value,
-      company_logo: this.signupForm.value.companyLogo
+      company_logo: this.companyLogoPreview || this.signupForm.value.companyLogo
     };
     if (payload.industry === 'Other') {
       payload.industry = payload.otherIndustry || 'Other';

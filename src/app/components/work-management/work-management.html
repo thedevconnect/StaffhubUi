@@ -795,6 +795,44 @@
           'No detailed description provided.' }}</p>
       </div>
 
+      <!-- Attached Screenshots & Media Gallery -->
+      <div *ngIf="selectedTask.attachments && selectedTask.attachments.length > 0" class="bg-indigo-50/40 p-4 rounded-xl border border-indigo-100/80 space-y-3">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-black text-indigo-900 uppercase tracking-wider flex items-center gap-2">
+            <i class="pi pi-images text-indigo-600 text-sm"></i> Attached Images & Screenshots
+            <span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full text-[10px] font-bold">
+              {{ selectedTask.attachments.length }}
+            </span>
+          </h4>
+          <span class="text-[11px] text-slate-500 font-medium">Click any image to expand</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div *ngFor="let att of selectedTask.attachments" class="group relative rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs hover:shadow-md transition">
+            <!-- Image Thumbnail -->
+            <div *ngIf="isImageFile(att.file_url, att.file_name)" (click)="openImagePreview(att.file_url, att.file_name)"
+              class="h-28 w-full bg-slate-900 overflow-hidden cursor-pointer flex items-center justify-center relative">
+              <img [src]="att.file_url" [alt]="att.file_name" class="h-full w-full object-cover group-hover:scale-105 transition-transform" />
+              <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1">
+                <i class="pi pi-search-plus"></i> Preview
+              </div>
+            </div>
+
+            <!-- Non-Image File Thumbnail -->
+            <div *ngIf="!isImageFile(att.file_url, att.file_name)" (click)="openImagePreview(att.file_url, att.file_name)"
+              class="h-28 w-full bg-slate-100 flex flex-col items-center justify-center p-3 text-center cursor-pointer">
+              <i class="pi pi-file text-2xl text-indigo-600 mb-1"></i>
+              <span class="text-xs font-bold text-slate-800 truncate w-full">{{ att.file_name }}</span>
+            </div>
+
+            <div class="p-2 flex items-center justify-between text-xs bg-white border-t border-slate-100">
+              <span class="font-semibold text-slate-800 truncate max-w-[120px]" [title]="att.file_name">{{ att.file_name }}</span>
+              <button type="button" (click)="openImagePreview(att.file_url, att.file_name)" class="text-indigo-600 font-bold hover:underline text-[11px]">View</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Interactive Sub-tasks / Checklist (Jira standard feature) -->
       <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-3">
         <div class="flex items-center justify-between">
@@ -1124,7 +1162,7 @@
 </p-dialog>
 
 <!-- FULLSCREEN IMAGE / SCREENSHOT PREVIEW MODAL -->
-<p-dialog [(visible)]="showImagePreviewModal" [header]="previewImageTitle || 'Screenshot Preview'" [modal]="true"
+<p-dialog [(visible)]="previewImageModal" [header]="previewImageTitle || 'Screenshot Preview'" [modal]="true"
   [style]="{ width: '90vw', maxWidth: '900px' }" styleClass="rounded-2xl overflow-hidden shadow-2xl">
   <div *ngIf="previewImageUrl" class="flex flex-col items-center justify-center bg-slate-950 p-4 rounded-xl">
     <img [src]="previewImageUrl" [alt]="previewImageTitle"
