@@ -28,9 +28,9 @@
           </div>
           <div class="mt-1 text-xs opacity-90">{{ totalPending() }} pending action(s)</div>
         </div>
-        <button class="flex h-6 w-6 items-center justify-center rounded-full bg-black/20 hover:bg-black/40 transition"
-          (click)="op.hide()">
-          <i class="pi pi-times text-xs"></i>
+        <button class="notification-close-btn flex h-7 w-7 items-center justify-center rounded-full bg-white/20 hover:bg-rose-500 text-white transition-all duration-300 cursor-pointer shadow-xs group"
+          (click)="op.hide()" title="Close Notifications">
+          <i class="pi pi-times text-xs transition-transform duration-300 group-hover:rotate-180 group-hover:scale-125"></i>
         </button>
       </div>
 

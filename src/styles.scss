@@ -428,3 +428,160 @@ html[data-accent] {
   border-left: 3.5px solid #ffffff !important;
   font-weight: 700 !important;
 }
+
+/* Universal Animated Close Button System (Popups, Dialogs, Tables, Modals & Notifications) */
+.notification-close-btn,
+.p-dialog-header-close,
+.p-dialog-close-button,
+.p-dialog-close-icon,
+.p-dialog-header-actions button:last-child,
+.p-dialog-header-actions button[aria-label="Close"],
+.p-dialog-header-actions button[data-pc-section="closebutton"],
+.p-dialog-header-actions button[data-pc-section="closeicon"],
+.p-dialog-header-icons button:last-child,
+.p-dialog-header-icon.p-dialog-header-close,
+.p-popover-close,
+.p-sidebar-header-content button,
+.close-btn,
+.btn-close,
+.modal-close-btn,
+.table-close-btn,
+button[title="Close"],
+button[aria-label="Close"],
+button.close {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  cursor: pointer;
+
+  i, svg, span, .p-icon {
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  }
+
+  &:hover {
+    transform: rotate(90deg) scale(1.18) !important;
+    background-color: #ef4444 !important; /* Vivid Red Glow */
+    color: #ffffff !important;
+    box-shadow: 0 0 14px rgba(239, 68, 68, 0.75) !important;
+
+    i, svg, span, .p-icon {
+      color: #ffffff !important;
+      transform: scale(1.25) rotate(90deg) !important;
+    }
+  }
+
+  &:active {
+    transform: rotate(180deg) scale(0.9) !important;
+  }
+}
+
+/* Dialog Header Maximize Button Styling */
+.p-dialog-header-actions button:first-child:not(:last-child),
+.p-dialog-maximize-button {
+  transition: all 0.3s ease !important;
+  border-radius: 9999px !important;
+  &:hover {
+    background-color: #e0e7ff !important; /* Indigo 100 */
+    color: #4338ca !important;
+    transform: scale(1.1) !important;
+  }
+}
+
+/* Universal Animated Table Refresh Button System */
+.table-refresh-btn,
+.btn-refresh,
+button.btn-refresh,
+button[title*="Refresh"],
+button[title*="refresh"] {
+  position: relative;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  cursor: pointer;
+
+  i, svg {
+    display: inline-block;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  }
+
+  &:hover:not(:disabled) {
+    transform: scale(1.12) !important;
+    background-color: #4f46e5 !important; /* Indigo 600 */
+    border-color: #4338ca !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 14px rgba(79, 70, 229, 0.45) !important;
+
+    i, svg {
+      color: #ffffff !important;
+      transform: rotate(360deg) scale(1.25) !important;
+    }
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.92) !important;
+  }
+}
+
+/* Universal Animated Table Fullscreen Button System */
+.table-fullscreen-btn,
+button[title*="Full Screen"],
+button[title*="fullscreen"],
+button[title*="Full screen"],
+button[title*="full screen"] {
+  position: relative;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  cursor: pointer;
+
+  i, svg {
+    display: inline-block;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  }
+
+  &:hover:not(:disabled) {
+    transform: scale(1.12) !important;
+    background-color: #2563eb !important; /* Blue 600 */
+    border-color: #1d4ed8 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 14px rgba(37, 99, 235, 0.45) !important;
+
+    i, svg {
+      color: #ffffff !important;
+      transform: scale(1.25) rotate(6deg) !important;
+    }
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.92) !important;
+  }
+}
+
+/* Universal Animated Table Excel Button System */
+.table-excel-btn,
+.btn-excel,
+button.btn-excel,
+button[title*="Excel"],
+button[title*="excel"] {
+  position: relative;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  cursor: pointer;
+
+  i, svg {
+    display: inline-block;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  }
+
+  &:hover:not(:disabled) {
+    transform: scale(1.12) !important;
+    background-color: #059669 !important; /* Emerald 600 */
+    border-color: #047857 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 14px rgba(5, 150, 105, 0.45) !important;
+
+    i, svg {
+      color: #ffffff !important;
+      transform: scale(1.25) rotate(-6deg) !important;
+    }
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.92) !important;
+  }
+}
