@@ -184,6 +184,7 @@ export class WorkManagementComponent implements OnInit {
   // Create / Edit Modal
   showTaskModal = false;
   isEditMode = false;
+  isSubmitting = false;
   editingTaskId: number | null = null;
   taskForm!: FormGroup;
 
@@ -401,6 +402,7 @@ export class WorkManagementComponent implements OnInit {
 
   openCreateTaskModal(): void {
     this.isEditMode = false;
+    this.isSubmitting = false;
     this.editingTaskId = null;
     this.initialSubtasksList = [];
     this.newInitialSubtaskInput = '';
@@ -427,6 +429,7 @@ export class WorkManagementComponent implements OnInit {
 
   openEditTaskModal(task: TaskItem): void {
     this.isEditMode = true;
+    this.isSubmitting = false;
     this.editingTaskId = task.id;
     this.initialSubtasksList = [];
     this.newInitialSubtaskInput = '';
@@ -472,8 +475,22 @@ export class WorkManagementComponent implements OnInit {
     const files: FileList = event.target.files;
     if (!files || files.length === 0) return;
 
+    const existingNames = new Set(this.initialScreenshots.map(s => s.fileName.toLowerCase()));
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
+      const lowerName = file.name.toLowerCase();
+
+      if (existingNames.has(lowerName)) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Duplicate Ignored',
+          detail: `"${file.name}" is already attached.`
+        });
+        continue;
+      }
+      existingNames.add(lowerName);
+
       const reader = new FileReader();
       reader.onload = (e: any) => {
         const fileUrl = e.target.result;
@@ -510,10 +527,16 @@ export class WorkManagementComponent implements OnInit {
         if (file) {
           const reader = new FileReader();
           reader.onload = (e: any) => {
+            const fileUrl = e.target.result;
+            // Prevent duplicate paste of same image data
+            if (this.initialScreenshots.some(sc => sc.fileUrl === fileUrl)) {
+              return;
+            }
+
             const fileName = `Screenshot_${new Date().getTime()}.png`;
             this.initialScreenshots.push({
               fileName,
-              fileUrl: e.target.result,
+              fileUrl,
               fileType: file.type,
               fileSize: this.formatFileSize(file.size),
               isImage: true
@@ -562,10 +585,15 @@ export class WorkManagementComponent implements OnInit {
   }
 
   saveTask(): void {
+    if (this.isSubmitting) return;
+
     if (this.taskForm.invalid) {
       this.taskForm.markAllAsTouched();
       return;
     }
+
+    this.isSubmitting = true;
+    this.cdr.markForCheck();
 
     const formVal = this.taskForm.value;
     const payload = {
@@ -577,11 +605,10 @@ export class WorkManagementComponent implements OnInit {
       screenshots: this.initialScreenshots
     };
 
-
-
     if (this.isEditMode && this.editingTaskId) {
       this.taskService.updateTask(this.editingTaskId, payload).subscribe({
         next: () => {
+          this.isSubmitting = false;
           this.messageService.add({
             severity: 'success',
             summary: 'Task Updated',
@@ -590,18 +617,22 @@ export class WorkManagementComponent implements OnInit {
           this.showTaskModal = false;
           this.loadStats();
           this.loadTasks();
+          this.cdr.markForCheck();
         },
         error: (err) => {
+          this.isSubmitting = false;
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
             detail: err?.error?.message || 'Failed to update task'
           });
+          this.cdr.markForCheck();
         }
       });
     } else {
       this.taskService.createTask(payload).subscribe({
         next: () => {
+          this.isSubmitting = false;
           this.messageService.add({
             severity: 'success',
             summary: 'Task Created',
@@ -610,13 +641,16 @@ export class WorkManagementComponent implements OnInit {
           this.showTaskModal = false;
           this.loadStats();
           this.loadTasks();
+          this.cdr.markForCheck();
         },
         error: (err) => {
+          this.isSubmitting = false;
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
             detail: err?.error?.message || 'Failed to create task'
           });
+          this.cdr.markForCheck();
         }
       });
     }
