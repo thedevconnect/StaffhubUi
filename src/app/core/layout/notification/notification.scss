@@ -104,3 +104,28 @@
     box-shadow: 0 0 16px rgba(239, 68, 68, 0.9);
   }
 }
+
+/* HR Admin Notification Cross (Close Icon) Animations */
+.notification-close-btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+
+  i {
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  }
+
+  &:hover {
+    transform: rotate(90deg) scale(1.18) !important;
+    background-color: #ef4444 !important; /* Vivid Red Glow */
+    box-shadow: 0 0 14px rgba(239, 68, 68, 0.75) !important;
+
+    i {
+      transform: scale(1.25) rotate(90deg) !important;
+    }
+  }
+
+  &:active {
+    transform: rotate(180deg) scale(0.9) !important;
+  }
+}

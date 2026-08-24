@@ -7,6 +7,7 @@ import {
   inject,
   input,
   output,
+  signal,
   OnInit
 } from '@angular/core';
 import { AvatarModule } from 'primeng/avatar';
@@ -22,6 +23,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../shared/services/services/auth.service';
 import { UserProfileService } from '../../../shared/services/user-profile.service';
+import { PayrollService } from '../../../shared/services/payroll.service';
 import { NotificationComponent } from '../notification/notification';
 import { ThemeService, ThemeMode, AccentColor } from '../../../shared/services/theme.service';
 
@@ -67,6 +69,12 @@ export class AppHeader implements OnInit {
   isThemeMenuOpen = false;
   isColorMenuOpen = false;
 
+  // Daily Earned Salary Signals
+  readonly earnedSalaryAmount = signal<number>(0);
+  readonly paidDaysWorked = signal<number>(0);
+  readonly perDayRate = signal<number>(0);
+  readonly baseSalary = signal<number>(0);
+
   toggleThemeMenu(): void {
     this.isThemeMenuOpen = !this.isThemeMenuOpen;
     if (this.isThemeMenuOpen) this.isColorMenuOpen = false;
@@ -103,14 +111,12 @@ export class AppHeader implements OnInit {
     }
   }
 
-
-
   constructor(
     private readonly router: Router,
     private readonly authService: AuthService,
     public readonly userProfileService: UserProfileService,
+    private readonly payrollService: PayrollService,
     private readonly confirmationService: ConfirmationService,
-
     private readonly messageService: MessageService,
     private readonly fb: FormBuilder
   ) {
@@ -160,6 +166,83 @@ export class AppHeader implements OnInit {
     this.userProfileService.getUserProfile().subscribe({
       error: () => { }
     });
+
+    this.loadHeaderSalary();
+  }
+
+  loadHeaderSalary(): void {
+    const user = this.authService.user();
+    const userId = user?.id;
+
+    const today = new Date();
+    const month = today.getMonth() + 1;
+    const year = today.getFullYear();
+    const daysInMonth = new Date(year, month, 0).getDate();
+
+    if (userId) {
+      this.payrollService.getEmployeesPayroll(month, year).subscribe({
+        next: (res) => {
+          if (res?.success && Array.isArray(res.data)) {
+            const myEmp = res.data.find((e: any) => e.id === userId || e.employee_id === userId || e.user_id === userId);
+            if (myEmp) {
+              const base = Number(myEmp.base_salary || myEmp.master_base_salary || 50000);
+              const paidDays = Number(myEmp.payable_days !== undefined && myEmp.payable_days !== null ? myEmp.payable_days : today.getDate());
+              const perDay = daysInMonth > 0 ? Math.round((base / daysInMonth) * 100) / 100 : 0;
+              const earned = Math.round((perDay * paidDays) * 100) / 100;
+
+              this.baseSalary.set(base);
+              this.paidDaysWorked.set(paidDays);
+              this.perDayRate.set(perDay);
+              this.earnedSalaryAmount.set(earned);
+              this.cdr.markForCheck();
+              return;
+            }
+          }
+          this.fetchIndividualSalary(userId, month, year, today.getDate(), daysInMonth);
+        },
+        error: () => {
+          this.fetchIndividualSalary(userId, month, year, today.getDate(), daysInMonth);
+        }
+      });
+    } else {
+      this.setFallbackSalary(today.getDate(), daysInMonth);
+    }
+  }
+
+  fetchIndividualSalary(userId: number, month: number, year: number, todayDate: number, daysInMonth: number): void {
+    this.payrollService.getEmployeePayrollDetails(userId, month, year).subscribe({
+      next: (res) => {
+        if (res?.success && res.data) {
+          const base = res.data.payroll?.base_salary ? Number(res.data.payroll.base_salary) : 50000;
+          const paidDays = res.data.payable_days !== undefined && res.data.payable_days !== null ? Number(res.data.payable_days) : todayDate;
+          const perDay = daysInMonth > 0 ? Math.round((base / daysInMonth) * 100) / 100 : 0;
+          const earned = Math.round((perDay * paidDays) * 100) / 100;
+
+          this.baseSalary.set(base);
+          this.paidDaysWorked.set(paidDays);
+          this.perDayRate.set(perDay);
+          this.earnedSalaryAmount.set(earned);
+          this.cdr.markForCheck();
+        } else {
+          this.setFallbackSalary(todayDate, daysInMonth);
+        }
+      },
+      error: () => {
+        this.setFallbackSalary(todayDate, daysInMonth);
+      }
+    });
+  }
+
+  setFallbackSalary(paidDays: number, totalDays: number): void {
+    const base = 50000;
+    const perDay = totalDays > 0 ? Math.round((base / totalDays) * 100) / 100 : 0;
+    const earned = Math.round((perDay * paidDays) * 100) / 100;
+
+    this.baseSalary.set(base);
+    this.paidDaysWorked.set(paidDays);
+    this.perDayRate.set(perDay);
+    this.earnedSalaryAmount.set(earned);
+    this.cdr.markForCheck();
   }
 
   getUserInitial(): string {

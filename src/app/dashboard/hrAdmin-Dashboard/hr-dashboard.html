@@ -73,7 +73,7 @@
           <div class="flex items-center gap-2 px-2 py-0.5">
             <i class="pi pi-calendar text-indigo-600 text-sm"></i>
             <p-datepicker [(ngModel)]="selectedDate" (onSelect)="onDateChange()" [dateFormat]="'yy-mm-dd'"
-              [showIcon]="true" styleClass="w-32 text-xs"
+              [showIcon]="true" styleClass="w-36 text-xs"
               inputStyleClass="w-full text-xs font-bold text-slate-800 bg-white border border-slate-200 rounded-lg px-2 py-1 focus:ring-1 focus:ring-indigo-500">
             </p-datepicker>
           </div>
@@ -235,90 +235,105 @@
       </div>
     </div>
 
-    <!-- Attendance Source, Exceptions, and Pending Requests Grid -->
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+    <!-- Attendance Source, Exceptions, and Pending Requests Live Animated Sections (Screenshot Matching Design) -->
+    <div class="space-y-8 mt-6">
 
-      <!-- Card 1: Attendance Source -->
-      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div class="mb-4 flex items-center justify-between border-b border-slate-100 pb-2">
-          <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Attendance Source</h3>
-          <i class="pi pi-desktop text-slate-400"></i>
-        </div>
-        <div class="space-y-4">
+      <!-- Section 1: Attendance Source -->
+      <div>
+        <h3 class="text-center text-sm font-extrabold text-slate-700 uppercase tracking-widest mb-4">
+          Attendance Source
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div *ngFor="let src of sources" (click)="onSourceClick(src)"
-            class="cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-lg transition-colors">
-            <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1">
-              <span>{{ src.label }}</span>
-              <span class="text-slate-800 font-bold">{{ src.count }}</span>
+            class="group bg-white rounded-2xl p-5 border border-slate-100 border-l-[5px] border-l-sky-400 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">{{ src.label }}</p>
+              <h4 class="text-3xl font-black text-sky-400 tracking-tight">{{ src.count }}</h4>
             </div>
-            <div class="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
-              <div class="h-full rounded-full transition-all duration-500" [class]="src.color"
-                [style.width.%]="src.percentage"></div>
+
+            <div
+              class="w-14 h-14 rounded-2xl bg-sky-50 flex items-center justify-center text-sky-400 group-hover:scale-110 group-hover:bg-sky-100 transition-all duration-300 shadow-inner">
+              <i
+                [ngClass]="src.category === 'desktop_swipe_in' ? 'pi pi-desktop text-2xl' : (src.category === 'mobile_swipe_in' ? 'pi pi-mobile text-2xl' : 'pi pi-camera text-2xl')"></i>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Card 2: Exceptions -->
-      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div class="mb-4 flex items-center justify-between border-b border-slate-100 pb-2">
-          <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Exceptions</h3>
-          <i class="pi pi-exclamation-circle text-slate-400"></i>
-        </div>
-        <div class="space-y-3">
-          <div *ngFor="let ex of exceptions" (click)="onExceptionClick(ex)"
-            class="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:bg-slate-50 cursor-pointer transition">
-            <div class="flex items-center gap-2.5">
-              <span class="flex h-8 w-8 items-center justify-center rounded-lg"
-                [class.bg-rose-50]="ex.severity === 'danger'" [class.text-rose-600]="ex.severity === 'danger'"
-                [class.bg-amber-50]="ex.severity === 'warning'" [class.text-amber-600]="ex.severity === 'warning'">
-                <i [class]="'pi ' + ex.icon"></i>
-              </span>
-              <span class="text-xs font-bold text-slate-700">{{ ex.label }}</span>
+      <!-- Section 2: Exceptions -->
+      <div>
+        <h3 class="text-center text-sm font-extrabold text-slate-700 uppercase tracking-widest mb-4">
+          Exceptions
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- Late Coming -->
+          <div (click)="onExceptionClick(exceptions[0])"
+            class="group bg-white rounded-2xl p-5 border border-slate-100 border-l-[5px] border-l-rose-500 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">{{ exceptions[0]?.label ||
+                'Late Coming' }}</p>
+              <h4 class="text-3xl font-black text-rose-500 tracking-tight">{{ exceptions[0]?.count || 0 }}</h4>
             </div>
-            <span class="inline-flex items-center justify-center rounded-full h-6 w-6 font-bold text-xs"
-              [class.bg-rose-100]="ex.severity === 'danger'" [class.text-rose-800]="ex.severity === 'danger'"
-              [class.bg-amber-100]="ex.severity === 'warning'" [class.text-amber-800]="ex.severity === 'warning'">
-              {{ ex.count }}
-            </span>
+
+            <div
+              class="w-14 h-14 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-500 group-hover:scale-110 group-hover:bg-rose-100 transition-all duration-300 shadow-inner">
+              <i class="pi pi-clock text-2xl"></i>
+            </div>
+          </div>
+
+          <!-- Early Swipe Out -->
+          <div (click)="onExceptionClick(exceptions[1])"
+            class="group bg-white rounded-2xl p-5 border border-slate-100 border-l-[5px] border-l-rose-500 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">{{ exceptions[1]?.label ||
+                'Early Swipe Out' }}</p>
+              <h4 class="text-3xl font-black text-rose-500 tracking-tight">{{ exceptions[1]?.count || 0 }}</h4>
+            </div>
+
+            <div
+              class="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500 group-hover:scale-110 group-hover:bg-amber-100 transition-all duration-300 shadow-inner">
+              <i class="pi pi-sign-out text-2xl"></i>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Card 3: Pending Request -->
-      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between">
-        <div>
-          <div class="mb-4 flex items-center justify-between border-b border-slate-100 pb-2">
-            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Pending Request</h3>
-            <i class="pi pi-hourglass text-slate-400"></i>
-          </div>
-          <div class="space-y-3">
-            <div
-              class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100/80 transition cursor-pointer"
-              (click)="setActiveTab('pendency')">
-              <span class="text-xs font-bold text-slate-600">Regularization Request</span>
-              <span
-                class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
-                {{ pendingCounts.regularization }}
-              </span>
-            </div>
-            <div
-              class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100/80 transition cursor-pointer"
-              (click)="navigateToLeaveApproval()">
-              <span class="text-xs font-bold text-slate-600">Leave Request</span>
-              <span
-                class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
-                {{ pendingCounts.leave }}
-              </span>
-            </div>
-          </div>
-        </div>
+      <!-- Section 3: Pending Request -->
+      <div>
+        <h3 class="text-center text-sm font-extrabold text-slate-700 uppercase tracking-widest mb-4">
+          Pending Request
+        </h3>
 
-        <div class="mt-4 pt-4 border-t border-slate-100">
-          <button (click)="setActiveTab('pendency')"
-            class="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-700 py-2 text-xs font-bold text-white hover:bg-blue-800 shadow-sm transition cursor-pointer">
-            View All Pendencies ({{ pendingCounts.total }})
-          </button>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- Regularization Request -->
+          <div (click)="setActiveTab('pendency')"
+            class="group bg-white rounded-2xl p-5 border border-slate-100 border-l-[5px] border-l-blue-600 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Regularization Request</p>
+              <h4 class="text-3xl font-black text-blue-600 tracking-tight">{{ pendingCounts.regularization }}</h4>
+            </div>
+
+            <div
+              class="w-13 h-13 rounded-full bg-cyan-100/80 flex items-center justify-center text-cyan-600 group-hover:scale-110 group-hover:bg-cyan-200 transition-all duration-300 shadow-inner">
+              <i class="pi pi-file-edit text-2xl"></i>
+            </div>
+          </div>
+
+          <!-- Leave Request -->
+          <div (click)="navigateToLeaveApproval()"
+            class="group bg-white rounded-2xl p-5 border border-slate-100 border-l-[5px] border-l-blue-600 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Leave Request</p>
+              <h4 class="text-3xl font-black text-blue-600 tracking-tight">{{ pendingCounts.leave }}</h4>
+            </div>
+
+            <div
+              class="w-13 h-13 rounded-full bg-cyan-100/80 flex items-center justify-center text-cyan-600 group-hover:scale-110 group-hover:bg-cyan-200 transition-all duration-300 shadow-inner">
+              <i class="pi pi-file-edit text-2xl"></i>
+            </div>
+          </div>
         </div>
       </div>
 

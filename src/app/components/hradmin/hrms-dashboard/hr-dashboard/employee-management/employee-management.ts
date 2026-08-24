@@ -401,6 +401,7 @@ export class EmployeeManagement implements OnInit {
   }
 
   private patchForm(employee: Employee): void {
+    const dobVal = (employee as any).dob || (employee as any).dateOfBirth;
     this.employeeForm.patchValue({
       fullName: employee.fullName,
       officialEmail: employee.officialEmail,
@@ -409,6 +410,7 @@ export class EmployeeManagement implements OnInit {
       department: employee.department,
       reportingManager: employee.reportingManager,
       joiningDate: employee.joiningDate ? new Date(employee.joiningDate) : null,
+      dob: dobVal ? new Date(dobVal) : null,
       employmentType: employee.employmentType,
       workLocation: employee.workLocation,
     });
@@ -431,11 +433,12 @@ export class EmployeeManagement implements OnInit {
       reportingManagerId: reportingManagerId,
       reporting_manager_id: reportingManagerId,
       joiningDate: this.toApiDate(formValue.joiningDate),
+      dob: this.toApiDate(formValue.dob),
       employmentType: this.normalizeEmploymentType(formValue.employmentType),
       workLocation: String(formValue.workLocation || 'OFFICE').trim().toUpperCase(),
       companyId: this.getCompanyIdFromSession(),
       company_id: this.getCompanyIdFromSession(),
-    };
+    } as any;
   }
 
   private getCompanyIdFromSession(): number | undefined {

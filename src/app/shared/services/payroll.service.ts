@@ -31,7 +31,7 @@ export class PayrollService {
     return this.http.post<any>(`${this.apiUrl}/set-base-salary`, { employee_id, base_salary, effective_from });
   }
 
-  recordPayment(data: { payroll_id: number; employee_id: number; amount: number; payment_mode?: string; reference_number?: string; payment_date?: string; notes?: string }): Observable<any> {
+  recordPayment(data: { payroll_id?: number; employee_id: number; amount: number; payment_mode?: string; reference_number?: string; payment_date?: string; notes?: string; month?: number; year?: number }): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/record-payment`, data);
   }
 
