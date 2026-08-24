@@ -132,6 +132,12 @@
             </div>
 
             <div class="space-y-2">
+                <label for="dob" class="block text-sm font-medium text-gray-700">Date of Birth (DOB)</label>
+                <p-datepicker id="dob" formControlName="dob" class="w-full" [showIcon]="true"
+                    placeholder="Select Date of Birth" [showButtonBar]="true" dateFormat="yy-mm-dd"></p-datepicker>
+            </div>
+
+            <div class="space-y-2">
                 <label for="employmentType" class="block text-sm font-medium text-gray-700">Employment Type
                     *</label>
                 <p-select id="employmentType" [options]="employmentTypeOptions" optionLabel="label" optionValue="value"

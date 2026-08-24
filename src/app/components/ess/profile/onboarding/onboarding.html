@@ -627,6 +627,10 @@
                             <input pInputText formControlName="mother_name" class="w-full p-inputtext-sm" />
                         </div>
                         <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Date of Birth (DOB) *</label>
+                            <p-datepicker formControlName="dob" dateFormat="yy-mm-dd" styleClass="w-full p-inputtext-sm" appendTo="body" placeholder="Select Date of Birth"></p-datepicker>
+                        </div>
+                        <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">Gender</label>
                             <p-select [options]="genderOptions" formControlName="gender" optionLabel="label" optionValue="value" styleClass="w-full p-inputtext-sm" appendTo="body"></p-select>
                         </div>

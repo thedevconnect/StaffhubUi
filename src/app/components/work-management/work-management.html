@@ -150,50 +150,50 @@
     <div *ngIf="!isTableSectionMinimized" class="space-y-4">
       <!-- FILTERS & VIEW MODE CONTROL BAR (Horizontal Streamlined Layout) -->
       <div
-        class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex flex-wrap items-center justify-between gap-3">
+        class="bg-white p-2.5 md:p-3 rounded-2xl shadow-sm border border-slate-200/80 flex flex-wrap items-center justify-between gap-2.5">
         <!-- Horizontal Filters Group -->
-        <div class="flex flex-wrap items-center gap-2.5 flex-1 min-w-0">
+        <div class="flex flex-wrap items-center gap-2 flex-1 min-w-0">
           <!-- Search Box -->
-          <div class="relative w-full sm:w-44">
+          <div class="relative w-44 md:w-52 shrink-0">
             <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
             <input pInputText type="text" [(ngModel)]="searchQuery" (keyup.enter)="onSearch()" (input)="onSearch()"
-              placeholder="Search task..." class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border-slate-200 bg-slate-50 focus:bg-white" />
+              placeholder="Search task..."
+              class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border-slate-200 bg-slate-50 focus:bg-white" />
           </div>
 
           <!-- Issue Type Filter -->
           <p-select [options]="issueTypeOptions" [(ngModel)]="selectedIssueType" optionLabel="label" optionValue="value"
             (onChange)="onFilterChange()"
-            styleClass="w-full sm:w-36 bg-slate-50 border-slate-200 text-xs rounded-xl font-semibold" />
+            styleClass="!w-36 bg-slate-50 border-slate-200 text-xs rounded-xl font-semibold shrink-0" />
 
           <!-- Status Filter -->
           <p-select [options]="statusOptions" [(ngModel)]="selectedStatus" optionLabel="label" optionValue="value"
-            (onChange)="onFilterChange()" styleClass="w-full sm:w-36 bg-slate-50 border-slate-200 text-xs rounded-xl" />
+            (onChange)="onFilterChange()" styleClass="!w-36 bg-slate-50 border-slate-200 text-xs rounded-xl shrink-0" />
 
           <!-- Priority Filter -->
           <p-select [options]="priorityOptions" [(ngModel)]="selectedPriority" optionLabel="label" optionValue="value"
-            (onChange)="onFilterChange()" styleClass="w-full sm:w-32 bg-slate-50 border-slate-200 text-xs rounded-xl" />
+            (onChange)="onFilterChange()" styleClass="!w-32 bg-slate-50 border-slate-200 text-xs rounded-xl shrink-0" />
 
           <!-- Category Filter -->
           <p-select [options]="categoryOptions" [(ngModel)]="selectedCategory" optionLabel="label" optionValue="value"
-            (onChange)="onFilterChange()" styleClass="w-full sm:w-36 bg-slate-50 border-slate-200 text-xs rounded-xl" />
+            (onChange)="onFilterChange()" styleClass="!w-36 bg-slate-50 border-slate-200 text-xs rounded-xl shrink-0" />
 
           <!-- Scope Filter -->
           <p-select [options]="scopeOptions" [(ngModel)]="selectedScope" optionLabel="label" optionValue="value"
             (onChange)="onFilterChange()"
-            styleClass="w-full sm:w-40 bg-slate-50 border-slate-200 text-xs rounded-xl font-semibold text-indigo-700" />
+            styleClass="!w-40 bg-slate-50 border-slate-200 text-xs rounded-xl font-semibold text-indigo-700 shrink-0" />
         </div>
 
         <!-- Right Actions: View Mode Switcher -->
-        <div
-          class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200/80 shrink-0">
+        <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200/80 shrink-0">
           <button type="button" (click)="viewMode = 'table'" [class.bg-white]="viewMode === 'table'"
             [class.shadow-sm]="viewMode === 'table'" [class.text-indigo-600]="viewMode === 'table'"
-            class="px-2.5 py-1 text-xs font-bold rounded-lg text-slate-600 transition-all flex items-center gap-1">
+            class="px-2.5 py-1 text-xs font-bold rounded-lg text-slate-600 transition-all flex items-center gap-1 cursor-pointer">
             <i class="pi pi-table"></i> Table
           </button>
           <button type="button" (click)="viewMode = 'kanban'" [class.bg-white]="viewMode === 'kanban'"
             [class.shadow-sm]="viewMode === 'kanban'" [class.text-indigo-600]="viewMode === 'kanban'"
-            class="px-2.5 py-1 text-xs font-bold rounded-lg text-slate-600 transition-all flex items-center gap-1">
+            class="px-2.5 py-1 text-xs font-bold rounded-lg text-slate-600 transition-all flex items-center gap-1 cursor-pointer">
             <i class="pi pi-th-large"></i> Board
           </button>
         </div>
@@ -510,31 +510,29 @@
 
 <!-- CREATE / EDIT TASK DRAWER FORM -->
 <p-drawer [(visible)]="showTaskModal" position="right" [modal]="true"
-  [style]="isFormFullscreen() ? { width: '100vw', height: '60%', maxWidth: '100vw', margin: '0', borderRadius: '0' } : { width: '100%', maxWidth: '40rem' }"
-  styleClass="border-none shadow-2xl bg-white">
+  [style]="isFormFullscreen() ? { width: '100vw', height: '100vh', maxWidth: '100vw', margin: '0', borderRadius: '0' } : { width: '100%', maxWidth: '850px' }"
+  styleClass="border-none shadow-2xl bg-white !max-w-full">
 
   <ng-template pTemplate="header">
-    <div class="flex items-center justify-between w-full pr-6 text-slate-800">
+    <div class="flex items-center justify-between w-full pr-4 text-slate-800">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-sm">
-          <i class="pi pi-plus text-lg"></i>
+          <i [class]="isEditMode ? 'pi pi-pencil text-lg' : 'pi pi-plus text-lg'"></i>
         </div>
         <div>
-          <h2 class="text-lg font-black text-slate-900">{{ isEditMode ? 'Edit Task / Issue' : 'Create Task / Issue' }}
-          </h2>
+          <h2 class="text-lg font-black text-slate-900">{{ isEditMode ? 'Edit Task / Issue' : 'Create Task / Issue' }}</h2>
           <p class="text-xs text-slate-500">StaffHub HRMS enterprise task creation workflow</p>
         </div>
       </div>
 
       <!-- Fullscreen Mode Toggle Button -->
       <button (click)="toggleFormFullscreen()" type="button"
-        [title]="isFormFullscreen() ? 'Exit Fullscreen' : 'Fullscreen'"
-        class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-indigo-50 border border-slate-200 text-slate-700 flex items-center justify-center transition-all cursor-pointer shadow-2xs">
-        <i
-          [class]="isFormFullscreen() ? 'pi pi-window-minimize text-rose-600 text-xs font-bold' : 'pi pi-window-maximize text-indigo-600 text-xs font-bold'"></i>
+        [title]="isFormFullscreen() ? 'Restore Normal Size' : 'Maximize Fullscreen'"
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-xs font-bold transition-all cursor-pointer shadow-2xs">
+        <i [class]="isFormFullscreen() ? 'pi pi-window-minimize text-xs text-rose-600' : 'pi pi-window-maximize text-xs text-indigo-600'"></i>
+        <span>{{ isFormFullscreen() ? 'Exit Fullscreen' : 'Fullscreen' }}</span>
       </button>
     </div>
-
   </ng-template>
 
   <form [formGroup]="taskForm" (ngSubmit)="saveTask()" class="space-y-5 pt-2">
@@ -758,8 +756,9 @@
 </p-drawer>
 
 <!-- JIRA STYLE TASK DETAIL DRAWER SIDE PANEL -->
-<p-drawer [(visible)]="showDetailModal" position="right" [style]="{ width: '100%', maxWidth: '52rem' }"
-  styleClass="border-none shadow-2xl bg-white">
+<p-drawer [(visible)]="showDetailModal" position="right"
+  [style]="isFormFullscreen() ? { width: '100vw', height: '100vh', maxWidth: '100vw', margin: '0', borderRadius: '0' } : { width: '100%', maxWidth: '60rem' }"
+  styleClass="border-none shadow-2xl bg-white !max-w-full">
 
   <ng-template pTemplate="header">
     <div class="flex items-center justify-between w-full pr-4">
@@ -775,8 +774,16 @@
       <!-- Quick Action Buttons -->
       <div class="flex items-center gap-2">
         <button (click)="openWorklogModal()" type="button"
-          class="px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold flex items-center gap-1.5 hover:bg-indigo-100 transition">
+          class="px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold flex items-center gap-1.5 hover:bg-indigo-100 transition cursor-pointer">
           <i class="pi pi-stopwatch"></i> Log Work
+        </button>
+
+        <!-- Fullscreen Mode Toggle Button -->
+        <button (click)="toggleFormFullscreen()" type="button"
+          [title]="isFormFullscreen() ? 'Restore Normal Size' : 'Maximize Fullscreen'"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer shadow-2xs">
+          <i [class]="isFormFullscreen() ? 'pi pi-window-minimize text-xs text-rose-600' : 'pi pi-window-maximize text-xs text-indigo-600'"></i>
+          <span>{{ isFormFullscreen() ? 'Exit Fullscreen' : 'Fullscreen' }}</span>
         </button>
       </div>
     </div>
@@ -800,7 +807,8 @@
       </div>
 
       <!-- Attached Screenshots & Media Gallery -->
-      <div *ngIf="selectedTask.attachments && selectedTask.attachments.length > 0" class="bg-indigo-50/40 p-4 rounded-xl border border-indigo-100/80 space-y-3">
+      <div *ngIf="selectedTask.attachments && selectedTask.attachments.length > 0"
+        class="bg-indigo-50/40 p-4 rounded-xl border border-indigo-100/80 space-y-3">
         <div class="flex items-center justify-between">
           <h4 class="text-xs font-black text-indigo-900 uppercase tracking-wider flex items-center gap-2">
             <i class="pi pi-images text-indigo-600 text-sm"></i> Attached Images & Screenshots
@@ -812,26 +820,33 @@
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <div *ngFor="let att of selectedTask.attachments" class="group relative rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs hover:shadow-md transition">
+          <div *ngFor="let att of selectedTask.attachments"
+            class="group relative rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs hover:shadow-md transition">
             <!-- Image Thumbnail -->
-            <div *ngIf="isImageFile(att.file_url, att.file_name)" (click)="openImagePreview(att.file_url, att.file_name)"
+            <div *ngIf="isImageFile(att.file_url, att.file_name)"
+              (click)="openImagePreview(att.file_url, att.file_name)"
               class="h-28 w-full bg-slate-900 overflow-hidden cursor-pointer flex items-center justify-center relative">
-              <img [src]="att.file_url" [alt]="att.file_name" class="h-full w-full object-cover group-hover:scale-105 transition-transform" />
-              <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1">
+              <img [src]="att.file_url" [alt]="att.file_name"
+                class="h-full w-full object-cover group-hover:scale-105 transition-transform" />
+              <div
+                class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1">
                 <i class="pi pi-search-plus"></i> Preview
               </div>
             </div>
 
             <!-- Non-Image File Thumbnail -->
-            <div *ngIf="!isImageFile(att.file_url, att.file_name)" (click)="openImagePreview(att.file_url, att.file_name)"
+            <div *ngIf="!isImageFile(att.file_url, att.file_name)"
+              (click)="openImagePreview(att.file_url, att.file_name)"
               class="h-28 w-full bg-slate-100 flex flex-col items-center justify-center p-3 text-center cursor-pointer">
               <i class="pi pi-file text-2xl text-indigo-600 mb-1"></i>
               <span class="text-xs font-bold text-slate-800 truncate w-full">{{ att.file_name }}</span>
             </div>
 
             <div class="p-2 flex items-center justify-between text-xs bg-white border-t border-slate-100">
-              <span class="font-semibold text-slate-800 truncate max-w-[120px]" [title]="att.file_name">{{ att.file_name }}</span>
-              <button type="button" (click)="openImagePreview(att.file_url, att.file_name)" class="text-indigo-600 font-bold hover:underline text-[11px]">View</button>
+              <span class="font-semibold text-slate-800 truncate max-w-[120px]" [title]="att.file_name">{{ att.file_name
+                }}</span>
+              <button type="button" (click)="openImagePreview(att.file_url, att.file_name)"
+                class="text-indigo-600 font-bold hover:underline text-[11px]">View</button>
             </div>
           </div>
         </div>

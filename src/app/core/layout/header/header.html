@@ -10,7 +10,8 @@
       <button type="button" (click)="toggleThemeMenu()"
         class="w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors shadow-2xs"
         [pTooltip]="'Theme: ' + themeService.themeMode()" tooltipPosition="bottom">
-        <i [class]="themeService.themeMode() === 'light' ? 'pi pi-sun text-amber-500' : (themeService.themeMode() === 'dark' ? 'pi pi-moon text-indigo-400' : 'pi pi-desktop text-blue-500')"></i>
+        <i
+          [class]="themeService.themeMode() === 'light' ? 'pi pi-sun text-amber-500' : (themeService.themeMode() === 'dark' ? 'pi pi-moon text-indigo-400' : 'pi pi-desktop text-blue-500')"></i>
       </button>
 
       <!-- Theme Mode Overlay Menu -->
@@ -51,12 +52,13 @@
       <!-- Palette Overlay Dropdown -->
       <div *ngIf="isColorMenuOpen"
         class="absolute right-0 top-11 mt-1 w-52 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3.5 shadow-xl z-50">
-        <span class="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-2">Accent Theme Color</span>
+        <span
+          class="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-2">Accent
+          Theme Color</span>
         <div class="grid grid-cols-5 gap-2">
           <button *ngFor="let color of themeService.colorsList" (click)="selectAccentColor(color.name)"
             class="w-7 h-7 rounded-full border-2 transition-all hover:scale-110 flex items-center justify-center cursor-pointer"
-            [title]="color.label"
-            [ngClass]="[
+            [title]="color.label" [ngClass]="[
               color.bgClass,
               themeService.accentColor() === color.name ? 'border-slate-900 dark:border-white scale-110 shadow-sm' : 'border-transparent opacity-85 hover:opacity-100'
             ]">
@@ -68,7 +70,8 @@
             class="w-7 h-7 rounded-full border-2 border-dashed border-slate-400 dark:border-slate-500 hover:border-indigo-600 dark:hover:border-indigo-400 bg-slate-100 dark:bg-slate-800 flex items-center justify-center cursor-pointer transition-all hover:scale-110 relative"
             [class.border-indigo-600]="themeService.accentColor() === 'custom'"
             [style.background-color]="themeService.accentColor() === 'custom' ? themeService.customHexColor() : ''">
-            <i [class]="themeService.accentColor() === 'custom' ? 'pi pi-check text-[10px] text-white' : 'pi pi-plus text-xs text-slate-600 dark:text-slate-300 font-bold'"></i>
+            <i
+              [class]="themeService.accentColor() === 'custom' ? 'pi pi-check text-[10px] text-white' : 'pi pi-plus text-xs text-slate-600 dark:text-slate-300 font-bold'"></i>
             <input type="color" [value]="themeService.customHexColor()" (input)="onCustomColorPicked($event)"
               class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
           </label>
@@ -76,6 +79,25 @@
       </div>
 
     </div>
+
+    <!-- Total Earned Salary Till Date Badge -->
+    <!-- <div
+      class="relative group cursor-pointer flex items-center gap-2 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/80 dark:to-teal-950/80 border border-emerald-300/80 dark:border-emerald-700/60 px-3 py-1 rounded-xl shadow-2xs hover:shadow-xs transition-all"
+      [pTooltip]="'Total Earned Salary Till Date: ₹' + (earnedSalaryAmount() | number:'1.0-0') + ' (Monthly Base: ₹' + (baseSalary() | number:'1.0-0') + ' | Per Day Rate: ₹' + perDayRate() + '/day | Worked: ' + paidDaysWorked() + ' Days)'"
+      tooltipPosition="bottom">
+
+      <div
+        class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs font-extrabold shadow-2xs">
+        <i class="pi pi-wallet"></i>
+      </div>
+
+      <div class="flex flex-col leading-tight">
+        <span class="text-[10px] font-black text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">Total Earned</span>
+        <div class="flex items-center gap-1">
+          <span class="text-xs md:text-sm font-black text-slate-900 dark:text-white">₹{{ earnedSalaryAmount() | number:'1.0-0' }}</span>
+        </div>
+      </div>
+    </div> -->
 
     <!-- Notification Bell -->
     <app-notification></app-notification>
@@ -86,9 +108,7 @@
 
     <span class="hidden text-sm font-medium text-slate-700 sm:inline">{{ getUserName() }}</span>
     <p-avatar *ngIf="userProfileService.profilePicture(); else defaultAvatar"
-      [image]="userProfileService.profilePicture()!"
-      size="normal"
-      shape="circle"
+      [image]="userProfileService.profilePicture()!" size="normal" shape="circle"
       class="cursor-pointer border border-slate-200 dark:border-slate-700 overflow-hidden w-8 h-8 flex items-center justify-center"
       (click)="userMenu.toggle($event)">
     </p-avatar>
@@ -104,31 +124,40 @@
 
 
 <!-- Dedicated Change Password Dialog from Header -->
-<p-dialog [(visible)]="changePasswordVisible" [modal]="true" [style]="{width: '420px'}" 
-  header="Change Account Password" [draggable]="false" [resizable]="false">
-  
+<p-dialog [(visible)]="changePasswordVisible" [modal]="true" [style]="{width: '420px'}" header="Change Account Password"
+  [draggable]="false" [resizable]="false">
+
   <form [formGroup]="changePasswordForm" (ngSubmit)="submitChangePassword()" class="flex flex-col gap-4 mt-2">
     <div>
       <label for="hdrOldPassword" class="block text-xs font-bold text-slate-700 mb-1">Old Password *</label>
-      <p-password id="hdrOldPassword" formControlName="oldPassword" [toggleMask]="true" [feedback]="false" styleClass="w-full" inputStyleClass="w-full" placeholder="Enter Old Password" />
-      <small *ngIf="changePasswordForm.get('oldPassword')?.touched && changePasswordForm.get('oldPassword')?.invalid" class="text-rose-500 text-xs mt-1 block">Old password is required.</small>
+      <p-password id="hdrOldPassword" formControlName="oldPassword" [toggleMask]="true" [feedback]="false"
+        styleClass="w-full" inputStyleClass="w-full" placeholder="Enter Old Password" />
+      <small *ngIf="changePasswordForm.get('oldPassword')?.touched && changePasswordForm.get('oldPassword')?.invalid"
+        class="text-rose-500 text-xs mt-1 block">Old password is required.</small>
     </div>
 
     <div>
       <label for="hdrNewPassword" class="block text-xs font-bold text-slate-700 mb-1">New Password *</label>
-      <p-password id="hdrNewPassword" formControlName="newPassword" [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full" placeholder="Enter New Password" />
-      <small *ngIf="changePasswordForm.get('newPassword')?.touched && changePasswordForm.get('newPassword')?.invalid" class="text-rose-500 text-xs mt-1 block">At least 6 characters required.</small>
+      <p-password id="hdrNewPassword" formControlName="newPassword" [toggleMask]="true" styleClass="w-full"
+        inputStyleClass="w-full" placeholder="Enter New Password" />
+      <small *ngIf="changePasswordForm.get('newPassword')?.touched && changePasswordForm.get('newPassword')?.invalid"
+        class="text-rose-500 text-xs mt-1 block">At least 6 characters required.</small>
     </div>
 
     <div>
       <label for="hdrConfirmPassword" class="block text-xs font-bold text-slate-700 mb-1">Confirm New Password *</label>
-      <p-password id="hdrConfirmPassword" formControlName="confirmPassword" [toggleMask]="true" [feedback]="false" styleClass="w-full" inputStyleClass="w-full" placeholder="Re-enter New Password" />
-      <small *ngIf="changePasswordForm.get('confirmPassword')?.touched && changePasswordForm.get('confirmPassword')?.invalid" class="text-rose-500 text-xs mt-1 block">Please confirm new password.</small>
+      <p-password id="hdrConfirmPassword" formControlName="confirmPassword" [toggleMask]="true" [feedback]="false"
+        styleClass="w-full" inputStyleClass="w-full" placeholder="Re-enter New Password" />
+      <small
+        *ngIf="changePasswordForm.get('confirmPassword')?.touched && changePasswordForm.get('confirmPassword')?.invalid"
+        class="text-rose-500 text-xs mt-1 block">Please confirm new password.</small>
     </div>
 
     <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
-      <p-button label="Cancel" icon="pi pi-times" [outlined]="true" severity="secondary" (click)="changePasswordVisible = false"></p-button>
-      <p-button label="Update Password" icon="pi pi-check" type="submit" [loading]="savingPassword" styleClass="bg-indigo-600 text-white font-bold"></p-button>
+      <p-button label="Cancel" icon="pi pi-times" [outlined]="true" severity="secondary"
+        (click)="changePasswordVisible = false"></p-button>
+      <p-button label="Update Password" icon="pi pi-check" type="submit" [loading]="savingPassword"
+        styleClass="bg-indigo-600 text-white font-bold"></p-button>
     </div>
   </form>
 </p-dialog>

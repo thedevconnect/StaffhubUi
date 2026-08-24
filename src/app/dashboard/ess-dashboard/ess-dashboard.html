@@ -1,156 +1,215 @@
-<!-- Page Header Inline with Breadcrumb -->
-<div
-  class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6">
+<!-- Top Breadcrumb Bar -->
+<div class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6">
   <div class="flex-1 min-w-0">
-    <p-breadcrumb [model]="breadcrumbItems"
-      styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
+    <p-breadcrumb [model]="breadcrumbItems" styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
   </div>
 </div>
 
-<section class="space-y-4">
-  <!-- Welcome Header Card -->
-  <header [style.background-color]="'var(--accent-color, #1976D2)'"
-    class="rounded-xl border border-slate-200 p-6 text-white relative overflow-hidden shadow-sm transition-all duration-300">
-    <div class="relative z-10">
-      <h2 class="text-2xl font-bold tracking-tight">Welcome Back, {{ employeeName() }}!</h2>
-      <p class="mt-1 text-sm text-white/90 font-medium">Have a wonderful day ahead. Here is an overview of your work
-        records and shortcuts.</p>
-    </div>
-    <div class="absolute right-6 -bottom-6 opacity-10 text-9xl">
-      <i class="pi pi-home animate-spin-slow"></i>
-    </div>
-  </header>
+<div class="space-y-4 font-sans text-slate-700 bg-slate-50/50 min-h-screen pb-10">
 
-  <!-- Statistics Dashboard Grid -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-    <!-- Present Days -->
-    <div
-      class="bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 rounded-xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
-      <div class="space-y-1">
-        <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wider block">Present Days</span>
-        <span class="text-2xl font-extrabold text-slate-800 block">{{ dashboardSummary().presentDays }}</span>
-      </div>
-      <div class="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600">
-        <i class="pi pi-check-circle text-xl"></i>
-      </div>
-    </div>
-    <!-- Late Days -->
-    <div
-      class="bg-gradient-to-br from-amber-50 to-white border border-amber-100 rounded-xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
-      <div class="space-y-1">
-        <span class="text-xs font-semibold text-amber-600 uppercase tracking-wider block">Late Days</span>
-        <span class="text-2xl font-extrabold text-slate-800 block">{{ dashboardSummary().lateDays }}</span>
-      </div>
-      <div class="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600">
-        <i class="pi pi-exclamation-triangle text-xl"></i>
-      </div>
-    </div>
-    <!-- Half Days -->
-    <div
-      class="bg-gradient-to-br from-sky-50 to-white border border-sky-100 rounded-xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
-      <div class="space-y-1">
-        <span class="text-xs font-semibold text-sky-600 uppercase tracking-wider block">Half Days</span>
-        <span class="text-2xl font-extrabold text-slate-800 block">{{ dashboardSummary().halfDays }}</span>
-      </div>
-      <div class="h-10 w-10 rounded-lg bg-sky-500/10 flex items-center justify-center text-sky-600">
-        <i class="pi pi-calendar-minus text-xl"></i>
-      </div>
-    </div>
-    <!-- Absent Days -->
-    <div
-      class="bg-gradient-to-br from-rose-50 to-white border border-rose-100 rounded-xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
-      <div class="space-y-1">
-        <span class="text-xs font-semibold text-rose-600 uppercase tracking-wider block">Absent Days</span>
-        <span class="text-2xl font-extrabold text-slate-800 block">{{ dashboardSummary().absentDays }}</span>
-      </div>
-      <div class="h-10 w-10 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-600">
-        <i class="pi pi-times-circle text-xl"></i>
-      </div>
-    </div>
-    <!-- Total Shifts Hours -->
-    <div
-      class="bg-gradient-to-br from-violet-50 to-white border border-violet-100 rounded-xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow sm:col-span-2 lg:col-span-1">
-      <div class="space-y-1">
-        <span class="text-xs font-semibold text-violet-600 uppercase tracking-wider block">Total Hours</span>
-        <span class="text-2xl font-extrabold text-slate-800 block">{{
-          formatTotalWorkingHours(dashboardSummary().totalWorkingMinutes) }}</span>
-      </div>
-      <div class="h-10 w-10 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-600">
-        <i class="pi pi-clock text-xl"></i>
-      </div>
-    </div>
+  <!-- Top Navigation Tabs (Dashboard | Employee Attendance | Regularization | Pendency) -->
+  <div class="flex items-center gap-4 sm:gap-6 border-b border-slate-200 bg-white px-4 md:px-6 pt-1 overflow-x-auto">
+    <button (click)="activeTab = 'dashboard'"
+      [class]="activeTab === 'dashboard' ? 'text-blue-600 border-b-2 border-blue-600 font-bold py-2 text-xs sm:text-sm flex items-center gap-2 shrink-0 cursor-pointer' : 'text-slate-500 font-medium py-2 text-xs sm:text-sm hover:text-slate-700 flex items-center gap-2 shrink-0 cursor-pointer'">
+      <i class="pi pi-th-large text-xs"></i> Dashboard
+    </button>
+    <button (click)="activeTab = 'attendance'"
+      [class]="activeTab === 'attendance' ? 'text-blue-600 border-b-2 border-blue-600 font-bold py-2 text-xs sm:text-sm flex items-center gap-2 shrink-0 cursor-pointer' : 'text-slate-500 font-medium py-2 text-xs sm:text-sm hover:text-slate-700 flex items-center gap-2 shrink-0 cursor-pointer'">
+      <i class="pi pi-clock text-xs"></i> Employee Attendance
+    </button>
+    <button (click)="activeTab = 'regularization'"
+      [class]="activeTab === 'regularization' ? 'text-blue-600 border-b-2 border-blue-600 font-bold py-2 text-xs sm:text-sm flex items-center gap-2 shrink-0 cursor-pointer' : 'text-slate-500 font-medium py-2 text-xs sm:text-sm hover:text-slate-700 flex items-center gap-2 shrink-0 cursor-pointer'">
+      <i class="pi pi-calendar-plus text-xs"></i> Regularization
+    </button>
+    <button (click)="activeTab = 'pendency'"
+      [class]="activeTab === 'pendency' ? 'text-blue-600 border-b-2 border-blue-600 font-bold py-2 text-xs sm:text-sm flex items-center gap-2 shrink-0 cursor-pointer' : 'text-slate-500 font-medium py-2 text-xs sm:text-sm hover:text-slate-700 flex items-center gap-2 shrink-0 cursor-pointer'">
+      <i class="pi pi-bell text-xs"></i> Pendency ({{ pendencyCount }})
+    </button>
   </div>
 
-  <!-- Quick Actions Grid -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-    <!-- Attendance Quick Link -->
-    <a routerLink="/ess/employee-attendance"
-      class="block bg-white border border-slate-200 rounded-xl p-4 hover:border-blue-300 hover:shadow transition group cursor-pointer">
-      <div class="flex items-center gap-3">
-        <div
-          class="h-9 w-9 rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors flex items-center justify-center">
-          <i class="pi pi-clock"></i>
+  <!-- Tab Content 1: Dashboard View -->
+  <div *ngIf="activeTab === 'dashboard'" class="px-2 md:px-4 space-y-6">
+
+    <!-- MAIN TWO COLUMN GRID LAYOUT (Left: My Info & Leave Status | Right: My Feed) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+      <!-- LEFT COLUMN (7 Cols) -->
+      <div class="lg:col-span-7 space-y-5">
+
+        <!-- 1. MY INFO CARD -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+          <div class="bg-slate-50/80 px-4 py-2.5 border-b border-slate-200 flex items-center justify-between">
+            <h3 class="text-xs md:text-sm font-bold text-slate-800 flex items-center gap-2">
+              My Info
+            </h3>
+          </div>
+
+          <div class="p-4 md:p-5 flex flex-col sm:flex-row items-center gap-6">
+            <!-- Left Illustration Graphic -->
+            <div class="w-28 h-28 sm:w-32 sm:h-32 shrink-0 flex items-center justify-center relative">
+              <div class="w-24 h-28 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl border border-indigo-200/80 flex flex-col items-center justify-center p-3 text-center shadow-xs">
+                <div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold shadow-sm mb-1">
+                  <i class="pi pi-user"></i>
+                </div>
+                <div class="w-8 h-2 bg-emerald-400 rounded-full my-1"></div>
+                <div class="w-12 h-1.5 bg-indigo-200 rounded-full"></div>
+              </div>
+            </div>
+
+            <!-- Right Info Table -->
+            <div class="flex-1 w-full border border-blue-100 rounded-xl overflow-hidden bg-blue-50/20 text-xs">
+              <div class="grid grid-cols-12 border-b border-blue-100 p-2.5 items-center">
+                <span class="col-span-4 font-bold text-slate-500 text-right pr-3">Name</span>
+                <span class="col-span-8 font-semibold text-slate-900 bg-white px-3 py-1 rounded-lg border border-slate-200/80 shadow-2xs">{{ myInfo().name }}</span>
+              </div>
+              <div class="grid grid-cols-12 border-b border-blue-100 p-2.5 items-center">
+                <span class="col-span-4 font-bold text-slate-500 text-right pr-3">Designation</span>
+                <span class="col-span-8 font-semibold text-slate-900 bg-white px-3 py-1 rounded-lg border border-slate-200/80 shadow-2xs">{{ myInfo().designation }}</span>
+              </div>
+              <div class="grid grid-cols-12 border-b border-blue-100 p-2.5 items-center">
+                <span class="col-span-4 font-bold text-slate-500 text-right pr-3">Department</span>
+                <span class="col-span-8 font-semibold text-slate-900 bg-white px-3 py-1 rounded-lg border border-slate-200/80 shadow-2xs">{{ myInfo().department }}</span>
+              </div>
+              <div class="grid grid-cols-12 p-2.5 items-center">
+                <span class="col-span-4 font-bold text-slate-500 text-right pr-3">Reporting Manager</span>
+                <span class="col-span-8 font-semibold text-slate-900 bg-white px-3 py-1 rounded-lg border border-slate-200/80 shadow-2xs">{{ myInfo().reportingManager }}</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <div>
-          <span class="font-bold text-slate-800 text-xs block">Swipe Panel</span>
-          <span class="text-[10px] text-slate-400 block mt-0.5">Check In/Out & Breaks</span>
+
+        <!-- 2. LEAVE STATUS CARD -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+          <div class="bg-slate-50/80 px-4 py-2.5 border-b border-slate-200 flex items-center justify-between">
+            <h3 class="text-xs md:text-sm font-bold text-slate-800">
+              Leave Status
+            </h3>
+          </div>
+
+          <div class="p-4 md:p-5 flex flex-col sm:flex-row items-center gap-6">
+            <!-- Left 3D Bar Chart Illustration Graphic -->
+            <div class="w-28 h-28 sm:w-32 sm:h-32 shrink-0 flex items-center justify-center">
+              <div class="w-24 h-24 bg-amber-50 rounded-2xl border border-amber-200 flex items-end justify-center gap-1.5 p-3 shadow-xs">
+                <div class="w-3.5 h-10 bg-amber-500 rounded-t-md"></div>
+                <div class="w-3.5 h-14 bg-yellow-600 rounded-t-md"></div>
+                <div class="w-3.5 h-8 bg-amber-400 rounded-t-md"></div>
+              </div>
+            </div>
+
+            <!-- Right Leave Status Data Table -->
+            <div class="flex-1 w-full border border-slate-200 rounded-xl overflow-hidden text-xs">
+              <div *ngFor="let item of leaveStatusList(); let last = last"
+                class="flex items-center justify-between px-3 py-1.5 hover:bg-slate-50 transition"
+                [class.border-b]="!last" [class.border-slate-100]="!last">
+                <span class="font-medium text-slate-600">{{ item.label }}</span>
+                <span class="font-mono font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                  {{ item.value }}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
+
       </div>
-    </a>
 
-    <!-- Leave Application Link -->
-    <a routerLink="/ess/leave-application"
-      class="block bg-white border border-slate-200 rounded-xl p-4 hover:border-emerald-300 hover:shadow transition group cursor-pointer">
-      <div class="flex items-center gap-3">
-        <div
-          class="h-9 w-9 rounded-lg bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors flex items-center justify-center">
-          <i class="pi pi-calendar-plus"></i>
+      <!-- RIGHT COLUMN (5 Cols) - MY FEED -->
+      <div class="lg:col-span-5">
+
+        <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden space-y-4">
+          <div class="bg-slate-50/80 px-4 py-2.5 border-b border-slate-200 flex items-center justify-between">
+            <h3 class="text-xs md:text-sm font-bold text-slate-800">
+              My Feed
+            </h3>
+          </div>
+
+          <div class="p-4 space-y-4">
+
+            <!-- Work Anniversary Celebration Card -->
+            <div *ngFor="let feed of anniversaryFeeds()" class="bg-slate-50/70 border border-slate-200 rounded-xl p-3.5 space-y-3 relative shadow-2xs hover:shadow-xs transition">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-sky-700">To Work Anniversary</span>
+                <span class="text-[10px] text-slate-400 font-mono">{{ feed.date }}</span>
+              </div>
+
+              <!-- Content Row: Graphic & Text -->
+              <div class="flex items-center gap-4">
+                <!-- Graphic Art -->
+                <div class="w-20 h-16 shrink-0 bg-blue-100/60 rounded-xl border border-blue-200 flex items-center justify-center p-2">
+                  <div class="text-center">
+                    <i class="pi pi-users text-2xl text-blue-600"></i>
+                  </div>
+                </div>
+
+                <!-- Congratulatory Message -->
+                <div class="text-xs font-semibold text-slate-800 leading-relaxed">
+                  Our congratulations to <span class="font-bold text-slate-900">{{ feed.name }}</span> on completing {{ feed.years }} successful years
+                </div>
+              </div>
+
+              <!-- Footer Like & Comment Actions -->
+              <div class="flex items-center gap-6 pt-2 border-t border-slate-200/60 text-xs text-slate-500">
+                <button type="button" (click)="toggleLike(feed)" class="flex items-center gap-1 hover:text-rose-600 transition cursor-pointer">
+                  <i [class]="feed.isLiked ? 'pi pi-heart-fill text-rose-500' : 'pi pi-heart'"></i>
+                  <span class="font-bold">{{ feed.likes }}</span>
+                </button>
+
+                <div class="flex items-center gap-1 text-slate-500">
+                  <i class="pi pi-comments"></i>
+                  <span class="font-bold">{{ feed.comments }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Birthday Celebration Card -->
+            <div *ngFor="let feed of birthdayFeeds()" class="bg-slate-50/70 border border-slate-200 rounded-xl p-3.5 space-y-3 relative shadow-2xs hover:shadow-xs transition">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-emerald-700">To Birthday</span>
+                <span class="text-[10px] text-slate-400 font-mono">{{ feed.date }}</span>
+              </div>
+
+              <!-- Content Row: Graphic & Text -->
+              <div class="flex items-center gap-4">
+                <!-- Graphic Art -->
+                <div class="w-20 h-16 shrink-0 bg-rose-100/60 rounded-xl border border-rose-200 flex items-center justify-center p-2">
+                  <div class="text-center">
+                    <i class="pi pi-gift text-2xl text-rose-500"></i>
+                  </div>
+                </div>
+
+                <!-- Birthday Wish Message -->
+                <div class="text-xs font-semibold text-slate-800 leading-relaxed">
+                  Happy Birthday <span class="font-bold text-slate-900">{{ feed.name }}</span> Have a great year ahead
+                </div>
+              </div>
+
+              <!-- Footer Like & Comment Actions -->
+              <div class="flex items-center gap-6 pt-2 border-t border-slate-200/60 text-xs text-slate-500">
+                <button type="button" (click)="toggleLike(feed)" class="flex items-center gap-1 hover:text-rose-600 transition cursor-pointer">
+                  <i [class]="feed.isLiked ? 'pi pi-heart-fill text-rose-500' : 'pi pi-heart'"></i>
+                  <span class="font-bold">{{ feed.likes }}</span>
+                </button>
+
+                <div class="flex items-center gap-1 text-slate-500">
+                  <i class="pi pi-comments"></i>
+                  <span class="font-bold">{{ feed.comments }}</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
-        <div>
-          <span class="font-bold text-slate-800 text-xs block">Apply Leave</span>
-          <span class="text-[10px] text-slate-400 block mt-0.5">Request casual/sick leave</span>
-        </div>
+
       </div>
-    </a>
 
-    <!-- Regularization Link -->
-    <a routerLink="/ess/attendance-regularization"
-      class="block bg-white border border-slate-200 rounded-xl p-4 hover:border-violet-300 hover:shadow transition group cursor-pointer">
-      <div class="flex items-center gap-3">
-        <div
-          class="h-9 w-9 rounded-lg bg-violet-50 text-violet-600 group-hover:bg-violet-600 group-hover:text-white transition-colors flex items-center justify-center">
-          <i class="pi pi-clock"></i>
-        </div>
-        <div>
-          <span class="font-bold text-slate-800 text-xs block">Regularization</span>
-          <span class="text-[10px] text-slate-400 block mt-0.5">Fix attendance entries</span>
-        </div>
+    </div>
+
+    <!-- Attendance History Logs Table Section Below -->
+    <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs mt-6">
+      <div class="px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+          <i class="pi pi-history text-indigo-600"></i> Attendance Logs & History
+        </h4>
       </div>
-    </a>
-
-    <!-- Calendar Link -->
-    <a routerLink="/ess/monthly-attendance-calendar"
-      class="block bg-white border border-slate-200 rounded-xl p-4 hover:border-amber-300 hover:shadow transition group cursor-pointer">
-      <div class="flex items-center gap-3">
-        <div
-          class="h-9 w-9 rounded-lg bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-colors flex items-center justify-center">
-          <i class="pi pi-calendar"></i>
-        </div>
-        <div>
-          <span class="font-bold text-slate-800 text-xs block">Monthly Calendar</span>
-          <span class="text-[10px] text-slate-400 block mt-0.5">View full month schedule</span>
-        </div>
-      </div>
-    </a>
-  </div>
-
-
-
-
-  <section class="space-y-4">
-
-    <!-- Table -->
-    <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
       <div class="w-full overflow-x-auto">
         <app-table-template [data]="resData" [columns]="columns" [pageSize]="pageSize" [totalCount]="totalCount"
           [isLoading]="loading()" [currentPage]="pageNo" [searchText]="searchText" [showRefresh]="true"
@@ -158,11 +217,33 @@
           (refresh)="loadDashboardData()" (pageChange)="onPageChange($event)" (searchChange)="onSearchChange($event)"
           (sortChange)="onSortChange($event)" (pageSizeChange)="onPageSizeChange($event)">
         </app-table-template>
-
       </div>
     </div>
 
-  </section>
+  </div>
 
+  <!-- Tab Content 2: Employee Attendance Embedded View -->
+  <div *ngIf="activeTab === 'attendance'" class="px-2 md:px-4">
+    <app-employee-attendance></app-employee-attendance>
+  </div>
 
-</section>
+  <!-- Tab Content 3: Attendance Regularization Embedded View -->
+  <div *ngIf="activeTab === 'regularization'" class="px-2 md:px-4">
+    <app-attendance-regularization></app-attendance-regularization>
+  </div>
+
+  <!-- Tab Content 4: Pendency View -->
+  <div *ngIf="activeTab === 'pendency'" class="px-4 py-8 bg-white rounded-xl border border-slate-200 text-center space-y-3">
+    <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">
+      <i class="pi pi-check-circle"></i>
+    </div>
+    <h3 class="text-sm font-bold text-slate-800">No Pending Requests</h3>
+    <p class="text-xs text-slate-500">All your leave applications and regularization requests are up to date.</p>
+  </div>
+
+  <!-- Footer Branding (Matching Screenshot) -->
+  <div class="text-right pt-4 text-xs font-medium text-slate-400 pr-2">
+    Powered By <span class="font-bold text-slate-600">StaffHub HRMS</span>
+  </div>
+
+</div>

@@ -334,6 +334,8 @@ export class EmployeeSalaryPreparation implements OnInit, OnDestroy {
     this.payrollService.recordPayment({
       payroll_id: payrollId,
       employee_id: empId,
+      month: this.selectedMonth,
+      year: this.selectedYear,
       amount: this.paymentAmount,
       payment_mode: this.paymentMode,
       reference_number: this.paymentRef,
