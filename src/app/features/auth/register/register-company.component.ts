@@ -2,19 +2,14 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { UserService } from '../../../shared/services/user-service';
-import { AuthService } from '../../../shared/services/services/auth.service';
 import { MessageService } from 'primeng/api';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
-import { CheckboxModule } from 'primeng/checkbox';
 import { ButtonModule } from 'primeng/button';
-import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { IconFieldModule } from 'primeng/iconfield';
-import { InputIconModule } from 'primeng/inputicon';
 import { SelectModule } from 'primeng/select';
 import { DialogModule } from 'primeng/dialog';
 
@@ -28,13 +23,9 @@ import { DialogModule } from 'primeng/dialog';
     RouterModule,
     InputTextModule,
     PasswordModule,
-    CheckboxModule,
     ButtonModule,
-    TextareaModule,
     ToastModule,
     FloatLabelModule,
-    IconFieldModule,
-    InputIconModule,
     SelectModule,
     DialogModule
   ],
@@ -62,7 +53,6 @@ export class RegisterCompanyComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private userService: UserService,
-    private authService: AuthService,
     private messageService: MessageService,
     private cdr: ChangeDetectorRef
   ) { }
@@ -82,7 +72,7 @@ export class RegisterCompanyComponent implements OnInit {
       companyName: ['', Validators.required],
       shortName: ['', Validators.required],
       companyEmail: ['', [Validators.required, Validators.email]],
-      companyPhone: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+      companyPhone: ['', [Validators.required, Validators.pattern('^[6-9][0-9]{9}$')]],
       address: ['', Validators.required],
       companyLogo: [''],
       officeLatitude: [''],
@@ -93,8 +83,8 @@ export class RegisterCompanyComponent implements OnInit {
       empId: [''],
       fullName: ['', Validators.required],
       username: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      mobile: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+      email: ['', [Validators.email]],
+      mobile: ['', [Validators.pattern('^[6-9][0-9]{9}$')]],
       password: ['', Validators.required]
     });
   }
@@ -155,9 +145,12 @@ export class RegisterCompanyComponent implements OnInit {
   submitSignUpForm() {
     this.isProcess = true;
 
+    const formVal = this.signupForm.value;
     const payload = {
-      ...this.signupForm.value,
-      company_logo: this.companyLogoPreview || this.signupForm.value.companyLogo
+      ...formVal,
+      email: formVal.email || formVal.companyEmail,
+      mobile: formVal.mobile || formVal.companyPhone,
+      company_logo: this.companyLogoPreview || formVal.companyLogo
     };
     if (payload.industry === 'Other') {
       payload.industry = payload.otherIndustry || 'Other';
@@ -214,6 +207,9 @@ export class RegisterCompanyComponent implements OnInit {
   onlyNumbers(event: Event, controlName: string): void {
     const input = event.target as HTMLInputElement;
     let value = input.value.replace(/[^0-9]/g, '');
+    if (value.length > 0 && !/^[6-9]/.test(value)) {
+      value = value.replace(/^[^6-9]+/, '');
+    }
     if (value.length > 10) {
       value = value.substring(0, 10);
     }

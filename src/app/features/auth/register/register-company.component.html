@@ -1,6 +1,5 @@
 <p-toast></p-toast>
 
-
 <div class="min-h-screen w-full flex bg-slate-50 font-sans">
     <!-- Left Column: Branding (hidden on mobile) -->
     <div
@@ -34,7 +33,8 @@
                     in One Platform.</span>
             </h1>
             <p class="text-slate-300 text-sm leading-relaxed mb-8">
-                Simplify your daily HR operations—from automated attendance swipes and payroll calculations to leave approvals and work management.
+                Simplify your daily HR operations—from automated attendance swipes and payroll calculations to leave
+                approvals and work management.
             </p>
 
             <!-- Feature Checklist (Complete HR Overview) -->
@@ -46,7 +46,8 @@
                     </div>
                     <div>
                         <h4 class="font-bold text-white text-sm">Automated Attendance & Swipes</h4>
-                        <p class="text-[11px] text-slate-300">Live attendance logging, shift timers & attendance regularization.</p>
+                        <p class="text-[11px] text-slate-300">Live attendance logging, shift timers & attendance
+                            regularization.</p>
                     </div>
                 </div>
 
@@ -57,7 +58,8 @@
                     </div>
                     <div>
                         <h4 class="font-bold text-white text-sm">Payroll & Salary Engine</h4>
-                        <p class="text-[11px] text-slate-300">1-click salary preparation, payslip downloads & deduction management.</p>
+                        <p class="text-[11px] text-slate-300">1-click salary preparation, payslip downloads & deduction
+                            management.</p>
                     </div>
                 </div>
 
@@ -68,7 +70,8 @@
                     </div>
                     <div>
                         <h4 class="font-bold text-white text-sm">Leave, Expense & ESS Portal</h4>
-                        <p class="text-[11px] text-slate-300">Quick leave approvals, expense claims & employee self-service dashboard.</p>
+                        <p class="text-[11px] text-slate-300">Quick leave approvals, expense claims & employee
+                            self-service dashboard.</p>
                     </div>
                 </div>
 
@@ -79,7 +82,8 @@
                     </div>
                     <div>
                         <h4 class="font-bold text-white text-sm">Task & Work Management</h4>
-                        <p class="text-[11px] text-slate-300">Assign tasks with image proof attachments & track probation progress.</p>
+                        <p class="text-[11px] text-slate-300">Assign tasks with image proof attachments & track
+                            probation progress.</p>
                     </div>
                 </div>
             </div>
@@ -92,9 +96,9 @@
     </div>
 
     <!-- Right Column: Interactive Forms -->
-    <div class="w-full lg:w-[60%] flex flex-col justify-center items-center p-4 md:p-6 relative overflow-y-auto">
+    <div class="w-full lg:w-[60%] flex flex-col justify-center items-center p-3 sm:p-5 md:p-8 relative overflow-y-auto">
         <!-- Floating Mobile Logo (only visible on mobile/tablet) -->
-        <div class="lg:hidden flex items-center gap-2 mb-4 select-none">
+        <div class="lg:hidden flex items-center gap-2 mb-3 sm:mb-4 select-none">
             <svg class="w-8 h-8 text-indigo-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect x="3" y="3" width="8" height="8" rx="2" fill="currentColor" />
                 <rect x="13" y="3" width="8" height="8" rx="2" fill="currentColor" opacity="0.7" />
@@ -105,7 +109,7 @@
         </div>
 
         <!-- Card Outer Wrapper -->
-        <div class="w-full max-w-3xl bg-white rounded-2xl shadow-xl border border-slate-100 p-5 md:p-6 relative">
+        <div class="w-full max-w-3xl bg-white rounded-2xl shadow-xl border border-slate-100 p-4 sm:p-6 md:p-8 relative">
 
             <!-- Navigation header -->
             <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
@@ -129,19 +133,21 @@
                 <div class="mb-4 p-3 rounded-xl bg-indigo-50/80 border border-indigo-100 flex items-center gap-2.5">
                     <i class="pi pi-shield text-indigo-600 text-base shrink-0"></i>
                     <p class="text-xs text-slate-600 font-medium leading-normal">
-                        Admin credentials will be sent instantly via <strong class="text-indigo-700">Email & WhatsApp</strong> upon registration.
+                        Admin credentials will be sent instantly via <strong class="text-indigo-700">Email &
+                            WhatsApp</strong> upon registration.
                     </p>
                 </div>
 
                 <form [formGroup]="signupForm" class="flex flex-col gap-4">
-                    <div class="border border-slate-100 rounded-2xl p-4 bg-slate-50/50 flex flex-col gap-3.5">
+                    <div class="border border-slate-100 rounded-2xl p-3.5 sm:p-4 bg-slate-50/50 flex flex-col gap-3.5">
                         <h3
                             class="text-xs font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2 select-none uppercase tracking-wide">
                             <i class="pi pi-building text-indigo-600"></i> Company Registration
                         </h3>
 
-                        <!-- Row 1: Company Name & Short Name -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 py-1.5">
+                        <!-- Form Grid (Fully Responsive Across Mobile, Tablet, Laptop, Desktop) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 py-1.5">
+                            <!-- Company Name -->
                             <div>
                                 <p-floatlabel>
                                     <input pInputText id="companyName" formControlName="companyName"
@@ -155,6 +161,8 @@
                                     class="text-rose-500 text-xs mt-1.5 block font-medium">Company name is
                                     required</small>
                             </div>
+
+                            <!-- Short Name -->
                             <div>
                                 <p-floatlabel>
                                     <input pInputText id="shortName" formControlName="shortName" class="w-full bg-white"
@@ -167,10 +175,8 @@
                                     class="text-rose-500 text-xs mt-1.5 block font-medium">Short name is
                                     required</small>
                             </div>
-                        </div>
 
-                        <!-- Row 2: Company Email & Company Phone -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 py-1.5">
+                            <!-- Company Email -->
                             <div>
                                 <p-floatlabel>
                                     <input pInputText id="companyEmail" type="email" formControlName="companyEmail"
@@ -184,9 +190,11 @@
                                     class="text-rose-500 text-xs mt-1.5 block font-medium">Valid company email is
                                     required</small>
                             </div>
+
+                            <!-- Company Phone -->
                             <div>
                                 <p-floatlabel>
-                                    <input pInputText id="companyPhone" type="text" formControlName="companyPhone"
+                                    <input pInputText id="companyPhone" type="tel" formControlName="companyPhone"
                                         maxlength="10" (input)="onlyNumbers($event, 'companyPhone')"
                                         class="w-full bg-white"
                                         [class.ng-invalid]="f2['companyPhone'].invalid && f2['companyPhone'].touched"
@@ -199,13 +207,11 @@
                                     <span *ngIf="f2['companyPhone'].errors?.['required']">Company phone is
                                         required</span>
                                     <span *ngIf="f2['companyPhone'].errors?.['pattern']">Please enter a valid 10-digit
-                                        phone number</span>
+                                        phone number starting with 6-9</span>
                                 </small>
                             </div>
-                        </div>
 
-                        <!-- Row 3: Industry & Company Address -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 py-1.5">
+                            <!-- Industry -->
                             <div class="flex flex-col gap-2">
                                 <p-floatlabel>
                                     <p-select id="industry" [options]="industryOptions" formControlName="industry"
@@ -232,6 +238,8 @@
                                         industry</small>
                                 </div>
                             </div>
+
+                            <!-- Company Address -->
                             <div>
                                 <div class="relative">
                                     <p-floatlabel>
@@ -249,29 +257,24 @@
                                             [ngClass]="isLocating ? 'pi-spin pi-spinner' : 'pi-compass'"></i>
                                     </button>
                                 </div>
-                                <!-- <div *ngIf="signupForm.value.officeLatitude" class="text-[11px] text-emerald-600 font-mono flex items-center gap-1 mt-1 font-semibold">
-                                    <i class="pi pi-check-circle text-xs"></i> GPS Coordinates: {{ signupForm.value.officeLatitude }}, {{ signupForm.value.officeLongitude }}
-                                </div> -->
                                 <small *ngIf="f2['address'].touched && f2['address'].invalid"
                                     class="text-rose-500 text-xs mt-1.5 block font-medium">Address is required</small>
                             </div>
-                        </div>
 
-                        <!-- Row 4: Full Name -->
-                        <div class="py-1.5">
-                            <p-floatlabel>
-                                <input pInputText id="fullName" formControlName="fullName" class="w-full bg-white"
-                                    [class.ng-invalid]="f2['fullName'].invalid && f2['fullName'].touched"
-                                    [class.ng-dirty]="f2['fullName'].invalid && f2['fullName'].touched" />
-                                <label for="fullName"><i class="pi pi-user mr-2 text-slate-400"></i>Admin Full
-                                    Name</label>
-                            </p-floatlabel>
-                            <small *ngIf="f2['fullName'].touched && f2['fullName'].invalid"
-                                class="text-rose-500 text-xs mt-1.5 block font-medium">Full name is required</small>
-                        </div>
+                            <!-- Admin Full Name -->
+                            <div class="md:col-span-2">
+                                <p-floatlabel>
+                                    <input pInputText id="fullName" formControlName="fullName" class="w-full bg-white"
+                                        [class.ng-invalid]="f2['fullName'].invalid && f2['fullName'].touched"
+                                        [class.ng-dirty]="f2['fullName'].invalid && f2['fullName'].touched" />
+                                    <label for="fullName"><i class="pi pi-user mr-2 text-slate-400"></i>Admin Full
+                                        Name</label>
+                                </p-floatlabel>
+                                <small *ngIf="f2['fullName'].touched && f2['fullName'].invalid"
+                                    class="text-rose-500 text-xs mt-1.5 block font-medium">Full name is required</small>
+                            </div>
 
-                        <!-- Row 5: Username & Password -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 py-1.5">
+                            <!-- Username -->
                             <div>
                                 <p-floatlabel>
                                     <input pInputText id="username" formControlName="username" class="w-full bg-white"
@@ -283,6 +286,8 @@
                                 <small *ngIf="f2['username'].touched && f2['username'].invalid"
                                     class="text-rose-500 text-xs mt-1.5 block font-medium">Username is required</small>
                             </div>
+
+                            <!-- Admin Password -->
                             <div>
                                 <p-floatlabel>
                                     <p-password id="password" formControlName="password" [toggleMask]="true"
@@ -297,46 +302,13 @@
                             </div>
                         </div>
 
-                        <!-- Row 6: Email & Mobile -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 py-1.5">
-                            <div>
-                                <p-floatlabel>
-                                    <input pInputText id="email" type="email" formControlName="email"
-                                        class="w-full bg-white" (input)="onEmailInput($event, 'email')"
-                                        [class.ng-invalid]="f2['email'].invalid && f2['email'].touched"
-                                        [class.ng-dirty]="f2['email'].invalid && f2['email'].touched" />
-                                    <label for="email"><i class="pi pi-envelope mr-2 text-slate-400"></i>Admin Email
-                                        Address</label>
-                                </p-floatlabel>
-                                <small *ngIf="f2['email'].touched && f2['email'].invalid"
-                                    class="text-rose-500 text-xs mt-1.5 block font-medium">Valid admin email is
-                                    required</small>
-                            </div>
-                            <div>
-                                <p-floatlabel>
-                                    <input pInputText id="mobile" type="text" formControlName="mobile" maxlength="10"
-                                        (input)="onlyNumbers($event, 'mobile')" class="w-full bg-white"
-                                        [class.ng-invalid]="f2['mobile'].invalid && f2['mobile'].touched"
-                                        [class.ng-dirty]="f2['mobile'].invalid && f2['mobile'].touched" />
-                                    <label for="mobile"><i class="pi pi-phone mr-2 text-slate-400"></i>Mobile
-                                        Number</label>
-                                </p-floatlabel>
-                                <small *ngIf="f2['mobile'].touched && f2['mobile'].errors"
-                                    class="text-rose-500 text-xs mt-1.5 block font-medium">
-                                    <span *ngIf="f2['mobile'].errors?.['required']">Mobile number is required</span>
-                                    <span *ngIf="f2['mobile'].errors?.['pattern']">Please enter a valid 10-digit mobile
-                                        number</span>
-                                </small>
-                            </div>
-                        </div>
-
                         <!-- Optional Company Logo Upload (At the very end of the form) -->
                         <div class="pt-2 border-t border-slate-100 mt-1">
                             <label
                                 class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Company
                                 Logo (Optional)</label>
                             <div
-                                class="p-3 bg-white border border-dashed border-slate-300 rounded-xl flex items-center gap-3.5 shadow-2xs">
+                                class="p-3 bg-white border border-dashed border-slate-300 rounded-xl flex flex-col sm:flex-row items-start sm:items-center gap-3.5 shadow-2xs">
                                 <div *ngIf="companyLogoPreview" (click)="viewLogo()" title="Click to view full logo"
                                     class="h-12 w-16 rounded-lg border border-slate-200 bg-slate-50 p-1 flex items-center justify-center overflow-hidden shrink-0 cursor-pointer hover:border-indigo-400 group relative">
                                     <img [src]="companyLogoPreview" (error)="onLogoError($event)"
@@ -346,8 +318,8 @@
                                         <i class="pi pi-eye text-xs"></i>
                                     </div>
                                 </div>
-                                <div class="flex flex-col gap-1 flex-1">
-                                    <div class="flex items-center gap-2">
+                                <div class="flex flex-col gap-1 flex-1 w-full sm:w-auto">
+                                    <div class="flex flex-wrap items-center gap-2">
                                         <input type="file" #publicLogoInput accept="image/*" class="hidden"
                                             (change)="onRegisterLogoSelected($event)" />
                                         <button type="button" (click)="publicLogoInput.click()"
