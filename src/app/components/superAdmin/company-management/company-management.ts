@@ -212,6 +212,10 @@ export class CompanyManagement implements OnInit {
   }
 
   registerNewCompany() {
+    const logo = this.selectedCompany.company_logo || this.selectedCompany.companyLogo || '';
+    this.selectedCompany.company_logo = logo;
+    this.selectedCompany.companyLogo = logo;
+
     const payload = this.selectedCompany;
     if (
       !payload.companyName ||
@@ -394,6 +398,10 @@ export class CompanyManagement implements OnInit {
       });
       return;
     }
+
+    const logo = this.selectedCompany.company_logo || this.selectedCompany.companyLogo || '';
+    this.selectedCompany.company_logo = logo;
+    this.selectedCompany.companyLogo = logo;
 
     this.isLoading = true;
     this.userService.updateCompany(this.selectedCompany.id, this.selectedCompany).subscribe({
