@@ -6,7 +6,8 @@ import { PopoverModule } from 'primeng/popover';
 import { AttendanceService } from '../../../shared/services/attendance.service';
 import { LeaveService, LeaveRequest } from '../../../shared/services/leave.service';
 import { formatLocalTime } from '../../../shared/utils/date-utils';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-monthly-attendance-calendar',
@@ -92,28 +93,49 @@ export class MonthlyAttendanceCalendar implements OnInit {
 
   loadData() {
     forkJoin({
-      attendance: this.attendanceService.getHistory(),
+      attendance: this.attendanceService.getHistory(1, 200),
       leaves: this.leaveService.getLeaves(),
-      regularizations: this.attendanceService.getMyRegularizations()
+      regularizations: this.attendanceService.getMyRegularizations(),
+      holidays: this.attendanceService.getHolidays().pipe(catchError(() => of({ success: true, data: [] })))
     }).subscribe({
-      next: ({ attendance, leaves, regularizations }) => {
+      next: ({ attendance, leaves, regularizations, holidays }: any) => {
         let records: any[] = [];
-        if (attendance.success && Array.isArray(attendance.data)) {
+        if (attendance && attendance.success && Array.isArray(attendance.data)) {
           records = attendance.data;
         }
 
         let leaveRecords: LeaveRequest[] = [];
-        if (leaves.success && Array.isArray(leaves.data)) {
+        if (leaves && leaves.success && Array.isArray(leaves.data)) {
           leaveRecords = leaves.data;
         }
 
         let regRecords: any[] = [];
-        if (regularizations.success && Array.isArray(regularizations.data)) {
+        if (regularizations && regularizations.success && Array.isArray(regularizations.data)) {
           regRecords = regularizations.data;
+        }
+
+        let holidayList: any[] = [];
+        if (holidays && holidays.success && Array.isArray(holidays.data)) {
+          holidayList = holidays.data;
+        } else if (Array.isArray(holidays)) {
+          holidayList = holidays;
         }
 
         const updatedDays = this.calendarDays().map(day => {
           if (!day.dayNum) return day;
+
+          // Check if there is a matching holiday for this date
+          let dayHoliday: any = null;
+          for (const h of holidayList) {
+            let hDate = h.holiday_date || h.date || h.holidayDate;
+            if (hDate && typeof hDate === 'string') {
+              hDate = hDate.split('T')[0];
+            }
+            if (hDate === day.dateString) {
+              dayHoliday = h;
+              break;
+            }
+          }
 
           // Check if there is a pending or approved regularization for this date
           let dayReg: any = null;
@@ -200,29 +222,33 @@ export class MonthlyAttendanceCalendar implements OnInit {
 
             const status = (firstRecord.attendance_status || '').toUpperCase();
 
-            if (status === 'PRESENT') {
+            if (status === 'PRESENT' || status === 'P') {
               day.type = 'P';
               day.colorClass = 'bg-emerald-500 text-white';
-            } else if (status === 'HALF_DAY' || status === 'HALF DAY') {
+            } else if (status === 'HALF_DAY' || status === 'HALF DAY' || status === 'HD') {
               day.type = 'HD';
               day.colorClass = 'bg-amber-500 text-white';
-            } else if (status === 'ABSENT') {
+            } else if (status === 'ABSENT' || status === 'A') {
               day.type = 'A';
               day.colorClass = 'bg-rose-500 text-white';
-            } else if (status === 'ON_LEAVE' || status === 'LEAVE') {
+            } else if (status === 'ON_LEAVE' || status === 'LEAVE' || status === 'L' || status === 'CL' || status === 'SL' || status === 'EL' || status === 'LOP') {
               if (dayLeave) {
                 const code = dayLeave.leave_type;
                 if (code === 'Casual Leave') day.type = 'CL';
                 else if (code === 'Sick Leave') day.type = 'SL';
                 else if (code === 'Earned Leave') day.type = 'EL';
+                else if (code === 'LOP' || code.includes('Loss of Pay') || code.includes('Lost Of Pay')) day.type = 'LOP';
                 else day.type = 'L';
               } else {
-                day.type = 'L';
+                day.type = status === 'ON_LEAVE' || status === 'LEAVE' ? 'L' : status;
               }
               day.colorClass = 'bg-indigo-500 text-white';
-            } else if (isSunday || status === 'WEEKLY_OFF' || status === 'WEEKOFF' || status === 'WEEKLY OFF') {
+            } else if (isSunday || status === 'WO' || status === 'WEEKLY_OFF' || status === 'WEEKOFF' || status === 'WEEKLY OFF') {
               day.type = 'WO';
               day.colorClass = 'bg-slate-500 text-white';
+            } else if (status === 'HOLIDAY' || status === 'H' || dayHoliday) {
+              day.type = 'H';
+              day.colorClass = 'bg-teal-500 text-white';
             } else if (dayReg) {
               day.type = 'RG';
               day.colorClass = 'bg-amber-500 text-white';
@@ -232,12 +258,9 @@ export class MonthlyAttendanceCalendar implements OnInit {
               if (dayReg.checkOut || dayReg.check_out) {
                 day.swipeOut = this.formatTime(dayReg.checkOut || dayReg.check_out);
               }
-            } else if (!firstRecord.swipe_out || day.swipeOut === '-') {
-              day.type = 'A';
-              day.colorClass = 'bg-rose-500 text-white';
             } else {
-              day.type = status.substring(0, 2);
-              day.colorClass = 'bg-blue-500 text-white';
+              day.type = 'P';
+              day.colorClass = 'bg-emerald-500 text-white';
             }
           } else {
             // No attendance records for this day
@@ -246,7 +269,7 @@ export class MonthlyAttendanceCalendar implements OnInit {
 
             const dayDate = new Date(day.dateString);
             dayDate.setHours(0, 0, 0, 0);
-            const isPastOrToday = dayDate <= today;
+            const isStrictPast = dayDate < today;
 
             const joiningStr = localStorage.getItem('joiningDate');
             let isBeforeJoining = false;
@@ -261,6 +284,9 @@ export class MonthlyAttendanceCalendar implements OnInit {
             if (isBeforeJoining) {
               day.type = '-';
               day.colorClass = 'bg-slate-100 text-slate-400 border border-slate-200';
+            } else if (dayHoliday) {
+              day.type = 'H';
+              day.colorClass = 'bg-teal-500 text-white';
             } else if (isSunday) {
               day.type = 'WO';
               day.colorClass = 'bg-slate-500 text-white';
@@ -281,14 +307,18 @@ export class MonthlyAttendanceCalendar implements OnInit {
               else if (code === 'LOP' || code.includes('Loss of Pay') || code.includes('Lost Of Pay')) day.type = 'LOP';
               else day.type = 'L';
               day.colorClass = 'bg-indigo-500 text-white';
-            } else if (isPastOrToday) {
+            } else if (isStrictPast) {
               day.type = 'A';
               day.colorClass = 'bg-rose-500 text-white';
+            } else {
+              day.type = '';
+              day.colorClass = '';
             }
           }
 
           day.hasLeave = !!dayLeave;
           day.hasReg = !!dayReg;
+          day.hasHoliday = !!dayHoliday;
           return day;
         });
 

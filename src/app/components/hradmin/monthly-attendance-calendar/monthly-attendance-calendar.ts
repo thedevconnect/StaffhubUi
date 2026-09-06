@@ -179,22 +179,42 @@ export class HRMonthlyAttendanceCalendar implements OnInit {
     }
 
     forkJoin({
-      attendance: this.attendanceService.getEmployeeHistory(empId).pipe(catchError(() => of({ success: true, data: [] }))),
-      leaves: this.leaveService.getLeaves().pipe(catchError(() => of({ success: true, data: [] })))
+      attendance: this.attendanceService.getEmployeeHistory(empId, 1, 200).pipe(catchError(() => of({ success: true, data: [] }))),
+      leaves: this.leaveService.getLeaves().pipe(catchError(() => of({ success: true, data: [] }))),
+      holidays: this.attendanceService.getHolidays().pipe(catchError(() => of({ success: true, data: [] })))
     }).subscribe({
-      next: ({ attendance, leaves }: any) => {
+      next: ({ attendance, leaves, holidays }: any) => {
         let records: any[] = [];
-        if (attendance.success && Array.isArray(attendance.data)) {
+        if (attendance && attendance.success && Array.isArray(attendance.data)) {
           records = attendance.data;
         }
 
         let leaveRecords: LeaveRequest[] = [];
-        if (leaves.success && Array.isArray(leaves.data)) {
+        if (leaves && leaves.success && Array.isArray(leaves.data)) {
           leaveRecords = leaves.data.filter((l: any) => String(l.employee_id) === String(empId));
+        }
+
+        let holidayList: any[] = [];
+        if (holidays && holidays.success && Array.isArray(holidays.data)) {
+          holidayList = holidays.data;
+        } else if (Array.isArray(holidays)) {
+          holidayList = holidays;
         }
 
         const updatedDays = this.calendarDays().map(day => {
           if (!day.dayNum) return day;
+
+          let dayHoliday: any = null;
+          for (const h of holidayList) {
+            let hDate = h.holiday_date || h.date || h.holidayDate;
+            if (hDate && typeof hDate === 'string') {
+              hDate = hDate.split('T')[0];
+            }
+            if (hDate === day.dateString) {
+              dayHoliday = h;
+              break;
+            }
+          }
 
           let dayLeave: LeaveRequest | null = null;
           for (const lr of leaveRecords) {
@@ -216,12 +236,8 @@ export class HRMonthlyAttendanceCalendar implements OnInit {
           const dayRecords = records.filter((r: any) => {
             if (!r.attendance_date) return false;
             let localDateString = r.attendance_date;
-            if (r.attendance_date.includes('T')) {
-              const d = new Date(r.attendance_date);
-              const yyyy = d.getFullYear();
-              const mm = String(d.getMonth() + 1).padStart(2, '0');
-              const dd = String(d.getDate()).padStart(2, '0');
-              localDateString = `${yyyy}-${mm}-${dd}`;
+            if (typeof r.attendance_date === 'string' && r.attendance_date.includes('T')) {
+              localDateString = r.attendance_date.split('T')[0];
             }
             return localDateString === day.dateString;
           });
@@ -233,7 +249,7 @@ export class HRMonthlyAttendanceCalendar implements OnInit {
             const firstRecord = dayRecords[dayRecords.length - 1]; 
             const lastRecord = dayRecords[0]; 
 
-            const status = firstRecord.attendance_status || 'PRESENT';
+            const status = (firstRecord.attendance_status || 'PRESENT').toUpperCase();
             day.swipeIn = this.formatTime(firstRecord.swipe_in);
             day.swipeOut = this.formatTime(lastRecord.swipe_out);
             day.rawStatus = status;
@@ -254,18 +270,24 @@ export class HRMonthlyAttendanceCalendar implements OnInit {
               day.totalTime = '-';
             }
 
-            if (status === 'PRESENT') {
+            if (status === 'PRESENT' || status === 'P') {
               day.type = 'P';
               day.colorClass = 'bg-emerald-500 text-white';
-            } else if (status === 'ABSENT') {
+            } else if (status === 'ABSENT' || status === 'A') {
               day.type = 'A';
               day.colorClass = 'bg-rose-500 text-white';
-            } else if (status === 'HALF_DAY') {
+            } else if (status === 'HALF_DAY' || status === 'HALF DAY' || status === 'HD') {
               day.type = 'HD';
               day.colorClass = 'bg-amber-500 text-white';
-            } else if (status === 'WO' || status === 'WEEKLY_OFF') {
+            } else if (status === 'WO' || status === 'WEEKLY_OFF' || status === 'WEEKOFF' || status === 'WEEKLY OFF') {
               day.type = 'WO';
               day.colorClass = 'bg-slate-400 text-white';
+            } else if (status === 'ON_LEAVE' || status === 'LEAVE' || status === 'L' || status === 'CL' || status === 'SL' || status === 'EL' || status === 'LOP') {
+              day.type = 'L';
+              day.colorClass = 'bg-indigo-500 text-white';
+            } else if (status === 'HOLIDAY' || status === 'H' || dayHoliday) {
+              day.type = 'H';
+              day.colorClass = 'bg-teal-500 text-white';
             } else {
               day.type = status.substring(0, 2).toUpperCase();
               day.colorClass = 'bg-blue-500 text-white';
@@ -274,7 +296,11 @@ export class HRMonthlyAttendanceCalendar implements OnInit {
             const dayDate = new Date(day.dateString);
             const isSunday = dayDate.getDay() === 0;
 
-            if (isSunday) {
+            if (dayHoliday) {
+              day.type = 'H';
+              day.colorClass = 'bg-teal-500 text-white';
+              day.rawStatus = 'HOLIDAY';
+            } else if (isSunday) {
               day.type = 'WO';
               day.colorClass = 'bg-slate-400 text-white';
               day.rawStatus = 'WO';

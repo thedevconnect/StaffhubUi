@@ -27,7 +27,6 @@ import { EmployeeManagementService } from '../../shared/services/employee-manage
     CardModule,
     TableModule,
     Breadcrumb,
-    RouterLink,
     TableTemplate,
     EmployeeAttendance,
     AttendanceRegularization
@@ -246,7 +245,7 @@ export class EssDashboard implements OnInit {
                 leaveRes.data.forEach((l: any) => {
                   const type = (l.leave_type || '').toUpperCase();
                   const status = (l.status || '').toUpperCase();
-                  const days = l.start_date && l.end_date 
+                  const days = l.start_date && l.end_date
                     ? Math.max(1, Math.round((new Date(l.end_date).getTime() - new Date(l.start_date).getTime()) / (1000 * 3600 * 24)) + 1)
                     : 1;
 
