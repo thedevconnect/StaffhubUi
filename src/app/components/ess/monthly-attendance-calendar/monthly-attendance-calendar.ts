@@ -8,6 +8,7 @@ import { LeaveService, LeaveRequest } from '../../../shared/services/leave.servi
 import { formatLocalTime } from '../../../shared/utils/date-utils';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { SocketService } from '../../../shared/services/socket.service';
 
 @Component({
   selector: 'app-monthly-attendance-calendar',
@@ -32,12 +33,20 @@ export class MonthlyAttendanceCalendar implements OnInit {
 
   constructor(
     private readonly attendanceService: AttendanceService,
-    private readonly leaveService: LeaveService
+    private readonly leaveService: LeaveService,
+    private readonly socketService: SocketService
   ) { }
 
   ngOnInit() {
     this.generateCalendar();
     this.loadData();
+    
+    // Listen for HR updates to refresh calendar
+    this.socketService.onAttendanceUpdated().subscribe(data => {
+      if (data && data.type === 'HR_UPDATE') {
+        this.loadData();
+      }
+    });
   }
 
   private formatTime(dateStr: string | null): string {
