@@ -223,7 +223,7 @@ export class OfficeLocationSettings implements OnInit {
       address: ['', [Validators.required]],
       officeLatitude: ['', [Validators.required]],
       officeLongitude: ['', [Validators.required]],
-      allowedRadius: [50, [Validators.required, Validators.min(1)]]
+      allowedRadius: [200, [Validators.required, Validators.min(1)]]
     });
 
     this.employeeLocationForm = this.fb.group({
