@@ -317,6 +317,36 @@ export class EssDashboard implements OnInit {
     });
   }
 
+  private parseDateParts(val: any): { year: number; month: number; day: number } | null {
+    if (!val) return null;
+    if (val instanceof Date) {
+      if (isNaN(val.getTime())) return null;
+      return { year: val.getFullYear(), month: val.getMonth(), day: val.getDate() };
+    }
+    const s = String(val).trim();
+    const mIso = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+    if (mIso) {
+      return {
+        year: parseInt(mIso[1], 10),
+        month: parseInt(mIso[2], 10) - 1,
+        day: parseInt(mIso[3], 10)
+      };
+    }
+    const mDmy = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+    if (mDmy) {
+      return {
+        year: parseInt(mDmy[3], 10),
+        month: parseInt(mDmy[2], 10) - 1,
+        day: parseInt(mDmy[1], 10)
+      };
+    }
+    const d = new Date(s);
+    if (!isNaN(d.getTime())) {
+      return { year: d.getFullYear(), month: d.getMonth(), day: d.getDate() };
+    }
+    return null;
+  }
+
   processCelebrationData(employees: any[]): void {
     const today = new Date();
     const currentYear = today.getFullYear();
@@ -329,14 +359,12 @@ export class EssDashboard implements OnInit {
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
     employees.forEach(emp => {
-      // 1. WORK ANNIVERSARY (calculated from joining_date / joiningDate)
-      const joining = emp.joiningDate || emp.joining_date;
+      // 1. WORK ANNIVERSARY (calculated strictly from Date of Joining: joiningDate / joining_date)
+      const joining = emp.joiningDate || emp.joining_date || emp.dateOfJoining || emp.date_of_joining;
       if (joining) {
-        const jDate = new Date(joining);
-        if (!isNaN(jDate.getTime())) {
-          const jYear = jDate.getFullYear();
-          const jMonth = jDate.getMonth();
-          const jDay = jDate.getDate();
+        const jParts = this.parseDateParts(joining);
+        if (jParts) {
+          const { year: jYear, month: jMonth, day: jDay } = jParts;
 
           // Calculate anniversary occurrence
           let annivYear = currentYear;
@@ -400,13 +428,12 @@ export class EssDashboard implements OnInit {
         }
       }
 
-      // 2. BIRTHDAY (calculated from dob / dateOfBirth)
+      // 2. BIRTHDAY (calculated strictly from DOB: dob / dateOfBirth)
       const dob = emp.dob || emp.dateOfBirth || emp.date_of_birth;
       if (dob) {
-        const bDate = new Date(dob);
-        if (!isNaN(bDate.getTime())) {
-          const bMonth = bDate.getMonth();
-          const bDay = bDate.getDate();
+        const bParts = this.parseDateParts(dob);
+        if (bParts) {
+          const { month: bMonth, day: bDay } = bParts;
 
           let bdayYear = currentYear;
           let bdayDate = new Date(bdayYear, bMonth, bDay);

@@ -173,6 +173,7 @@ export class EmployeeManagement implements OnInit {
       department: ['', [Validators.required]],
       reportingManager: ['', [Validators.required]],
       joiningDate: [null, [Validators.required]],
+      dob: [null],
       employmentType: ['', [Validators.required]],
       workLocation: ['OFFICE', [Validators.required]],
     });
