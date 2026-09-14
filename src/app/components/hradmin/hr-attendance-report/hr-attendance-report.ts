@@ -56,6 +56,7 @@ export class HrAttendanceReport implements OnInit {
     { label: 'Weekly (This Week)', value: 1, icon: 'pi pi-calendar-plus' },
     { label: 'All Time', value: 2, icon: 'pi pi-list' }
   ];
+
   activeTab = signal<number>(0);
 
   columns: TableColumn[] = [

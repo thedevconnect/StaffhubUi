@@ -33,6 +33,10 @@ export interface Employee {
   custom_radius?: number;
   last_working_day?: string | Date;
   lastWorkingDay?: string | Date;
+  dob?: string;
+  dateOfBirth?: string;
+  profilePicture?: string;
+  avatarUrl?: string;
 }
 
 export interface CreateEmployeeRequest {
@@ -64,6 +68,8 @@ export interface CreateEmployeeRequest {
   defaultPassword?: string;
   role?: string;
   status?: string;
+  dob?: string;
+  dateOfBirth?: string;
 }
 
 export interface UpdateEmployeeRequest extends CreateEmployeeRequest { }

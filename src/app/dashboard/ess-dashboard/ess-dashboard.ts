@@ -18,6 +18,25 @@ import { AttendanceRegularization } from '../../components/ess/attendance-regula
 import { LeaveService } from '../../shared/services/leave.service'
 import { UserProfileService } from '../../shared/services/user-profile.service'
 import { EmployeeManagementService } from '../../shared/services/employee-management.service'
+export interface CelebrationFeedItem {
+  id: string;
+  userId?: string | number;
+  type: 'birthday' | 'anniversary';
+  isToday: boolean;
+  name: string;
+  designation: string;
+  department: string;
+  avatarUrl?: string;
+  profilePicture?: string;
+  dateBadge: string;
+  dateFormatted: string;
+  daysLeft: number;
+  years?: number;
+  message: string;
+  likes: number;
+  isLiked?: boolean;
+  wished?: boolean;
+}
 
 @Component({
   selector: 'app-ess-dashboard',
@@ -70,23 +89,114 @@ export class EssDashboard implements OnInit {
     { label: 'Earned Leave-Balance as on', value: 0 }
   ]);
 
+  readonly activeFeedFilter = signal<'all' | 'anniversary' | 'birthday'>('all');
+  readonly activeFeedView = signal<'all' | 'today' | 'upcoming'>('all');
+  readonly celebrationFeeds = signal<CelebrationFeedItem[]>([]);
+  readonly loadingFeeds = signal<boolean>(false);
+
+  // User celebration pop-up modal state
+  readonly showCelebrationModal = signal<boolean>(false);
+  readonly userCelebrationInfo = signal<{
+    name: string;
+    isBirthday: boolean;
+    isAnniversary: boolean;
+    years?: number;
+  } | null>(null);
+  readonly userCelebrationDismissed = signal<boolean>(false);
+  readonly toastWishMessage = signal<string | null>(null);
+
   readonly anniversaryFeeds = signal<Array<{ date: string; name: string; years: number; likes: number; comments: number; isLiked?: boolean }>>([
-    { date: 'Aug 22', name: 'Thangadurai Annadurai', years: 2, likes: 0, comments: 0 },
-    { date: 'Aug 22', name: 'Shiva', years: 1, likes: 0, comments: 0 }
+    { date: 'Today', name: 'Manjeet', years: 2, likes: 8, comments: 0 }
   ]);
 
   readonly birthdayFeeds = signal<Array<{ date: string; name: string; likes: number; comments: number; isLiked?: boolean }>>([
-    { date: 'Aug 22', name: 'DEEPAK KUMAR', likes: 0, comments: 0 }
+    { date: 'Today', name: 'Niharika', likes: 12, comments: 0 }
   ]);
 
-  toggleLike(item: any): void {
-    if (item.isLiked) {
-      item.likes--;
-      item.isLiked = false;
-    } else {
-      item.likes++;
-      item.isLiked = true;
+  get todayCelebrationsCount(): number {
+    return this.celebrationFeeds().filter(i => i.isToday).length;
+  }
+
+  get upcomingCelebrationsCount(): number {
+    return this.celebrationFeeds().filter(i => !i.isToday).length;
+  }
+
+  get filteredCelebrationFeeds(): CelebrationFeedItem[] {
+    const filter = this.activeFeedFilter();
+    const view = this.activeFeedView();
+
+    return this.celebrationFeeds().filter(item => {
+      if (filter !== 'all' && item.type !== filter) return false;
+      if (view === 'today' && !item.isToday) return false;
+      if (view === 'upcoming' && item.isToday) return false;
+      return true;
+    });
+  }
+
+  getStoredLikes(feedId: string, defaultLikes: number): number {
+    try {
+      const stored = localStorage.getItem(`feed_likes_count_${feedId}`);
+      return stored !== null ? Number(stored) : defaultLikes;
+    } catch (e) {
+      return defaultLikes;
     }
+  }
+
+  getStoredIsLiked(feedId: string): boolean {
+    try {
+      return localStorage.getItem(`feed_is_liked_${feedId}`) === 'true';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  toggleLike(item: any): void {
+    if (!item) return;
+    if (item.isLiked) {
+      item.likes = Math.max(0, (item.likes || 1) - 1);
+      item.isLiked = false;
+      if (item.id) localStorage.setItem(`feed_is_liked_${item.id}`, 'false');
+    } else {
+      item.likes = (item.likes || 0) + 1;
+      item.isLiked = true;
+      if (item.id) localStorage.setItem(`feed_is_liked_${item.id}`, 'true');
+    }
+    if (item.id) {
+      localStorage.setItem(`feed_likes_count_${item.id}`, String(item.likes));
+    }
+    this.cdr.markForCheck();
+  }
+
+  sendWish(feed: CelebrationFeedItem): void {
+    feed.wished = true;
+    if (!feed.isLiked) {
+      this.toggleLike(feed);
+    }
+    const wishText = feed.type === 'birthday'
+      ? `🎂 You sent heartfelt birthday wishes to ${feed.name}!`
+      : `🏆 You congratulated ${feed.name} on completing ${feed.years} years of service!`;
+    this.toastWishMessage.set(wishText);
+    setTimeout(() => {
+      if (this.toastWishMessage() === wishText) {
+        this.toastWishMessage.set(null);
+        this.cdr.markForCheck();
+      }
+    }, 4000);
+    this.cdr.markForCheck();
+  }
+
+  closeCelebrationModal(): void {
+    this.showCelebrationModal.set(false);
+    const user = this.authService.user();
+    const today = new Date();
+    const todayKey = `celebration_shown_${user?.id}_${today.getFullYear()}_${today.getMonth()}_${today.getDate()}`;
+    sessionStorage.setItem(todayKey, 'true');
+    this.userCelebrationDismissed.set(true);
+    this.cdr.markForCheck();
+  }
+
+  openCelebrationModal(): void {
+    this.showCelebrationModal.set(true);
     this.cdr.markForCheck();
   }
 
@@ -189,6 +299,239 @@ export class EssDashboard implements OnInit {
     });
 
     this.loadDashboardData()
+    this.loadCelebrationFeeds()
+  }
+
+  loadCelebrationFeeds(): void {
+    this.loadingFeeds.set(true);
+    this.employeeManagementService.getEmployees().subscribe({
+      next: (employees) => {
+        this.processCelebrationData(employees || []);
+        this.loadingFeeds.set(false);
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.loadingFeeds.set(false);
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  processCelebrationData(employees: any[]): void {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const todayMonth = today.getMonth(); // 0 to 11
+    const todayDate = today.getDate(); // 1 to 31
+
+    const todayMidnight = new Date(currentYear, todayMonth, todayDate).getTime();
+    const items: CelebrationFeedItem[] = [];
+
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    employees.forEach(emp => {
+      // 1. WORK ANNIVERSARY (calculated from joining_date / joiningDate)
+      const joining = emp.joiningDate || emp.joining_date;
+      if (joining) {
+        const jDate = new Date(joining);
+        if (!isNaN(jDate.getTime())) {
+          const jYear = jDate.getFullYear();
+          const jMonth = jDate.getMonth();
+          const jDay = jDate.getDate();
+
+          // Calculate anniversary occurrence
+          let annivYear = currentYear;
+          let annivDate = new Date(annivYear, jMonth, jDay);
+          let diffDays = Math.round((annivDate.getTime() - todayMidnight) / (1000 * 3600 * 24));
+
+          // If already passed earlier this year, calculate for next year
+          if (diffDays < 0) {
+            annivYear = currentYear + 1;
+            annivDate = new Date(annivYear, jMonth, jDay);
+            diffDays = Math.round((annivDate.getTime() - todayMidnight) / (1000 * 3600 * 24));
+          }
+
+          const isToday = (todayMonth === jMonth && todayDate === jDay);
+          const yearsCompleted = annivYear - jYear;
+
+          // Must complete at least 1 year
+          if (yearsCompleted >= 1) {
+            const feedId = `anniv_${emp.id || emp.employeeId || emp.user_id}_${annivYear}`;
+            const storedLikes = this.getStoredLikes(feedId, isToday ? 8 : 2);
+            const isLiked = this.getStoredIsLiked(feedId);
+
+            if (isToday) {
+              items.push({
+                id: feedId,
+                userId: emp.user_id || emp.id,
+                type: 'anniversary',
+                isToday: true,
+                name: emp.fullName || emp.full_name || 'Team Member',
+                designation: emp.designation || 'Team Member',
+                department: emp.department || 'General',
+                profilePicture: emp.profilePicture || emp.profile_picture || null,
+                dateBadge: 'Today!',
+                dateFormatted: `${jDay} ${monthNames[jMonth]}`,
+                daysLeft: 0,
+                years: yearsCompleted,
+                message: `Warm congratulations to ${emp.fullName || emp.full_name} on completing ${yearsCompleted} ${yearsCompleted === 1 ? 'successful year' : 'successful years'} of dedication with us! 🎉`,
+                likes: storedLikes,
+                isLiked: isLiked
+              });
+            } else if (diffDays > 0 && diffDays <= 30) {
+              items.push({
+                id: feedId,
+                userId: emp.user_id || emp.id,
+                type: 'anniversary',
+                isToday: false,
+                name: emp.fullName || emp.full_name || 'Team Member',
+                designation: emp.designation || 'Team Member',
+                department: emp.department || 'General',
+                profilePicture: emp.profilePicture || emp.profile_picture || null,
+                dateBadge: diffDays === 1 ? 'Tomorrow' : `In ${diffDays} days`,
+                dateFormatted: `${jDay} ${monthNames[jMonth]}`,
+                daysLeft: diffDays,
+                years: yearsCompleted,
+                message: `Completing ${yearsCompleted} ${yearsCompleted === 1 ? 'year' : 'years'} of service on ${jDay} ${monthNames[jMonth]}. Mark your calendars to celebrate! 🌟`,
+                likes: storedLikes,
+                isLiked: isLiked
+              });
+            }
+          }
+        }
+      }
+
+      // 2. BIRTHDAY (calculated from dob / dateOfBirth)
+      const dob = emp.dob || emp.dateOfBirth || emp.date_of_birth;
+      if (dob) {
+        const bDate = new Date(dob);
+        if (!isNaN(bDate.getTime())) {
+          const bMonth = bDate.getMonth();
+          const bDay = bDate.getDate();
+
+          let bdayYear = currentYear;
+          let bdayDate = new Date(bdayYear, bMonth, bDay);
+          let diffDays = Math.round((bdayDate.getTime() - todayMidnight) / (1000 * 3600 * 24));
+
+          if (diffDays < 0) {
+            bdayYear = currentYear + 1;
+            bdayDate = new Date(bdayYear, bMonth, bDay);
+            diffDays = Math.round((bdayDate.getTime() - todayMidnight) / (1000 * 3600 * 24));
+          }
+
+          const isToday = (todayMonth === bMonth && todayDate === bDay);
+          const feedId = `bday_${emp.id || emp.employeeId || emp.user_id}_${bdayYear}`;
+          const storedLikes = this.getStoredLikes(feedId, isToday ? 12 : 3);
+          const isLiked = this.getStoredIsLiked(feedId);
+
+          if (isToday) {
+            items.push({
+              id: feedId,
+              userId: emp.user_id || emp.id,
+              type: 'birthday',
+              isToday: true,
+              name: emp.fullName || emp.full_name || 'Team Member',
+              designation: emp.designation || 'Team Member',
+              department: emp.department || 'General',
+              profilePicture: emp.profilePicture || emp.profile_picture || null,
+              dateBadge: 'Today!',
+              dateFormatted: `${bDay} ${monthNames[bMonth]}`,
+              daysLeft: 0,
+              message: `Wishing ${emp.fullName || emp.full_name} a very Happy Birthday! Have a glorious and prosperous year ahead! 🎂`,
+              likes: storedLikes,
+              isLiked: isLiked
+            });
+          } else if (diffDays > 0 && diffDays <= 30) {
+            items.push({
+              id: feedId,
+              userId: emp.user_id || emp.id,
+              type: 'birthday',
+              isToday: false,
+              name: emp.fullName || emp.full_name || 'Team Member',
+              designation: emp.designation || 'Team Member',
+              department: emp.department || 'General',
+              profilePicture: emp.profilePicture || emp.profile_picture || null,
+              dateBadge: diffDays === 1 ? 'Tomorrow' : `In ${diffDays} days`,
+              dateFormatted: `${bDay} ${monthNames[bMonth]}`,
+              daysLeft: diffDays,
+              message: `Birthday coming up on ${bDay} ${monthNames[bMonth]}! Get ready to wish them a wonderful day ahead! 🎈`,
+              likes: storedLikes,
+              isLiked: isLiked
+            });
+          }
+        }
+      }
+    });
+
+    // Sort items: Today items first, then upcoming by daysLeft ascending
+    items.sort((a, b) => {
+      if (a.isToday && !b.isToday) return -1;
+      if (!a.isToday && b.isToday) return 1;
+      return a.daysLeft - b.daysLeft;
+    });
+
+    this.celebrationFeeds.set(items);
+
+    // Also populate anniversaryFeeds and birthdayFeeds for compatibility
+    const annivList = items.filter(i => i.type === 'anniversary').map(i => ({
+      date: i.dateFormatted,
+      name: i.name,
+      years: i.years || 1,
+      likes: i.likes,
+      comments: 0,
+      isLiked: i.isLiked
+    }));
+    this.anniversaryFeeds.set(annivList.length > 0 ? annivList : [
+      { date: 'Today', name: 'Manjeet', years: 2, likes: 8, comments: 0 }
+    ]);
+
+    const bdayList = items.filter(i => i.type === 'birthday').map(i => ({
+      date: i.dateFormatted,
+      name: i.name,
+      likes: i.likes,
+      comments: 0,
+      isLiked: i.isLiked
+    }));
+    this.birthdayFeeds.set(bdayList.length > 0 ? bdayList : [
+      { date: 'Today', name: 'Niharika', likes: 12, comments: 0 }
+    ]);
+
+    this.checkUserCelebration(items, today);
+  }
+
+  checkUserCelebration(items: CelebrationFeedItem[], today: Date): void {
+    const user = this.authService.user();
+    if (!user) return;
+
+    const currentUserId = String(user.id);
+    const currentUsername = (user.username || '').toLowerCase();
+    const currentEmpName = (user.employeeName || '').toLowerCase();
+
+    const userAnniv = items.find(i => 
+      i.isToday && 
+      i.type === 'anniversary' && 
+      (String(i.userId) === currentUserId || (currentEmpName && i.name.toLowerCase() === currentEmpName) || (currentUsername && i.name.toLowerCase().includes(currentUsername)))
+    );
+
+    const userBday = items.find(i => 
+      i.isToday && 
+      i.type === 'birthday' && 
+      (String(i.userId) === currentUserId || (currentEmpName && i.name.toLowerCase() === currentEmpName) || (currentUsername && i.name.toLowerCase().includes(currentUsername)))
+    );
+
+    if (userAnniv || userBday) {
+      this.userCelebrationInfo.set({
+        name: user.employeeName || user.username || 'Valued Team Member',
+        isBirthday: !!userBday,
+        isAnniversary: !!userAnniv,
+        years: userAnniv?.years
+      });
+
+      const todayKey = `celebration_shown_${currentUserId}_${today.getFullYear()}_${today.getMonth()}_${today.getDate()}`;
+      const alreadyShown = sessionStorage.getItem(todayKey);
+      if (!alreadyShown) {
+        this.showCelebrationModal.set(true);
+      }
+    }
   }
 
   loadLiveLeaveSummary(): void {

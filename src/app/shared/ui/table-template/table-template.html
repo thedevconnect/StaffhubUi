@@ -45,8 +45,7 @@
       @if (shouldShowRefresh) {
       <button type="button" (click)="onRefreshClick()" [disabled]="isLoading" title="Click to refresh latest data"
         class="table-refresh-btn group flex items-center justify-center p-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all duration-300 shrink-0 cursor-pointer shadow-2xs">
-        <i class="pi pi-refresh text-lg transition-transform duration-700"
-          [ngClass]="{'animate-spin': isLoading}"></i>
+        <i class="pi pi-refresh text-lg transition-transform duration-700" [ngClass]="{'animate-spin': isLoading}"></i>
       </button>
       }
 
@@ -54,7 +53,8 @@
       <button type="button" (click)="toggleFullScreen()"
         [title]="isFullscreen ? 'Exit Full Screen' : 'Toggle Full Screen Table'"
         class="table-fullscreen-btn group flex items-center justify-center p-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all duration-300 focus:outline-none shrink-0 cursor-pointer shadow-2xs">
-        <i class="pi text-lg transition-transform duration-300" [ngClass]="isFullscreen ? 'pi-window-minimize' : 'pi-window-maximize'"></i>
+        <i class="pi text-lg transition-transform duration-300"
+          [ngClass]="isFullscreen ? 'pi-window-minimize' : 'pi-window-maximize'"></i>
       </button>
       }
 

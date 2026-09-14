@@ -92,6 +92,7 @@ export class EmployeeManagementService {
       joiningDate,
       employmentType,
       workLocation,
+      ...((payload.dob || payload.dateOfBirth) ? { dob: payload.dob || payload.dateOfBirth } : {}),
       ...(role ? { role } : {}),
       ...(status ? { status } : {}),
       ...(companyId ? { companyId } : {}),
@@ -182,7 +183,10 @@ export class EmployeeManagementService {
       custom_location_allowed: employee?.custom_location_allowed,
       custom_latitude: employee?.custom_latitude,
       custom_longitude: employee?.custom_longitude,
-      custom_radius: employee?.custom_radius
+      custom_radius: employee?.custom_radius,
+      dob: employee?.dob ?? employee?.date_of_birth ?? employee?.dateOfBirth ?? '',
+      dateOfBirth: employee?.dob ?? employee?.date_of_birth ?? employee?.dateOfBirth ?? '',
+      profilePicture: employee?.profile_picture ?? employee?.profilePicture ?? ''
     };
   }
 }
