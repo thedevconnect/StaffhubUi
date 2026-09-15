@@ -106,6 +106,20 @@ export class ThemeService {
 
     const colorDef = this.colorsList.find(c => c.name === color);
     if (colorDef) {
+      const p600 = colorDef.hex;
+      const p700 = colorDef.hoverHex;
+      const p500 = adjustColorLightness(colorDef.hex, 0.1);
+      const p100 = colorDef.lightBgHex;
+      const p50 = adjustColorLightness(colorDef.hex, 0.92);
+      const p200 = adjustColorLightness(colorDef.hex, 0.65);
+
+      document.documentElement.style.setProperty('--primary-600', p600);
+      document.documentElement.style.setProperty('--primary-700', p700);
+      document.documentElement.style.setProperty('--primary-500', p500);
+      document.documentElement.style.setProperty('--primary-100', p100);
+      document.documentElement.style.setProperty('--primary-50', p50);
+      document.documentElement.style.setProperty('--primary-200', p200);
+
       document.documentElement.style.setProperty('--accent-color', colorDef.hex);
       document.documentElement.style.setProperty('--accent-hover', colorDef.hoverHex);
       document.documentElement.style.setProperty('--accent-light-bg', colorDef.lightBgHex);

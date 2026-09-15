@@ -63,29 +63,25 @@
   <div *ngIf="activeTab === 'dashboard'" class="space-y-6">
 
     <!-- Personal Celebration Banner (for Logged-in HR Leader) -->
-    <div *ngIf="userCelebrationInfo"
-      class="bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-600 p-0.5 rounded-2xl shadow-md animate-glow-gold">
+    <div *ngIf="userCelebrationInfo as info"
+      class="feed-celebration-ribbon-border p-0.5 rounded-2xl shadow-md animate-glow-gold">
       <div
         class="bg-white/95 backdrop-blur-md px-4 py-3 rounded-[14px] flex flex-col sm:flex-row items-center justify-between gap-3">
         <div class="flex items-center gap-3">
           <div
-            class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-400 to-rose-500 text-white flex items-center justify-center text-xl shadow-xs animate-bounce">
-            <i [class]="userCelebrationInfo?.isBirthday ? 'pi pi-gift' : 'pi pi-trophy'"></i>
+            class="w-10 h-10 rounded-xl feed-anniversary-avatar-bg flex items-center justify-center text-xl shadow-xs animate-bounce">
+            <i [class]="info.isBirthday ? 'pi pi-gift' : 'pi pi-trophy'"></i>
           </div>
           <div>
             <div class="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-              <span>🎉 Happy {{ userCelebrationInfo?.isBirthday ? 'Birthday' : '' }} {{ userCelebrationInfo?.isBirthday
-                && userCelebrationInfo?.isAnniversary ? '& ' : '' }} {{ userCelebrationInfo?.isAnniversary ? ('Work
-                Anniversary (' + userCelebrationInfo?.years + ' Years)') : '' }}, {{ userCelebrationInfo?.name
-                }}!</span>
-              <span class="px-2 py-0.5 bg-rose-100 text-rose-700 text-[10px] font-extrabold rounded-full">SPECIAL
-                DAY</span>
+              <span>🎉 Happy {{ info.isBirthday ? 'Birthday' : '' }} {{ info.isBirthday && info.isAnniversary ? '& ' : '' }} {{ info.isAnniversary ? ('Work Anniversary (' + info.years + ' Years)') : '' }}, {{ info.name }}!</span>
+              <span class="px-2 py-0.5 bg-rose-100 text-rose-700 text-[10px] font-extrabold rounded-full">SPECIAL DAY</span>
             </div>
             <p class="text-[11px] text-slate-500">Wishing you another incredible year of leadership and success!</p>
           </div>
         </div>
         <button type="button" (click)="openCelebrationModal()"
-          class="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-rose-500 text-white font-bold text-xs rounded-xl shadow-xs hover:shadow-md transition cursor-pointer shrink-0 flex items-center gap-1.5">
+          class="px-3.5 py-1.5 feed-celebration-ribbon-btn font-bold text-xs rounded-xl shadow-xs transition cursor-pointer shrink-0 flex items-center gap-1.5">
           <i class="pi pi-sparkles"></i> View Celebration Card
         </button>
       </div>
@@ -111,7 +107,7 @@
         </div>
       </div>
       <button type="button" (click)="setActiveTab('feed')"
-        class="px-3.5 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-xl shadow-xs hover:bg-slate-800 transition cursor-pointer flex items-center gap-1.5 shrink-0">
+        class="px-3.5 py-1.5 feed-chip-active-accent text-xs font-bold rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1.5 shrink-0">
         <span>Open My Feed</span>
         <i class="pi pi-arrow-right text-[10px]"></i>
       </button>
@@ -436,7 +432,7 @@
         <div
           class="inline-flex rounded-xl bg-slate-100 p-1 text-xs font-semibold text-slate-600 border border-slate-200/80">
           <button type="button" (click)="activeFeedView = 'all'"
-            [class]="activeFeedView === 'all' ? 'bg-white text-blue-600 shadow-xs rounded-lg px-3 py-1.5 font-bold transition cursor-pointer' : 'px-3 py-1.5 hover:text-slate-900 transition cursor-pointer'">
+            [class]="activeFeedView === 'all' ? 'feed-view-btn-active-accent shadow-xs rounded-lg px-3 py-1.5 font-bold transition cursor-pointer' : 'px-3 py-1.5 hover:text-slate-900 transition cursor-pointer'">
             All ({{ celebrationFeeds.length }})
           </button>
           <button type="button" (click)="activeFeedView = 'today'"
@@ -445,13 +441,13 @@
             Today ({{ todayCelebrationsCount }})
           </button>
           <button type="button" (click)="activeFeedView = 'upcoming'"
-            [class]="activeFeedView === 'upcoming' ? 'bg-white text-indigo-600 shadow-xs rounded-lg px-3 py-1.5 font-bold transition cursor-pointer' : 'px-3 py-1.5 hover:text-slate-900 transition cursor-pointer'">
+            [class]="activeFeedView === 'upcoming' ? 'feed-view-btn-active-accent shadow-xs rounded-lg px-3 py-1.5 font-bold transition cursor-pointer' : 'px-3 py-1.5 hover:text-slate-900 transition cursor-pointer'">
             Upcoming ({{ upcomingCelebrationsCount }})
           </button>
         </div>
 
         <button (click)="loadCelebrationFeeds()" type="button"
-          class="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-indigo-600 shadow-2xs transition cursor-pointer"
+          class="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-accent shadow-2xs transition cursor-pointer"
           title="Refresh Celebrations">
           <i class="pi pi-refresh text-xs" [class.pi-spin]="loadingFeeds"></i>
         </button>
@@ -461,7 +457,7 @@
     <!-- Category Filter Pills -->
     <div class="flex items-center gap-2 overflow-x-auto text-xs pb-1">
       <button type="button" (click)="activeFeedFilter = 'all'"
-        [class]="activeFeedFilter === 'all' ? 'bg-slate-900 text-white font-bold px-3 py-1.5 rounded-xl shadow-xs cursor-pointer' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold px-3 py-1.5 rounded-xl shadow-2xs cursor-pointer transition'">
+        [class]="activeFeedFilter === 'all' ? 'feed-chip-active-accent font-bold px-3 py-1.5 rounded-xl shadow-xs cursor-pointer' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold px-3 py-1.5 rounded-xl shadow-2xs cursor-pointer transition'">
         All Celebrations
       </button>
       <button type="button" (click)="activeFeedFilter = 'birthday'"
@@ -469,14 +465,14 @@
         <span>🎂</span> Birthdays
       </button>
       <button type="button" (click)="activeFeedFilter = 'anniversary'"
-        [class]="activeFeedFilter === 'anniversary' ? 'bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5' : 'bg-white border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 font-semibold px-3 py-1.5 rounded-xl shadow-2xs cursor-pointer transition flex items-center gap-1.5'">
+        [class]="activeFeedFilter === 'anniversary' ? 'feed-chip-active-accent font-bold px-3 py-1.5 rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5' : 'feed-chip-inactive-anniversary font-semibold px-3 py-1.5 rounded-xl shadow-2xs cursor-pointer transition flex items-center gap-1.5'">
         <span>🏆</span> Work Anniversaries
       </button>
     </div>
 
     <!-- Celebrations Grid -->
     <div *ngIf="loadingFeeds" class="py-16 text-center space-y-3 bg-white rounded-2xl border border-slate-200">
-      <i class="pi pi-spin pi-spinner text-3xl text-indigo-600"></i>
+      <i class="pi pi-spin pi-spinner text-3xl text-accent"></i>
       <p class="text-xs text-slate-500 font-medium">Loading real-time celebration feeds...</p>
     </div>
 
@@ -492,7 +488,7 @@
           filter.</p>
       </div>
       <button type="button" (click)="activeFeedFilter = 'all'; activeFeedView = 'all'"
-        class="text-xs text-indigo-600 font-bold hover:underline cursor-pointer">
+        class="text-xs text-accent font-bold hover:underline cursor-pointer">
         Reset Filters
       </button>
     </div>
@@ -505,16 +501,16 @@
         [class]="feed.isToday 
           ? (feed.type === 'birthday' 
               ? 'bg-gradient-to-br from-rose-50 via-amber-50/40 to-white border-2 border-rose-300 rounded-2xl p-5 space-y-4 shadow-sm animate-glow-rose hover:shadow-md transition-all duration-300 flex flex-col justify-between' 
-              : 'bg-gradient-to-br from-sky-50 via-indigo-50/40 to-white border-2 border-indigo-300 rounded-2xl p-5 space-y-4 shadow-sm animate-glow-gold hover:shadow-md transition-all duration-300 flex flex-col justify-between')
+              : 'feed-anniversary-card-today rounded-2xl p-5 space-y-4 animate-glow-gold flex flex-col justify-between')
           : (feed.type === 'birthday' 
               ? 'bg-white border border-rose-100 hover:border-rose-300 rounded-2xl p-5 space-y-4 shadow-2xs hover:shadow-md transition duration-200 flex flex-col justify-between' 
-              : 'bg-white border border-slate-200 hover:border-indigo-300 rounded-2xl p-5 space-y-4 shadow-2xs hover:shadow-md transition duration-200 flex flex-col justify-between')">
+              : 'feed-anniversary-card-normal rounded-2xl p-5 space-y-4 shadow-2xs hover:shadow-md flex flex-col justify-between')">
 
         <div class="space-y-3">
           <!-- Top Row: Badge & Date Indicator -->
           <div class="flex items-center justify-between">
             <span *ngIf="feed.type === 'anniversary'"
-              [class]="feed.isToday ? 'text-xs font-extrabold text-indigo-700 flex items-center gap-1.5' : 'text-xs font-bold text-slate-700 flex items-center gap-1.5'">
+              [class]="feed.isToday ? 'text-xs font-extrabold feed-anniversary-type-label flex items-center gap-1.5' : 'text-xs font-bold text-slate-700 flex items-center gap-1.5'">
               <i class="pi pi-trophy text-amber-500"></i> Work Anniversary
             </span>
             <span *ngIf="feed.type === 'birthday'"
@@ -542,7 +538,7 @@
               <div *ngIf="!feed.profilePicture"
                 [class]="feed.type === 'birthday' 
                   ? 'w-14 h-14 rounded-2xl bg-gradient-to-tr from-rose-400 to-amber-300 text-white flex items-center justify-center font-extrabold text-lg shadow-xs' 
-                  : 'w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 text-white flex items-center justify-center font-extrabold text-lg shadow-xs'">
+                  : 'w-14 h-14 rounded-2xl feed-anniversary-avatar-bg flex items-center justify-center font-extrabold text-lg shadow-xs'">
                 <span>{{ feed.name ? feed.name[0] : 'E' }}</span>
               </div>
               <span
@@ -560,7 +556,7 @@
               <!-- EXPERIENCE / TENURE BADGE ("kisko kitne year ka experince ho gya hai") -->
               <div *ngIf="feed.type === 'anniversary' && feed.years" class="pt-1">
                 <div
-                  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-gradient-to-r from-amber-100 via-indigo-100 to-blue-100 text-indigo-900 border border-indigo-200 shadow-2xs">
+                  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold feed-service-milestone-badge shadow-2xs">
                   <i class="pi pi-trophy text-amber-500 text-xs"></i>
                   <span>{{ feed.years }} {{ feed.years === 1 ? 'Year' : 'Years' }} of Service Completed</span>
                 </div>
@@ -572,19 +568,27 @@
         </div>
 
         <!-- Card Footer -->
-        <div class="flex items-center justify-between pt-3 border-t border-slate-200/70 text-xs mt-3">
-          <button type="button" (click)="toggleLike(feed)"
-            class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg hover:bg-rose-50 text-slate-600 hover:text-rose-600 transition cursor-pointer">
-            <i [class]="feed.isLiked ? 'pi pi-heart-fill text-rose-500 animate-badge-pop' : 'pi pi-heart'"></i>
-            <span class="font-bold text-xs" [class.text-rose-600]="feed.isLiked">{{ feed.likes }}</span>
-          </button>
+        <div class="flex items-center justify-between pt-3 border-t border-slate-200/70 text-xs mt-3 gap-2">
+          <div class="flex items-center gap-1.5">
+            <button type="button" (click)="toggleLike(feed)"
+              class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg hover:bg-rose-50 text-slate-600 hover:text-rose-600 transition cursor-pointer">
+              <i [class]="feed.isLiked ? 'pi pi-heart-fill text-rose-500 animate-badge-pop' : 'pi pi-heart'"></i>
+              <span class="font-bold text-xs" [class.text-rose-600]="feed.isLiked">{{ feed.likes }}</span>
+            </button>
+            <button type="button" (click)="openCelebrationModal(feed)"
+              class="flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-amber-50 text-slate-600 hover:text-amber-700 transition cursor-pointer text-xs font-semibold"
+              title="View Celebration Card">
+              <i class="pi pi-sparkles text-amber-500 text-xs"></i>
+              <span>Card</span>
+            </button>
+          </div>
 
           <button type="button" (click)="sendWish(feed)"
             [class]="feed.wished 
               ? 'px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-bold text-xs border border-emerald-200 flex items-center gap-1.5 transition cursor-default' 
               : (feed.type === 'birthday' 
                   ? 'px-3.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs border border-rose-200 flex items-center gap-1.5 transition cursor-pointer hover:shadow-2xs' 
-                  : 'px-3.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs border border-indigo-200 flex items-center gap-1.5 transition cursor-pointer hover:shadow-2xs')">
+                  : 'px-3.5 py-1.5 rounded-xl feed-btn-congratulate flex items-center gap-1.5 cursor-pointer')">
             <i [class]="feed.wished ? 'pi pi-check' : (feed.type === 'birthday' ? 'pi pi-gift' : 'pi pi-sparkles')"></i>
             <span>{{ feed.wished ? 'Wishes Sent!' : (feed.type === 'birthday' ? 'Send Wish 🎂' : 'Congratulate 🎉')
               }}</span>
@@ -727,10 +731,12 @@
 <!-- ========================================================================== -->
 <!-- FULL-SCREEN CONGRATULATIONS CELEBRATION MODAL (For HR Admin Leader)       -->
 <!-- ========================================================================== -->
-<div *ngIf="showCelebrationModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+<!-- ========================================================================== -->
+<!-- FULL-SCREEN CONGRATULATIONS CELEBRATION MODAL                             -->
+<!-- ========================================================================== -->
+<div *ngIf="showCelebrationModal && celebrationModalData as data" class="fixed inset-0 z-50 flex items-center justify-center p-4">
   <!-- Backdrop Blur -->
-  <div class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity" (click)="closeCelebrationModal()">
-  </div>
+  <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity" (click)="closeCelebrationModal()"></div>
 
   <!-- Falling Confetti Shower -->
   <div class="confetti-wrapper">
@@ -738,57 +744,88 @@
   </div>
 
   <!-- Celebration Modal Card -->
-  <div
-    class="relative bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden z-10 border-4 border-amber-300 animate-badge-pop">
-    <div
-      class="bg-gradient-to-r from-amber-400 via-rose-500 to-indigo-600 px-6 pt-8 pb-6 text-center text-white relative overflow-hidden">
-      <div
-        class="w-20 h-20 mx-auto rounded-full bg-white text-slate-900 flex items-center justify-center text-3xl shadow-lg mb-3 animate-float-balloon">
-        <span *ngIf="userCelebrationInfo?.isBirthday">🎂</span>
-        <span *ngIf="!userCelebrationInfo?.isBirthday && userCelebrationInfo?.isAnniversary">🏆</span>
-      </div>
+  <div class="relative bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden z-10 border-4 border-amber-300 animate-badge-pop">
+    
+    <!-- Top Banner Header -->
+    <div class="feed-celebration-ribbon-border px-6 pt-8 pb-14 text-center text-white relative overflow-hidden">
+      <div class="absolute -top-12 -right-12 w-36 h-36 bg-white/15 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="absolute -bottom-12 -left-12 w-36 h-36 bg-white/15 rounded-full blur-2xl pointer-events-none"></div>
 
-      <h2 class="text-xl sm:text-2xl font-black tracking-tight text-white drop-shadow-sm">
-        🎉 Heartiest Congratulations! 🎉
+      <button type="button" (click)="closeCelebrationModal()"
+        class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition cursor-pointer"
+        title="Close">
+        <i class="pi pi-times text-xs"></i>
+      </button>
+
+      <h2 class="text-xl sm:text-2xl font-black tracking-tight text-white drop-shadow-sm flex items-center justify-center gap-2">
+        <span>Heartiest Congratulations! 🎉</span>
       </h2>
       <p class="text-xs sm:text-sm font-medium text-amber-100 mt-1">
-        Celebrating our esteemed leader
+        A special tribute to our exceptional team member
       </p>
     </div>
 
-    <div class="p-6 sm:p-8 text-center space-y-4">
+    <!-- Floating Profile Image / Avatar -->
+    <div class="-mt-12 relative z-10 flex justify-center">
+      <div class="relative w-28 h-28 rounded-full p-1 bg-gradient-to-tr from-amber-400 via-rose-400 to-indigo-500 shadow-xl animate-float-gentle">
+        <div class="w-full h-full rounded-full overflow-hidden bg-white ring-4 ring-white shadow-inner flex items-center justify-center">
+          <img *ngIf="data.profilePicture" [src]="data.profilePicture"
+            [alt]="data.name" class="w-full h-full object-cover rounded-full" />
+          <div *ngIf="!data.profilePicture"
+            class="w-full h-full rounded-full bg-gradient-to-tr from-rose-400 via-amber-400 to-indigo-500 text-white flex items-center justify-center text-3xl font-black shadow-inner">
+            <span>{{ data.name ? data.name[0] : 'E' }}</span>
+          </div>
+        </div>
+        <span class="absolute bottom-1 right-1 w-9 h-9 rounded-full bg-gradient-to-tr from-amber-400 to-rose-500 text-white flex items-center justify-center text-base shadow-lg border-2 border-white animate-bounce">
+          <span *ngIf="data.isBirthday && data.isAnniversary">🎉</span>
+          <span *ngIf="data.isBirthday && !data.isAnniversary">🎂</span>
+          <span *ngIf="!data.isBirthday && data.isAnniversary">🏆</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Card Content -->
+    <div class="p-6 sm:p-8 pt-3 text-center space-y-4">
       <div class="space-y-1">
-        <h3 class="text-lg sm:text-xl font-black text-slate-900">{{ userCelebrationInfo?.name }}</h3>
-        <p *ngIf="userCelebrationInfo?.isBirthday" class="text-sm font-bold text-rose-600">🎂 Happy Birthday to You! 🎈
+        <h3 class="text-xl sm:text-2xl font-black text-slate-900">{{ data.name }}</h3>
+        <p *ngIf="data.isBirthday" class="text-sm sm:text-base font-bold text-rose-600 flex items-center justify-center gap-1.5">
+          <span>🎂</span> <span>Happy Birthday to You! 🎈</span>
         </p>
-        <p *ngIf="userCelebrationInfo?.isAnniversary" class="text-sm font-bold text-indigo-600">🏆 Happy {{
-          userCelebrationInfo?.years }} Year Work Anniversary! 🌟</p>
+        <p *ngIf="data.isAnniversary" class="text-sm sm:text-base font-bold feed-anniversary-type-label flex items-center justify-center gap-1.5">
+          <span>🏆</span> <span>Happy {{ data.years }} Year Work Anniversary! 🌟</span>
+        </p>
       </div>
 
-      <div *ngIf="userCelebrationInfo?.isAnniversary && userCelebrationInfo?.years"
-        class="bg-gradient-to-r from-amber-50 via-indigo-50 to-blue-50 border border-amber-200/80 rounded-2xl p-4 shadow-xs space-y-1">
-        <div class="text-2xl font-black text-amber-600">{{ userCelebrationInfo?.years }} Years</div>
-        <div class="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Of Leadership, Excellence &
-          Dedication</div>
+      <!-- Work Anniversary Box -->
+      <div *ngIf="data.isAnniversary && data.years"
+        class="bg-gradient-to-r from-amber-50/90 via-indigo-50/70 to-blue-50/90 border border-amber-200/80 rounded-2xl p-4 shadow-2xs space-y-1.5">
+        <div class="text-2xl font-black text-amber-600">{{ data.years }} Years</div>
+        <div class="text-xs font-black text-slate-800 uppercase tracking-wider">
+          Of Commitment, Hard Work & Success
+        </div>
         <p class="text-xs text-slate-600 pt-1 leading-relaxed">
-          Thank you for guiding our teams and making StaffHub such a wonderful workplace over the past {{
-          userCelebrationInfo?.years }} years!
+          Thank you for being such an integral and inspiring pillar of our organization. Your dedication over the past {{ data.years }} years is deeply appreciated!
         </p>
       </div>
 
-      <div *ngIf="userCelebrationInfo?.isBirthday"
-        class="bg-rose-50/70 border border-rose-200/80 rounded-2xl p-4 shadow-xs text-xs text-slate-700 leading-relaxed">
-        <p class="font-semibold text-rose-800 mb-1">Wishing you the very best on your special day!</p>
-        May your day be filled with happiness and the year ahead bring endless success and prosperity!
+      <!-- Birthday Box -->
+      <div *ngIf="data.isBirthday"
+        class="bg-rose-50/80 border border-rose-200/80 rounded-2xl p-4 shadow-2xs text-xs text-slate-700 leading-relaxed space-y-1">
+        <p class="font-bold text-rose-800 text-sm">Wishing you the very best on your special day!</p>
+        <p class="text-xs text-slate-600">
+          May this coming year be filled with exciting opportunities, great happiness, vibrant health, and outstanding professional achievements!
+        </p>
       </div>
 
+      <!-- Button -->
       <div class="pt-2">
         <button type="button" (click)="closeCelebrationModal()"
-          class="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-600 text-white font-extrabold text-sm shadow-md hover:shadow-lg transition cursor-pointer flex items-center justify-center gap-2">
+          class="w-full py-3 px-6 rounded-xl feed-celebration-ribbon-border text-white font-extrabold text-sm shadow-md hover:shadow-lg transition cursor-pointer flex items-center justify-center gap-2">
           <span>🙏 Thank You so much! Let's Celebrate 🎉</span>
         </button>
       </div>
     </div>
+
   </div>
 </div>
 

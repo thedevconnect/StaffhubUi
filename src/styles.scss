@@ -1,5 +1,5 @@
 @import "primeicons/primeicons.css";
-@import "tailwindcss";
+@import "tailwindcss/index.css";
 @import "leaflet/dist/leaflet.css";
 
 /* Force class-based dark mode in Tailwind v4 instead of system media queries */
@@ -155,6 +155,25 @@ app-table-template {
 }
 
 /* Global Dynamic Accent Color Palette System */
+:root {
+  --primary-600: #1976D2;
+  --primary-700: #1565C0;
+  --primary-500: #2196F3;
+  --primary-400: #64b5f6;
+  --primary-300: #90caf9;
+  --primary-200: #bbdefb;
+  --primary-100: #e3f2fd;
+  --primary-50: #f4fafe;
+  --accent-color: #1976D2;
+  --accent-hover: #1565C0;
+  --accent-light-bg: #f4fafe;
+  --color-add: #1976D2;
+  --color-add-hover: #1565C0;
+  --color-submit: #1976D2;
+  --color-submit-hover: #1565C0;
+  --primary-color: #1976D2;
+}
+
 [data-accent="staffhub"] {
   --primary-600: #1976D2;
   --primary-700: #1565C0;
@@ -427,6 +446,149 @@ html[data-accent] {
   background-color: rgba(255, 255, 255, 0.25) !important;
   border-left: 3.5px solid #ffffff !important;
   font-weight: 700 !important;
+}
+
+/* ==========================================================================
+   DYNAMIC THEME ACCENT INTEGRATION FOR MY FEED & DASHBOARDS
+   ========================================================================== */
+
+/* Active Dashboard Navigation Tab Indicator */
+.active-nav-tab {
+  color: var(--primary-600, #1976D2) !important;
+  border-bottom: 2px solid var(--primary-600, #1976D2) !important;
+  font-weight: 700 !important;
+}
+
+/* My Feed Header Live Pulse Dot */
+.feed-live-dot {
+  background-color: var(--primary-500, #2196F3) !important;
+  box-shadow: 0 0 10px var(--primary-400, #64b5f6) !important;
+}
+
+/* Milestones Count Chip in Feed Header */
+.feed-milestones-count {
+  background-color: var(--primary-100, #e3f2fd) !important;
+  color: var(--primary-700, #1565C0) !important;
+  border: 1px solid var(--primary-200, #bbdefb) !important;
+}
+
+/* Feed View Switcher (All | Upcoming) */
+.feed-view-btn-active-accent {
+  background-color: #ffffff !important;
+  color: var(--primary-600, #1976D2) !important;
+  font-weight: 800 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Filter Chips (All & Work Anniversaries) */
+.feed-chip-active-accent {
+  background-color: var(--primary-600, #1976D2) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+}
+
+.feed-chip-inactive-anniversary {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: var(--primary-50, #f4fafe) !important;
+    color: var(--primary-700, #1565C0) !important;
+    border-color: var(--primary-200, #bbdefb) !important;
+  }
+}
+
+/* Work Anniversary Cards */
+.feed-anniversary-card-today {
+  background: linear-gradient(135deg, var(--primary-50, #f4fafe) 0%, #ffffff 80%) !important;
+  border: 1.5px solid var(--primary-200, #bbdefb) !important;
+  box-shadow: 0 4px 14px var(--primary-100, #e3f2fd) !important;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 8px 20px var(--primary-200, #bbdefb) !important;
+    transform: translateY(-1px);
+  }
+}
+
+.feed-anniversary-card-normal {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--primary-200, #bbdefb) !important;
+    box-shadow: 0 4px 12px var(--primary-50, #f4fafe) !important;
+  }
+}
+
+/* Work Anniversary Type Label */
+.feed-anniversary-type-label {
+  color: var(--primary-700, #1565C0) !important;
+}
+
+/* Avatar Graphic (when no profile picture is set) */
+.feed-anniversary-avatar-bg {
+  background: linear-gradient(135deg, var(--primary-500, #2196F3), var(--primary-700, #1565C0)) !important;
+  color: #ffffff !important;
+}
+
+/* Experience / Service Milestone Badge */
+.feed-service-milestone-badge {
+  background: linear-gradient(90deg, #fef3c7 0%, var(--primary-100, #e3f2fd) 100%) !important;
+  color: var(--primary-800, #0f4c81) !important;
+  border: 1px solid var(--primary-200, #bbdefb) !important;
+}
+
+/* Congratulate Action Button for Anniversaries */
+.feed-btn-congratulate {
+  background-color: var(--primary-50, #f4fafe) !important;
+  color: var(--primary-700, #1565C0) !important;
+  border: 1px solid var(--primary-200, #bbdefb) !important;
+  font-weight: 700 !important;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: var(--primary-100, #e3f2fd) !important;
+    border-color: var(--primary-300, #90caf9) !important;
+    box-shadow: 0 2px 8px var(--primary-100, #e3f2fd) !important;
+    transform: translateY(-1px);
+  }
+}
+
+/* Celebration Ribbon Theme Accent Integration */
+.feed-celebration-ribbon-border {
+  background: linear-gradient(90deg, #f59e0b 0%, #f43f5e 45%, var(--primary-600, #1976D2) 100%) !important;
+}
+
+.feed-celebration-ribbon-btn {
+  background: linear-gradient(135deg, #f59e0b 0%, var(--primary-600, #1976D2) 100%) !important;
+  color: #ffffff !important;
+  transition: all 0.2s ease;
+
+  &:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Left Column "My Info" & "Leave Status" Theme Integration */
+.my-info-table-box {
+  border-color: var(--primary-200, #bbdefb) !important;
+  background-color: var(--primary-50, #f4fafe) !important;
+}
+
+.my-info-badge-icon {
+  background: linear-gradient(135deg, var(--primary-500, #2196F3), var(--primary-700, #1565C0)) !important;
+  color: #ffffff !important;
+}
+
+.leave-status-value-pill {
+  color: var(--primary-700, #1565C0) !important;
+  background-color: var(--primary-50, #f4fafe) !important;
+  border: 1px solid var(--primary-200, #bbdefb) !important;
 }
 
 /* Universal Animated Close Button System (Popups, Dialogs, Tables, Modals & Notifications) */

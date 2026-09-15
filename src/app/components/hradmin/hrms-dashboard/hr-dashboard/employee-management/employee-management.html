@@ -60,7 +60,8 @@
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div class="space-y-2 md:col-span-2">
-                <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name *</label>
+                <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name <span
+                        class="text-red-500">*</span></label>
                 <input id="fullName" placeholder="Enter full name" type="text" pInputText formControlName="fullName"
                     class="w-full">
                 @if (f['fullName'].touched && f['fullName'].invalid) {
@@ -69,7 +70,8 @@
             </div>
 
             <div class="space-y-2 md:col-span-2">
-                <label for="officialEmail" class="block text-sm font-medium text-gray-700">Official Email *</label>
+                <label for="officialEmail" class="block text-sm font-medium text-gray-700">Official Email <span
+                        class="text-red-500">*</span></label>
                 <input id="officialEmail" placeholder="Enter official email" type="email" pInputText
                     formControlName="officialEmail" class="w-full" (input)="onEmailInput($event)">
                 @if (f['officialEmail'].touched && f['officialEmail'].hasError('required')) {
@@ -81,7 +83,8 @@
             </div>
 
             <div class="space-y-2">
-                <label for="mobileNumber" class="block text-sm font-medium text-gray-700">Mobile Number *</label>
+                <label for="mobileNumber" class="block text-sm font-medium text-gray-700">Mobile Number <span
+                        class="text-red-500">*</span></label>
                 <input id="mobileNumber" placeholder="Enter mobile number" type="tel" pInputText
                     formControlName="mobileNumber" maxlength="10" class="w-full">
                 @if (f['mobileNumber'].touched && f['mobileNumber'].hasError('required')) {
@@ -93,7 +96,8 @@
             </div>
 
             <div class="space-y-2">
-                <label for="designation" class="block text-sm font-medium text-gray-700">Designation *</label>
+                <label for="designation" class="block text-sm font-medium text-gray-700">Designation <span
+                        class="text-red-500">*</span></label>
                 <p-select id="designation" [options]="designationOptions" optionLabel="label" optionValue="value"
                     formControlName="designation" placeholder="Select designation" [filter]="true"
                     class="w-full custom-p-select"></p-select>
@@ -103,7 +107,8 @@
             </div>
 
             <div class="space-y-2">
-                <label for="department" class="block text-sm font-medium text-gray-700">Department *</label>
+                <label for="department" class="block text-sm font-medium text-gray-700">Department <span
+                        class="text-red-500">*</span></label>
                 <p-select id="department" [options]="departmentOptions" optionLabel="label" optionValue="value"
                     formControlName="department" placeholder="Select department" [filter]="true"
                     class="w-full custom-p-select"></p-select>
@@ -114,7 +119,7 @@
 
             <div class="space-y-2">
                 <label for="reportingManager" class="block text-sm font-medium text-gray-700">Reporting Manager Name
-                    *</label>
+                    <span class="text-red-500">*</span></label>
                 <input id="reportingManager" type="text" pInputText formControlName="reportingManager" class="w-full"
                     placeholder="Enter reporting manager name">
                 @if (f['reportingManager'].touched && f['reportingManager'].invalid) {
@@ -123,7 +128,8 @@
             </div>
 
             <div class="space-y-2">
-                <label for="joiningDate" class="block text-sm font-medium text-gray-700">Joining Date *</label>
+                <label for="joiningDate" class="block text-sm font-medium text-gray-700">Joining Date <span
+                        class="text-red-500">*</span></label>
                 <p-datepicker id="joiningDate" formControlName="joiningDate" class="w-full" [showIcon]="true"
                     placeholder="Select joining date" [showButtonBar]="true" dateFormat="yy-mm-dd"></p-datepicker>
                 @if (f['joiningDate'].touched && f['joiningDate'].invalid) {
@@ -132,14 +138,18 @@
             </div>
 
             <div class="space-y-2">
-                <label for="dob" class="block text-sm font-medium text-gray-700">Date of Birth (DOB)</label>
+                <label for="dob" class="block text-sm font-medium text-gray-700">Date of Birth (DOB) <span
+                        class="text-red-500">*</span></label>
                 <p-datepicker id="dob" formControlName="dob" class="w-full" [showIcon]="true"
                     placeholder="Select Date of Birth" [showButtonBar]="true" dateFormat="yy-mm-dd"></p-datepicker>
+                @if (f['dob'].touched && f['dob'].invalid) {
+                <small class="text-red-500">Date of Birth is required.</small>
+                }
             </div>
 
             <div class="space-y-2">
                 <label for="employmentType" class="block text-sm font-medium text-gray-700">Employment Type
-                    *</label>
+                    <span class="text-red-500">*</span></label>
                 <p-select id="employmentType" [options]="employmentTypeOptions" optionLabel="label" optionValue="value"
                     formControlName="employmentType" placeholder="Select employment type"
                     class="w-full custom-p-select"></p-select>
@@ -149,7 +159,8 @@
             </div>
 
             <div class="space-y-2">
-                <label for="workLocation" class="block text-sm font-medium text-gray-700">Work Location *</label>
+                <label for="workLocation" class="block text-sm font-medium text-gray-700">Work Location <span
+                        class="text-red-500">*</span></label>
                 <p-select id="workLocation" [options]="workLocationOptions" optionLabel="label" optionValue="value"
                     formControlName="workLocation" placeholder="Select work location"
                     class="w-full custom-p-select"></p-select>

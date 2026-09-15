@@ -267,11 +267,19 @@ export class HrDashboard implements OnInit, OnDestroy {
   loadingFeeds = false;
 
   showCelebrationModal = false;
+  celebrationModalData: {
+    name: string;
+    isBirthday: boolean;
+    isAnniversary: boolean;
+    years?: number;
+    profilePicture?: string | null;
+  } | null = null;
   userCelebrationInfo: {
     name: string;
     isBirthday: boolean;
     isAnniversary: boolean;
     years?: number;
+    profilePicture?: string | null;
   } | null = null;
   userCelebrationDismissed = false;
   toastWishMessage: string | null = null;
@@ -973,8 +981,10 @@ export class HrDashboard implements OnInit, OnDestroy {
         name: user.employeeName || user.username || 'Valued Leader',
         isBirthday: !!userBday,
         isAnniversary: !!userAnniv,
-        years: userAnniv?.years
+        years: userAnniv?.years,
+        profilePicture: userAnniv?.profilePicture || userBday?.profilePicture || (user as any).profilePicture || (user as any).profile_picture || null
       };
+      this.celebrationModalData = this.userCelebrationInfo;
 
       const todayKey = `celebration_shown_hr_${currentUserId}_${today.getFullYear()}_${today.getMonth()}_${today.getDate()}`;
       const alreadyShown = sessionStorage.getItem(todayKey);
@@ -1046,7 +1056,31 @@ export class HrDashboard implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  openCelebrationModal(): void {
+  openCelebrationModal(feedItem?: CelebrationFeedItem): void {
+    if (feedItem) {
+      const allMatching = this.celebrationFeeds.filter(i => 
+        (i.userId && feedItem.userId && String(i.userId) === String(feedItem.userId)) ||
+        (i.name && feedItem.name && i.name.toLowerCase().trim() === feedItem.name.toLowerCase().trim())
+      );
+      const hasBday = allMatching.some(i => i.type === 'birthday');
+      const hasAnniv = allMatching.some(i => i.type === 'anniversary');
+      const annivItem = allMatching.find(i => i.type === 'anniversary');
+      const withPic = allMatching.find(i => !!i.profilePicture);
+
+      this.celebrationModalData = {
+        name: feedItem.name,
+        isBirthday: hasBday,
+        isAnniversary: hasAnniv,
+        years: annivItem?.years || feedItem.years || 3,
+        profilePicture: withPic?.profilePicture || feedItem.profilePicture || null
+      };
+    } else if (this.userCelebrationInfo) {
+      this.celebrationModalData = this.userCelebrationInfo;
+    } else if (this.celebrationFeeds.length > 0) {
+      const firstToday = this.celebrationFeeds.find(i => i.isToday) || this.celebrationFeeds[0];
+      this.openCelebrationModal(firstToday);
+      return;
+    }
     this.showCelebrationModal = true;
     this.cdr.detectChanges();
   }

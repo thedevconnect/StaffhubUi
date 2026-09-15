@@ -46,7 +46,6 @@ export interface CelebrationFeedItem {
     CardModule,
     TableModule,
     Breadcrumb,
-    RouterLink,
     TableTemplate,
     EmployeeAttendance,
     AttendanceRegularization
@@ -96,11 +95,19 @@ export class EssDashboard implements OnInit {
 
   // User celebration pop-up modal state
   readonly showCelebrationModal = signal<boolean>(false);
+  readonly celebrationModalData = signal<{
+    name: string;
+    isBirthday: boolean;
+    isAnniversary: boolean;
+    years?: number;
+    profilePicture?: string | null;
+  } | null>(null);
   readonly userCelebrationInfo = signal<{
     name: string;
     isBirthday: boolean;
     isAnniversary: boolean;
     years?: number;
+    profilePicture?: string | null;
   } | null>(null);
   readonly userCelebrationDismissed = signal<boolean>(false);
   readonly toastWishMessage = signal<string | null>(null);
@@ -195,7 +202,31 @@ export class EssDashboard implements OnInit {
     this.cdr.markForCheck();
   }
 
-  openCelebrationModal(): void {
+  openCelebrationModal(feedItem?: CelebrationFeedItem): void {
+    if (feedItem) {
+      const allMatching = this.celebrationFeeds().filter(i => 
+        (i.userId && feedItem.userId && String(i.userId) === String(feedItem.userId)) ||
+        (i.name && feedItem.name && i.name.toLowerCase().trim() === feedItem.name.toLowerCase().trim())
+      );
+      const hasBday = allMatching.some(i => i.type === 'birthday');
+      const hasAnniv = allMatching.some(i => i.type === 'anniversary');
+      const annivItem = allMatching.find(i => i.type === 'anniversary');
+      const withPic = allMatching.find(i => !!i.profilePicture);
+
+      this.celebrationModalData.set({
+        name: feedItem.name,
+        isBirthday: hasBday,
+        isAnniversary: hasAnniv,
+        years: annivItem?.years || feedItem.years || 3,
+        profilePicture: withPic?.profilePicture || feedItem.profilePicture || null
+      });
+    } else if (this.userCelebrationInfo()) {
+      this.celebrationModalData.set(this.userCelebrationInfo());
+    } else if (this.celebrationFeeds().length > 0) {
+      const firstToday = this.celebrationFeeds().find(i => i.isToday) || this.celebrationFeeds()[0];
+      this.openCelebrationModal(firstToday);
+      return;
+    }
     this.showCelebrationModal.set(true);
     this.cdr.markForCheck();
   }
@@ -546,12 +577,15 @@ export class EssDashboard implements OnInit {
     );
 
     if (userAnniv || userBday) {
-      this.userCelebrationInfo.set({
+      const data = {
         name: user.employeeName || user.username || 'Valued Team Member',
         isBirthday: !!userBday,
         isAnniversary: !!userAnniv,
-        years: userAnniv?.years
-      });
+        years: userAnniv?.years,
+        profilePicture: userAnniv?.profilePicture || userBday?.profilePicture || (user as any).profilePicture || (user as any).profile_picture || null
+      };
+      this.userCelebrationInfo.set(data);
+      this.celebrationModalData.set(data);
 
       const todayKey = `celebration_shown_${currentUserId}_${today.getFullYear()}_${today.getMonth()}_${today.getDate()}`;
       const alreadyShown = sessionStorage.getItem(todayKey);
