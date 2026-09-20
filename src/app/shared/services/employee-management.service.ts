@@ -170,6 +170,8 @@ export class EmployeeManagementService {
       joining_date: employee?.joining_date ?? employee?.joiningDate ?? '',
       company_name: employee?.company_name ?? employee?.companyName ?? '',
       companyName: employee?.companyName ?? employee?.company_name ?? '',
+      companyId: employee?.company_id ?? employee?.companyId ?? null,
+      company_id: employee?.company_id ?? employee?.companyId ?? null,
       employmentType: employee?.employmentType ?? employee?.employment_type ?? '',
       employment_type: employee?.employment_type ?? employee?.employmentType ?? '',
       workLocation: employee?.workLocation ?? employee?.work_location ?? '',

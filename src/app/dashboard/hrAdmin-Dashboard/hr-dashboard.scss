@@ -280,6 +280,21 @@
   }
 }
 
+@keyframes pulse-glow-emerald {
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.25), 0 4px 12px rgba(5, 150, 105, 0.15);
+    border-color: rgba(16, 185, 129, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 28px rgba(16, 185, 129, 0.5), 0 8px 20px rgba(5, 150, 105, 0.25);
+    border-color: rgba(16, 185, 129, 0.8);
+  }
+}
+
+.animate-glow-emerald {
+  animation: pulse-glow-emerald 3s ease-in-out infinite;
+}
+
 .animate-glow-gold {
   animation: pulse-glow-gold 3s ease-in-out infinite;
 }

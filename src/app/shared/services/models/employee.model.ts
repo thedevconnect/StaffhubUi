@@ -25,6 +25,8 @@ export interface Employee {
   created_at?: string;
   company_name?: string;
   companyName?: string;
+  companyId?: number;
+  company_id?: number;
   employeeId?: number | string;
   onboardingStatus?: string;
   custom_location_allowed?: number;

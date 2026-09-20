@@ -460,6 +460,10 @@
         [class]="activeFeedFilter === 'all' ? 'feed-chip-active-accent font-bold px-3 py-1.5 rounded-xl shadow-xs cursor-pointer' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold px-3 py-1.5 rounded-xl shadow-2xs cursor-pointer transition'">
         All Celebrations
       </button>
+      <button type="button" (click)="activeFeedFilter = 'newhire'"
+        [class]="activeFeedFilter === 'newhire' ? 'bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5' : 'bg-white border border-slate-200 text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 font-semibold px-3 py-1.5 rounded-xl shadow-2xs cursor-pointer transition flex items-center gap-1.5'">
+        <span>👋</span> New Hires
+      </button>
       <button type="button" (click)="activeFeedFilter = 'birthday'"
         [class]="activeFeedFilter === 'birthday' ? 'bg-rose-500 text-white font-bold px-3 py-1.5 rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5' : 'bg-white border border-slate-200 text-slate-700 hover:bg-rose-50 hover:text-rose-600 font-semibold px-3 py-1.5 rounded-xl shadow-2xs cursor-pointer transition flex items-center gap-1.5'">
         <span>🎂</span> Birthdays
@@ -499,16 +503,24 @@
 
       <div *ngFor="let feed of filteredCelebrationFeeds"
         [class]="feed.isToday 
-          ? (feed.type === 'birthday' 
-              ? 'bg-gradient-to-br from-rose-50 via-amber-50/40 to-white border-2 border-rose-300 rounded-2xl p-5 space-y-4 shadow-sm animate-glow-rose hover:shadow-md transition-all duration-300 flex flex-col justify-between' 
-              : 'feed-anniversary-card-today rounded-2xl p-5 space-y-4 animate-glow-gold flex flex-col justify-between')
-          : (feed.type === 'birthday' 
-              ? 'bg-white border border-rose-100 hover:border-rose-300 rounded-2xl p-5 space-y-4 shadow-2xs hover:shadow-md transition duration-200 flex flex-col justify-between' 
-              : 'feed-anniversary-card-normal rounded-2xl p-5 space-y-4 shadow-2xs hover:shadow-md flex flex-col justify-between')">
+          ? (feed.type === 'newhire'
+              ? 'bg-gradient-to-br from-emerald-50 via-teal-50/40 to-white border-2 border-emerald-400 rounded-2xl p-5 space-y-4 shadow-sm animate-glow-emerald hover:shadow-md transition-all duration-300 flex flex-col justify-between'
+              : (feed.type === 'birthday' 
+                  ? 'bg-gradient-to-br from-rose-50 via-amber-50/40 to-white border-2 border-rose-300 rounded-2xl p-5 space-y-4 shadow-sm animate-glow-rose hover:shadow-md transition-all duration-300 flex flex-col justify-between' 
+                  : 'feed-anniversary-card-today rounded-2xl p-5 space-y-4 animate-glow-gold flex flex-col justify-between'))
+          : (feed.type === 'newhire'
+              ? 'bg-white border border-emerald-100 hover:border-emerald-300 rounded-2xl p-5 space-y-4 shadow-2xs hover:shadow-md transition duration-200 flex flex-col justify-between'
+              : (feed.type === 'birthday' 
+                  ? 'bg-white border border-rose-100 hover:border-rose-300 rounded-2xl p-5 space-y-4 shadow-2xs hover:shadow-md transition duration-200 flex flex-col justify-between' 
+                  : 'feed-anniversary-card-normal rounded-2xl p-5 space-y-4 shadow-2xs hover:shadow-md flex flex-col justify-between'))">
 
         <div class="space-y-3">
           <!-- Top Row: Badge & Date Indicator -->
           <div class="flex items-center justify-between">
+            <span *ngIf="feed.type === 'newhire'"
+              [class]="feed.isToday ? 'text-xs font-extrabold text-emerald-600 flex items-center gap-1.5' : 'text-xs font-bold text-slate-700 flex items-center gap-1.5'">
+              <i class="pi pi-user-plus text-emerald-600"></i> New Joinee / Welcome
+            </span>
             <span *ngIf="feed.type === 'anniversary'"
               [class]="feed.isToday ? 'text-xs font-extrabold feed-anniversary-type-label flex items-center gap-1.5' : 'text-xs font-bold text-slate-700 flex items-center gap-1.5'">
               <i class="pi pi-trophy text-amber-500"></i> Work Anniversary
@@ -536,14 +548,20 @@
                 <img [src]="feed.profilePicture" alt="{{ feed.name }}" class="w-full h-full object-cover" />
               </div>
               <div *ngIf="!feed.profilePicture"
-                [class]="feed.type === 'birthday' 
-                  ? 'w-14 h-14 rounded-2xl bg-gradient-to-tr from-rose-400 to-amber-300 text-white flex items-center justify-center font-extrabold text-lg shadow-xs' 
-                  : 'w-14 h-14 rounded-2xl feed-anniversary-avatar-bg flex items-center justify-center font-extrabold text-lg shadow-xs'">
+                [class]="feed.type === 'newhire'
+                  ? 'w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-white flex items-center justify-center font-extrabold text-lg shadow-xs'
+                  : (feed.type === 'birthday' 
+                    ? 'w-14 h-14 rounded-2xl bg-gradient-to-tr from-rose-400 to-amber-300 text-white flex items-center justify-center font-extrabold text-lg shadow-xs' 
+                    : 'w-14 h-14 rounded-2xl feed-anniversary-avatar-bg flex items-center justify-center font-extrabold text-lg shadow-xs')">
                 <span>{{ feed.name ? feed.name[0] : 'E' }}</span>
               </div>
               <span
-                [class]="feed.type === 'birthday' ? 'absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] flex items-center justify-center shadow-xs' : 'absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-amber-500 text-white text-[10px] flex items-center justify-center shadow-xs'">
-                <i [class]="feed.type === 'birthday' ? 'pi pi-heart-fill' : 'pi pi-star-fill'"></i>
+                [class]="feed.type === 'newhire'
+                  ? 'absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-600 text-white text-[10px] flex items-center justify-center shadow-xs'
+                  : (feed.type === 'birthday' 
+                    ? 'absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] flex items-center justify-center shadow-xs' 
+                    : 'absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-amber-500 text-white text-[10px] flex items-center justify-center shadow-xs')">
+                <i [class]="feed.type === 'newhire' ? 'pi pi-user-plus' : (feed.type === 'birthday' ? 'pi pi-heart-fill' : 'pi pi-star-fill')"></i>
               </span>
             </div>
 
@@ -559,6 +577,15 @@
                   class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold feed-service-milestone-badge shadow-2xs">
                   <i class="pi pi-trophy text-amber-500 text-xs"></i>
                   <span>{{ feed.years }} {{ feed.years === 1 ? 'Year' : 'Years' }} of Service Completed</span>
+                </div>
+              </div>
+
+              <!-- NEW JOINEE WELCOME BADGE -->
+              <div *ngIf="feed.type === 'newhire'" class="pt-1">
+                <div
+                  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
+                  <i class="pi pi-sparkles text-emerald-600 text-xs"></i>
+                  <span>Welcome New Joinee 🚀</span>
                 </div>
               </div>
 
@@ -586,12 +613,13 @@
           <button type="button" (click)="sendWish(feed)"
             [class]="feed.wished 
               ? 'px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-bold text-xs border border-emerald-200 flex items-center gap-1.5 transition cursor-default' 
-              : (feed.type === 'birthday' 
-                  ? 'px-3.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs border border-rose-200 flex items-center gap-1.5 transition cursor-pointer hover:shadow-2xs' 
-                  : 'px-3.5 py-1.5 rounded-xl feed-btn-congratulate flex items-center gap-1.5 cursor-pointer')">
-            <i [class]="feed.wished ? 'pi pi-check' : (feed.type === 'birthday' ? 'pi pi-gift' : 'pi pi-sparkles')"></i>
-            <span>{{ feed.wished ? 'Wishes Sent!' : (feed.type === 'birthday' ? 'Send Wish 🎂' : 'Congratulate 🎉')
-              }}</span>
+              : (feed.type === 'newhire'
+                  ? 'px-3.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs border border-emerald-200 flex items-center gap-1.5 transition cursor-pointer hover:shadow-2xs'
+                  : (feed.type === 'birthday' 
+                      ? 'px-3.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs border border-rose-200 flex items-center gap-1.5 transition cursor-pointer hover:shadow-2xs' 
+                      : 'px-3.5 py-1.5 rounded-xl feed-btn-congratulate flex items-center gap-1.5 cursor-pointer'))">
+            <i [class]="feed.wished ? 'pi pi-check' : (feed.type === 'newhire' ? 'pi pi-handshake' : (feed.type === 'birthday' ? 'pi pi-gift' : 'pi pi-sparkles'))"></i>
+            <span>{{ feed.wished ? 'Welcomed!' : (feed.type === 'newhire' ? 'Say Welcome 👋' : (feed.type === 'birthday' ? 'Send Wish 🎂' : 'Congratulate 🎉')) }}</span>
           </button>
         </div>
 
@@ -788,11 +816,26 @@
     <div class="p-6 sm:p-8 pt-3 text-center space-y-4">
       <div class="space-y-1">
         <h3 class="text-xl sm:text-2xl font-black text-slate-900">{{ data.name }}</h3>
+        <p *ngIf="data.isNewHire" class="text-sm sm:text-base font-bold text-emerald-600 flex items-center justify-center gap-1.5">
+          <span>👋</span> <span>Welcome to the Team! 🚀</span>
+        </p>
         <p *ngIf="data.isBirthday" class="text-sm sm:text-base font-bold text-rose-600 flex items-center justify-center gap-1.5">
           <span>🎂</span> <span>Happy Birthday to You! 🎈</span>
         </p>
         <p *ngIf="data.isAnniversary" class="text-sm sm:text-base font-bold feed-anniversary-type-label flex items-center justify-center gap-1.5">
           <span>🏆</span> <span>Happy {{ data.years }} Year Work Anniversary! 🌟</span>
+        </p>
+      </div>
+
+      <!-- New Joinee Welcome Box -->
+      <div *ngIf="data.isNewHire"
+        class="bg-gradient-to-r from-emerald-50/90 via-teal-50/70 to-cyan-50/90 border border-emerald-200/80 rounded-2xl p-4 shadow-2xs space-y-1.5">
+        <div class="text-xl font-black text-emerald-700">Welcome Aboard! 🌟</div>
+        <div class="text-xs font-black text-slate-800 uppercase tracking-wider">
+          New Team Member Joining Us
+        </div>
+        <p class="text-xs text-slate-600 pt-1 leading-relaxed">
+          We are beyond excited to welcome {{ data.name }} to our company family. Wishing you an incredible journey of learning, innovation, and milestones ahead!
         </p>
       </div>
 

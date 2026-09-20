@@ -173,7 +173,7 @@ export class EmployeeManagement implements OnInit {
       department: ['', [Validators.required]],
       reportingManager: ['', [Validators.required]],
       joiningDate: [null, [Validators.required]],
-      dob: [null],
+      dob: [null, [Validators.required]],
       employmentType: ['', [Validators.required]],
       workLocation: ['OFFICE', [Validators.required]],
     });
@@ -193,6 +193,8 @@ export class EmployeeManagement implements OnInit {
     this.isEditMode = false;
     this.selectedEmployee = null;
     this.employeeForm.reset({ workLocation: 'OFFICE' });
+    this.employeeForm.get('dob')?.setValidators([Validators.required]);
+    this.employeeForm.get('dob')?.updateValueAndValidity();
     this.employeeForm.enable();
   }
 

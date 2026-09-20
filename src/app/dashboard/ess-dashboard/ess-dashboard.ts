@@ -21,7 +21,7 @@ import { EmployeeManagementService } from '../../shared/services/employee-manage
 export interface CelebrationFeedItem {
   id: string;
   userId?: string | number;
-  type: 'birthday' | 'anniversary';
+  type: 'birthday' | 'anniversary' | 'newhire';
   isToday: boolean;
   name: string;
   designation: string;
@@ -88,7 +88,7 @@ export class EssDashboard implements OnInit {
     { label: 'Earned Leave-Balance as on', value: 0 }
   ]);
 
-  readonly activeFeedFilter = signal<'all' | 'anniversary' | 'birthday'>('all');
+  readonly activeFeedFilter = signal<'all' | 'anniversary' | 'birthday' | 'newhire'>('all');
   readonly activeFeedView = signal<'all' | 'today' | 'upcoming'>('all');
   readonly celebrationFeeds = signal<CelebrationFeedItem[]>([]);
   readonly loadingFeeds = signal<boolean>(false);
@@ -99,6 +99,7 @@ export class EssDashboard implements OnInit {
     name: string;
     isBirthday: boolean;
     isAnniversary: boolean;
+    isNewHire?: boolean;
     years?: number;
     profilePicture?: string | null;
   } | null>(null);
@@ -106,6 +107,7 @@ export class EssDashboard implements OnInit {
     name: string;
     isBirthday: boolean;
     isAnniversary: boolean;
+    isNewHire?: boolean;
     years?: number;
     profilePicture?: string | null;
   } | null>(null);
@@ -179,9 +181,14 @@ export class EssDashboard implements OnInit {
     if (!feed.isLiked) {
       this.toggleLike(feed);
     }
-    const wishText = feed.type === 'birthday'
-      ? `🎂 You sent heartfelt birthday wishes to ${feed.name}!`
-      : `🏆 You congratulated ${feed.name} on completing ${feed.years} years of service!`;
+    let wishText = '';
+    if (feed.type === 'birthday') {
+      wishText = `🎂 You sent heartfelt birthday wishes to ${feed.name}!`;
+    } else if (feed.type === 'anniversary') {
+      wishText = `🏆 You congratulated ${feed.name} on completing ${feed.years} years of service!`;
+    } else {
+      wishText = `👋 You welcomed ${feed.name} to the team!`;
+    }
     this.toastWishMessage.set(wishText);
     setTimeout(() => {
       if (this.toastWishMessage() === wishText) {
@@ -210,6 +217,7 @@ export class EssDashboard implements OnInit {
       );
       const hasBday = allMatching.some(i => i.type === 'birthday');
       const hasAnniv = allMatching.some(i => i.type === 'anniversary');
+      const hasNewHire = allMatching.some(i => i.type === 'newhire') || feedItem.type === 'newhire';
       const annivItem = allMatching.find(i => i.type === 'anniversary');
       const withPic = allMatching.find(i => !!i.profilePicture);
 
@@ -217,6 +225,7 @@ export class EssDashboard implements OnInit {
         name: feedItem.name,
         isBirthday: hasBday,
         isAnniversary: hasAnniv,
+        isNewHire: hasNewHire,
         years: annivItem?.years || feedItem.years || 3,
         profilePicture: withPic?.profilePicture || feedItem.profilePicture || null
       });
@@ -389,7 +398,18 @@ export class EssDashboard implements OnInit {
 
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-    employees.forEach(emp => {
+    const user = this.authService.user();
+    const userCompanyId = (user as any)?.companyId || (user as any)?.company_id || localStorage.getItem('companyId');
+
+    // Filter employees strictly by company if companyId is available
+    const companyEmployees = employees.filter(emp => {
+      if (!userCompanyId) return true;
+      const empCompanyId = emp.companyId ?? emp.company_id;
+      if (!empCompanyId) return true;
+      return String(empCompanyId) === String(userCompanyId);
+    });
+
+    companyEmployees.forEach(emp => {
       // 1. WORK ANNIVERSARY (calculated strictly from Date of Joining: joiningDate / joining_date)
       const joining = emp.joiningDate || emp.joining_date || emp.dateOfJoining || emp.date_of_joining;
       if (joining) {
@@ -518,6 +538,78 @@ export class EssDashboard implements OnInit {
           }
         }
       }
+
+      // 3. NEW HIRING / NEW JOINEE
+      const joiningVal = emp.joiningDate || emp.joining_date || emp.dateOfJoining || emp.date_of_joining;
+      const createdVal = emp.created_at || emp.createdAt;
+      const jParts = this.parseDateParts(joiningVal) || this.parseDateParts(createdVal);
+      if (jParts) {
+        const { year: jYear, month: jMonth, day: jDay } = jParts;
+        const joinDateTime = new Date(jYear, jMonth, jDay).getTime();
+        const diffDays = Math.round((joinDateTime - todayMidnight) / (1000 * 3600 * 24));
+
+        let isRecentlyCreated = false;
+        if (createdVal) {
+          const cParts = this.parseDateParts(createdVal);
+          if (cParts) {
+            const createdTime = new Date(cParts.year, cParts.month, cParts.day).getTime();
+            const createdDiffDays = Math.round((createdTime - todayMidnight) / (1000 * 3600 * 24));
+            if (createdDiffDays >= -30 && createdDiffDays <= 0) {
+              isRecentlyCreated = true;
+            }
+          }
+        }
+
+        // Within past 45 days or upcoming 30 days, or created in system in last 30 days
+        const isRecentJoin = (diffDays >= -45 && diffDays <= 30);
+        if (isRecentJoin || isRecentlyCreated) {
+          const isToday = (diffDays === 0);
+          const feedId = `newhire_${emp.id || emp.employeeId || emp.user_id}_${jYear}_${jMonth}_${jDay}`;
+          const storedLikes = this.getStoredLikes(feedId, isToday ? 15 : 6);
+          const isLiked = this.getStoredIsLiked(feedId);
+
+          let dateBadge = '';
+          let message = '';
+          const empName = emp.fullName || emp.full_name || 'New Team Member';
+          const empDesig = emp.designation || 'Team Member';
+          const empDept = emp.department || 'our team';
+
+          if (isToday) {
+            dateBadge = 'Joined Today! 🚀';
+            message = `Warm welcome to ${empName}, who has joined our team as ${empDesig} in ${empDept} today! Let's give them a great welcome aboard! 🎊👏`;
+          } else if (diffDays === -1) {
+            dateBadge = 'Joined Yesterday';
+            message = `Warm welcome to ${empName}, who joined our team yesterday as ${empDesig} in ${empDept}! Welcome to the family! 🌟`;
+          } else if (diffDays < -1) {
+            const daysAgo = Math.abs(diffDays);
+            dateBadge = `Joined ${daysAgo} ${daysAgo === 1 ? 'day' : 'days'} ago`;
+            message = `We are delighted to welcome ${empName} to our team as ${empDesig} in ${empDept}. Welcome aboard! 🚀👏`;
+          } else if (diffDays === 1) {
+            dateBadge = 'Joining Tomorrow';
+            message = `${empName} is joining our team tomorrow as ${empDesig} in ${empDept}. Excited to have them on board! 🤝🎉`;
+          } else {
+            dateBadge = `Joining in ${diffDays} days`;
+            message = `${empName} will be joining our team as ${empDesig} in ${empDept} on ${jDay} ${monthNames[jMonth]}. Let's get ready to welcome them! 🤝`;
+          }
+
+          items.push({
+            id: feedId,
+            userId: emp.user_id || emp.id,
+            type: 'newhire',
+            isToday: isToday,
+            name: empName,
+            designation: empDesig,
+            department: empDept,
+            profilePicture: emp.profilePicture || emp.profile_picture || null,
+            dateBadge: dateBadge,
+            dateFormatted: `${jDay} ${monthNames[jMonth]}`,
+            daysLeft: isToday ? 0 : (diffDays < 0 ? Math.abs(diffDays) : diffDays),
+            message: message,
+            likes: storedLikes,
+            isLiked: isLiked
+          });
+        }
+      }
     });
 
     // Sort items: Today items first, then upcoming by daysLeft ascending
@@ -576,13 +668,20 @@ export class EssDashboard implements OnInit {
       (String(i.userId) === currentUserId || (currentEmpName && i.name.toLowerCase() === currentEmpName) || (currentUsername && i.name.toLowerCase().includes(currentUsername)))
     );
 
-    if (userAnniv || userBday) {
+    const userNewHire = items.find(i => 
+      i.isToday && 
+      i.type === 'newhire' && 
+      (String(i.userId) === currentUserId || (currentEmpName && i.name.toLowerCase() === currentEmpName) || (currentUsername && i.name.toLowerCase().includes(currentUsername)))
+    );
+
+    if (userAnniv || userBday || userNewHire) {
       const data = {
         name: user.employeeName || user.username || 'Valued Team Member',
         isBirthday: !!userBday,
         isAnniversary: !!userAnniv,
+        isNewHire: !!userNewHire,
         years: userAnniv?.years,
-        profilePicture: userAnniv?.profilePicture || userBday?.profilePicture || (user as any).profilePicture || (user as any).profile_picture || null
+        profilePicture: userAnniv?.profilePicture || userBday?.profilePicture || userNewHire?.profilePicture || (user as any).profilePicture || (user as any).profile_picture || null
       };
       this.userCelebrationInfo.set(data);
       this.celebrationModalData.set(data);
