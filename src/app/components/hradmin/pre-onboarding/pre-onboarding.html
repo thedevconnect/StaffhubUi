@@ -142,11 +142,11 @@
       <div class="flex items-center gap-2">
         <p-select [options]="docsStatusOptions" optionLabel="label" optionValue="value" [ngModel]="selectedDocsStatus()"
           (ngModelChange)="selectedDocsStatus.set($event); onFilterChange()" placeholder="All Document Statuses"
-          class="w-48 text-xs custom-p-select" appendTo="body"></p-select>
+          class="filter-dropdown text-xs" appendTo="body"></p-select>
 
         <p-select [options]="offerStatusOptions" optionLabel="label" optionValue="value" [ngModel]="selectedOfferStatus()"
           (ngModelChange)="selectedOfferStatus.set($event); onFilterChange()" placeholder="All Offer Statuses"
-          class="w-48 text-xs custom-p-select" appendTo="body"></p-select>
+          class="filter-dropdown text-xs" appendTo="body"></p-select>
 
         <button *ngIf="selectedDocsStatus() || selectedOfferStatus()" (click)="resetFilters()" type="button"
           class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-red-600 hover:bg-red-50 border border-slate-200 hover:border-red-200 transition-colors cursor-pointer"

@@ -128,7 +128,7 @@ export class PreOnboardingComponent implements OnInit {
       return row.documents_status !== 'VERIFIED' && row.offer_status !== 'OFFER_SENT';
     }
     if (actionId === 'convert') {
-      return row.offer_status !== 'ACCEPTED' || !!row.onboarding_completed;
+      return row.offer_status !== 'ACCEPTED' || row.documents_status !== 'VERIFIED' || !!row.onboarding_completed;
     }
     return false;
   };
@@ -143,7 +143,7 @@ export class PreOnboardingComponent implements OnInit {
   selectedCandidate = signal<PreOnboardingCandidate | null>(null);
 
   // Strictly Scoped Company Signals
-  userCompanyId = signal<number>(15);
+  userCompanyId = signal<number>(0);
   userCompanyName = signal<string>('');
   nextCodePreview = signal<string>('');
   nextCodePrefix = signal<string>('');
@@ -240,7 +240,9 @@ export class PreOnboardingComponent implements OnInit {
     { label: 'Sales & Marketing', value: 'Sales & Marketing' },
     { label: 'Finance & Accounts', value: 'Finance & Accounts' },
     { label: 'Operations', value: 'Operations' },
-    { label: 'Quality Assurance', value: 'Quality Assurance' }
+    { label: 'Quality Assurance', value: 'Quality Assurance' },
+    { label: 'Other', value: 'Other' }
+
   ];
 
   private getCompanyIdFromSession(): number {
@@ -251,7 +253,7 @@ export class PreOnboardingComponent implements OnInit {
     if (decoded && Number.isFinite(Number(decoded.companyId)) && Number(decoded.companyId) > 0) return Number(decoded.companyId);
     const fromStorage = localStorage.getItem('companyId') || sessionStorage.getItem('companyId');
     if (Number.isFinite(Number(fromStorage)) && Number(fromStorage) > 0) return Number(fromStorage);
-    return 15;
+    return 0;
   }
 
   ngOnInit(): void {
@@ -261,15 +263,21 @@ export class PreOnboardingComponent implements OnInit {
     this.loadCompanyDetails(sessCompId);
     this.initForms();
     this.loadCandidates();
-    this.loadNextCodePreview(sessCompId);
+    if (sessCompId > 0) {
+      this.loadNextCodePreview(sessCompId);
+    }
   }
 
   loadCompanyDetails(companyId: number): void {
     this.preOnboardingService.getActiveCompanies().subscribe({
       next: (res) => {
         const comps = res.data || [];
-        const myComp = comps.find((c: any) => c.id === companyId) || comps[0];
+        const myComp = (companyId > 0 ? comps.find((c: any) => c.id === companyId) : null) || comps[0];
         if (myComp) {
+          if (!companyId || companyId <= 0) {
+            this.userCompanyId.set(myComp.id);
+            this.loadNextCodePreview(myComp.id);
+          }
           this.userCompanyName.set(myComp.company_name || myComp.legal_name || 'My Company');
           if (myComp.short_name) {
             this.nextCodePrefix.set(myComp.short_name);
@@ -849,6 +857,24 @@ export class PreOnboardingComponent implements OnInit {
 
   // Convert Candidate to Active Employee
   confirmConvertToEmployee(c: PreOnboardingCandidate): void {
+    if (c.documents_status !== 'VERIFIED') {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Documents Not Verified',
+        detail: `All 8 mandatory documents for ${c.full_name} must be verified and approved before converting to an active employee.`
+      });
+      return;
+    }
+
+    if (c.offer_status !== 'ACCEPTED') {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Offer Acceptance Required',
+        detail: `Official offer letter must be issued and accepted with digital signature by ${c.full_name} before converting.`
+      });
+      return;
+    }
+
     this.confirmationService.confirm({
       header: 'Convert Candidate to Active Employee',
       message: `Candidate ${c.full_name} has accepted the offer! Do you want to generate an Employee Code, create active system credentials, and complete pre-onboarding?`,

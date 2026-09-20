@@ -370,7 +370,12 @@ export class EmployeeManagement implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (employees) => {
-          this.employees = employees ?? [];
+          this.employees = (employees ?? []).filter(e =>
+            e.emp_id !== 'sam_101' &&
+            e.employeeCode !== 'sam_101' &&
+            e.fullName?.toLowerCase() !== 'sam super admin' &&
+            e.officialEmail?.toLowerCase() !== 'superadmin@gmail.com'
+          );
           this.loading.set(false);
         },
         error: (err) => {
