@@ -326,7 +326,18 @@ export class TableTemplate implements OnChanges, OnInit, OnDestroy {
   isDateField(col: TableColumn, item: any): boolean {
     if (col.format === 'date' || col.pipe === 'date') return true;
     const lowerKey = (col.key || '').toLowerCase();
-    if (lowerKey.includes('date') || lowerKey.includes('created_at') || lowerKey.includes('updated_at') || lowerKey.includes('joiningdate')) {
+    if (lowerKey.includes('candidate')) return false;
+    const isDateKey = lowerKey === 'date' ||
+      lowerKey.endsWith('_date') ||
+      lowerKey.startsWith('date_') ||
+      lowerKey.includes('joiningdate') ||
+      lowerKey.includes('created_at') ||
+      lowerKey.includes('updated_at') ||
+      lowerKey.includes('birth_date') ||
+      lowerKey.includes('end_date') ||
+      lowerKey.includes('start_date');
+
+    if (isDateKey) {
       const val = this.getDeepValue(item, col.key);
       if (typeof val === 'string' && (val.includes('T') || /^\d{4}-\d{2}-\d{2}/.test(val))) return true;
     }

@@ -34,3 +34,35 @@ canvas {
     }
   }
 }
+
+/* Print Styles for 2-Page Official Appointment Letter */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Hide everything except printable offer letter */
+  header, nav, .no-print, .p-toast, .p-dialog {
+    display: none !important;
+  }
+
+  .print-page {
+    page-break-after: always;
+    break-after: page;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 0 20mm 0 !important;
+  }
+
+  .print-page:last-child {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+}

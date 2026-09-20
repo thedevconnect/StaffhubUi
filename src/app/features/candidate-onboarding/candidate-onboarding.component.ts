@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 // PrimeNG Modules
 import { CardModule } from 'primeng/card';
@@ -82,6 +84,8 @@ export class CandidateOnboardingComponent implements OnInit {
   uploadedSignatureFileName = signal<string>('');
   typedSignatureName = signal<string>('');
   termsAccepted = signal<boolean>(false);
+  isDownloadingOfferPdf = signal<boolean>(false);
+  currentYear = new Date().getFullYear();
 
   // 8 Mandatory Documents list
   documents: DocUploadItem[] = [
@@ -791,6 +795,61 @@ export class CandidateOnboardingComponent implements OnInit {
 
   printOfferLetter(): void {
     window.print();
+  }
+
+  async downloadOfferLetterPdf(): Promise<void> {
+    const page1 = document.getElementById('offer-letter-page-1');
+    const page2 = document.getElementById('offer-letter-page-2');
+    if (!page1 || !page2) {
+      this.printOfferLetter();
+      return;
+    }
+
+    this.isDownloadingOfferPdf.set(true);
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Generating PDF',
+      detail: 'Compiling high-resolution 2-page Appointment Letter...'
+    });
+
+    try {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      const canvas1 = await html2canvas(page1, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
+      const img1 = canvas1.toDataURL('image/jpeg', 0.95);
+      pdf.addImage(img1, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+
+      pdf.addPage();
+      const canvas2 = await html2canvas(page2, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
+      const img2 = canvas2.toDataURL('image/jpeg', 0.95);
+      pdf.addImage(img2, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+
+      const candidateName = (this.candidateData()?.full_name || 'Candidate').replace(/\s+/g, '_');
+      pdf.save(`Appointment_Letter_${candidateName}.pdf`);
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Download Complete',
+        detail: 'Official 2-Page Appointment Letter downloaded successfully!'
+      });
+    } catch (err) {
+      console.error('Error creating PDF with html2canvas:', err);
+      this.printOfferLetter();
+    } finally {
+      this.isDownloadingOfferPdf.set(false);
+    }
   }
 
   // Offer Acceptance / Decline

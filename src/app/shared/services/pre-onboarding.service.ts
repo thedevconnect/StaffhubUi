@@ -6,6 +6,15 @@ import { environment } from '../../../environments/environment';
 export interface PreOnboardingCandidate {
   id: number;
   company_id: number;
+  company_name?: string;
+  company_legal_name?: string;
+  company_short_name?: string;
+  company_logo?: string;
+  company_address?: string;
+  company_email?: string;
+  company_phone?: string;
+  gst_number?: string;
+  pan_number?: string;
   candidate_code: string;
   full_name: string;
   email: string;
@@ -49,6 +58,16 @@ export class PreOnboardingService {
     return this.http.post<any>(`${this.apiUrl}/api/pre-onboarding`, data);
   }
 
+  /** Get active companies for multi-company pre-onboarding */
+  getActiveCompanies(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/api/pre-onboarding/companies`);
+  }
+
+  /** Get next sequential candidate code for a company series */
+  getNextCandidateCode(companyId: number | string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/api/pre-onboarding/next-code?company_id=${companyId}`);
+  }
+
   /** List candidates with filtering and pagination */
   getCandidates(params: {
     page?: number;
@@ -56,6 +75,7 @@ export class PreOnboardingService {
     search?: string;
     documents_status?: string;
     offer_status?: string;
+    company_id?: number | string;
   } = {}): Observable<any> {
     const queryParams: string[] = [];
     if (params.page !== undefined) queryParams.push(`page=${params.page}`);
@@ -63,6 +83,9 @@ export class PreOnboardingService {
     if (params.search) queryParams.push(`search=${encodeURIComponent(params.search)}`);
     if (params.documents_status) queryParams.push(`documents_status=${params.documents_status}`);
     if (params.offer_status) queryParams.push(`offer_status=${params.offer_status}`);
+    if (params.company_id !== undefined && params.company_id !== 'ALL' && params.company_id !== 'all') {
+      queryParams.push(`company_id=${params.company_id}`);
+    }
 
     const query = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
     return this.http.get<any>(`${this.apiUrl}/api/pre-onboarding${query}`);

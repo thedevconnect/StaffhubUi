@@ -671,98 +671,388 @@
         </p>
       </div>
 
-      <!-- Official Offer Letter Document Card -->
-      <div *ngIf="c.offer_details as offer" class="bg-white border border-slate-200/90 rounded-2xl shadow-sm p-6 sm:p-10 max-w-4xl mx-auto">
-        <!-- Letterhead Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-200 gap-4 mb-6">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-xs">
-              <i class="pi pi-bolt text-lg"></i>
+      <!-- Top Action Bar for Offer Letter: Download PDF & Print -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white border border-slate-200 rounded-2xl p-4 shadow-xs max-w-4xl mx-auto no-print">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg shrink-0">
+            <i class="pi pi-file-check"></i>
+          </div>
+          <div class="min-w-0">
+            <h3 class="text-sm font-bold text-slate-900 m-0 truncate">Official 2-Page Appointment Letter</h3>
+            <p class="text-xs text-slate-500 m-0">Issued for <strong>{{ c.full_name }}</strong> ({{ c.candidate_code }})</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            class="px-3.5 py-2 bg-white border border-slate-300 hover:bg-slate-50 hover:border-slate-400 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+            (click)="printOfferLetter()"
+            pTooltip="Print letter or Save as PDF via browser dialog"
+            tooltipPosition="bottom"
+          >
+            <i class="pi pi-print text-slate-500"></i>
+            <span>Print / Save PDF</span>
+          </button>
+
+          <button
+            type="button"
+            [disabled]="isDownloadingOfferPdf()"
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition cursor-pointer shadow-xs disabled:opacity-50"
+            (click)="downloadOfferLetterPdf()"
+            pTooltip="Download full 2-page PDF document"
+            tooltipPosition="bottom"
+          >
+            <i class="pi" [ngClass]="isDownloadingOfferPdf() ? 'pi-spin pi-spinner' : 'pi-download'"></i>
+            <span>{{ isDownloadingOfferPdf() ? 'Generating PDF...' : 'Download Offer Letter (PDF)' }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- PRINTABLE 2-PAGE APPOINTMENT LETTER CONTAINER -->
+      <!-- ========================================================================= -->
+      <div *ngIf="c.offer_details as offer" id="printable-offer-letter" class="max-w-4xl mx-auto space-y-6">
+
+        <!-- ======================================================================= -->
+        <!-- PAGE 1: OFFICIAL APPOINTMENT LETTER -->
+        <!-- ======================================================================= -->
+        <div id="offer-letter-page-1" class="print-page bg-white border border-slate-300 rounded-2xl shadow-sm p-8 sm:p-12 relative overflow-hidden text-slate-800 font-serif leading-relaxed">
+          <!-- Top Accent Ribbon -->
+          <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-700 via-indigo-600 to-amber-500"></div>
+
+          <!-- Dynamic Company Letterhead Header -->
+          <div class="flex flex-col sm:flex-row sm:items-start justify-between pb-5 border-b-2 border-slate-800 gap-4 mb-6 pt-2">
+            <!-- Left: Dynamic Logo & Company Info -->
+            <div class="flex items-start gap-3.5">
+              <div *ngIf="c.company_logo" class="shrink-0 max-h-14 max-w-[180px] flex items-center">
+                <img [src]="c.company_logo" [alt]="c.company_name" class="max-h-14 max-w-full object-contain" />
+              </div>
+              <div *ngIf="!c.company_logo" class="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-800 to-indigo-900 text-white flex items-center justify-center font-bold text-xl shrink-0 shadow-xs">
+                <i class="pi pi-building"></i>
+              </div>
+              <div>
+                <h1 class="text-lg font-extrabold text-slate-900 tracking-tight m-0 font-sans uppercase">
+                  {{ c.company_legal_name || c.company_name || 'StaffHub Technologies Pvt. Ltd.' }}
+                </h1>
+                <p class="text-xs text-slate-600 m-0 max-w-md font-sans leading-tight mt-0.5">
+                  {{ c.company_address || 'Tech Park, Corporate Boulevard, Sector 62, Noida, UP 201301' }}
+                </p>
+                <div class="text-[10px] text-slate-500 font-mono mt-1 flex flex-wrap gap-2 font-sans">
+                  <span>CIN: {{ c.company_code || 'U72900DL2024PTC123456' }}</span>
+                  <span *ngIf="c.gst_number">&bull; GST: {{ c.gst_number }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Corporate Contacts -->
+            <div class="text-left sm:text-right text-xs font-sans text-slate-600 shrink-0 space-y-0.5">
+              <div class="font-semibold text-slate-800 flex items-center sm:justify-end gap-1.5">
+                <i class="pi pi-envelope text-[11px] text-blue-600"></i> {{ c.company_email || 'hr@staffhub.com' }}
+              </div>
+              <div class="flex items-center sm:justify-end gap-1.5">
+                <i class="pi pi-phone text-[11px] text-blue-600"></i> {{ c.company_phone || '+91 120 4567890' }}
+              </div>
+              <div class="text-[11px] text-slate-400 font-mono">www.staffhub.com</div>
+            </div>
+          </div>
+
+          <!-- Date & Reference Number Strip -->
+          <div class="flex flex-wrap items-center justify-between text-xs font-sans font-semibold text-slate-700 mb-5 pb-3 border-b border-slate-100">
+            <div class="font-mono">
+              <span class="text-slate-400">REF NO:</span>
+              <span class="text-blue-700 font-bold ml-1">{{ c.candidate_code }}/APPT/{{ currentYear }}</span>
             </div>
             <div>
-              <span class="block font-extrabold text-lg text-slate-900 leading-tight">StaffHub Enterprise</span>
-              <span class="block text-xs text-slate-500">Official Employment Offer Letter</span>
+              <span class="text-slate-400">Date:</span>
+              <strong class="ml-1 text-slate-900">{{ (offer.issued_at || c.updated_at) | date:'dd MMMM yyyy' }}</strong>
             </div>
           </div>
 
-          <div class="text-left sm:text-right">
-            <span class="block font-bold text-[10px] uppercase tracking-wider text-slate-400">Offer Reference</span>
-            <span class="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">{{ c.candidate_code }}-OFFER</span>
-            <span class="block text-[11px] text-slate-500 mt-1">
-              Released on: <strong>{{ (offer.issued_at || c.updated_at) | date:'dd MMMM yyyy, hh:mm a' }}</strong>
-            </span>
-            <span *ngIf="offer.valid_until" class="block text-[10px] text-amber-600 font-semibold">
-              Valid Until: {{ offer.valid_until | date:'dd MMMM yyyy' }}
-            </span>
+          <!-- Addressee Block -->
+          <div class="text-xs font-sans text-slate-800 space-y-0.5 mb-5 p-3.5 bg-slate-50 border border-slate-200 rounded-xl max-w-md">
+            <div class="font-bold text-slate-500 uppercase text-[10px] tracking-wider">Candidate Details:</div>
+            <div class="font-extrabold text-sm text-slate-900 font-serif">To, Mr./Ms. {{ c.full_name }}</div>
+            <div>Email: <span class="font-mono font-medium">{{ c.email }}</span></div>
+            <div>Contact: <span class="font-mono font-medium">+91 {{ c.mobile }}</span></div>
+            <div class="text-[10px] text-slate-500 font-mono">Candidate ID: {{ c.candidate_code }}</div>
+          </div>
+
+          <!-- Document Title & Subject -->
+          <div class="text-center my-4 pb-2 border-b border-slate-200">
+            <h2 class="text-lg sm:text-xl font-extrabold uppercase tracking-wide text-slate-900 m-0 font-serif">
+              Letter of Appointment
+            </h2>
+            <div class="text-xs sm:text-sm font-bold text-blue-900 mt-1 font-sans">
+              Subject: Appointment for the Position of {{ offer.designation }}
+            </div>
+          </div>
+
+          <!-- Appointment Letter Body Text -->
+          <div class="space-y-3.5 text-xs sm:text-sm text-slate-700 text-justify">
+            <p class="m-0">
+              Dear <strong>{{ c.full_name }}</strong>,
+            </p>
+            <p class="m-0">
+              We are pleased to appoint you as <strong>{{ offer.designation }}</strong> in the <strong>{{ offer.department }}</strong> department at <strong>{{ c.company_name || 'the Company' }}</strong>, effective from your date of joining on <strong>{{ (offer.joining_date || c.joining_date) ? ((offer.joining_date || c.joining_date) | date:'dd MMMM yyyy') : 'as mutually agreed' }}</strong>. This appointment is subject to the following terms and conditions:
+            </p>
+
+            <!-- Numbered Clauses -->
+            <div class="space-y-3 pt-1">
+              <!-- Clause 1: Role & Location -->
+              <div>
+                <strong class="text-slate-900">1. Designation & Reporting Location:</strong>
+                <span class="block mt-0.5 text-slate-600">
+                  You will be designated as <strong>{{ offer.designation }}</strong>. You will report directly to the Department Head / Reporting Manager and be based at {{ c.company_address || 'the Company Headquarters' }}. You are expected to perform your duties with sincerity, diligence, and professionalism.
+                </span>
+              </div>
+
+              <!-- Clause 2: Probation & Termination Terms (User Requested Rules) -->
+              <div class="p-3 bg-amber-50/60 border border-amber-200 rounded-xl">
+                <strong class="text-slate-900 flex items-center gap-1.5 text-amber-950 font-bold">
+                  <i class="pi pi-exclamation-circle text-amber-600"></i>
+                  2. Probation Period & Notice Terms:
+                </strong>
+                <div class="mt-1 space-y-1.5 text-slate-700 text-xs pl-2">
+                  <p class="m-0">
+                    <strong>a. Probation Duration:</strong> You will be on probation for a period of <strong>six (6) months</strong> from your effective date of joining.
+                  </p>
+                  <p class="m-0">
+                    <strong>b. Termination during Probation (15 Days' Notice):</strong> During this six-month probationary period, either party (the Company or the Employee) may terminate this employment agreement by providing <strong>fifteen (15) days' written notice</strong> or gross salary in lieu thereof, without assigning any reason.
+                  </p>
+                  <p class="m-0">
+                    <strong>c. Confirmation:</strong> Upon successful completion of your 6-month probation period and satisfactory appraisal of your performance, your employment will be confirmed in writing by the Company.
+                  </p>
+                  <p class="m-0">
+                    <strong>d. Termination post-Confirmation (1 Month Notice):</strong> Following confirmation of employment, either party may terminate this agreement by giving <strong>one (1) month's (30 days') written notice</strong> or gross salary in lieu thereof.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Clause 3: Compensation Package -->
+              <div>
+                <strong class="text-slate-900">3. Compensation Package:</strong>
+                <span class="block mt-0.5 text-slate-600">
+                  Your total annual Cost to Company (CTC) will be <strong>₹{{ offer.annual_ctc | number:'1.0-0' }}</strong> per annum (Rupees {{ offer.annual_ctc | number:'1.0-0' }} only), payable monthly as detailed in <strong>Annexure I</strong> attached hereto. Salary is subject to statutory tax deductions (TDS) and Provident Fund contributions.
+                </span>
+              </div>
+
+              <!-- Clause 4: Working Hours & Benefits -->
+              <div>
+                <strong class="text-slate-900">4. Working Hours, Leaves & Benefits:</strong>
+                <span class="block mt-0.5 text-slate-600">
+                  Standard working hours are 9:30 AM to 6:30 PM, Monday to Friday (or as designated by your team roster). You will be eligible for annual leave entitlements, paid public holidays, and statutory benefits including Provident Fund, Gratuity, and Health Insurance as per company policy.
+                </span>
+              </div>
+
+              <!-- Clause 5: Confidentiality & Code of Conduct -->
+              <div>
+                <strong class="text-slate-900">5. Code of Conduct & Strict Confidentiality:</strong>
+                <span class="block mt-0.5 text-slate-600">
+                  You agree to comply with all company policies and maintain strict confidentiality regarding all proprietary software, trade secrets, architecture, client records, and business intellectual property during and following your tenure.
+                </span>
+              </div>
+            </div>
+
+            <!-- Closing Signoff -->
+            <p class="m-0 pt-2 text-slate-600">
+              Please confirm your formal acceptance of this appointment by digitally signing this letter along with Annexure I. We welcome you to <strong>{{ c.company_name || 'the Company' }}</strong> and look forward to your valuable contributions.
+            </p>
+
+            <!-- Company Signature Block -->
+            <div class="flex items-end justify-between pt-6 border-t border-slate-200 mt-6">
+              <div>
+                <div class="text-xs font-sans text-slate-500 uppercase font-semibold">Sincerely,</div>
+                <div class="font-bold text-sm text-slate-900 font-sans mt-0.5">For {{ c.company_name || 'StaffHub Technologies' }}</div>
+                <div class="w-28 h-12 my-1 flex items-center">
+                  <div class="border border-blue-200 bg-blue-50/50 rounded-lg px-2.5 py-1 text-[10px] font-mono text-blue-800 font-bold">
+                    AUTHORIZED SIGNATURE
+                  </div>
+                </div>
+                <div class="font-bold text-xs text-slate-800 font-sans">Authorized Signatory</div>
+                <div class="text-[11px] text-slate-500 font-sans">Human Resources & Talent Acquisition</div>
+              </div>
+
+              <!-- Official Seal Graphic -->
+              <div class="w-20 h-20 rounded-full border-2 border-dashed border-blue-300 flex flex-col items-center justify-center text-center p-1 text-blue-900 bg-blue-50/30 font-sans select-none">
+                <i class="pi pi-shield text-xs mb-0.5 text-blue-600"></i>
+                <span class="text-[8px] font-extrabold uppercase leading-tight tracking-tighter">OFFICIAL SEAL</span>
+                <span class="text-[7px] font-bold text-slate-500 uppercase leading-none">{{ c.company_code || 'STAFFHUB' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Page 1 Footer -->
+          <div class="pt-6 mt-8 border-t border-slate-200 flex items-center justify-between text-[10px] font-sans text-slate-400">
+            <span>{{ c.company_legal_name || c.company_name || 'StaffHub Technologies' }} &bull; Strictly Confidential</span>
+            <span class="font-bold text-slate-600">Page 1 of 2</span>
           </div>
         </div>
 
-        <!-- Subject & Salutation -->
-        <div class="mb-6">
-          <h2 class="text-base sm:text-lg font-bold text-slate-900 mb-2">
-            Subject: Letter of Offer - {{ offer.designation }}
-          </h2>
-          <p class="text-sm text-slate-700 leading-relaxed m-0">
-            Dear <strong>{{ c.full_name }}</strong>,<br/>
-            {{ offer.offer_letter_text || 'We are delighted to extend this formal offer of employment to you at our organization. Following your successful interview rounds, we are confident that your skills and experience will make a significant contribution to our growth and success.' }}
-          </p>
+        <!-- ======================================================================= -->
+        <!-- PAGE 2: ANNEXURE I - COMPENSATION STRUCTURE & DIGITAL ACCEPTANCE -->
+        <!-- ======================================================================= -->
+        <div id="offer-letter-page-2" class="print-page bg-white border border-slate-300 rounded-2xl shadow-sm p-8 sm:p-12 relative overflow-hidden text-slate-800 font-serif leading-relaxed">
+          <!-- Top Accent Ribbon -->
+          <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-700 via-indigo-600 to-amber-500"></div>
+
+          <!-- Header Continuation -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-300 gap-2 mb-6 pt-2 font-sans text-xs">
+            <div class="flex items-center gap-2">
+              <span class="font-extrabold text-slate-900 uppercase tracking-tight">{{ c.company_name || 'StaffHub Technologies' }}</span>
+              <span class="text-slate-300">|</span>
+              <span class="text-slate-500 font-mono">{{ c.candidate_code }}/APPT/{{ currentYear }}</span>
+            </div>
+            <div class="text-slate-500">
+              Annexure I &bull; Effective Date: <strong>{{ (offer.joining_date || c.joining_date) ? ((offer.joining_date || c.joining_date) | date:'dd MMMM yyyy') : 'As mutually agreed' }}</strong>
+            </div>
+          </div>
+
+          <!-- Annexure I Title -->
+          <div class="text-center my-4 pb-2 border-b border-slate-200 font-sans">
+            <h2 class="text-base sm:text-lg font-extrabold uppercase tracking-wide text-slate-900 m-0">
+              Annexure I – Compensation Structure & Acceptance
+            </h2>
+            <p class="text-xs text-slate-500 m-0 mt-0.5">
+              Salary Breakup for the position of <strong>{{ offer.designation }}</strong>
+            </p>
+          </div>
+
+          <!-- Candidate Details Strip -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3.5 bg-slate-50 border border-slate-200 rounded-xl mb-6 font-sans text-xs">
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400 block">Candidate Name</span>
+              <span class="font-bold text-slate-900">{{ c.full_name }}</span>
+            </div>
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400 block">Designation</span>
+              <span class="font-bold text-slate-900">{{ offer.designation }}</span>
+            </div>
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400 block">Department</span>
+              <span class="font-bold text-slate-900">{{ offer.department }}</span>
+            </div>
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400 block">Total Annual CTC</span>
+              <span class="font-extrabold text-blue-700">₹{{ offer.annual_ctc | number:'1.0-0' }} / yr</span>
+            </div>
+          </div>
+
+          <!-- Detailed Salary Breakup Table -->
+          <div class="mb-6 font-sans">
+            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Monthly & Annual Salary Components:
+            </h4>
+            <div class="border border-slate-300 rounded-xl overflow-hidden shadow-xs">
+              <table class="w-full text-xs sm:text-sm">
+                <thead>
+                  <tr class="bg-slate-100 text-slate-800 font-bold border-b border-slate-300">
+                    <th class="p-3 text-left">Salary Component</th>
+                    <th class="p-3 text-right">Monthly (₹)</th>
+                    <th class="p-3 text-right">Annual (₹)</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                  <tr>
+                    <td class="p-3 text-slate-800 font-medium">Basic Salary (50%)</td>
+                    <td class="p-3 text-right font-mono text-slate-800">₹{{ (offer.ctc_breakup?.basic || (offer.monthly_gross * 0.5)) | number:'1.0-0' }}</td>
+                    <td class="p-3 text-right font-mono text-slate-800">₹{{ ((offer.ctc_breakup?.basic || (offer.monthly_gross * 0.5)) * 12) | number:'1.0-0' }}</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 text-slate-800 font-medium">House Rent Allowance (HRA - 50% Basic)</td>
+                    <td class="p-3 text-right font-mono text-slate-800">₹{{ (offer.ctc_breakup?.hra || (offer.monthly_gross * 0.25)) | number:'1.0-0' }}</td>
+                    <td class="p-3 text-right font-mono text-slate-800">₹{{ ((offer.ctc_breakup?.hra || (offer.monthly_gross * 0.25)) * 12) | number:'1.0-0' }}</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 text-slate-800 font-medium">Special Allowance</td>
+                    <td class="p-3 text-right font-mono text-slate-800">₹{{ (offer.ctc_breakup?.special_allowance || (offer.monthly_gross * 0.25)) | number:'1.0-0' }}</td>
+                    <td class="p-3 text-right font-mono text-slate-800">₹{{ ((offer.ctc_breakup?.special_allowance || (offer.monthly_gross * 0.25)) * 12) | number:'1.0-0' }}</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 text-slate-800 font-medium">Employer Provident Fund (PF)</td>
+                    <td class="p-3 text-right font-mono text-slate-800">₹{{ (offer.ctc_breakup?.pf || 0) | number:'1.0-0' }}</td>
+                    <td class="p-3 text-right font-mono text-slate-800">₹{{ ((offer.ctc_breakup?.pf || 0) * 12) | number:'1.0-0' }}</td>
+                  </tr>
+                  <tr class="bg-blue-50/80 font-bold text-slate-900 border-t-2 border-blue-300">
+                    <td class="p-3 font-extrabold text-blue-950">Total Cost to Company (Annual CTC)</td>
+                    <td class="p-3 text-right font-mono font-extrabold text-blue-700">₹{{ offer.monthly_gross | number:'1.0-0' }}</td>
+                    <td class="p-3 text-right font-mono font-extrabold text-blue-700">₹{{ offer.annual_ctc | number:'1.0-0' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Statutory & Deductions Notes -->
+          <div class="mb-6 font-sans text-[11px] text-slate-600 bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-1">
+            <div class="font-bold text-slate-700 uppercase text-[10px] tracking-wider mb-1">Important Compensation Notes:</div>
+            <div>&bull; Gratuity shall be payable strictly in accordance with the provisions of the Payment of Gratuity Act, 1972.</div>
+            <div>&bull; Income Tax (TDS), Professional Tax, and Employee PF contributions shall be deducted at source as per statutory laws.</div>
+            <div>&bull; The probation period is 6 months; notice period during probation is 15 days, and 1 month after confirmation.</div>
+          </div>
+
+          <!-- Formal Acceptance Declaration Box -->
+          <div class="p-4 bg-slate-50 border-2 border-slate-300 rounded-xl mb-6">
+            <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-1.5 font-sans flex items-center gap-1.5">
+              <i class="pi pi-check-circle text-emerald-600"></i> Candidate Formal Acceptance Statement
+            </h4>
+            <p class="text-xs text-slate-700 leading-relaxed m-0 italic font-serif">
+              "I, <strong>{{ c.full_name }}</strong>, hereby acknowledge that I have read, understood, and unconditionally accept all the terms, conditions, 6-month probation guidelines (including 15 days notice), and the compensation structure outlined in this Appointment Letter and Annexure I. I confirm my acceptance to join <strong>{{ c.company_name || 'the Company' }}</strong> on or before <strong>{{ (offer.joining_date || c.joining_date) ? ((offer.joining_date || c.joining_date) | date:'dd MMMM yyyy') : 'the agreed date' }}</strong>."
+            </p>
+          </div>
+
+          <!-- Side-by-Side Dual Signatures Row -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-200 font-sans">
+            <!-- Left: Company Signatory -->
+            <div class="p-3.5 bg-white border border-slate-200 rounded-xl flex flex-col justify-between">
+              <div>
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Company Signatory:</div>
+                <div class="font-bold text-xs text-slate-900 mt-1">For {{ c.company_name || 'StaffHub Technologies' }}</div>
+              </div>
+              <div class="my-3">
+                <div class="border border-blue-200 bg-blue-50/50 rounded-lg px-2.5 py-1 text-[10px] font-mono text-blue-800 font-bold inline-block">
+                  AUTHORIZED SIGNATORY
+                </div>
+              </div>
+              <div class="text-[10px] text-slate-500">
+                Issued on: <strong>{{ (offer.issued_at || c.updated_at) | date:'dd MMMM yyyy' }}</strong>
+              </div>
+            </div>
+
+            <!-- Right: Candidate Acceptance Signature -->
+            <div class="p-3.5 bg-white border rounded-xl flex flex-col justify-between" [ngClass]="c.offer_status === 'ACCEPTED' ? 'border-emerald-300 bg-emerald-50/20' : 'border-slate-200'">
+              <div>
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Candidate Digital Acceptance:</div>
+                <div class="font-bold text-xs text-slate-900 mt-1">{{ c.full_name }}</div>
+              </div>
+
+              <!-- If Signed & Accepted -->
+              <div *ngIf="c.offer_status === 'ACCEPTED' && c.signature_data" class="my-2">
+                <img [src]="c.signature_data" alt="Candidate Signature" class="h-12 max-w-full object-contain" />
+                <div class="text-[10px] text-emerald-700 font-semibold mt-1 flex items-center gap-1">
+                  <i class="pi pi-verified"></i> Signed: {{ c.accepted_at | date:'dd MMM yyyy, hh:mm a' }}
+                </div>
+              </div>
+
+              <!-- If Pending Acceptance -->
+              <div *ngIf="c.offer_status === 'OFFER_SENT'" class="my-2 p-2 bg-amber-50 border border-dashed border-amber-300 rounded text-center text-[10px] text-amber-800 font-medium">
+                ✍️ Pending Digital Acceptance Signature Below
+              </div>
+
+              <div class="text-[10px] font-mono text-slate-400">
+                Security Hash: AUTH-{{ c.candidate_code }}-ACCEPT
+              </div>
+            </div>
+          </div>
+
+          <!-- Page 2 Footer -->
+          <div class="pt-6 mt-8 border-t border-slate-200 flex items-center justify-between text-[10px] font-sans text-slate-400">
+            <span>{{ c.company_legal_name || c.company_name || 'StaffHub Technologies' }} &bull; Annexure I &bull; Digitally Executed</span>
+            <span class="font-bold text-slate-600">Page 2 of 2</span>
+          </div>
         </div>
 
-        <!-- Key Offer Terms Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-          <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
-            <span class="text-[11px] font-bold uppercase text-slate-500 block">Designation</span>
-            <span class="font-bold text-sm text-slate-900">{{ offer.designation }}</span>
-          </div>
-          <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
-            <span class="text-[11px] font-bold uppercase text-slate-500 block">Department</span>
-            <span class="font-bold text-sm text-slate-900">{{ offer.department }}</span>
-          </div>
-          <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
-            <span class="text-[11px] font-bold uppercase text-slate-500 block">Expected Joining Date</span>
-            <span class="font-bold text-sm text-slate-900">{{ (offer.joining_date || c.joining_date) ? ((offer.joining_date || c.joining_date) | date:'dd MMMM, yyyy') : 'As mutually agreed' }}</span>
-          </div>
-        </div>
-
-        <!-- Compensation Package Breakup Table -->
-        <div class="mb-6">
-          <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2.5">
-            Compensation Package (CTC Breakup)
-          </h4>
-          <div class="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
-            <table class="w-full text-xs sm:text-sm">
-              <thead>
-                <tr class="bg-blue-50/80 text-blue-900 font-bold border-b border-slate-200">
-                  <th class="p-3 text-left">Salary Component</th>
-                  <th class="p-3 text-right">Monthly Gross (₹)</th>
-                  <th class="p-3 text-right">Annual CTC (₹)</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100">
-                <tr>
-                  <td class="p-3 text-slate-700">Basic Salary</td>
-                  <td class="p-3 text-right font-medium text-slate-800">₹{{ (offer.ctc_breakup?.basic || (offer.monthly_gross * 0.5)) | number:'1.0-0' }}</td>
-                  <td class="p-3 text-right font-medium text-slate-800">₹{{ ((offer.ctc_breakup?.basic || (offer.monthly_gross * 0.5)) * 12) | number:'1.0-0' }}</td>
-                </tr>
-                <tr>
-                  <td class="p-3 text-slate-700">House Rent Allowance (HRA)</td>
-                  <td class="p-3 text-right font-medium text-slate-800">₹{{ (offer.ctc_breakup?.hra || (offer.monthly_gross * 0.25)) | number:'1.0-0' }}</td>
-                  <td class="p-3 text-right font-medium text-slate-800">₹{{ ((offer.ctc_breakup?.hra || (offer.monthly_gross * 0.25)) * 12) | number:'1.0-0' }}</td>
-                </tr>
-                <tr>
-                  <td class="p-3 text-slate-700">Special Allowance</td>
-                  <td class="p-3 text-right font-medium text-slate-800">₹{{ (offer.ctc_breakup?.special_allowance || (offer.monthly_gross * 0.25)) | number:'1.0-0' }}</td>
-                  <td class="p-3 text-right font-medium text-slate-800">₹{{ ((offer.ctc_breakup?.special_allowance || (offer.monthly_gross * 0.25)) * 12) | number:'1.0-0' }}</td>
-                </tr>
-                <tr class="bg-blue-50/60 font-bold text-slate-900 border-t-2 border-blue-200">
-                  <td class="p-3 font-bold text-blue-950">Total Cost to Company (Annual CTC)</td>
-                  <td class="p-3 text-right font-extrabold text-blue-700">₹{{ offer.monthly_gross | number:'1.0-0' }}</td>
-                  <td class="p-3 text-right font-extrabold text-blue-700">₹{{ offer.annual_ctc | number:'1.0-0' }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+      </div>
 
         <!-- Terms & Conditions Statement & Mandatory Checkbox -->
         <div class="mb-6 bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5">
@@ -974,12 +1264,21 @@
             </div>
           </div>
 
-          <!-- Buttons: Print/Download PDF & Proceed to Step 4 -->
+          <!-- Buttons: Download PDF, Print/Save & Proceed to Step 4 -->
           <div class="flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              [disabled]="isDownloadingOfferPdf()"
+              class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition cursor-pointer shadow-xs disabled:opacity-50"
+              (click)="downloadOfferLetterPdf()"
+            >
+              <i class="pi" [ngClass]="isDownloadingOfferPdf() ? 'pi-spin pi-spinner' : 'pi-download'"></i>
+              <span>{{ isDownloadingOfferPdf() ? 'Generating PDF...' : 'Download Offer Letter (PDF)' }}</span>
+            </button>
             <button
               pButton
               type="button"
-              label="Print / Save Signed Offer PDF"
+              label="Print / Save PDF"
               icon="pi pi-print"
               class="p-button-outlined p-button-success p-button-sm rounded-xl font-bold"
               (click)="printOfferLetter()"
@@ -995,7 +1294,6 @@
           </div>
         </div>
       </div>
-    </div>
 
     <!-- ========================================================================= -->
     <!-- STEP 4: COMPLETED / WELCOME ABOARD -->

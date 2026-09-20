@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 // PrimeNG Modules
 import { CardModule } from 'primeng/card';
@@ -24,6 +26,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 // Shared Table Template (Same as Employee Management)
 import { TableTemplate, TableColumn, TableAction } from '../../../shared/ui/table-template/table-template';
 import { PreOnboardingService, PreOnboardingCandidate } from '../../../shared/services/pre-onboarding.service';
+import { AuthService } from '../../../shared/services/services/auth.service';
 
 export interface MandatoryDocDef {
   key: string;
@@ -74,6 +77,7 @@ export const MANDATORY_DOCS: MandatoryDocDef[] = [
 export class PreOnboardingComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly preOnboardingService = inject(PreOnboardingService);
+  private readonly authService = inject(AuthService);
   private readonly messageService = inject(MessageService);
   private readonly confirmationService = inject(ConfirmationService);
   private readonly sanitizer = inject(DomSanitizer);
@@ -95,7 +99,7 @@ export class PreOnboardingComponent implements OnInit {
     { key: 'offered_ctc', header: 'Offered CTC (₹)', isVisible: true, isSortable: true, pipe: 'currency', pipeArgs: 'INR' },
     { key: 'joining_date', header: 'Expected Joining', isVisible: true, isSortable: true, format: 'date' },
     { key: 'linkStatus', header: 'Link & Invite', isVisible: true },
-    { key: 'docsStatus', header: '8 Documents Status', isVisible: true },
+    { key: 'docsStatus', header: 'Documents Status', isVisible: true },
     { key: 'offerStatus', header: 'Offer Status', isVisible: true },
     { key: 'empStatus', header: 'Employee Status', isVisible: true },
     { key: 'created_at', header: 'Created At', isVisible: true, isSortable: true, format: 'date' }
@@ -138,6 +142,12 @@ export class PreOnboardingComponent implements OnInit {
   selectedOfferStatus = signal<string>('');
   selectedCandidate = signal<PreOnboardingCandidate | null>(null);
 
+  // Strictly Scoped Company Signals
+  userCompanyId = signal<number>(15);
+  userCompanyName = signal<string>('');
+  nextCodePreview = signal<string>('');
+  nextCodePrefix = signal<string>('');
+
   // Metrics Signals
   metricTotal = signal<number>(0);
   metricPendingDocs = signal<number>(0);
@@ -167,6 +177,10 @@ export class PreOnboardingComponent implements OnInit {
   previewCurrentIndex = 0;
   previewCategoryLabel = '';
   isDownloadingAll = false;
+  offerLetterPreviewVisible = false;
+  selectedOfferCandidate: any = null;
+  isDownloadingOfferPdf = false;
+  currentYear = new Date().getFullYear();
 
   // Forms
   candidateForm!: FormGroup;
@@ -229,9 +243,91 @@ export class PreOnboardingComponent implements OnInit {
     { label: 'Quality Assurance', value: 'Quality Assurance' }
   ];
 
+  private getCompanyIdFromSession(): number {
+    const fromUser = (this.authService.user?.() as any)?.companyId;
+    if (Number.isFinite(Number(fromUser)) && Number(fromUser) > 0) return Number(fromUser);
+    const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken') || '';
+    const decoded: any = this.authService.decodeToken(token);
+    if (decoded && Number.isFinite(Number(decoded.companyId)) && Number(decoded.companyId) > 0) return Number(decoded.companyId);
+    const fromStorage = localStorage.getItem('companyId') || sessionStorage.getItem('companyId');
+    if (Number.isFinite(Number(fromStorage)) && Number(fromStorage) > 0) return Number(fromStorage);
+    return 15;
+  }
+
   ngOnInit(): void {
+    const sessCompId = this.getCompanyIdFromSession();
+    this.userCompanyId.set(sessCompId);
+
+    this.loadCompanyDetails(sessCompId);
     this.initForms();
     this.loadCandidates();
+    this.loadNextCodePreview(sessCompId);
+  }
+
+  loadCompanyDetails(companyId: number): void {
+    this.preOnboardingService.getActiveCompanies().subscribe({
+      next: (res) => {
+        const comps = res.data || [];
+        const myComp = comps.find((c: any) => c.id === companyId) || comps[0];
+        if (myComp) {
+          this.userCompanyName.set(myComp.company_name || myComp.legal_name || 'My Company');
+          if (myComp.short_name) {
+            this.nextCodePrefix.set(myComp.short_name);
+          }
+        }
+      },
+      error: (err) => console.error('Failed to load company details:', err)
+    });
+  }
+
+  loadNextCodePreview(companyId: number): void {
+    if (!companyId) return;
+    this.preOnboardingService.getNextCandidateCode(companyId).subscribe({
+      next: (res) => {
+        if (res.data) {
+          this.nextCodePreview.set(res.data.candidate_code);
+          this.nextCodePrefix.set(res.data.prefix);
+        }
+      },
+      error: (err) => console.error('Failed to load next candidate code:', err)
+    });
+  }
+
+  onFilterChange(): void {
+    this.loadCandidates();
+  }
+
+  resetFilters(): void {
+    this.selectedDocsStatus.set('');
+    this.selectedOfferStatus.set('');
+    this.searchQuery.set('');
+    this.loadCandidates();
+  }
+
+  filterByMetric(type: string): void {
+    if (type === 'TOTAL') {
+      this.resetFilters();
+    } else if (type === 'PENDING_DOCS') {
+      this.selectedDocsStatus.set('PENDING_UPLOAD');
+      this.selectedOfferStatus.set('');
+      this.loadCandidates();
+    } else if (type === 'UNDER_REVIEW') {
+      this.selectedDocsStatus.set('SUBMITTED');
+      this.selectedOfferStatus.set('');
+      this.loadCandidates();
+    } else if (type === 'VERIFIED') {
+      this.selectedDocsStatus.set('VERIFIED');
+      this.selectedOfferStatus.set('');
+      this.loadCandidates();
+    } else if (type === 'OFFER_SENT') {
+      this.selectedDocsStatus.set('');
+      this.selectedOfferStatus.set('OFFER_SENT');
+      this.loadCandidates();
+    } else if (type === 'ACTIVE_HIRED') {
+      this.selectedDocsStatus.set('');
+      this.selectedOfferStatus.set('ACCEPTED');
+      this.loadCandidates();
+    }
   }
 
   get f() {
@@ -249,6 +345,7 @@ export class PreOnboardingComponent implements OnInit {
 
   private initForms(): void {
     this.candidateForm = this.fb.group({
+      company_id: [this.userCompanyId(), Validators.required],
       full_name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       mobile: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
@@ -258,6 +355,13 @@ export class PreOnboardingComponent implements OnInit {
       joining_date: [null],
       offered_ctc: [null, [Validators.min(0)]],
       notes: ['']
+    });
+
+    // Real-time preview of candidate code when company changes
+    this.candidateForm.get('company_id')?.valueChanges.subscribe(cid => {
+      if (cid) {
+        this.loadNextCodePreview(Number(cid));
+      }
     });
 
     // Real-time English words for Offered CTC with 5s display duration
@@ -349,7 +453,8 @@ export class PreOnboardingComponent implements OnInit {
     this.preOnboardingService.getCandidates({
       search: this.searchQuery(),
       documents_status: this.selectedDocsStatus(),
-      offer_status: this.selectedOfferStatus()
+      offer_status: this.selectedOfferStatus(),
+      company_id: this.userCompanyId()
     }).subscribe({
       next: (res) => {
         const list: PreOnboardingCandidate[] = res.data || [];
@@ -380,10 +485,6 @@ export class PreOnboardingComponent implements OnInit {
 
   onSearch(value: string): void {
     this.searchQuery.set(value);
-    this.loadCandidates();
-  }
-
-  onFilterChange(): void {
     this.loadCandidates();
   }
 
@@ -432,10 +533,14 @@ export class PreOnboardingComponent implements OnInit {
     this.isEditMode = false;
     this.editingCandidateId = null;
     this.selectedCandidate.set(null);
+    const cid = this.userCompanyId();
+
     this.candidateForm.reset({
+      company_id: cid,
       interview_status: 'INTERVIEW_CLEARED'
     });
     this.candidateForm.enable();
+    this.loadNextCodePreview(cid);
     this.showDrawer = true;
   }
 
@@ -445,6 +550,7 @@ export class PreOnboardingComponent implements OnInit {
     this.editingCandidateId = c.id;
     this.selectedCandidate.set(c);
     this.candidateForm.patchValue({
+      company_id: c.company_id,
       full_name: c.full_name,
       email: c.email,
       mobile: c.mobile,
@@ -456,6 +562,7 @@ export class PreOnboardingComponent implements OnInit {
       notes: c.notes
     });
     this.candidateForm.enable();
+    this.nextCodePreview.set(c.candidate_code);
     this.showDrawer = true;
   }
 
@@ -464,6 +571,7 @@ export class PreOnboardingComponent implements OnInit {
     this.isEditMode = false;
     this.selectedCandidate.set(c);
     this.candidateForm.patchValue({
+      company_id: c.company_id,
       full_name: c.full_name,
       email: c.email,
       mobile: c.mobile,
@@ -475,6 +583,7 @@ export class PreOnboardingComponent implements OnInit {
       notes: c.notes
     });
     this.candidateForm.disable();
+    this.nextCodePreview.set(c.candidate_code);
     this.showDrawer = true;
   }
 
@@ -490,8 +599,10 @@ export class PreOnboardingComponent implements OnInit {
     }
 
     const formVal = this.candidateForm.value;
+    const cid = formVal.company_id || this.userCompanyId();
     const payload = {
       ...formVal,
+      company_id: cid,
       joining_date: formVal.joining_date ? this.formatDate(formVal.joining_date) : null
     };
 
@@ -829,8 +940,8 @@ export class PreOnboardingComponent implements OnInit {
     }
 
     const isPdf = file.url.toLowerCase().includes('.pdf') ||
-                  file.url.startsWith('data:application/pdf') ||
-                  (fileName.toLowerCase().endsWith('.pdf'));
+      file.url.startsWith('data:application/pdf') ||
+      (fileName.toLowerCase().endsWith('.pdf'));
     this.isPdfPreview = isPdf;
     this.previewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(file.url);
   }
@@ -935,6 +1046,78 @@ export class PreOnboardingComponent implements OnInit {
       } else if (event.key === 'Escape') {
         this.docPreviewVisible = false;
       }
+    }
+  }
+
+  openOfferLetterPreview(candidate: any): void {
+    if (!candidate || !candidate.offer_details) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'No Offer Issued',
+        detail: 'Official offer letter has not been issued for this candidate yet.'
+      });
+      return;
+    }
+    this.selectedOfferCandidate = candidate;
+    this.offerLetterPreviewVisible = true;
+  }
+
+  printOfferLetter(): void {
+    window.print();
+  }
+
+  async downloadOfferLetterPdf(): Promise<void> {
+    const page1 = document.getElementById('hr-offer-letter-page-1');
+    const page2 = document.getElementById('hr-offer-letter-page-2');
+    if (!page1 || !page2) {
+      this.printOfferLetter();
+      return;
+    }
+
+    this.isDownloadingOfferPdf = true;
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Generating PDF',
+      detail: 'Compiling 2-page Appointment Letter...'
+    });
+
+    try {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      const canvas1 = await html2canvas(page1, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
+      const img1 = canvas1.toDataURL('image/jpeg', 0.95);
+      pdf.addImage(img1, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+
+      pdf.addPage();
+      const canvas2 = await html2canvas(page2, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
+      const img2 = canvas2.toDataURL('image/jpeg', 0.95);
+      pdf.addImage(img2, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+
+      const candidateName = (this.selectedOfferCandidate?.full_name || 'Candidate').replace(/\s+/g, '_');
+      pdf.save(`Appointment_Letter_${candidateName}.pdf`);
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Download Complete',
+        detail: 'Official 2-Page Appointment Letter downloaded successfully!'
+      });
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+      this.printOfferLetter();
+    } finally {
+      this.isDownloadingOfferPdf = false;
     }
   }
 
