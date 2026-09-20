@@ -1,0 +1,809 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<!-- Page Header Inline with Breadcrumb (Matching Employee Management) -->
+<div
+  class="flex items-center justify-between bg-white border-b border-slate-200 -mx-4 -mt-4 md:-mx-6 md:-mt-6 mb-4 pr-4 md:pr-6">
+  <div class="flex-1 min-w-0">
+    <p-breadcrumb [model]="breadcrumbItems"
+      styleClass="!border-0 !rounded-none !bg-transparent !px-4 md:!px-6 !py-2.5 text-xs md:text-sm"></p-breadcrumb>
+  </div>
+  <div class="flex-none flex items-center gap-2">
+    <button pButton (click)="openAddDrawer()" label="Add Candidate" icon="pi pi-plus" class="p-button-sm rounded-lg"
+      [raised]="true"></button>
+  </div>
+</div>
+
+<div class="space-y-4">
+  <!-- Metrics KPI Summary Cards -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-2">
+    <!-- Total Candidates -->
+    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-semibold uppercase text-slate-500">Total Selected</span>
+        <span class="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
+          <i class="pi pi-users"></i>
+        </span>
+      </div>
+      <div class="text-2xl font-bold text-slate-900">{{ metricTotal() }}</div>
+      <span class="text-xs text-slate-400">Post-interview</span>
+    </div>
+
+    <!-- Docs Pending -->
+    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-semibold uppercase text-slate-500">Docs Pending</span>
+        <span class="w-6 h-6 rounded-md bg-amber-50 text-amber-600 flex items-center justify-center text-xs">
+          <i class="pi pi-clock"></i>
+        </span>
+      </div>
+      <div class="text-2xl font-bold text-amber-600">{{ metricPendingDocs() }}</div>
+      <span class="text-xs text-amber-500 font-medium">Awaiting upload</span>
+    </div>
+
+    <!-- Under Review -->
+    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-semibold uppercase text-slate-500">Under Review</span>
+        <span class="w-6 h-6 rounded-md bg-cyan-50 text-cyan-600 flex items-center justify-center text-xs">
+          <i class="pi pi-file-edit"></i>
+        </span>
+      </div>
+      <div class="text-2xl font-bold text-cyan-600">{{ metricUnderReview() }}</div>
+      <span class="text-xs text-cyan-500 font-medium">Docs submitted</span>
+    </div>
+
+    <!-- Docs Verified -->
+    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-semibold uppercase text-slate-500">Verified</span>
+        <span class="w-6 h-6 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
+          <i class="pi pi-check-circle"></i>
+        </span>
+      </div>
+      <div class="text-2xl font-bold text-emerald-600">{{ metricVerified() }}</div>
+      <span class="text-xs text-emerald-500 font-medium">Ready for offer</span>
+    </div>
+
+    <!-- Offer Released -->
+    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-semibold uppercase text-slate-500">Offer Sent</span>
+        <span class="w-6 h-6 rounded-md bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
+          <i class="pi pi-send"></i>
+        </span>
+      </div>
+      <div class="text-2xl font-bold text-indigo-600">{{ metricOfferSent() }}</div>
+      <span class="text-xs text-indigo-500 font-medium">Sent / Accepted</span>
+    </div>
+
+    <!-- Active Employee -->
+    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-semibold uppercase text-slate-500">Active Hired</span>
+        <span class="w-6 h-6 rounded-md bg-teal-50 text-teal-600 flex items-center justify-center text-xs">
+          <i class="pi pi-verified"></i>
+        </span>
+      </div>
+      <div class="text-2xl font-bold text-teal-600">{{ metricCompleted() }}</div>
+      <span class="text-xs text-teal-500 font-medium">Onboarded</span>
+    </div>
+  </div>
+
+  <!-- Status Filter Toolbar -->
+  <div
+    class="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+    <div class="flex items-center gap-2">
+      <span class="text-xs font-semibold text-slate-600 uppercase">Filters:</span>
+      <p-select [options]="docsStatusOptions" optionLabel="label" optionValue="value" [ngModel]="selectedDocsStatus()"
+        (ngModelChange)="selectedDocsStatus.set($event); onFilterChange()" placeholder="Filter by Document Status"
+        class="w-56 text-xs custom-p-select"></p-select>
+
+      <p-select [options]="offerStatusOptions" optionLabel="label" optionValue="value" [ngModel]="selectedOfferStatus()"
+        (ngModelChange)="selectedOfferStatus.set($event); onFilterChange()" placeholder="Filter by Offer Status"
+        class="w-56 text-xs custom-p-select"></p-select>
+    </div>
+
+    <div class="text-xs text-slate-500">
+      Showing <strong class="text-slate-800">{{ candidates().length }}</strong> candidates
+    </div>
+  </div>
+
+  <!-- Table Container (Using Shared TableTemplate with 3-Dot Action Menu) -->
+  <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+    <div class="w-full overflow-x-auto">
+      <app-table-template [data]="candidates()" [columns]="columns" [isLoading]="loading()" [tableActions]="rowActions"
+        [disableActionCondition]="disableActionCondition" (actionClicked)="handleRowAction($event)" [showRefresh]="true"
+        (refresh)="loadCandidates()" [showExport]="true" exportFileName="Pre_Onboarding_Candidates" [cellTemplates]="{
+          candidate: candidateTpl,
+          linkStatus: linkStatusTpl,
+          docsStatus: docsStatusTpl,
+          offerStatus: offerStatusTpl,
+          empStatus: empStatusTpl
+        }">
+      </app-table-template>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- CELL TEMPLATES FOR TABLE-TEMPLATE -->
+<!-- ========================================================================= -->
+
+<!-- Candidate Info Template -->
+<ng-template #candidateTpl let-item>
+  <div class="flex items-center gap-3">
+    <div
+      class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-sm">
+      {{ item.full_name?.charAt(0)?.toUpperCase() || 'C' }}
+    </div>
+    <div class="min-w-0">
+      <div class="font-semibold text-slate-900 cursor-pointer hover:text-blue-600 transition-colors truncate"
+        (click)="openViewDrawer(item)">
+        {{ item.full_name }}
+      </div>
+      <div class="text-[11px] text-slate-500 truncate">{{ item.email }}</div>
+      <div class="text-[11px] text-slate-500 font-mono">{{ item.mobile }}</div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- Link & Invite Status Template -->
+<ng-template #linkStatusTpl let-item>
+  <div class="flex items-center gap-2">
+    <p-tag
+      [value]="item.link_status === 'SENT' ? 'Invite Sent' : (item.link_status === 'ACCESSED' ? 'Portal Accessed' : 'Link Not Sent')"
+      [severity]="item.link_status === 'ACCESSED' ? 'success' : (item.link_status === 'SENT' ? 'info' : 'secondary')"
+      styleClass="text-xs"></p-tag>
+    <div class="flex items-center gap-0.5">
+      <button pButton icon="pi pi-copy"
+        class="p-button-rounded p-button-text p-button-xs text-slate-500 hover:text-slate-700"
+        pTooltip="Copy Portal Link" tooltipPosition="top" (click)="copyPortalLink(item)"></button>
+      <button pButton icon="pi pi-send"
+        class="p-button-rounded p-button-text p-button-xs text-blue-600 hover:text-blue-800" pTooltip="Email Link"
+        tooltipPosition="top" (click)="openSendLinkModal(item)"></button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- 8 Documents Status Template -->
+<ng-template #docsStatusTpl let-item>
+  <div class="flex flex-col gap-0.5">
+    <div class="flex items-center gap-1.5">
+      <p-tag
+        [value]="item.documents_status === 'PENDING_UPLOAD' ? 'Pending Upload' : (item.documents_status === 'SUBMITTED' ? 'Under Review' : (item.documents_status === 'VERIFIED' ? 'Verified' : 'Rejected'))"
+        [severity]="getDocsBadgeSeverity(item.documents_status)" styleClass="text-xs"></p-tag>
+      <span class="text-xs font-semibold text-slate-600">
+        ({{ getUploadedCount(item) }}/8 Docs)
+      </span>
+    </div>
+    <div *ngIf="item.documents_status === 'REJECTED' && item.rejection_remarks"
+      class="text-[11px] text-red-500 truncate max-w-xs" [pTooltip]="item.rejection_remarks">
+      Remarks: {{ item.rejection_remarks }}
+    </div>
+    <div *ngIf="item.verified_by && item.documents_status === 'VERIFIED'" class="text-[11px] text-slate-400">
+      Verified by {{ item.verified_by }}
+    </div>
+  </div>
+</ng-template>
+
+<!-- Offer Status Template -->
+<ng-template #offerStatusTpl let-item>
+  <div class="flex flex-col gap-0.5">
+    <p-tag
+      [value]="item.offer_status === 'ACCEPTED' ? 'Accepted with Signature' : (item.offer_status === 'OFFER_SENT' ? 'Offer Released' : (item.offer_status === 'DECLINED' ? 'Declined' : 'Not Issued'))"
+      [severity]="getOfferBadgeSeverity(item.offer_status)" styleClass="text-xs w-fit"></p-tag>
+    <span class="text-[11px] text-emerald-600 font-medium flex items-center gap-1"
+      *ngIf="item.offer_status === 'ACCEPTED' && item.accepted_at">
+      <i class="pi pi-check text-[10px]"></i> Signed {{ item.accepted_at | date:'dd MMM yyyy' }}
+    </span>
+  </div>
+</ng-template>
+
+<!-- Employee Status Template -->
+<ng-template #empStatusTpl let-item>
+  <div *ngIf="item.onboarding_completed" class="flex flex-col gap-0.5">
+    <p-tag value="Active Employee" severity="success" icon="pi pi-check" styleClass="text-xs w-fit"></p-tag>
+    <span class="text-[11px] text-slate-400">Converted</span>
+  </div>
+  <div *ngIf="!item.onboarding_completed">
+    <p-tag value="Pre-Hire Stage" severity="secondary" styleClass="text-xs w-fit"></p-tag>
+  </div>
+</ng-template>
+
+<!-- ========================================================================= -->
+<!-- ADD / EDIT / VIEW CANDIDATE DRAWER (Exact pattern as employee-management) -->
+<!-- ========================================================================= -->
+<p-drawer [(visible)]="showDrawer" position="right" [modal]="true"
+  [style]="isDrawerFullScreen ? { width: '100vw', maxWidth: '100vw' } : { width: '100%', maxWidth: '800px' }">
+  <ng-template pTemplate="header">
+    <div class="flex items-center justify-between w-full pr-2">
+      <h2 class="text-xl font-semibold text-gray-800 m-0">
+        {{ isViewMode ? 'Candidate Profile & Documents' : (isEditMode ? 'Edit Candidate Details' : 'Add Candidate
+        (Interview Cleared)') }}
+      </h2>
+      <button type="button" (click)="toggleDrawerFullScreen()"
+        [title]="isDrawerFullScreen ? 'Exit Full Screen' : 'Full Screen'"
+        class="p-2 text-slate-500 hover:text-blue-600 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer mr-2">
+        <i class="pi text-base" [ngClass]="isDrawerFullScreen ? 'pi-window-minimize' : 'pi-window-maximize'"></i>
+      </button>
+    </div>
+  </ng-template>
+
+  <!-- VIEW MODE CONTENT -->
+  <div *ngIf="isViewMode && selectedCandidate() as c" class="space-y-4 pb-4">
+    <!-- Candidate Header Card -->
+    <div class="rounded-xl border border-blue-200 bg-blue-50/70 p-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold text-base shadow-sm">
+          {{ c.full_name.charAt(0).toUpperCase() }}
+        </div>
+        <div>
+          <h3 class="m-0 font-bold text-base text-slate-900">{{ c.full_name }}</h3>
+          <span class="text-xs font-semibold text-slate-600">{{ c.designation }} &bull; {{ c.department }}</span>
+          <div class="text-xs text-slate-500 mt-0.5">Candidate Code: <strong class="font-mono text-slate-800">{{
+              c.candidate_code }}</strong></div>
+        </div>
+      </div>
+      <div>
+        <p-tag [value]="c.interview_status" severity="info"></p-tag>
+      </div>
+    </div>
+
+    <!-- Candidate Portal Magic Link Sharing Card -->
+    <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2">
+      <div class="flex items-center justify-between">
+        <span class="font-semibold text-sm text-slate-800 flex items-center gap-1.5">
+          <i class="pi pi-link text-blue-600"></i> Pre-Onboarding Public Portal Link
+        </span>
+        <p-tag [value]="c.link_status" [severity]="c.link_status === 'ACCESSED' ? 'success' : 'info'"></p-tag>
+      </div>
+
+      <div class="flex gap-2">
+        <input pInputText [value]="getCandidatePortalUrl(c)" readonly class="w-full text-xs font-mono bg-white" />
+        <button pButton icon="pi pi-copy" label="Copy" class="p-button-outlined p-button-sm rounded-lg"
+          (click)="copyPortalLink(c)"></button>
+        <button pButton icon="pi pi-send" label="Email" class="p-button-primary p-button-sm rounded-lg"
+          (click)="openSendLinkModal(c)"></button>
+      </div>
+      <p class="text-[11px] text-slate-500 m-0">Candidate uses this link to upload 8 mandatory documents and digitally
+        sign the offer letter.</p>
+    </div>
+
+    <!-- 8 Mandatory Documents Grid -->
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h4 class="text-sm font-bold uppercase text-slate-700 m-0">8 Mandatory Documents</h4>
+        <p-tag [value]="c.documents_status" [severity]="getDocsBadgeSeverity(c.documents_status)"></p-tag>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+        <div *ngFor="let doc of mandatoryDocs; let i = index"
+          class="p-3 rounded-lg border border-slate-200 bg-white flex items-center justify-between shadow-xs">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+              <i [class]="doc.icon"></i>
+            </span>
+            <div class="min-w-0">
+              <div class="text-xs font-semibold text-slate-800 truncate" [pTooltip]="doc.label">{{ i + 1 }}. {{
+                doc.label }}</div>
+              <div class="text-[11px]">
+                <span *ngIf="getUploadedDoc(c, doc.key) as uploaded"
+                  class="text-emerald-600 font-medium flex items-center gap-1">
+                  <i class="pi pi-check text-[10px]"></i> Uploaded
+                  <span *ngIf="getUploadedDocFiles(c, doc.key).length > 1"
+                    class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded-full">
+                    {{ getUploadedDocFiles(c, doc.key).length }} files
+                  </span>
+                </span>
+                <span *ngIf="!getUploadedDoc(c, doc.key)" class="text-amber-500 font-medium flex items-center gap-1">
+                  <i class="pi pi-clock text-[10px]"></i> Pending Upload
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="getUploadedDoc(c, doc.key) as uploaded" class="flex items-center gap-1">
+            <div *ngIf="getUploadedDocFiles(c, doc.key) as files" class="flex items-center gap-1">
+              <button *ngFor="let f of files; let fIdx = index" pButton icon="pi pi-eye"
+                class="p-button-rounded p-button-text p-button-xs text-slate-600 hover:text-blue-600"
+                [pTooltip]="files.length > 1 ? 'Preview file ' + (fIdx + 1) + ': ' + f.fileName : 'Preview document'"
+                (click)="previewDocument(f, files, fIdx, doc.label)"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button pButton icon="pi pi-check-square" label="Verify Documents"
+          class="p-button-outlined p-button-info p-button-sm rounded-lg" (click)="openVerifyModal(c)"></button>
+        <button pButton icon="pi pi-file-arrow-up" label="Issue Offer Letter"
+          class="p-button-outlined p-button-success p-button-sm rounded-lg" (click)="openOfferModal(c)"></button>
+      </div>
+    </div>
+
+    <!-- Offer Status & Digital Signature Box -->
+    <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="font-bold text-sm text-slate-800">Job Offer & Digital Signature</span>
+        <p-tag [value]="c.offer_status" [severity]="getOfferBadgeSeverity(c.offer_status)"></p-tag>
+      </div>
+
+      <div *ngIf="c.offer_details as offer"
+        class="text-xs text-slate-700 grid grid-cols-2 gap-2 bg-white p-3 rounded-lg border border-slate-200">
+        <div><strong>Offered CTC:</strong> ₹{{ offer.annual_ctc | number:'1.0-0' }} / yr</div>
+        <div><strong>Monthly Gross:</strong> ₹{{ offer.monthly_gross | number:'1.0-0' }}</div>
+        <div><strong>Joining Date:</strong> {{ offer.joining_date }}</div>
+        <div><strong>Valid Until:</strong> {{ offer.valid_until || 'N/A' }}</div>
+      </div>
+
+      <div *ngIf="c.signature_data" class="bg-white p-3 rounded-lg border border-emerald-200 space-y-1">
+        <div class="text-emerald-700 font-semibold text-xs flex items-center gap-1">
+          <i class="pi pi-check-circle"></i> Candidate Digital Signature:
+        </div>
+        <img [src]="c.signature_data" alt="Digital Signature"
+          class="h-12 border border-slate-100 p-1 bg-white rounded" />
+        <div class="text-slate-400 font-mono text-[10px]">Signed on: {{ c.accepted_at | date:'dd MMM yyyy, hh:mm a' }}
+        </div>
+      </div>
+
+      <div *ngIf="c.offer_status === 'ACCEPTED' && !c.onboarding_completed" class="pt-2 flex justify-end">
+        <button pButton icon="pi pi-user-plus" label="Convert to Active Employee"
+          class="p-button-success p-button-sm rounded-lg" (click)="confirmConvertToEmployee(c)"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD / EDIT MODE FORM (Matches Employee Management Styling) -->
+  <form *ngIf="!isViewMode" [formGroup]="candidateForm" (ngSubmit)="saveCandidate()" class="space-y-4 pb-2">
+    <!-- Readonly Candidate Code if Editing -->
+    <div *ngIf="isEditMode && selectedCandidate() as c"
+      class="space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
+      <label class="block text-sm font-medium text-gray-700">Candidate Code</label>
+      <input type="text" pInputText [value]="c.candidate_code" class="w-full bg-slate-100 font-mono" readonly />
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <!-- Full Name -->
+      <div class="space-y-2 md:col-span-2">
+        <label for="fullName" class="block text-sm font-medium text-gray-700">
+          Full Name <span class="text-red-500">*</span>
+        </label>
+        <input id="fullName" placeholder="Enter full name" type="text" pInputText formControlName="full_name"
+          class="w-full" />
+        <small class="text-red-500" *ngIf="f['full_name'].touched && f['full_name'].invalid">
+          Full Name is required.
+        </small>
+      </div>
+
+      <!-- Email Address -->
+      <div class="space-y-2 md:col-span-2">
+        <label for="officialEmail" class="block text-sm font-medium text-gray-700">
+          Candidate Email <span class="text-red-500">*</span>
+        </label>
+        <input id="officialEmail" placeholder="Enter email address" type="email" pInputText formControlName="email"
+          class="w-full" (input)="onEmailInput($event)" />
+        <small class="text-red-500" *ngIf="f['email'].touched && f['email'].hasError('required')">
+          Email is required.
+        </small>
+        <small class="text-red-500" *ngIf="f['email'].touched && f['email'].hasError('email')">
+          Please enter a valid email address.
+        </small>
+      </div>
+
+      <!-- Mobile Number -->
+      <div class="space-y-2">
+        <label for="mobileNumber" class="block text-sm font-medium text-gray-700">
+          Mobile Number <span class="text-red-500">*</span>
+        </label>
+        <input id="mobileNumber" placeholder="Enter 10-digit mobile" type="tel" pInputText formControlName="mobile"
+          maxlength="10" class="w-full" />
+        <small class="text-red-500" *ngIf="f['mobile'].touched && f['mobile'].hasError('required')">
+          Mobile number is required.
+        </small>
+        <small class="text-red-500" *ngIf="f['mobile'].touched && f['mobile'].hasError('pattern')">
+          Mobile number must be 10 digits.
+        </small>
+      </div>
+
+      <!-- Designation -->
+      <div class="space-y-2">
+        <label for="designation" class="block text-sm font-medium text-gray-700">
+          Designation <span class="text-red-500">*</span>
+        </label>
+        <p-select id="designation" [options]="designationOptions" appendTo="body" optionLabel="label"
+          optionValue="value" formControlName="designation" placeholder="Select designation" [filter]="true"
+          class="w-full custom-p-select"></p-select>
+        <small class="text-red-500" *ngIf="f['designation'].touched && f['designation'].invalid">
+          Designation is required.
+        </small>
+      </div>
+
+      <!-- Department -->
+      <div class="space-y-2">
+        <label for="department" class="block text-sm font-medium text-gray-700">
+          Department <span class="text-red-500">*</span>
+        </label>
+        <p-select id="department" [options]="departmentOptions" appendTo="body" optionLabel="label" optionValue="value"
+          formControlName="department" placeholder="Select department" [filter]="true"
+          class="w-full custom-p-select"></p-select>
+        <small class="text-red-500" *ngIf="f['department'].touched && f['department'].invalid">
+          Department is required.
+        </small>
+      </div>
+
+      <!-- Interview Stage -->
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700">Interview Stage</label>
+        <p-select [options]="interviewStatusOptions" appendTo="body" optionLabel="label" optionValue="value"
+          formControlName="interview_status" class="w-full custom-p-select"></p-select>
+      </div>
+
+      <!-- Expected Joining Date -->
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700">Expected Joining Date</label>
+        <p-datepicker formControlName="joining_date" appendTo="body" dateFormat="yy-mm-dd"
+          placeholder="Select joining date" styleClass="w-full"></p-datepicker>
+      </div>
+
+      <!-- Offered CTC -->
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700">Offered Annual CTC (₹)</label>
+        <input type="number" pInputText formControlName="offered_ctc" placeholder="e.g. 800000" class="w-full"
+          (focus)="onCtcFocus()" />
+        <!-- Real-time English Words Preview (Shows for 5 seconds) -->
+        <div *ngIf="showOfferedCtcWords() && offeredCtcInWords()"
+          class="ctc-words-badge text-xs text-blue-800 font-medium bg-blue-50/95 border border-blue-200 rounded-lg p-2.5 flex items-center justify-between shadow-xs transition-all duration-300 relative overflow-hidden">
+          <div class="flex items-center gap-2 min-w-0 pr-2">
+            <i class="pi pi-volume-up text-blue-600 text-sm shrink-0"></i>
+            <span class="truncate font-semibold tracking-wide">{{ offeredCtcInWords() }}</span>
+          </div>
+          <span
+            class="text-[10px] text-blue-600 bg-blue-100/80 px-2 py-0.5 rounded-full font-mono flex items-center gap-1 shrink-0 font-medium">
+            <i class="pi pi-clock text-[9px]"></i> 5s
+          </span>
+          <div class="ctc-timer-bar"></div>
+        </div>
+      </div>
+
+      <!-- Interview Notes / Feedback -->
+      <div class="space-y-2 md:col-span-2">
+        <label class="block text-sm font-medium text-gray-700">Interview Feedback & Hiring Notes</label>
+        <textarea pTextarea formControlName="notes" rows="3"
+          placeholder="Interview feedback, notice period terms, special notes..." class="w-full"></textarea>
+      </div>
+    </div>
+
+    <!-- Drawer Footer Actions -->
+    <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+      <button pButton type="button" label="Cancel" class="p-button-outlined p-button-secondary p-button-sm rounded-lg"
+        (click)="closeDrawer()"></button>
+      <button pButton type="submit" [label]="isEditMode ? 'Update Candidate' : 'Save & Generate Link'"
+        icon="pi pi-check" class="p-button-primary p-button-sm rounded-lg" [raised]="true"></button>
+    </div>
+  </form>
+</p-drawer>
+
+<!-- ========================================================================= -->
+<!-- SEND INVITATION LINK MODAL -->
+<!-- ========================================================================= -->
+<p-dialog [(visible)]="sendLinkModalVisible" [modal]="true" [style]="{ width: '520px' }"
+  header="Send Pre-Onboarding Link via Email">
+  <div *ngIf="selectedCandidate() as c" class="p-fluid space-y-3">
+    <p class="text-sm text-slate-600 m-0">
+      Send document upload link to <strong>{{ c.full_name }}</strong> ({{ c.email }}).
+    </p>
+
+    <form [formGroup]="sendLinkForm">
+      <div class="space-y-1">
+        <label class="block text-xs font-semibold text-slate-700">Custom HR Message (Optional)</label>
+        <textarea pTextarea formControlName="customMessage" rows="3" class="w-full text-xs"></textarea>
+      </div>
+    </form>
+
+    <div class="p-2.5 bg-slate-100 rounded-lg text-xs font-mono text-slate-600 break-all">
+      {{ getCandidatePortalUrl(c) }}
+    </div>
+
+    <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+      <button pButton type="button" label="Cancel" class="p-button-text p-button-secondary p-button-sm"
+        (click)="sendLinkModalVisible = false"></button>
+      <button pButton type="button" label="Dispatch Email" icon="pi pi-send"
+        class="p-button-primary p-button-sm rounded-lg" (click)="sendInvitationEmail()"></button>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- ========================================================================= -->
+<!-- VERIFY 8 DOCUMENTS MODAL -->
+<!-- ========================================================================= -->
+<p-dialog [(visible)]="verifyModalVisible" [modal]="true" [style]="{ width: '600px' }"
+  header="Verify Candidate 8 Documents">
+  <div *ngIf="selectedCandidate() as c" class="space-y-4">
+    <div class="text-sm text-slate-700">
+      Candidate: <strong>{{ c.full_name }}</strong> (<span class="font-mono">{{ c.candidate_code }}</span>)
+    </div>
+
+    <!-- Uploaded docs checklist -->
+    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3 max-h-60 overflow-y-auto space-y-2">
+      <div *ngFor="let doc of mandatoryDocs; let idx = index"
+        class="flex items-center justify-between py-1 border-b border-slate-200 last:border-0 text-xs">
+        <span class="font-medium text-slate-800">{{ idx + 1 }}. {{ doc.label }}</span>
+        <div class="flex items-center gap-2">
+          <span *ngIf="getUploadedDoc(c, doc.key) as uploaded"
+            class="text-emerald-600 font-semibold flex items-center gap-1">
+            <i class="pi pi-check text-[10px]"></i> Submitted
+            <button pButton icon="pi pi-eye" class="p-button-text p-button-rounded p-button-xs"
+              (click)="previewDocument(uploaded, getUploadedDocFiles(c, doc.key), 0, doc.label)"></button>
+          </span>
+          <span *ngIf="!getUploadedDoc(c, doc.key)" class="text-amber-500 font-semibold flex items-center gap-1">
+            <i class="pi pi-times text-[10px]"></i> Missing
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <form [formGroup]="verifyForm" (ngSubmit)="submitVerification()" class="space-y-3">
+      <div class="space-y-1">
+        <label class="block text-xs font-semibold text-slate-700">Verification Decision <span
+            class="text-red-500">*</span></label>
+        <p-select [options]="verifyStatusOptions" appendTo="body" optionLabel="label" optionValue="value"
+          formControlName="status" class="w-full custom-p-select"></p-select>
+      </div>
+
+      <div class="space-y-1" *ngIf="verifyForm.get('status')?.value === 'REJECTED'">
+        <label class="block text-xs font-semibold text-slate-700">Rejection Remarks / Reason <span
+            class="text-red-500">*</span></label>
+        <textarea pTextarea formControlName="rejectionRemarks" rows="3"
+          placeholder="Explain why documents are rejected so the candidate can re-upload..."
+          class="w-full text-xs"></textarea>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+        <button pButton type="button" label="Cancel" class="p-button-text p-button-secondary p-button-sm"
+          (click)="verifyModalVisible = false"></button>
+        <button pButton type="submit" label="Save Verification" icon="pi pi-check"
+          class="p-button-primary p-button-sm rounded-lg"></button>
+      </div>
+    </form>
+  </div>
+</p-dialog>
+
+<!-- ========================================================================= -->
+<!-- ISSUE OFFICIAL OFFER LETTER MODAL -->
+<!-- ========================================================================= -->
+<p-dialog [(visible)]="offerModalVisible" [modal]="true" [style]="{ width: '700px' }"
+  header="Issue Official Job Offer Letter">
+  <div *ngIf="selectedCandidate() as c">
+    <form [formGroup]="offerForm" (ngSubmit)="issueOfferLetter()" class="space-y-3">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-slate-700">Designation <span
+              class="text-red-500">*</span></label>
+          <input pInputText formControlName="designation" class="w-full text-sm" />
+        </div>
+
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-slate-700">Department <span
+              class="text-red-500">*</span></label>
+          <p-select [options]="departmentOptions" appendTo="body" optionLabel="label" optionValue="value"
+            formControlName="department" class="w-full custom-p-select"></p-select>
+        </div>
+
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-slate-700">Annual CTC (₹) <span
+              class="text-red-500">*</span></label>
+          <input pInputText type="number" formControlName="annual_ctc" placeholder="e.g. 800000" class="w-full text-sm"
+            (focus)="onAnnualCtcFocus()" />
+          <!-- Real-time English Words Preview (Shows for 5 seconds) -->
+          <div *ngIf="showAnnualCtcWords() && annualCtcInWords()"
+            class="ctc-words-badge text-xs text-blue-800 font-medium bg-blue-50/95 border border-blue-200 rounded-lg p-2.5 flex items-center justify-between shadow-xs transition-all duration-300 relative overflow-hidden">
+            <div class="flex items-center gap-2 min-w-0 pr-2">
+              <i class="pi pi-volume-up text-blue-600 text-sm shrink-0"></i>
+              <span class="truncate font-semibold tracking-wide">{{ annualCtcInWords() }}</span>
+            </div>
+            <span
+              class="text-[10px] text-blue-600 bg-blue-100/80 px-2 py-0.5 rounded-full font-mono flex items-center gap-1 shrink-0 font-medium">
+              <i class="pi pi-clock text-[9px]"></i> 5s
+            </span>
+            <div class="ctc-timer-bar"></div>
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-slate-700">Monthly Gross (₹)</label>
+          <input pInputText type="number" formControlName="monthly_gross" readonly
+            class="w-full text-sm bg-slate-100 font-bold text-blue-600" />
+        </div>
+
+        <!-- Monthly CTC Breakdown Box -->
+        <div class="md:col-span-2 rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-2">
+          <span class="block text-xs font-bold uppercase text-slate-700">Monthly CTC Components Breakup</span>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div>
+              <label class="text-[11px] text-slate-500 block">Basic (50%)</label>
+              <input pInputText type="number" formControlName="basic" class="w-full p-inputtext-sm text-xs" />
+            </div>
+            <div>
+              <label class="text-[11px] text-slate-500 block">HRA (50% Basic)</label>
+              <input pInputText type="number" formControlName="hra" class="w-full p-inputtext-sm text-xs" />
+            </div>
+            <div>
+              <label class="text-[11px] text-slate-500 block">Special Allowance</label>
+              <input pInputText type="number" formControlName="special_allowance"
+                class="w-full p-inputtext-sm text-xs" />
+            </div>
+            <div>
+              <label class="text-[11px] text-slate-500 block">PF Employer</label>
+              <input pInputText type="number" formControlName="pf" class="w-full p-inputtext-sm text-xs" />
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-slate-700">Proposed Joining Date <span
+              class="text-red-500">*</span></label>
+          <p-datepicker formControlName="joining_date" appendTo="body" dateFormat="yy-mm-dd"
+            styleClass="w-full"></p-datepicker>
+        </div>
+
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-slate-700">Acceptance Deadline</label>
+          <p-datepicker formControlName="valid_until" appendTo="body" dateFormat="yy-mm-dd"
+            styleClass="w-full"></p-datepicker>
+        </div>
+
+        <div class="space-y-1 md:col-span-2">
+          <label class="block text-xs font-semibold text-slate-700">Offer Letter Intro / Terms Text</label>
+          <textarea pTextarea formControlName="offer_letter_text" rows="2" class="w-full text-xs"></textarea>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+        <button pButton type="button" label="Cancel" class="p-button-text p-button-secondary p-button-sm"
+          (click)="offerModalVisible = false"></button>
+        <button pButton type="submit" label="Release & Email Offer Letter" icon="pi pi-send"
+          class="p-button-success p-button-sm rounded-lg"></button>
+      </div>
+    </form>
+  </div>
+</p-dialog>
+
+<!-- ========================================================================= -->
+<!-- DOCUMENT PREVIEW MODAL -->
+<!-- ========================================================================= -->
+<p-dialog [(visible)]="docPreviewVisible" [modal]="true" [style]="{ width: '90vw', maxWidth: '920px' }"
+  [dismissableMask]="true"
+  [header]="previewCategoryLabel ? (previewCategoryLabel + ' - Document Preview') : 'Document Preview'">
+  <div class="space-y-3">
+    <!-- Top Meta & Quick Action Toolbar -->
+    <div
+      class="flex flex-wrap items-center justify-between gap-2 bg-slate-100/90 border border-slate-200/80 px-3.5 py-2.5 rounded-xl text-xs">
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="w-6 h-6 rounded-md bg-blue-100 text-blue-700 flex items-center justify-center font-bold shrink-0">
+          <i class="pi" [ngClass]="isPdfPreview ? 'pi-file-pdf' : 'pi-image'"></i>
+        </span>
+        <div class="min-w-0">
+          <div class="font-semibold text-slate-800 truncate max-w-sm" [pTooltip]="previewTitle">
+            {{ previewFileList[previewCurrentIndex]?.fileName || previewFileList[previewCurrentIndex]?.name ||
+            previewTitle }}
+          </div>
+          <div class="text-[10px] text-slate-500 flex items-center gap-1.5"
+            *ngIf="previewFileList[previewCurrentIndex]?.fileSize">
+            <span>{{ previewFileList[previewCurrentIndex].fileSize }}</span>
+            <span *ngIf="previewFileList.length > 1">&bull; File {{ previewCurrentIndex + 1 }} of {{
+              previewFileList.length }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions Header Strip -->
+      <div class="flex items-center gap-1.5 shrink-0">
+        <!-- New Tab / Fullscreen -->
+        <button type="button"
+          class="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 hover:border-slate-300 flex items-center gap-1 font-medium transition cursor-pointer shadow-xs"
+          (click)="openPreviewInNewTab()" pTooltip="Open in Fullscreen New Tab" tooltipPosition="bottom">
+          <i class="pi pi-external-link text-[11px]"></i>
+          <span class="hidden sm:inline">Fullscreen</span>
+        </button>
+
+        <!-- Download Current -->
+        <button type="button"
+          class="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 hover:border-slate-300 flex items-center gap-1 font-medium transition cursor-pointer shadow-xs"
+          (click)="downloadCurrentDoc()" pTooltip="Download current file" tooltipPosition="bottom">
+          <i class="pi pi-download text-[11px] text-blue-600"></i>
+          <span class="hidden sm:inline">Download</span>
+        </button>
+
+        <!-- Download All (Highlighted) -->
+        <button *ngIf="previewFileList.length > 1" type="button" [disabled]="isDownloadingAll"
+          class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center gap-1.5 font-semibold transition cursor-pointer shadow-xs disabled:opacity-50"
+          (click)="downloadAllDocs()" pTooltip="Download all uploaded files in this category" tooltipPosition="bottom">
+          <i class="pi" [ngClass]="isDownloadingAll ? 'pi-spin pi-spinner' : 'pi-cloud-download'"></i>
+          <span>Download All ({{ previewFileList.length }})</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Media Display Container with Floating Navigation Arrows -->
+    <div
+      class="relative flex items-center justify-center p-2 bg-slate-950 rounded-2xl overflow-hidden min-h-[420px] max-h-[66vh] border border-slate-800 shadow-inner group">
+      <!-- Floating Previous Arrow Button -->
+      <button *ngIf="previewFileList.length > 1" type="button" (click)="prevPreviewFile()"
+        [disabled]="!hasPrevPreview()"
+        class="absolute left-3 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white flex items-center justify-center shadow-xl border border-slate-700 backdrop-blur-md transition-all cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed hover:scale-105 active:scale-95"
+        pTooltip="Previous File (Left Arrow)" tooltipPosition="right">
+        <i class="pi pi-chevron-left text-base"></i>
+      </button>
+
+      <!-- Floating Next Arrow Button -->
+      <button *ngIf="previewFileList.length > 1" type="button" (click)="nextPreviewFile()"
+        [disabled]="!hasNextPreview()"
+        class="absolute right-3 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white flex items-center justify-center shadow-xl border border-slate-700 backdrop-blur-md transition-all cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed hover:scale-105 active:scale-95"
+        pTooltip="Next File (Right Arrow)" tooltipPosition="left">
+        <i class="pi pi-chevron-right text-base"></i>
+      </button>
+
+      <!-- Document Content -->
+      <iframe *ngIf="isPdfPreview && previewUrl" [src]="previewUrl"
+        class="w-full h-[520px] rounded-lg border-0 bg-white"></iframe>
+
+      <img *ngIf="!isPdfPreview && previewRawUrl" [src]="previewRawUrl" alt="Document Preview"
+        class="max-w-full max-h-[62vh] object-contain rounded-lg shadow-2xl transition-transform duration-200 select-none" />
+    </div>
+
+    <!-- Multiple Files Indicator Dots Strip -->
+    <div *ngIf="previewFileList.length > 1" class="flex items-center justify-center gap-2 py-1">
+      <button *ngFor="let item of previewFileList; let idx = index" type="button" (click)="jumpToPreviewIndex(idx)"
+        [pTooltip]="(item.fileName || item.name || 'File ' + (idx + 1))" tooltipPosition="top"
+        class="h-2.5 rounded-full transition-all duration-200 cursor-pointer"
+        [ngClass]="idx === previewCurrentIndex ? 'w-8 bg-blue-600 shadow-xs' : 'w-2.5 bg-slate-300 hover:bg-slate-400'"></button>
+    </div>
+  </div>
+
+  <!-- Footer Navigation & Actions -->
+  <div class="flex flex-wrap items-center justify-between gap-3 pt-3 mt-2 border-t border-slate-200">
+    <!-- Left: Prev / Next Navigation buttons with Counter -->
+    <div class="flex items-center gap-2">
+      <button type="button"
+        class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 hover:border-slate-400 flex items-center gap-1.5 text-xs font-semibold transition cursor-pointer shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+        [disabled]="!hasPrevPreview()" (click)="prevPreviewFile()">
+        <i class="pi pi-chevron-left text-[11px]"></i>
+        <span>Previous</span>
+      </button>
+
+      <span *ngIf="previewFileList.length > 1"
+        class="text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg select-none">
+        {{ previewCurrentIndex + 1 }} / {{ previewFileList.length }}
+      </span>
+
+      <button type="button"
+        class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 hover:border-slate-400 flex items-center gap-1.5 text-xs font-semibold transition cursor-pointer shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+        [disabled]="!hasNextPreview()" (click)="nextPreviewFile()">
+        <span>Next</span>
+        <i class="pi pi-chevron-right text-[11px]"></i>
+      </button>
+    </div>
+
+    <!-- Right: Download All, Download, Close -->
+    <div class="flex items-center gap-2">
+      <button *ngIf="previewFileList.length > 1" type="button" [disabled]="isDownloadingAll"
+        class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center gap-1.5 text-xs font-semibold transition cursor-pointer shadow-xs disabled:opacity-50"
+        (click)="downloadAllDocs()">
+        <i class="pi" [ngClass]="isDownloadingAll ? 'pi-spin pi-spinner' : 'pi-cloud-download'"></i>
+        <span>Download All</span>
+      </button>
+
+      <button type="button"
+        class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-1.5 text-xs font-semibold transition cursor-pointer shadow-xs"
+        (click)="downloadCurrentDoc()">
+        <i class="pi pi-download text-[11px]"></i>
+        <span>Download</span>
+      </button>
+
+      <button pButton label="Close" class="p-button-secondary p-button-sm rounded-lg"
+        (click)="docPreviewVisible = false"></button>
+    </div>
+  </div>
+</p-dialog>

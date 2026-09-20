@@ -9,7 +9,7 @@ import { environment } from '../../../environments/environment';
 export class EmployeeOnboardingService {
   private readonly apiUrl = environment.apiBaseUrl;
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient) { }
 
   getOnboardingByEmployeeId(employeeId: string | number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/api/employee-onboarding/${employeeId}`);
@@ -30,7 +30,7 @@ export class EmployeeOnboardingService {
     if (params.limit !== undefined) queryParams.push(`limit=${params.limit}`);
     if (params.search) queryParams.push(`search=${encodeURIComponent(params.search)}`);
     if (params.profile_status) queryParams.push(`profile_status=${params.profile_status}`);
-    
+
     if (queryParams.length > 0) {
       query = `?${queryParams.join('&')}`;
     }

@@ -157,6 +157,7 @@ export class AppShell implements OnInit {
         if (pathLower.includes('approval') || pathLower.includes('exit')) {
           approvalSubmenus.push(item);
         } else if (
+          pathLower.includes('pre-onboarding') ||
           pathLower.includes('employee-management') ||
           pathLower.includes('offboarding') ||
           pathLower.includes('office-location') ||
@@ -231,6 +232,7 @@ export class AppShell implements OnInit {
     if (p.includes('menu')) return 'pi-list';
     if (p.includes('work') || p.includes('task')) return 'pi-check-square';
     if (p.includes('role')) return 'pi-users';
+    if (p.includes('pre-onboarding')) return 'pi-user-plus';
     return 'pi-file';
   }
 

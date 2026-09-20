@@ -1,0 +1,36 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Custom primeNG progress bar */
+:host ::ng-deep .p-progressbar {
+  background-color: #f1f5f9;
+  border-radius: 9999px;
+
+  .p-progressbar-value {
+    background: linear-gradient(90deg, #2563eb, #10b981);
+    border-radius: 9999px;
+    transition: width 0.4s ease;
+  }
+}
+
+/* Canvas signature pad responsive styles */
+canvas {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* PrimeNG Dialog responsive adjustments for mobile */
+@media (max-width: 640px) {
+  :host ::ng-deep .p-dialog {
+    width: 96vw !important;
+    margin: 0.5rem;
+
+    .p-dialog-content {
+      padding: 0.75rem !important;
+    }
+  }
+}

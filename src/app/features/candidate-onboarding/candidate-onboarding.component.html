@@ -1,0 +1,1333 @@
+<div class="min-h-screen bg-slate-50 text-slate-800 font-sans pb-16">
+  <p-toast position="top-center"></p-toast>
+
+  <!-- Top Enterprise Navbar -->
+  <header class="w-full bg-white border-b border-slate-200/90 sticky top-0 z-40 shadow-xs px-4 sm:px-8 py-3.5">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
+      <!-- Brand Logo & Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-xs">
+          <i class="pi pi-bolt text-lg"></i>
+        </div>
+        <div>
+          <span class="block text-base font-extrabold text-slate-900 leading-tight">StaffHub</span>
+          <span class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">Candidate Onboarding</span>
+        </div>
+      </div>
+
+      <!-- Candidate Secure Session Info -->
+      <div *ngIf="candidateData() as c" class="flex items-center gap-3 sm:gap-4">
+        <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-slate-100 rounded-full text-slate-600 text-xs font-medium">
+          <i class="pi pi-lock text-[11px] text-emerald-600"></i>
+          <span>Secure Candidate Portal</span>
+        </div>
+
+        <div class="flex items-center gap-2.5 bg-blue-50/90 border border-blue-200/80 rounded-full py-1 pl-3 pr-1.5">
+          <div class="hidden md:block text-right leading-tight">
+            <div class="font-bold text-xs text-slate-900">{{ c.full_name }}</div>
+            <div class="text-[10px] text-slate-500 truncate max-w-44">{{ c.designation }}</div>
+          </div>
+          <div class="w-7 h-7 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+            {{ c.full_name?.charAt(0)?.toUpperCase() || 'C' }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="max-w-md mx-auto my-20 p-8 text-center bg-white border border-slate-200 rounded-2xl shadow-xs">
+    <i class="pi pi-spin pi-spinner text-4xl text-blue-600 mb-3 block"></i>
+    <h3 class="text-base font-bold text-slate-800 mb-1">Loading Pre-Onboarding Workspace</h3>
+    <p class="text-xs text-slate-500 m-0">Please wait while we verify your secure access token...</p>
+  </div>
+
+  <!-- Error State (Invalid Token / Link) -->
+  <div *ngIf="!loading() && loadError()" class="max-w-lg mx-auto my-16 p-6 sm:p-8 bg-white border border-red-200 rounded-2xl text-center shadow-sm">
+    <div class="w-14 h-14 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-4 text-2xl">
+      <i class="pi pi-exclamation-triangle"></i>
+    </div>
+    <h2 class="text-xl font-bold text-slate-900 mb-2">Access Link Expired or Invalid</h2>
+    <p class="text-slate-600 text-sm mb-4 leading-relaxed">{{ loadError() }}</p>
+    <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-600 mb-4">
+      If you believe this is an error, please contact your HR onboarding team to request a fresh invitation link.
+    </div>
+  </div>
+
+  <!-- Main Candidate Workspace -->
+  <main *ngIf="!loading() && candidateData() as c" class="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
+    <!-- Welcome Header Card -->
+    <div class="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-7 shadow-xs mb-6">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div>
+          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-blue-100/70 text-blue-700 mb-2">
+            <i class="pi pi-sparkles text-[10px]"></i> Candidate Pre-Onboarding
+          </span>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight m-0">
+            Welcome to the Team, {{ c.full_name }}! 👋
+          </h1>
+          <p class="text-sm sm:text-base text-slate-600 mt-1 mb-0 leading-relaxed">
+            Congratulations on successfully clearing your interviews for the 
+            <strong class="text-slate-900 font-semibold">{{ c.designation }}</strong> position in 
+            <strong class="text-slate-900 font-semibold">{{ c.department }}</strong>.
+          </p>
+        </div>
+
+        <!-- Badges & Status -->
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="px-3 py-1 bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-xs font-mono font-semibold">
+            ID: {{ c.candidate_code }}
+          </span>
+          <p-tag
+            [value]="c.documents_status === 'PENDING_UPLOAD' ? 'Pending Uploads' : (c.documents_status === 'SUBMITTED' ? 'Under HR Review' : (c.documents_status === 'VERIFIED' ? 'Verified & Approved' : 'Action Required'))"
+            [severity]="c.documents_status === 'VERIFIED' ? 'success' : (c.documents_status === 'REJECTED' ? 'danger' : 'info')"
+            styleClass="text-xs font-semibold py-1 px-2.5"
+          ></p-tag>
+        </div>
+      </div>
+
+      <!-- 4-Step Responsive Stepper Navigation -->
+      <!-- 4-Step Responsive Stepper Navigation with Locking Mechanism -->
+      <div class="border-t border-slate-100 mt-6 pt-5 grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
+        <!-- Step 1 -->
+        <button
+          type="button"
+          (click)="goToStep(1)"
+          class="flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl border text-left transition-all cursor-pointer"
+          [ngClass]="activeStep() === 1 ? 'bg-blue-50/80 border-blue-300 ring-2 ring-blue-100' : (getUploadedCount() === 8 ? 'bg-emerald-50/60 border-emerald-200' : 'bg-slate-50/70 border-slate-200 hover:bg-slate-100/70')"
+        >
+          <div
+            class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-xs"
+            [ngClass]="activeStep() === 1 ? 'bg-blue-600 text-white' : (getUploadedCount() === 8 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600')"
+          >
+            <i class="pi" [ngClass]="getUploadedCount() === 8 ? 'pi-check' : 'pi-upload'"></i>
+          </div>
+          <div class="min-w-0">
+            <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Step 1</span>
+            <span class="block text-xs sm:text-sm font-semibold truncate" [ngClass]="activeStep() === 1 ? 'text-blue-900' : 'text-slate-700'">
+              Upload 8 Docs
+            </span>
+          </div>
+        </button>
+
+        <!-- Step 2 (Locked until docs submitted/verified) -->
+        <button
+          type="button"
+          (click)="goToStep(2)"
+          class="flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl border text-left transition-all"
+          [ngClass]="[
+            !canAccessStep(2) ? 'opacity-60 cursor-not-allowed bg-slate-50/50 border-slate-200' : 'cursor-pointer',
+            activeStep() === 2 ? 'bg-blue-50/80 border-blue-300 ring-2 ring-blue-100' : '',
+            canAccessStep(2) && c.documents_status === 'VERIFIED' && activeStep() !== 2 ? 'bg-emerald-50/60 border-emerald-200 hover:bg-emerald-100/50' : '',
+            canAccessStep(2) && c.documents_status !== 'VERIFIED' && activeStep() !== 2 ? 'bg-slate-50/70 border-slate-200 hover:bg-slate-100/70' : ''
+          ]"
+        >
+          <div
+            class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-xs"
+            [ngClass]="activeStep() === 2 ? 'bg-blue-600 text-white' : (c.documents_status === 'VERIFIED' ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600')"
+          >
+            <i class="pi" [ngClass]="!canAccessStep(2) ? 'pi-lock' : (c.documents_status === 'VERIFIED' ? 'pi-check' : 'pi-search')"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Step 2</span>
+              <i *ngIf="!canAccessStep(2)" class="pi pi-lock text-[9px] text-slate-400"></i>
+            </div>
+            <span class="block text-xs sm:text-sm font-semibold truncate" [ngClass]="activeStep() === 2 ? 'text-blue-900' : 'text-slate-700'">
+              HR Verification
+            </span>
+          </div>
+        </button>
+
+        <!-- Step 3 (Locked until offer released) -->
+        <button
+          type="button"
+          (click)="goToStep(3)"
+          class="flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl border text-left transition-all"
+          [ngClass]="[
+            !canAccessStep(3) ? 'opacity-60 cursor-not-allowed bg-slate-50/50 border-slate-200' : 'cursor-pointer',
+            activeStep() === 3 ? 'bg-blue-50/80 border-blue-300 ring-2 ring-blue-100' : '',
+            canAccessStep(3) && c.offer_status === 'ACCEPTED' && activeStep() !== 3 ? 'bg-emerald-50/60 border-emerald-200 hover:bg-emerald-100/50' : '',
+            canAccessStep(3) && c.offer_status !== 'ACCEPTED' && activeStep() !== 3 ? 'bg-slate-50/70 border-slate-200 hover:bg-slate-100/70' : ''
+          ]"
+        >
+          <div
+            class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-xs"
+            [ngClass]="activeStep() === 3 ? 'bg-blue-600 text-white' : (c.offer_status === 'ACCEPTED' ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600')"
+          >
+            <i class="pi" [ngClass]="!canAccessStep(3) ? 'pi-lock' : (c.offer_status === 'ACCEPTED' ? 'pi-check' : 'pi-file-edit')"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Step 3</span>
+              <i *ngIf="!canAccessStep(3)" class="pi pi-lock text-[9px] text-slate-400"></i>
+            </div>
+            <span class="block text-xs sm:text-sm font-semibold truncate" [ngClass]="activeStep() === 3 ? 'text-blue-900' : 'text-slate-700'">
+              Review & Sign Offer
+            </span>
+          </div>
+        </button>
+
+        <!-- Step 4 (Locked until offer accepted) -->
+        <button
+          type="button"
+          (click)="goToStep(4)"
+          class="flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl border text-left transition-all"
+          [ngClass]="[
+            !canAccessStep(4) ? 'opacity-60 cursor-not-allowed bg-slate-50/50 border-slate-200' : 'cursor-pointer',
+            activeStep() === 4 ? 'bg-blue-600 text-white border-blue-600 shadow-xs' : (c.offer_status === 'ACCEPTED' ? 'bg-emerald-50/60 border-emerald-200 hover:bg-emerald-100/50' : 'bg-slate-50/70 border-slate-200')
+          ]"
+        >
+          <div
+            class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-xs"
+            [ngClass]="activeStep() === 4 ? 'bg-white text-blue-600' : (c.offer_status === 'ACCEPTED' ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600')"
+          >
+            <i class="pi" [ngClass]="!canAccessStep(4) ? 'pi-lock' : 'pi-star-fill'"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1">
+              <span class="text-[10px] font-bold uppercase tracking-wider" [ngClass]="activeStep() === 4 ? 'text-blue-200' : 'text-slate-400'">Step 4</span>
+              <i *ngIf="!canAccessStep(4)" class="pi pi-lock text-[9px] text-slate-400"></i>
+            </div>
+            <span class="block text-xs sm:text-sm font-semibold truncate" [ngClass]="activeStep() === 4 ? 'text-white' : 'text-slate-700'">
+              Welcome Aboard!
+            </span>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Rejection Alert (If HR requested re-upload) -->
+    <div *ngIf="c.documents_status === 'REJECTED'" class="mb-6 p-4 sm:p-5 rounded-2xl bg-red-50 border border-red-200 shadow-xs">
+      <div class="flex items-start gap-3.5">
+        <div class="w-9 h-9 rounded-xl bg-red-100 text-red-600 flex items-center justify-center shrink-0 text-lg">
+          <i class="pi pi-exclamation-triangle"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="text-sm sm:text-base font-bold text-red-900 m-0">Action Required: Document Re-Upload Requested</h3>
+          <p class="text-xs sm:text-sm text-red-700 mt-1 mb-2.5">
+            HR Admin reviewed your submitted documents and provided the following feedback:
+          </p>
+          <div class="p-3 bg-white rounded-xl border border-red-300 text-xs sm:text-sm font-semibold text-red-900 shadow-xs">
+            "{{ c.rejection_remarks || 'Please re-upload clear, legible copies of the requested documents.' }}"
+          </div>
+          <p class="text-xs text-red-600 mt-2 mb-0 font-medium">
+            Please replace or add the affected documents below and click <strong>"Submit Updated Documents"</strong> to re-submit for verification.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Under Review Alert (If Documents are Submitted & Pending HR Verification) -->
+    <div *ngIf="c.documents_status === 'SUBMITTED'" class="mb-6 p-4 sm:p-5 rounded-2xl bg-blue-50 border border-blue-200 shadow-xs">
+      <div class="flex items-start gap-3.5">
+        <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 text-lg">
+          <i class="pi pi-hourglass"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h3 class="text-sm sm:text-base font-bold text-blue-950 m-0">Documents Submitted & Under HR Review</h3>
+            <span class="text-xs font-semibold text-blue-700 bg-blue-100/80 px-2.5 py-0.5 rounded-full">
+              Submitted on {{ (c.updated_at || c.created_at) | date:'dd MMM yyyy, hh:mm a' }}
+            </span>
+          </div>
+          <p class="text-xs sm:text-sm text-blue-800 mt-1 mb-0 leading-relaxed">
+            All 8 mandatory documents have been received. HR Operations is currently reviewing and verifying your documents. <strong>Step 2 (HR Verification)</strong> will unlock automatically as soon as HR completes verification.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verified & Approved Alert (If Documents are Verified by HR) -->
+    <div *ngIf="c.documents_status === 'VERIFIED'" class="mb-6 p-4 sm:p-5 rounded-2xl bg-emerald-50 border border-emerald-200 shadow-xs">
+      <div class="flex items-start gap-3.5">
+        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 text-lg">
+          <i class="pi pi-check-circle"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h3 class="text-sm sm:text-base font-bold text-emerald-950 m-0">All 8 Documents Verified & Approved by HR! 🎉</h3>
+            <span class="text-xs font-semibold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full">
+              Verified on {{ c.verified_at | date:'dd MMM yyyy, hh:mm a' }} by {{ c.verified_by || 'HR Admin' }}
+            </span>
+          </div>
+          <p class="text-xs sm:text-sm text-emerald-800 mt-1 mb-3 leading-relaxed">
+            Your credentials have been validated and approved. All uploaded documents are now permanently locked in <strong>Read-Only</strong> mode.
+          </p>
+          <button
+            pButton
+            label="View HR Verification (Step 2)"
+            icon="pi pi-arrow-right"
+            class="p-button-success p-button-sm rounded-lg font-bold"
+            (click)="goToStep(2)"
+          ></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- STEP 1: 8 MANDATORY DOCUMENTS CHECKLIST -->
+    <!-- ========================================================================= -->
+    <div *ngIf="activeStep() === 1" class="space-y-6">
+      <!-- Progress Bar & Instructions Card -->
+      <div class="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 shadow-xs">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-slate-900 m-0">
+              Mandatory Documents Checklist ({{ getUploadedCount() }}/8 Categories Completed)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 m-0 mt-0.5">
+              Upload clear scans or photos for all 8 categories (Multiple files allowed per category &bull; PDF, JPG, PNG up to 15MB each).
+            </p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
+              {{ getTotalFilesCount() }} File(s) Uploaded
+            </span>
+            <span
+              class="px-2.5 py-1 rounded-full text-xs font-bold font-mono"
+              [ngClass]="getUploadedCount() === 8 ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'"
+            >
+              {{ getUploadProgress() }}% Completed
+            </span>
+          </div>
+        </div>
+
+        <p-progressBar [value]="getUploadProgress()" [showValue]="false" styleClass="h-2 rounded-full overflow-hidden"></p-progressBar>
+      </div>
+
+      <!-- 8 Documents Grid (Responsive: 1 col on mobile, 2 cols on tablet/desktop) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div
+          *ngFor="let doc of documents; let idx = index"
+          class="bg-white border rounded-2xl p-4 sm:p-5 shadow-xs transition-all flex flex-col justify-between"
+          [ngClass]="doc.files && doc.files.length > 0 ? 'border-emerald-300 ring-1 ring-emerald-100 bg-emerald-50/15' : 'border-slate-200 hover:border-slate-300'"
+        >
+          <!-- Document Header -->
+          <div>
+            <div class="flex items-start justify-between gap-3 mb-2">
+              <div class="flex items-start gap-3">
+                <div
+                  class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-base"
+                  [ngClass]="doc.files && doc.files.length > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-50 text-blue-600 border border-blue-100'"
+                >
+                  <i [class]="doc.icon"></i>
+                </div>
+                <div>
+                  <h3 class="m-0 text-sm sm:text-base font-bold text-slate-900">
+                    {{ idx + 1 }}. {{ doc.label }}
+                  </h3>
+                  <p class="text-xs text-slate-500 m-0 mt-0.5 leading-snug">
+                    {{ doc.description }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Upload Status Tag -->
+              <div class="shrink-0">
+                <p-tag
+                  *ngIf="doc.files && doc.files.length > 0"
+                  [value]="(c.documents_status === 'VERIFIED' ? 'Verified (' : 'Uploaded (') + doc.files.length + ')'"
+                  [severity]="c.documents_status === 'VERIFIED' ? 'success' : 'info'"
+                  [icon]="c.documents_status === 'VERIFIED' ? 'pi pi-verified' : 'pi pi-check'"
+                  styleClass="text-xs font-semibold"
+                ></p-tag>
+                <p-tag
+                  *ngIf="!doc.files || doc.files.length === 0"
+                  value="Required"
+                  severity="warn"
+                  styleClass="text-xs font-semibold"
+                ></p-tag>
+              </div>
+            </div>
+
+            <!-- STATE 1: 1st Time (No Files Yet) & Editable -> Show ONLY Upload Option -->
+            <div *ngIf="(!doc.files || doc.files.length === 0) && canEditDocuments()" class="mt-3">
+              <label class="block cursor-pointer">
+                <input
+                  type="file"
+                  multiple
+                  accept=".pdf,.png,.jpg,.jpeg"
+                  class="hidden"
+                  (change)="onFilesSelected($event, doc)"
+                />
+                <div class="border-2 border-dashed border-blue-200 hover:border-blue-400 bg-blue-50/40 hover:bg-blue-50/80 rounded-xl p-4 sm:p-5 text-center transition">
+                  <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mx-auto mb-2 text-base">
+                    <i class="pi pi-upload"></i>
+                  </div>
+                  <div class="text-xs font-bold text-blue-900">Click to Upload Document(s)</div>
+                  <div class="text-[11px] text-slate-500 mt-0.5">Select PDF, JPG, or PNG (up to 15MB each)</div>
+                  <div class="text-[10px] text-blue-600 font-medium mt-1">
+                    <i class="pi pi-info-circle text-[9px]"></i> Multiple files selection supported
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <!-- Empty state when locked (read-only) -->
+            <div *ngIf="(!doc.files || doc.files.length === 0) && !canEditDocuments()" class="mt-3 p-3 bg-slate-50 border border-slate-200 rounded-xl text-center text-xs text-slate-400">
+              No document uploaded
+            </div>
+
+            <!-- STATE 2: After Upload -> Show Files List + View (+ Delete if editable) -->
+            <div *ngIf="doc.files && doc.files.length > 0" class="mt-3 space-y-2">
+              <!-- Attached Files List -->
+              <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                <div
+                  *ngFor="let file of doc.files; let fIdx = index"
+                  class="bg-white border border-slate-200/90 hover:border-blue-200 rounded-xl p-2.5 flex items-center justify-between gap-2 shadow-xs transition"
+                >
+                  <!-- File Info -->
+                  <div class="flex items-center gap-2.5 min-w-0 pr-1">
+                    <span
+                      class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold"
+                      [ngClass]="file.fileName.toLowerCase().endsWith('.pdf') ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-blue-50 text-blue-600 border border-blue-100'"
+                    >
+                      <i class="pi" [ngClass]="file.fileName.toLowerCase().endsWith('.pdf') ? 'pi-file-pdf' : 'pi-image'"></i>
+                    </span>
+                    <div class="min-w-0">
+                      <div class="text-xs font-semibold text-slate-800 truncate max-w-xs" [pTooltip]="file.fileName">
+                        {{ file.fileName }}
+                      </div>
+                      <div class="text-[10px] text-slate-400 flex items-center gap-1.5">
+                        <span>{{ file.fileSize }}</span>
+                        <span *ngIf="file.uploadedAt">&bull; {{ file.uploadedAt | date:'dd MMM, hh:mm a' }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Action Icons: View ALWAYS, Delete ONLY if canEditDocuments() -->
+                  <div class="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      class="w-7 h-7 rounded-lg text-blue-600 hover:bg-blue-50 flex items-center justify-center transition border border-transparent hover:border-blue-200 cursor-pointer"
+                      pTooltip="View / Preview Document"
+                      tooltipPosition="top"
+                      (click)="previewFile(file, doc.label, doc.files, fIdx)"
+                    >
+                      <i class="pi pi-eye text-xs"></i>
+                    </button>
+                    <!-- Delete button is strictly hidden when documents are verified or under review -->
+                    <button
+                      *ngIf="canEditDocuments()"
+                      type="button"
+                      class="w-7 h-7 rounded-lg text-red-500 hover:bg-red-50 flex items-center justify-center transition border border-transparent hover:border-red-200 cursor-pointer"
+                      pTooltip="Delete this file"
+                      tooltipPosition="top"
+                      (click)="removeFile(doc, file.id)"
+                    >
+                      <i class="pi pi-trash text-xs"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Controls: + Add More & Replace All (ONLY if canEditDocuments) -->
+              <div *ngIf="canEditDocuments()" class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                <!-- + Add More Button -->
+                <label class="cursor-pointer">
+                  <input
+                    type="file"
+                    multiple
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    class="hidden"
+                    (change)="onFilesSelected($event, doc)"
+                  />
+                  <span class="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-bold transition">
+                    <i class="pi pi-plus text-[11px]"></i> Add More
+                  </span>
+                </label>
+
+                <!-- Replace All Button -->
+                <label class="cursor-pointer">
+                  <input
+                    type="file"
+                    multiple
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    class="hidden"
+                    (change)="replaceAllFiles($event, doc)"
+                  />
+                  <span class="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-800 transition py-1 px-2">
+                    <i class="pi pi-sync text-[10px]"></i> Replace All
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit / Lock Status Section CTA Bar -->
+      <!-- Condition 1: Can Edit (Initial Upload or Rejected) -> Show Submit CTA -->
+      <div *ngIf="canEditDocuments()" class="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-base"
+            [ngClass]="canSubmitDocuments() ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'"
+          >
+            <i class="pi" [ngClass]="canSubmitDocuments() ? 'pi-check-circle' : 'pi-info-circle'"></i>
+          </div>
+          <div>
+            <div class="text-sm sm:text-base font-bold text-slate-900">
+              {{ getUploadedCount() }} of 8 Categories Completed ({{ getTotalFilesCount() }} Files Attached)
+            </div>
+            <div class="text-xs sm:text-sm text-slate-500">
+              <span *ngIf="!canSubmitDocuments()" class="text-amber-600 font-semibold">
+                Please attach document(s) for all {{ 8 - getUploadedCount() }} remaining categories to submit.
+              </span>
+              <span *ngIf="canSubmitDocuments()" class="text-emerald-600 font-semibold">
+                All 8 mandatory categories fulfilled! Ready for HR verification review.
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <button
+          pButton
+          [label]="submittingDocs() ? 'Submitting Documents...' : (c.documents_status === 'REJECTED' ? 'Submit Updated Documents to HR' : 'Submit All 8 Categories to HR')"
+          [icon]="submittingDocs() ? 'pi pi-spin pi-spinner' : 'pi pi-send'"
+          class="w-full sm:w-auto p-button-lg rounded-xl font-bold text-sm px-6"
+          [disabled]="!canSubmitDocuments() || submittingDocs()"
+          (click)="submitAllDocuments()"
+        ></button>
+      </div>
+
+      <!-- Condition 2: Submitted & Under Review -> Show Under Review Bar -->
+      <div *ngIf="c.documents_status === 'SUBMITTED'" class="bg-blue-50 border border-blue-200 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+            <i class="pi pi-hourglass text-lg"></i>
+          </div>
+          <div>
+            <div class="text-sm font-bold text-blue-950">Documents Submitted (8/8 Completed)</div>
+            <div class="text-xs text-blue-700">
+              Submitted on {{ (c.updated_at || c.created_at) | date:'dd MMM yyyy, hh:mm a' }} &bull; Under Review by HR Admin
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1.5 bg-blue-100 text-blue-800 rounded-lg text-xs font-bold">
+            <i class="pi pi-lock text-[10px] mr-1"></i> Step 2 Unlocks After HR Verification
+          </span>
+        </div>
+      </div>
+
+      <!-- Condition 3: Verified -> Show Locked & Proceed to Step 2 Bar -->
+      <div *ngIf="c.documents_status === 'VERIFIED'" class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+            <i class="pi pi-lock text-lg"></i>
+          </div>
+          <div>
+            <div class="text-sm font-bold text-emerald-950">All Documents Verified & Permanently Locked (Read-Only)</div>
+            <div class="text-xs text-emerald-700">
+              Verified on {{ c.verified_at | date:'dd MMM yyyy, hh:mm a' }} by {{ c.verified_by || 'HR Admin' }}
+            </div>
+          </div>
+        </div>
+        <button
+          pButton
+          label="Proceed to Step 2: HR Verification"
+          icon="pi pi-arrow-right"
+          class="p-button-success rounded-xl font-bold text-xs sm:text-sm"
+          (click)="goToStep(2)"
+        ></button>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- STEP 2: HR VERIFICATION COMPLETED (Unlocks ONLY after HR verifies) -->
+    <!-- ========================================================================= -->
+    <div *ngIf="activeStep() === 2" class="space-y-6">
+      <div class="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-10 shadow-xs max-w-4xl mx-auto">
+        <!-- Verification Success Header -->
+        <div class="text-center mb-8 pb-6 border-b border-slate-100">
+          <div class="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4 text-3xl shadow-xs">
+            <i class="pi pi-verified"></i>
+          </div>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 mb-2">
+            <i class="pi pi-check text-[11px]"></i> Official HR Verification Completed
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 m-0">All 8 Documents Successfully Verified! 🎉</h2>
+          <p class="text-sm text-slate-600 mt-2 max-w-xl mx-auto leading-relaxed">
+            HR Operations has completed rigorous validation of all your submitted credentials, certificates, and identity documents. You are fully cleared.
+          </p>
+        </div>
+
+        <!-- Verification Metadata Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+          <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
+            <span class="text-[10px] font-bold uppercase text-slate-400 block tracking-wider">Candidate Code</span>
+            <span class="font-mono font-bold text-sm text-slate-900">{{ c.candidate_code }}</span>
+          </div>
+          <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
+            <span class="text-[10px] font-bold uppercase text-slate-400 block tracking-wider">Verified On (Date & Time)</span>
+            <span class="font-bold text-xs text-slate-900">{{ c.verified_at | date:'dd MMM yyyy, hh:mm a' }}</span>
+          </div>
+          <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
+            <span class="text-[10px] font-bold uppercase text-slate-400 block tracking-wider">Verified By</span>
+            <span class="font-bold text-xs text-slate-900 truncate block">{{ c.verified_by || 'HR Admin' }}</span>
+          </div>
+          <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
+            <span class="text-[10px] font-bold uppercase text-slate-400 block tracking-wider">Status</span>
+            <span class="font-bold text-xs text-emerald-700 flex items-center gap-1">
+              <i class="pi pi-check-circle"></i> Approved & Cleared
+            </span>
+          </div>
+        </div>
+
+        <!-- 8 Verified Documents Summary List -->
+        <div class="mb-8">
+          <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+            Verified Document Credentials (8/8 Verified)
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div
+              *ngFor="let doc of documents"
+              class="p-3 rounded-xl border border-emerald-200 bg-emerald-50/30 flex items-center justify-between gap-2"
+            >
+              <div class="flex items-center gap-2.5 min-w-0">
+                <i class="pi pi-check-circle text-emerald-600 text-sm shrink-0"></i>
+                <div class="min-w-0">
+                  <div class="text-xs font-bold text-slate-800 truncate">{{ doc.label }}</div>
+                  <div class="text-[10px] text-slate-500">{{ doc.files.length }} file(s) attached</div>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="text-blue-600 hover:text-blue-800 p-1 text-xs font-semibold cursor-pointer"
+                pTooltip="Preview Document"
+                (click)="previewDoc(doc)"
+              >
+                <i class="pi pi-eye"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Next Milestone: Offer Letter Status -->
+        <div class="p-5 rounded-2xl border transition-all" [ngClass]="c.offer_status === 'OFFER_SENT' || c.offer_status === 'ACCEPTED' ? 'bg-emerald-50/70 border-emerald-300' : 'bg-blue-50/60 border-blue-200'">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-start gap-3">
+              <div
+                class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-base"
+                [ngClass]="c.offer_status === 'OFFER_SENT' || c.offer_status === 'ACCEPTED' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-600'"
+              >
+                <i class="pi" [ngClass]="c.offer_status === 'OFFER_SENT' || c.offer_status === 'ACCEPTED' ? 'pi-file-check' : 'pi-clock'"></i>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-slate-900 m-0">
+                  {{ (c.offer_status === 'OFFER_SENT' || c.offer_status === 'ACCEPTED') ? 'Official Job Offer Letter Released!' : 'Offer Letter Preparation In Progress' }}
+                </h4>
+                <p class="text-xs text-slate-600 mt-1 mb-0 leading-relaxed">
+                  <span *ngIf="c.offer_status === 'NOT_ISSUED'">
+                    HR Admin has validated your documents. Your formal Offer Letter with compensation details is being generated. Step 3 will automatically unlock once HR releases the offer.
+                  </span>
+                  <span *ngIf="c.offer_status === 'OFFER_SENT'">
+                    HR Admin released your official Offer Letter on <strong>{{ (c.offer_details?.issued_at || c.updated_at) | date:'dd MMM yyyy, hh:mm a' }}</strong>. Please proceed to review and provide your digital signature.
+                  </span>
+                  <span *ngIf="c.offer_status === 'ACCEPTED'">
+                    You accepted and digitally signed your offer on <strong>{{ c.accepted_at | date:'dd MMM yyyy, hh:mm a' }}</strong>.
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div class="shrink-0">
+              <button
+                *ngIf="c.offer_status === 'OFFER_SENT'"
+                pButton
+                label="Proceed to Review & Sign Offer (Step 3)"
+                icon="pi pi-arrow-right"
+                class="p-button-success font-bold text-xs sm:text-sm rounded-xl w-full sm:w-auto"
+                (click)="goToStep(3)"
+              ></button>
+              <button
+                *ngIf="c.offer_status === 'ACCEPTED'"
+                pButton
+                label="View Signed Offer (Step 3)"
+                icon="pi pi-eye"
+                class="p-button-success p-button-outlined font-bold text-xs sm:text-sm rounded-xl w-full sm:w-auto"
+                (click)="goToStep(3)"
+              ></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- STEP 3: OFFICIAL JOB OFFER LETTER & DIGITAL SIGNATURE -->
+    <!-- ========================================================================= -->
+    <div *ngIf="activeStep() === 3" class="space-y-6">
+      <!-- If Offer is Not Issued Yet -->
+      <div *ngIf="!c.offer_details && c.offer_status === 'NOT_ISSUED'" class="bg-white border border-slate-200 rounded-2xl p-8 sm:p-12 text-center max-w-xl mx-auto shadow-xs">
+        <div class="w-14 h-14 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-3 text-2xl">
+          <i class="pi pi-clock"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 mb-1">Offer Letter Preparation In Progress</h3>
+        <p class="text-sm text-slate-600 m-0">
+          HR Admin is finalizing your official job offer letter with full compensation breakup. Please check back shortly.
+        </p>
+      </div>
+
+      <!-- Official Offer Letter Document Card -->
+      <div *ngIf="c.offer_details as offer" class="bg-white border border-slate-200/90 rounded-2xl shadow-sm p-6 sm:p-10 max-w-4xl mx-auto">
+        <!-- Letterhead Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-200 gap-4 mb-6">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-xs">
+              <i class="pi pi-bolt text-lg"></i>
+            </div>
+            <div>
+              <span class="block font-extrabold text-lg text-slate-900 leading-tight">StaffHub Enterprise</span>
+              <span class="block text-xs text-slate-500">Official Employment Offer Letter</span>
+            </div>
+          </div>
+
+          <div class="text-left sm:text-right">
+            <span class="block font-bold text-[10px] uppercase tracking-wider text-slate-400">Offer Reference</span>
+            <span class="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">{{ c.candidate_code }}-OFFER</span>
+            <span class="block text-[11px] text-slate-500 mt-1">
+              Released on: <strong>{{ (offer.issued_at || c.updated_at) | date:'dd MMMM yyyy, hh:mm a' }}</strong>
+            </span>
+            <span *ngIf="offer.valid_until" class="block text-[10px] text-amber-600 font-semibold">
+              Valid Until: {{ offer.valid_until | date:'dd MMMM yyyy' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Subject & Salutation -->
+        <div class="mb-6">
+          <h2 class="text-base sm:text-lg font-bold text-slate-900 mb-2">
+            Subject: Letter of Offer - {{ offer.designation }}
+          </h2>
+          <p class="text-sm text-slate-700 leading-relaxed m-0">
+            Dear <strong>{{ c.full_name }}</strong>,<br/>
+            {{ offer.offer_letter_text || 'We are delighted to extend this formal offer of employment to you at our organization. Following your successful interview rounds, we are confident that your skills and experience will make a significant contribution to our growth and success.' }}
+          </p>
+        </div>
+
+        <!-- Key Offer Terms Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+          <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
+            <span class="text-[11px] font-bold uppercase text-slate-500 block">Designation</span>
+            <span class="font-bold text-sm text-slate-900">{{ offer.designation }}</span>
+          </div>
+          <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
+            <span class="text-[11px] font-bold uppercase text-slate-500 block">Department</span>
+            <span class="font-bold text-sm text-slate-900">{{ offer.department }}</span>
+          </div>
+          <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
+            <span class="text-[11px] font-bold uppercase text-slate-500 block">Expected Joining Date</span>
+            <span class="font-bold text-sm text-slate-900">{{ (offer.joining_date || c.joining_date) ? ((offer.joining_date || c.joining_date) | date:'dd MMMM, yyyy') : 'As mutually agreed' }}</span>
+          </div>
+        </div>
+
+        <!-- Compensation Package Breakup Table -->
+        <div class="mb-6">
+          <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2.5">
+            Compensation Package (CTC Breakup)
+          </h4>
+          <div class="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+            <table class="w-full text-xs sm:text-sm">
+              <thead>
+                <tr class="bg-blue-50/80 text-blue-900 font-bold border-b border-slate-200">
+                  <th class="p-3 text-left">Salary Component</th>
+                  <th class="p-3 text-right">Monthly Gross (₹)</th>
+                  <th class="p-3 text-right">Annual CTC (₹)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr>
+                  <td class="p-3 text-slate-700">Basic Salary</td>
+                  <td class="p-3 text-right font-medium text-slate-800">₹{{ (offer.ctc_breakup?.basic || (offer.monthly_gross * 0.5)) | number:'1.0-0' }}</td>
+                  <td class="p-3 text-right font-medium text-slate-800">₹{{ ((offer.ctc_breakup?.basic || (offer.monthly_gross * 0.5)) * 12) | number:'1.0-0' }}</td>
+                </tr>
+                <tr>
+                  <td class="p-3 text-slate-700">House Rent Allowance (HRA)</td>
+                  <td class="p-3 text-right font-medium text-slate-800">₹{{ (offer.ctc_breakup?.hra || (offer.monthly_gross * 0.25)) | number:'1.0-0' }}</td>
+                  <td class="p-3 text-right font-medium text-slate-800">₹{{ ((offer.ctc_breakup?.hra || (offer.monthly_gross * 0.25)) * 12) | number:'1.0-0' }}</td>
+                </tr>
+                <tr>
+                  <td class="p-3 text-slate-700">Special Allowance</td>
+                  <td class="p-3 text-right font-medium text-slate-800">₹{{ (offer.ctc_breakup?.special_allowance || (offer.monthly_gross * 0.25)) | number:'1.0-0' }}</td>
+                  <td class="p-3 text-right font-medium text-slate-800">₹{{ ((offer.ctc_breakup?.special_allowance || (offer.monthly_gross * 0.25)) * 12) | number:'1.0-0' }}</td>
+                </tr>
+                <tr class="bg-blue-50/60 font-bold text-slate-900 border-t-2 border-blue-200">
+                  <td class="p-3 font-bold text-blue-950">Total Cost to Company (Annual CTC)</td>
+                  <td class="p-3 text-right font-extrabold text-blue-700">₹{{ offer.monthly_gross | number:'1.0-0' }}</td>
+                  <td class="p-3 text-right font-extrabold text-blue-700">₹{{ offer.annual_ctc | number:'1.0-0' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Terms & Conditions Statement & Mandatory Checkbox -->
+        <div class="mb-6 bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5">
+          <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <i class="pi pi-shield text-blue-600"></i> Terms & Conditions of Employment
+          </h4>
+          <ul class="text-xs text-slate-600 space-y-1.5 pl-4 list-disc mb-3 leading-relaxed">
+            <li>Your employment is subject to satisfactory verification of all documents, references, and credentials.</li>
+            <li>You agree to abide by the Company's Code of Conduct, Confidentiality, and Non-Disclosure agreements.</li>
+            <li>A standard probation period of 3 months will be applicable from your official date of joining.</li>
+          </ul>
+
+          <!-- Checkbox for accepting terms (Mandatory for acceptance) -->
+          <label *ngIf="c.offer_status === 'OFFER_SENT'" class="flex items-start gap-3 p-3 bg-white border border-blue-200 rounded-xl cursor-pointer hover:bg-blue-50/50 transition">
+            <input
+              type="checkbox"
+              [(ngModel)]="termsAccepted"
+              class="mt-0.5 w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer"
+            />
+            <span class="text-xs font-semibold text-slate-800 leading-snug">
+              I have read, understood, and unconditionally accept the <strong>Terms & Conditions of Employment</strong> and all company policies.
+            </span>
+          </label>
+        </div>
+
+        <!-- 3 SIGNATURE OPTIONS SECTION (When Offer is Sent & Pending Acceptance) -->
+        <div *ngIf="c.offer_status === 'OFFER_SENT'" class="bg-slate-50 border border-slate-200 rounded-2xl p-5 sm:p-6 mb-6 shadow-xs">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-200">
+            <div>
+              <span class="font-bold text-sm text-slate-900 block">Candidate Digital Acceptance Signature</span>
+              <span class="text-xs text-slate-500">Select one of the 3 signature options below to accept your offer:</span>
+            </div>
+
+            <!-- 3 Signature Mode Buttons -->
+            <div class="flex items-center gap-1 p-1 bg-white border border-slate-200 rounded-xl">
+              <button
+                type="button"
+                (click)="selectSignatureMode('draw')"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+                [ngClass]="signatureMode() === 'draw' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'"
+              >
+                <i class="pi pi-pencil text-[11px]"></i> 1. Draw
+              </button>
+              <button
+                type="button"
+                (click)="selectSignatureMode('upload')"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+                [ngClass]="signatureMode() === 'upload' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'"
+              >
+                <i class="pi pi-image text-[11px]"></i> 2. Upload Photo
+              </button>
+              <button
+                type="button"
+                (click)="selectSignatureMode('type')"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+                [ngClass]="signatureMode() === 'type' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'"
+              >
+                <i class="pi pi-font text-[11px]"></i> 3. Type Name
+              </button>
+            </div>
+          </div>
+
+          <!-- OPTION 1: Draw Signature on Canvas -->
+          <div *ngIf="signatureMode() === 'draw'" class="space-y-2">
+            <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
+              <span>Sign using your finger, stylus, or mouse:</span>
+              <button
+                type="button"
+                (click)="clearSignature()"
+                class="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 cursor-pointer"
+              >
+                <i class="pi pi-refresh text-[10px]"></i> Clear Canvas
+              </button>
+            </div>
+            <div class="bg-white border-2 border-dashed border-slate-300 rounded-xl p-2 shadow-inner relative overflow-hidden" style="touch-action: none;">
+              <canvas
+                #signatureCanvas
+                (mousedown)="startDrawing($event)"
+                (mousemove)="draw($event)"
+                (mouseup)="stopDrawing()"
+                (mouseleave)="stopDrawing()"
+                (touchstart)="startDrawing($event)"
+                (touchmove)="draw($event)"
+                (touchend)="stopDrawing()"
+                class="w-full bg-white rounded-lg cursor-crosshair block"
+              ></canvas>
+              <div class="absolute bottom-2 left-4 pointer-events-none text-[10px] text-slate-400 font-mono">
+                ✍️ Sign above this line
+              </div>
+            </div>
+            <div *ngIf="hasSigned" class="text-xs text-emerald-600 font-medium flex items-center gap-1">
+              <i class="pi pi-check-circle"></i> Digital signature drawn on canvas
+            </div>
+          </div>
+
+          <!-- OPTION 2: Upload Signature Photo from Device/Gallery -->
+          <div *ngIf="signatureMode() === 'upload'" class="space-y-3">
+            <div *ngIf="!uploadedSignatureUrl()" class="border-2 border-dashed border-blue-200 hover:border-blue-400 bg-white rounded-xl p-6 text-center transition">
+              <label class="cursor-pointer block">
+                <input
+                  type="file"
+                  accept=".png,.jpg,.jpeg"
+                  class="hidden"
+                  (change)="onSignatureFileSelected($event)"
+                />
+                <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-2 text-xl">
+                  <i class="pi pi-upload"></i>
+                </div>
+                <div class="text-sm font-bold text-slate-900">Upload Signature Picture from Device / Gallery</div>
+                <div class="text-xs text-slate-500 mt-1">Take a photo of your handwritten signature or pick from gallery (PNG, JPG up to 5MB)</div>
+                <span class="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold border border-blue-200">
+                  <i class="pi pi-folder-open text-xs"></i> Choose Signature Image
+                </span>
+              </label>
+            </div>
+
+            <div *ngIf="uploadedSignatureUrl()" class="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between gap-4">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="p-1 bg-slate-50 border border-slate-200 rounded-lg max-w-[180px] max-h-20 flex items-center justify-center overflow-hidden">
+                  <img [src]="uploadedSignatureUrl()" alt="Uploaded Signature" class="max-h-16 max-w-full object-contain" />
+                </div>
+                <div class="min-w-0">
+                  <div class="text-xs font-bold text-slate-900 truncate">{{ uploadedSignatureFileName() || 'signature.png' }}</div>
+                  <div class="text-[11px] text-emerald-600 flex items-center gap-1 font-medium mt-0.5">
+                    <i class="pi pi-check-circle"></i> Signature Attached & Ready
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                (click)="removeUploadedSignature()"
+                class="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold flex items-center gap-1 transition cursor-pointer"
+              >
+                <i class="pi pi-trash text-[11px]"></i> Remove
+              </button>
+            </div>
+          </div>
+
+          <!-- OPTION 3: Type Legal Name -->
+          <div *ngIf="signatureMode() === 'type'" class="space-y-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Enter your full legal name:</label>
+              <input
+                type="text"
+                [(ngModel)]="typedSignatureName"
+                placeholder="e.g. {{ c.full_name }}"
+                class="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-xl p-4">
+              <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Cursive Signature Preview:</div>
+              <div class="py-3 px-4 bg-slate-50 rounded-lg border border-slate-100 text-center">
+                <span
+                  class="text-3xl text-blue-900 tracking-wide inline-block"
+                  style="font-family: 'Brush Script MT', 'Caveat', 'Dancing Script', cursive, serif;"
+                >
+                  {{ typedSignatureName().trim() || c.full_name }}
+                </span>
+                <div class="text-[10px] font-mono text-slate-400 mt-2 border-t border-slate-200/80 pt-1.5 max-w-xs mx-auto">
+                  Digitally Verified Signature &bull; {{ todayDate | date:'dd MMM yyyy' }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Acceptance Actions -->
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 pt-4 border-t border-slate-200">
+            <button
+              pButton
+              type="button"
+              label="Decline Offer"
+              icon="pi pi-times"
+              class="p-button-outlined p-button-danger p-button-sm rounded-xl w-full sm:w-auto"
+              (click)="openDeclineDialog()"
+            ></button>
+
+            <button
+              pButton
+              type="button"
+              [label]="respondingOffer() ? 'Submitting Acceptance...' : 'Accept & Digitally Sign Offer'"
+              [icon]="respondingOffer() ? 'pi pi-spin pi-spinner' : 'pi pi-check-circle'"
+              class="p-button-success p-button-lg rounded-xl font-bold w-full sm:w-auto"
+              [disabled]="!termsAccepted() || !hasValidSignature() || respondingOffer()"
+              (click)="acceptOffer()"
+            ></button>
+          </div>
+        </div>
+
+        <!-- SIGNED STATE CONFIRMATION (When Offer is Accepted -> Permanently Locked & View Only) -->
+        <div *ngIf="c.offer_status === 'ACCEPTED'" class="bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-6 sm:p-8 text-center shadow-xs">
+          <div class="w-14 h-14 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-3 text-2xl shadow-xs">
+            <i class="pi pi-verified"></i>
+          </div>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 mb-2">
+            <i class="pi pi-lock text-[11px]"></i> Permanently Locked &bull; Official Signed Offer Letter
+          </span>
+          <h3 class="text-lg sm:text-xl font-extrabold text-emerald-950 m-0">Offer Accepted with Legally Binding Digital Signature</h3>
+          <p class="text-xs sm:text-sm text-emerald-800 mt-1 mb-5">
+            Digitally signed by <strong>{{ c.full_name }}</strong> on <strong>{{ c.accepted_at | date:'dd MMMM yyyy, hh:mm:ss a' }}</strong>
+          </p>
+
+          <div *ngIf="c.signature_data" class="bg-white border border-emerald-200 rounded-xl p-4 inline-block shadow-xs max-w-sm w-full mx-auto mb-6">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 text-left">Attached Digital Signature:</div>
+            <img [src]="c.signature_data" alt="Digital Signature" class="h-16 max-w-full mx-auto object-contain" />
+            <div class="mt-2 pt-2 border-t border-slate-100 text-[10px] font-mono text-slate-500 flex items-center justify-between">
+              <span>Security Hash: AUTH-{{ c.candidate_code }}</span>
+              <span class="text-emerald-600 font-bold">Verified ✓</span>
+            </div>
+          </div>
+
+          <!-- Buttons: Print/Download PDF & Proceed to Step 4 -->
+          <div class="flex flex-wrap items-center justify-center gap-3">
+            <button
+              pButton
+              type="button"
+              label="Print / Save Signed Offer PDF"
+              icon="pi pi-print"
+              class="p-button-outlined p-button-success p-button-sm rounded-xl font-bold"
+              (click)="printOfferLetter()"
+            ></button>
+            <button
+              pButton
+              type="button"
+              label="Proceed to Welcome Aboard (Step 4)"
+              icon="pi pi-arrow-right"
+              class="p-button-success p-button-sm rounded-xl font-bold"
+              (click)="goToStep(4)"
+            ></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- STEP 4: COMPLETED / WELCOME ABOARD -->
+    <!-- ========================================================================= -->
+    <div *ngIf="activeStep() === 4" class="space-y-6">
+      <div class="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-10 shadow-sm max-w-3xl mx-auto my-4">
+        <div class="text-center mb-8 pb-6 border-b border-slate-100">
+          <div class="text-5xl mb-3">🎉</div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 m-0">You're All Set! Welcome to StaffHub!</h2>
+          <p class="text-slate-600 text-sm mt-2 max-w-lg mx-auto leading-relaxed">
+            Congratulations, <strong>{{ c.full_name }}</strong>! Your 8 mandatory documents and digitally signed job offer letter are completely fulfilled.
+          </p>
+        </div>
+
+        <!-- End-to-End Milestone Timeline with Date and Time on all steps -->
+        <div class="mb-8">
+          <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">
+            Pre-Onboarding Lifecycle Summary (All Steps Verified)
+          </h4>
+          <div class="space-y-3">
+            <!-- Step 1 Milestone -->
+            <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 text-sm font-bold">
+                  <i class="pi pi-check"></i>
+                </div>
+                <div class="min-w-0">
+                  <div class="text-xs font-bold text-slate-900">Step 1: 8 Mandatory Documents Uploaded</div>
+                  <div class="text-[11px] text-slate-500">All identity, educational, and financial documents submitted</div>
+                </div>
+              </div>
+              <span class="text-xs font-semibold text-slate-700 shrink-0">
+                {{ (c.updated_at || c.created_at) | date:'dd MMM yyyy, hh:mm a' }}
+              </span>
+            </div>
+
+            <!-- Step 2 Milestone -->
+            <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 text-sm font-bold">
+                  <i class="pi pi-check"></i>
+                </div>
+                <div class="min-w-0">
+                  <div class="text-xs font-bold text-slate-900">Step 2: HR Document Verification Approved</div>
+                  <div class="text-[11px] text-slate-500">Verified by {{ c.verified_by || 'HR Admin' }}</div>
+                </div>
+              </div>
+              <span class="text-xs font-semibold text-slate-700 shrink-0">
+                {{ c.verified_at | date:'dd MMM yyyy, hh:mm a' }}
+              </span>
+            </div>
+
+            <!-- Step 3 Milestone -->
+            <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 text-sm font-bold">
+                  <i class="pi pi-check"></i>
+                </div>
+                <div class="min-w-0">
+                  <div class="text-xs font-bold text-slate-900">Step 3: Job Offer Letter Released by HR</div>
+                  <div class="text-[11px] text-slate-500">Designation: {{ c.designation }} &bull; Annual CTC: ₹{{ (c.offer_details?.annual_ctc || c.offered_ctc) | number:'1.0-0' }}</div>
+                </div>
+              </div>
+              <span class="text-xs font-semibold text-slate-700 shrink-0">
+                {{ (c.offer_details?.issued_at || c.updated_at) | date:'dd MMM yyyy, hh:mm a' }}
+              </span>
+            </div>
+
+            <!-- Step 4 Milestone -->
+            <div class="p-3.5 bg-emerald-50/70 border border-emerald-300 rounded-xl flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-sm font-bold">
+                  <i class="pi pi-check"></i>
+                </div>
+                <div class="min-w-0">
+                  <div class="text-xs font-bold text-emerald-950">Step 4: Offer Accepted with Digital Signature</div>
+                  <div class="text-[11px] text-emerald-700">Legally signed electronic acceptance certificate</div>
+                </div>
+              </div>
+              <span class="text-xs font-bold text-emerald-900 shrink-0">
+                {{ c.accepted_at | date:'dd MMM yyyy, hh:mm a' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Next Steps Card -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-left text-xs sm:text-sm mb-6 space-y-2">
+          <div class="font-bold text-slate-900 flex items-center gap-1.5 mb-2">
+            <i class="pi pi-info-circle text-blue-600"></i> What Happens Next:
+          </div>
+          <ol class="list-decimal pl-4 space-y-1.5 text-slate-600 m-0">
+            <li>HR Admin will configure your official employee profile and generate your login credentials.</li>
+            <li>Your system login credentials will be emailed to <strong>{{ c.email }}</strong>.</li>
+            <li>Please report on your expected joining date: <strong>{{ c.joining_date ? (c.joining_date | date:'dd MMMM, yyyy') : 'As confirmed with HR' }}</strong>.</li>
+          </ol>
+        </div>
+
+        <div class="flex justify-center gap-3">
+          <button
+            pButton
+            label="View / Print Signed Offer Letter"
+            icon="pi pi-print"
+            class="p-button-outlined p-button-success p-button-sm rounded-xl font-bold"
+            (click)="goToStep(3)"
+          ></button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- HIGH RESOLUTION DOCUMENT PREVIEW DIALOG -->
+  <!-- ========================================================================= -->
+  <p-dialog
+    [(visible)]="previewDialogVisible"
+    [modal]="true"
+    [style]="{ width: '90vw', maxWidth: '920px' }"
+    [dismissableMask]="true"
+    [header]="previewCategoryLabel ? (previewCategoryLabel + ' - Document Preview') : 'Document Preview'"
+  >
+    <div class="space-y-3">
+      <!-- Top Meta & Quick Action Toolbar -->
+      <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-100/90 border border-slate-200/80 px-3.5 py-2.5 rounded-xl text-xs">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="w-6 h-6 rounded-md bg-blue-100 text-blue-700 flex items-center justify-center font-bold shrink-0">
+            <i class="pi" [ngClass]="isPdf ? 'pi-file-pdf' : 'pi-image'"></i>
+          </span>
+          <div class="min-w-0">
+            <div class="font-semibold text-slate-800 truncate max-w-sm" [pTooltip]="previewTitle">
+              {{ previewFileList[previewCurrentIndex]?.fileName || previewTitle }}
+            </div>
+            <div class="text-[10px] text-slate-500 flex items-center gap-1.5" *ngIf="previewFileList[previewCurrentIndex]?.fileSize">
+              <span>{{ previewFileList[previewCurrentIndex].fileSize }}</span>
+              <span *ngIf="previewFileList.length > 1">&bull; File {{ previewCurrentIndex + 1 }} of {{ previewFileList.length }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions Header Strip -->
+        <div class="flex items-center gap-1.5 shrink-0">
+          <!-- New Tab / Fullscreen -->
+          <button
+            type="button"
+            class="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 hover:border-slate-300 flex items-center gap-1 font-medium transition cursor-pointer shadow-xs"
+            (click)="openInNewTab()"
+            pTooltip="Open in Fullscreen New Tab"
+            tooltipPosition="bottom"
+          >
+            <i class="pi pi-external-link text-[11px]"></i>
+            <span class="hidden sm:inline">Fullscreen</span>
+          </button>
+
+          <!-- Download Current -->
+          <button
+            type="button"
+            class="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 hover:border-slate-300 flex items-center gap-1 font-medium transition cursor-pointer shadow-xs"
+            (click)="downloadCurrentDoc()"
+            pTooltip="Download current file"
+            tooltipPosition="bottom"
+          >
+            <i class="pi pi-download text-[11px] text-blue-600"></i>
+            <span class="hidden sm:inline">Download</span>
+          </button>
+
+          <!-- Download All (Highlighted) -->
+          <button
+            *ngIf="previewFileList.length > 1"
+            type="button"
+            [disabled]="isDownloadingAll"
+            class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center gap-1.5 font-semibold transition cursor-pointer shadow-xs disabled:opacity-50"
+            (click)="downloadAllDocs()"
+            pTooltip="Download all uploaded files in this category"
+            tooltipPosition="bottom"
+          >
+            <i class="pi" [ngClass]="isDownloadingAll ? 'pi-spin pi-spinner' : 'pi-cloud-download'"></i>
+            <span>Download All ({{ previewFileList.length }})</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Media Display Container with Floating Navigation Arrows -->
+      <div class="relative flex items-center justify-center p-2 bg-slate-950 rounded-2xl overflow-hidden min-h-[420px] max-h-[66vh] border border-slate-800 shadow-inner group">
+        <!-- Floating Previous Arrow Button -->
+        <button
+          *ngIf="previewFileList.length > 1"
+          type="button"
+          (click)="prevPreviewFile()"
+          [disabled]="!hasPrevPreview()"
+          class="absolute left-3 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white flex items-center justify-center shadow-xl border border-slate-700 backdrop-blur-md transition-all cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed hover:scale-105 active:scale-95"
+          pTooltip="Previous File (Left Arrow)"
+          tooltipPosition="right"
+        >
+          <i class="pi pi-chevron-left text-base"></i>
+        </button>
+
+        <!-- Floating Next Arrow Button -->
+        <button
+          *ngIf="previewFileList.length > 1"
+          type="button"
+          (click)="nextPreviewFile()"
+          [disabled]="!hasNextPreview()"
+          class="absolute right-3 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white flex items-center justify-center shadow-xl border border-slate-700 backdrop-blur-md transition-all cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed hover:scale-105 active:scale-95"
+          pTooltip="Next File (Right Arrow)"
+          tooltipPosition="left"
+        >
+          <i class="pi pi-chevron-right text-base"></i>
+        </button>
+
+        <!-- Document Content -->
+        <iframe
+          *ngIf="isPdf && previewUrl"
+          [src]="previewUrl"
+          class="w-full h-[520px] rounded-lg border-0 bg-white"
+        ></iframe>
+
+        <img
+          *ngIf="!isPdf && previewRawUrl"
+          [src]="previewRawUrl"
+          alt="Document Preview"
+          class="max-w-full max-h-[62vh] object-contain rounded-lg shadow-2xl transition-transform duration-200 select-none"
+        />
+      </div>
+
+      <!-- Multiple Files Indicator Dots Strip -->
+      <div *ngIf="previewFileList.length > 1" class="flex items-center justify-center gap-2 py-1">
+        <button
+          *ngFor="let item of previewFileList; let idx = index"
+          type="button"
+          (click)="jumpToPreviewIndex(idx)"
+          [pTooltip]="item.fileName || ('File ' + (idx + 1))"
+          tooltipPosition="top"
+          class="h-2.5 rounded-full transition-all duration-200 cursor-pointer"
+          [ngClass]="idx === previewCurrentIndex ? 'w-8 bg-blue-600 shadow-xs' : 'w-2.5 bg-slate-300 hover:bg-slate-400'"
+        ></button>
+      </div>
+    </div>
+
+    <!-- Footer Navigation & Actions -->
+    <div class="flex flex-wrap items-center justify-between gap-3 pt-3 mt-2 border-t border-slate-200">
+      <!-- Left: Prev / Next Navigation buttons with Counter -->
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 hover:border-slate-400 flex items-center gap-1.5 text-xs font-semibold transition cursor-pointer shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+          [disabled]="!hasPrevPreview()"
+          (click)="prevPreviewFile()"
+        >
+          <i class="pi pi-chevron-left text-[11px]"></i>
+          <span>Previous</span>
+        </button>
+
+        <span *ngIf="previewFileList.length > 1" class="text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg select-none">
+          {{ previewCurrentIndex + 1 }} / {{ previewFileList.length }}
+        </span>
+
+        <button
+          type="button"
+          class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 hover:border-slate-400 flex items-center gap-1.5 text-xs font-semibold transition cursor-pointer shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+          [disabled]="!hasNextPreview()"
+          (click)="nextPreviewFile()"
+        >
+          <span>Next</span>
+          <i class="pi pi-chevron-right text-[11px]"></i>
+        </button>
+      </div>
+
+      <!-- Right: Download All, Download, Close -->
+      <div class="flex items-center gap-2">
+        <button
+          *ngIf="previewFileList.length > 1"
+          type="button"
+          [disabled]="isDownloadingAll"
+          class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center gap-1.5 text-xs font-semibold transition cursor-pointer shadow-xs disabled:opacity-50"
+          (click)="downloadAllDocs()"
+        >
+          <i class="pi" [ngClass]="isDownloadingAll ? 'pi-spin pi-spinner' : 'pi-cloud-download'"></i>
+          <span>Download All</span>
+        </button>
+
+        <button
+          type="button"
+          class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-1.5 text-xs font-semibold transition cursor-pointer shadow-xs"
+          (click)="downloadCurrentDoc()"
+        >
+          <i class="pi pi-download text-[11px]"></i>
+          <span>Download</span>
+        </button>
+
+        <button
+          pButton
+          label="Close"
+          class="p-button-secondary p-button-sm rounded-lg"
+          (click)="previewDialogVisible = false"
+        ></button>
+      </div>
+    </div>
+  </p-dialog>
+
+  <!-- Decline Offer Modal -->
+  <p-dialog
+    [(visible)]="declineDialogVisible"
+    [modal]="true"
+    [style]="{ width: '90vw', maxWidth: '480px' }"
+    header="Decline Job Offer"
+    [dismissableMask]="true"
+  >
+    <div class="space-y-3">
+      <p class="text-xs sm:text-sm text-slate-600 m-0">
+        Please share your reason for declining this offer. Your feedback will be shared with the hiring team:
+      </p>
+      <textarea
+        class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:border-blue-500 focus:outline-none"
+        [(ngModel)]="declineReason"
+        rows="4"
+        placeholder="Reason for declining..."
+      ></textarea>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button
+          pButton
+          label="Cancel"
+          class="p-button-text p-button-secondary p-button-sm rounded-lg"
+          (click)="declineDialogVisible = false"
+        ></button>
+        <button
+          pButton
+          label="Confirm Decline"
+          class="p-button-danger p-button-sm rounded-lg"
+          (click)="confirmDecline()"
+        ></button>
+      </div>
+    </div>
+  </p-dialog>
+</div>

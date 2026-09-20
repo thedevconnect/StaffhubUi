@@ -13,6 +13,10 @@ export const routes: Routes = [
   { path: 'landing', component: Landing },
   { path: 'login', component: LoginComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
+  {
+    path: 'candidate-onboarding/:token',
+    loadComponent: () => import('./features/candidate-onboarding/candidate-onboarding.component').then(m => m.CandidateOnboardingComponent)
+  },
 
   {
     path: '', component: AppShell, canActivate: [authGuard],

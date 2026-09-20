@@ -11,6 +11,11 @@ export const hradminRoutes: Routes = [
         loadComponent: () => import('../dashboard/hrAdmin-Dashboard/hr-dashboard').then(c => c.HrDashboard)
     },
     {
+        path: 'pre-onboarding',
+        title: 'Pre-Onboarding',
+        loadComponent: () => import('../components/hradmin/pre-onboarding/pre-onboarding').then(c => c.PreOnboardingComponent)
+    },
+    {
         path: 'employee-management',
         loadComponent: () => import('../components/hradmin/hrms-dashboard/hr-dashboard/employee-management/employee-management').then(c => c.EmployeeManagement)
     },
